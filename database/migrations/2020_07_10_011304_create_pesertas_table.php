@@ -21,6 +21,7 @@ class CreatePesertasTable extends Migration
             $table->string('jurusan_id', 10);
             $table->string('nama');
             $table->string('password');
+            $table->string('api_token')->nullable();
             $table->timestamps();
         });
     }
