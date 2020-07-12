@@ -17,7 +17,7 @@ class Jadwal extends Model
      * @var [type]
      */
     protected $appends = [
-        'kode_banksoal','ids'
+        'kode_banksoal','ids', 'banksoal'
     ];
 
     /**
@@ -25,7 +25,7 @@ class Jadwal extends Model
      * @var [type]
      */
     protected $hidden = [
-        'created_at','updated_at','ids'
+        'created_at','updated_at','ids', 'banksoal'
     ];
 
     /**
@@ -34,6 +34,7 @@ class Jadwal extends Model
      */
     protected $casts = [
         'banksoal_id' => 'array',
+        'ids' => 'array'
     ];
 
     /**
@@ -72,5 +73,16 @@ class Jadwal extends Model
     {
         $this->casts['banksoal_id'] = 'string';
         return $this->banksoal_id;
+    }
+
+    /**
+     * [getBanksoalAttribute description]
+     * @return [type] [description]
+     */
+    public function getBanksoalAttribute()
+    {
+        $ids = array_column($this->ids, 'id');
+        $banksoal = Banksoal::whereIn('id', $ids)->get();
+        return $banksoal;
     }
 }

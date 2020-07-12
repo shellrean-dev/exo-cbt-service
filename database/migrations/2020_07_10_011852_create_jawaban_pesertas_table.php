@@ -20,7 +20,7 @@ class CreateJawabanPesertasTable extends Migration
             $table->unsignedBigInteger('peserta_id');
             $table->unsignedBigInteger('jadwal_id');
             $table->bigInteger('jawab');
-            $table->longText('esay')->nullable()->default(null);
+            $table->longText('esay');
             $table->char('ragu_ragu',1)->default(0);
             $table->char('iscorrect',1)->default(0);
             $table->timestamps();

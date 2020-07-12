@@ -53,4 +53,13 @@ class JawabanPeserta extends Model
             return $percent;
         }
     }
+
+    /**
+     * [soal description]
+     * @return [type] [description]
+     */
+    public function soal()
+    {
+        return $this->belongsTo('App\Soal','soal_id');
+    }
 }

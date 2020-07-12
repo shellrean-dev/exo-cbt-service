@@ -22,6 +22,7 @@
     "dependencies": {
         "bootstrap-vue": "^2.15.0",
         "vue": "^2.6.11",
+        "vue-loading-overlay": "^3.3.2",
         "vuex": "^3.5.1"
     }
 }

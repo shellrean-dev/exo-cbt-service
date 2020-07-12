@@ -138,4 +138,33 @@ class PesertaController extends Controller
         }
         return SendResponse::accept();
     }
+
+    /**
+     * [getPesertaLogin description]
+     * @return [type] [description]
+     */
+    public function getPesertaLogin()
+    {
+        $peserta = Peserta::orderBy('no_ujian');
+        $peserta->where('api_token','!=','');
+        if (request()->q != '') {
+            $peserta = $peserta->where('nama', 'LIKE', '%'.request()->q.'%');
+        }
+
+        $peserta = $peserta->paginate(30);
+        return SendResponse::acceptData($peserta);
+    }
+
+    /**
+     * [resetPesertaLogin description]
+     * @param  Peserta $peserta [description]
+     * @return [type]           [description]
+     */
+    public function resetPesertaLogin(Peserta $peserta)
+    {
+        $peserta->api_token = '';
+        $peserta->save();
+
+        return SendResponse::accept();
+    }
 }

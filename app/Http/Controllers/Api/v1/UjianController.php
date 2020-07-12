@@ -149,7 +149,7 @@ class UjianController extends Controller
      */
     public function getActive()
     {
-        $ujian = Jadwal::with('banksoal','event')->where('status_ujian',1)->get();
+        $ujian = Jadwal::with('event')->where('status_ujian',1)->get();
         return SendResponse::acceptData($ujian);
     }
 }
