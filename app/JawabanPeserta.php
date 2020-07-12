@@ -62,4 +62,13 @@ class JawabanPeserta extends Model
     {
         return $this->belongsTo('App\Soal','soal_id');
     }
+
+    /**
+     * [banksoal description]
+     * @return [type] [description]
+     */
+    public function banksoal()
+    {   
+        return $this->belongsTo(Banksoal::class);
+    }
 }

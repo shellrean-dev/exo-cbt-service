@@ -403,7 +403,7 @@ class UjianController extends Controller
      */
     public function selesai(Request $request)
     {
-	$aktif = UjianAktif::first();
+	    $aktif = UjianAktif::first();
         $ujian = SiswaUjian::where([
             'jadwal_id'     => $aktif->ujian_id, 
             'peserta_id'    => $request->peserta_id
@@ -411,6 +411,11 @@ class UjianController extends Controller
 
         $ujian->status_ujian = 1;
         $ujian->save();
+
+        $banksoal = JawabanPeserta::where([
+            'jadwal_id'     => $aktif->ujian_id, 
+            'peserta_id'    => $request->peserta_id
+        ])->first();
 
         $salah = JawabanPeserta::where([
             'iscorrect'     => 0,
@@ -439,6 +444,7 @@ class UjianController extends Controller
         $hasil = ($benar/$jml)*100;
 
         HasilUjian::create([
+            'banksoal_id'     => $banksoal->id,
             'peserta_id'      => $request->peserta_id,
             'jadwal_id'       => $aktif->ujian_id,
             'jumlah_salah'    => $salah,

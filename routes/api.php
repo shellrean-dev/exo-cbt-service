@@ -66,6 +66,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('ujians/peserta/{peserta}/reset', 'UjianAktifController@resetUjianPeserta');
         Route::get('ujians/peserta/{peserta}/close', 'UjianAktifController@closePeserta');
 
+        Route::get('ujians/esay/exists', 'UjianController@getExistEsay');
+        Route::post('ujians/esay/input', 'UjianController@storeNilaiEsay');
+        Route::get('ujians/esay/{banksoal}/koreksi', 'UjianController@getExistEsayByBanksoal');
+        Route::get('ujians/{jadwal}/result', 'UjianController@getResult');
         Route::get('ujians/all', 'UjianController@allData');
         Route::get('ujians/active-status', 'UjianController@getActive');
         Route::post('ujians/set-status', 'UjianController@setStatus');

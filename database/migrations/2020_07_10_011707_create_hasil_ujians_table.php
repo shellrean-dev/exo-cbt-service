@@ -15,6 +15,7 @@ class CreateHasilUjiansTable extends Migration
     {
         Schema::create('hasil_ujians', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('banksoal_id');
             $table->unsignedBigInteger('peserta_id');
             $table->unsignedBigInteger('jadwal_id');
             $table->integer('jumlah_salah');
@@ -25,8 +26,9 @@ class CreateHasilUjiansTable extends Migration
             $table->longText('jawaban_peserta');
             $table->timestamps();
 
-            $table->foreign('peserta_id')->references('id')->on('pesertas')->onDelete('cascade')->onDelete('cascade');
-            $table->foreign('jadwal_id')->references('id')->on('jadwals')->onDelete('cascade')->onDelete('cascade');
+            $table->foreign('peserta_id')->references('id')->on('pesertas')->onDelete('cascade');
+            $table->foreign('banksoal_id')->references('id')->on('banksoals')->onDelete('cascade');
+            $table->foreign('jadwal_id')->references('id')->on('jadwals')->onDelete('cascade');
         });
     }
 

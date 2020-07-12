@@ -80,7 +80,7 @@ class Banksoal extends Model
      */
     public function getKoreksiAttribute()
     {
-        $exists = ResultEsay::where('banksoal_id', $this->id)
+        $exists = JawabanEsay::where('banksoal_id', $this->id)
         ->get()
         ->pluck('jawab_id')
         ->unique();

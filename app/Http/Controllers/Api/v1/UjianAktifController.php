@@ -195,6 +195,11 @@ class UjianAktifController extends Controller
             $ujian->status_ujian = 1;
             $ujian->save();
 
+            $banksoal = JawabanPeserta::where([
+                'jadwal_id'     => $aktif->ujian_id, 
+                'peserta_id'    => $peserta->id
+            ])->first();
+
             $salah = JawabanPeserta::where([
                 'iscorrect'     => 0,
                 'jadwal_id'     => $aktif->ujian_id, 
@@ -216,6 +221,7 @@ class UjianAktifController extends Controller
             $hasil = ($benar/$jml)*100;
 
             HasilUjian::create([
+                'banksoal_id'     => $banksoal->id,
                 'peserta_id'      => $peserta->id,
                 'jadwal_id'       => $aktif->ujian_id,
                 'jumlah_salah'    => $salah,
@@ -225,6 +231,9 @@ class UjianAktifController extends Controller
                 'point_esay'      => 0.0,
                 'jawaban_peserta' => ''
             ]);
+
+            $peserta->api_token = '';
+            $peserta->save();
 
             DB::commit();
         } catch (\Exception $e) {

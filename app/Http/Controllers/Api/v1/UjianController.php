@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\JawabanPeserta;
+use App\JawabanEsay;
+use App\HasilUjian;
+use App\Banksoal;
 use App\Jadwal;
 
 class UjianController extends Controller
@@ -151,5 +155,185 @@ class UjianController extends Controller
     {
         $ujian = Jadwal::with('event')->where('status_ujian',1)->get();
         return SendResponse::acceptData($ujian);
+    }
+
+    /**
+     * [getExistEsay description]
+     * @return [type] [description]
+     */
+    public function getExistEsay()
+    {
+        $has = JawabanEsay::all()->pluck('jawab_id')->unique();
+        $user = request()->user('api');
+
+        $exists = JawabanPeserta::whereNotNull('esay')
+        ->whereNotIn('id', $has)
+        ->get()
+        ->pluck('banksoal_id')
+        ->unique();
+
+        $banksoal = Banksoal::with('matpel')->whereIn('id', $exists)->get()
+        ->makeHidden('jumlah_soal')
+        ->makeHidden('jumlah_pilihan')
+        ->makeHidden('matpel_id')
+        ->makeHidden('directory_id')
+        ->makeHidden('inputed')
+        ->makeVisible('koreksi');
+
+        $filtered = $banksoal->reject(function ($value, $key) use($user) {
+            return !in_array($user->id, $value->matpel->correctors);
+        });
+
+        return SendResponse::acceptData($filtered->values()->all());
+    }
+
+    /**
+     * [getExistEsayByBanksoal description]
+     * @param  Banksoal $banksoal [description]
+     * @return [type]             [description]
+     */
+    public function getExistEsayByBanksoal(Banksoal $banksoal)
+    {
+        $has = JawabanEsay::where('banksoal_id', $banksoal->id)
+        ->get()->pluck('jawab_id');
+        
+        $exists = JawabanPeserta::whereNotIn('id', $has)
+        ->with(['pertanyaan' => function($q) {
+            $q->select(['id','rujukan','pertanyaan']);
+        }])
+        ->whereNotNull('esay')
+        ->where('banksoal_id', $banksoal->id)
+        ->paginate(30);
+
+        return SendResponse::acceptData($exists);
+    }
+
+    /**
+     * [storeNilaiEsay description]
+     * @param  Request $request [description]
+     * @return [type]           [description]
+     */
+    public function storeNilaiEsay(Request $request)
+    {
+        $request->validate([
+            'val'   => 'required|numeric|min:0|max:1',
+            'id'        => 'required|exists:jawaban_pesertas,id'
+        ]);
+
+        $jawab = JawabanPeserta::find($request->id);
+
+        $user = request()->user('api'); 
+
+        $has = JawabanEsay::where('banksoal_id', $jawab->banksoal_id)
+        ->get()->pluck('jawab_id');
+        
+        $sames = JawabanPeserta::whereNotIn('id',$has)
+        ->where([
+            'esay' => $jawab->esay, 
+            'banksoal_id' => $jawab->banksoal_id, 
+            'soal_id' => $jawab->soal_id
+        ])
+        ->get();
+
+        if($sames) {
+            foreach($sames as $same) {
+                $hasil = HasilUjian::where([
+                    'banksoal_id'   => $same->banksoal_id,
+                    'jadwal_id'     => $same->jadwal_id,
+                    'peserta_id'    => $same->peserta_id,
+                ])->first();
+
+                $jmlh = $same->banksoal->jumlah_soal;
+                $jml_esay =  $same->banksoal->jumlah_soal_esay;
+
+                if($hasil->jumlah_benar == 0) {
+                    $hasil_ganda = 0;
+                } else {
+                    $hasil_ganda = ($hasil->jumlah_benar/$jmlh);
+                }
+
+                if($request->val != 0) {
+                    $hasil_esay = $hasil->point_esay + ($request->val/$jml_esay);
+                } else {
+                    $hasil_esay = $hasil->point_esay;
+                }
+                
+                if($jml_esay != 0) {
+                    $hasil_val = ($hasil_ganda*70)+(($hasil_esay)*30);
+                } else {
+                    $hasil_val = $hasil_ganda*100;   
+                }
+                $hasil->point_esay = $hasil_esay;
+                $hasil->hasil = $hasil_val;
+                $hasil->save();
+
+                JawabanEsay::create([
+                    'banksoal_id'   => $same->banksoal_id,
+                    'peserta_id'    => $same->peserta_id,
+                    'jawab_id'      => $same->id,
+                    'corrected_by'  => $user->id,
+                    'point'         => $request->val
+                ]);
+            }
+
+            return SendResponse::accept();
+        }
+
+        $hasil = HasilUjian::where([
+            'banksoal_id'   => $jawab->banksoal_id,
+            'jadwal_id'     => $jawab->jadwal_id,
+            'peserta_id'    => $jawab->peserta_id
+        ])->first();
+
+        $jmlh = $jawab->banksoal->jumlah_soal;
+        $jml_esay =  $jawab->banksoal->jumlah_soal_esay;
+
+        if($hasil->jumlah_benar == 0) {
+            $hasil_ganda = 0;
+        } else {
+            $hasil_ganda = ($hasil->jumlah_benar/$jmlh);
+        }
+
+        $hasil_esay = $hasil->point_esay + ($request->val/$jml_esay);
+        if($jml_esay != 0) {
+            $hasil_val = ($hasil_ganda*70)+(($hasil_esay)*30);
+        } else {
+            $hasil_val = $hasil_ganda*100;   
+        }
+        $hasil->point_esay = $hasil_esay;
+        $hasil->hasil = $hasil_val;
+        $hasil->save();
+
+        JawabanEsay::create([
+            'banksoal_id'   => $jawab->banksoal_id,
+            'peserta_id'    => $jawab->peserta_id,
+            'jawab_id'      => $jawab->id,
+            'corrected_by'  => $user->id,
+            'point'         => $request->val
+        ]);
+
+        return SendResponse::accept();
+    }
+
+    /**
+     * [getResult description]
+     * @param  Jadwal $jadwal [description]
+     * @return [type]         [description]
+     */
+    public function getResult(Jadwal $jadwal)
+    {
+        $res = HasilUjian::with(['peserta' => function ($query) {
+            $query->select('id','nama','no_ujian');
+        }])
+        ->where('jadwal_id', $jadwal->id)
+        ->orderBy('peserta_id');
+
+        if(request()->perPage != '') {
+            $res = $res->paginate(request()->perPage);
+        } else {
+            $res = $res->get();
+        }
+
+        return SendResponse::acceptData($res);
     }
 }
