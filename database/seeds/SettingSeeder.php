@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use App\Setting;
 
 class SettingSeeder extends Seeder
 {
@@ -12,7 +13,7 @@ class SettingSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('settings')->insert([
+        Setting::create([
             'name'  => 'set_sekolah',
             'value' => [
                 'logo' => '',
