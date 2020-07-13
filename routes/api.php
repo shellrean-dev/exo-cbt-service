@@ -27,6 +27,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
     Route::group(['middleware' => 'auth:api'], function() {
         Route::get('user-authenticated', 'UserController@getUserLogin');
         Route::get('user-lists', 'UserController@userLists');
+        Route::post('user/change-password', 'UserController@changePassword');
         
         Route::get('agamas', 'AgamaController@index');
         
@@ -82,9 +83,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::post('ujians/set-status', 'UjianController@setStatus');
         Route::apiResource('ujians', 'UjianController');
 
-
         Route::get('events/all', 'EventController@allData');
         Route::apiResource('events', 'EventController');
+
+        Route::get('settings/sekolah', 'SettingController@getSettingSekolah');
+        Route::post('settings/sekolah', 'SettingController@storeSettingSekolah');
     });
 });
 

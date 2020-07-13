@@ -30,4 +30,21 @@ class UserController extends Controller
         $users = User::orderBy('created_at')->get();
         return SendResponse::acceptData($users);
     }
+
+    /**
+     * [changePassword description]
+     * @param  Request $request [description]
+     * @return [type]           [description]
+     */
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'password'  => 'required'
+        ]);
+        $user = request()->user('api'); 
+        $user->password = bcrypt($request->password);
+        $user->save();
+
+        return SendResponse::accept();
+    }
 }

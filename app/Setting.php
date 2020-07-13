@@ -11,4 +11,12 @@ class Setting extends Model
      * @var array
      */
     protected $guarded = [];
+
+    /**
+     * [$casts description]
+     * @var [type]
+     */
+    protected $casts = [
+        'value' => 'array'
+    ];  
 }
