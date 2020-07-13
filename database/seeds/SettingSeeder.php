@@ -13,8 +13,16 @@ class SettingSeeder extends Seeder
     public function run()
     {
         DB::table('settings')->insert([
-            ['name' => 'nama_sekolah', 'value' => 'SMK NUSANTARA'],
-            ['name' => 'logo', 'value' => '']        
+            'name'  => 'set_sekolah',
+            'value' => [
+                'logo' => '',
+                'nama_sekolah' => '',
+                'email' => '',
+                'alamat' => '',
+                'kepala_sekolah' => '',
+                'nip_kepsek' => ''
+            ],
+            'type' => 'sekolah'
         ]);
     }
 }
