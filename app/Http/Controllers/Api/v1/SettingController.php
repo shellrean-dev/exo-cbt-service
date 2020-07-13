@@ -36,8 +36,13 @@ class SettingController extends Controller
         $sekolah = Setting::where('name', 'set_sekolah')->first();
         
         if($sekolah) {
+            if(isset($sekolah->value['logo']) && $sekolah->value['logo'] != '') {
+                $logo = $sekolah->value['logo'];
+            } else {
+                $logo = '';
+            }
             $sekolah->value = [
-                'logo'  => isset($sekolah->value['logo']) ?: '',
+                'logo'  => $logo,
                 'nama_sekolah'  => $request->nama_sekolah,
                 'email' => $request->email,
                 'alamat'    => $request->alamat,

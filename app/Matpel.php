@@ -48,6 +48,32 @@ class Matpel extends Model
     }
 
     /**
+     * [setJurusanIdAttribute description]
+     */
+    public function setJurusanIdAttribute($value)
+    {
+        $this->attributes['jurusan_id'] = str_replace('"', '', $value);
+    }
+
+    /**
+     * [setAgamaIdAttribute description]
+     * @param [type] $value [description]
+     */
+    public function setAgamaIdAttribute($value) 
+    {
+        $this->attributes['agama_id'] = str_replace('"', '', $value);
+    }
+
+    /**
+     * [setCorrectorsAttribute description]
+     * @param [type] $value [description]
+     */
+    public function setCorrectorsAttribute($value)
+    {
+        $this->attributes['correctors'] = str_replace('"', '', $value);
+    }
+
+    /**
      * [getCorrectorsNameAttribute description]
      * @return [type] [description]
      */

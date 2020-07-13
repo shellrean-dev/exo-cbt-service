@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
+use App\Imports\MatpelImport;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use App\Matpel;
@@ -111,5 +114,28 @@ class MatpelController extends Controller
     {
         $matpels = Matpel::orderBy('nama')->get();
         return SendResponse::acceptData($matpels);
+    }
+
+    /**
+     * [import description]
+     * @param  Request $request [description]
+     * @return [type]           [description]
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            Excel::import(new MatpelImport, $request->file('file'));
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return SendResponse::badRequest($e->getMessage().':'.'Pastikan tidak ada kode_mapel duplikat dan format sesuai');
+        }
+        return SendResponse::accept();
     }
 }

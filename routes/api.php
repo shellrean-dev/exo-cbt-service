@@ -40,6 +40,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::apiResource('pesertas', 'PesertaController');
 
         Route::get('matpels/all', 'MatpelController@allData');
+        Route::post('matpels/upload', 'MatpelController@import');
         Route::apiResource('matpels', 'MatpelController');
 
         Route::get('banksoals/{banksoal}/analys', 'BanksoalController@getAnalys');
