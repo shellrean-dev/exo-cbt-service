@@ -88,6 +88,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
 
         Route::get('settings/sekolah', 'SettingController@getSettingSekolah');
         Route::post('settings/sekolah', 'SettingController@storeSettingSekolah');
+        Route::post('settings/sekolah/logo', 'SettingController@changeLogoSekolah');
     });
 });
 

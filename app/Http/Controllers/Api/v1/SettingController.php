@@ -19,6 +19,11 @@ class SettingController extends Controller
         return SendResponse::acceptData($setting);
     }
 
+    /**
+     * [storeSettingSekolah description]
+     * @param  Request $request [description]
+     * @return [type]           [description]
+     */
     public function storeSettingSekolah(Request $request)
     {
         $request->validate([
@@ -32,6 +37,7 @@ class SettingController extends Controller
         
         if($sekolah) {
             $sekolah->value = [
+                'logo'  => isset($sekolah->value['logo']) ?: '',
                 'nama_sekolah'  => $request->nama_sekolah,
                 'email' => $request->email,
                 'alamat'    => $request->alamat,
@@ -43,6 +49,7 @@ class SettingController extends Controller
             Setting::create([
                 'name'  => 'set_sekolah',
                 'value' => [
+                    'logo' => '',
                     'nama_sekolah'  => $request->nama_sekolah,
                     'email' => $request->email,
                     'alamat'    => $request->alamat,
@@ -54,5 +61,31 @@ class SettingController extends Controller
         }
 
         SendResponse::accept();
+    }
+
+    /**
+     * [changeLogoSekolah description]
+     * @param  Request $request [description]
+     * @return [type]           [description]
+     */
+    public function changeLogoSekolah(Request $request)
+    {
+        try {
+            $file = $request->file('image');
+            $filename = date('d_m_Y_his').'-'.$file->getClientOriginalName();
+            $file->storeAs('public', $filename);
+
+            $sekolah = Setting::where('name', 'set_sekolah')->first();
+            if($sekolah) {
+                $value = $sekolah->value;
+                $value['logo'] = $filename;
+
+                $sekolah->value = $value;
+                $sekolah->save();
+            }
+        } catch (\Exception $e) {
+            return SendResponse::badRequest($e->getMessage());
+        }
+        return SendResponse::accept();
     }
 }
