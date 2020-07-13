@@ -28,7 +28,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('user-authenticated', 'UserController@getUserLogin');
         Route::get('user-lists', 'UserController@userLists');
         Route::post('user/change-password', 'UserController@changePassword');
-        
+        Route::post('users/upload', 'UserController@import');
+        Route::apiResource('users', 'UserController');
+
         Route::get('agamas', 'AgamaController@index');
         
         Route::get('jurusans/all', 'JurusanController@allData');
