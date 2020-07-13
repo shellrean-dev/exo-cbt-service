@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\JawabanPeserta;
 use App\Directory;
 use App\Banksoal;
+use App\Soal;
 
 class BanksoalController extends Controller
 {
@@ -162,5 +164,45 @@ class BanksoalController extends Controller
         }
         $banksoal = $banksoal->get();
         return SendResponse::acceptData($banksoal);
+    }
+
+    /**
+     * [getAnalys description]
+     * @param  Banksoal $banksoal [description]
+     * @return [type]             [description]
+     */
+    public function getAnalys(Banksoal $banksoal)
+    {
+        $soal = Soal::with('jawabans')->where(function($query) use ($banksoal) {
+            $query->where('banksoal_id', $banksoal->id)
+            ->where('tipe_soal','!=','2');
+        })->get();
+
+        $fill = $soal->map(function($val, $key) {
+            $jawab = JawabanPeserta::where('soal_id', $val->id)->get();
+            $penjawab = $jawab->count();
+            $salah = $jawab->where('iscorrect', '0')->count();
+            $benar = $jawab->where('iscorrect','1')->count();
+            return [
+                'soal'  => $val->pertanyaan,
+                'penjawab' => $penjawab,
+                'salah'     => $salah,
+                'benar' => $benar,
+                'diagram' => [
+                    ['Tas','value'],
+                    ['salah', $salah],
+                    ['benar',$benar]
+                ],
+                'jawaban' => $val->jawabans->map(function($vel, $kiy) use($jawab) {
+                    return [
+                        'text' => $vel->text_jawaban,
+                        'iscorrect' => $vel->correct,
+                        'penjawab' => $jawab->where('jawab',$vel->id)->count()
+                    ];
+                }),
+            ];
+        });
+
+        return SendResponse::acceptData($fill);
     }
 }

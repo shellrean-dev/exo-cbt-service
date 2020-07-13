@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\Route;
  * @version 1
  * api response for v1
  */
+
+Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel', 'Api\v1\UjianController@getCapaianSiswaExcel');
+
 Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
     Route::post('login', 'AuthController@login');
 
@@ -38,6 +41,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('matpels/all', 'MatpelController@allData');
         Route::apiResource('matpels', 'MatpelController');
 
+        Route::get('banksoals/{banksoal}/analys', 'BanksoalController@getAnalys');
         Route::get('banksoals/all', 'BanksoalController@allData');
         Route::apiResource('banksoals', 'BanksoalController');
 
@@ -70,6 +74,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::post('ujians/esay/input', 'UjianController@storeNilaiEsay');
         Route::get('ujians/esay/{banksoal}/koreksi', 'UjianController@getExistEsayByBanksoal');
         Route::get('ujians/{jadwal}/result', 'UjianController@getResult');
+        Route::get('ujians/{jadwal}/result/banksoal', 'UjianController@getBanksoalByJadwal');
+        Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa', 'UjianController@getCapaianSiswa');
+        Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel', 'UjianController@getCapaianSiswaExcel');
         Route::get('ujians/all', 'UjianController@allData');
         Route::get('ujians/active-status', 'UjianController@getActive');
         Route::post('ujians/set-status', 'UjianController@setStatus');

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\CapaianExport;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -11,6 +13,7 @@ use App\JawabanEsay;
 use App\HasilUjian;
 use App\Banksoal;
 use App\Jadwal;
+use App\Soal;
 
 class UjianController extends Controller
 {
@@ -335,5 +338,107 @@ class UjianController extends Controller
         }
 
         return SendResponse::acceptData($res);
+    }
+
+    /**
+     * [getBanksoalByJadwal description]
+     * @param  Jadwal $jadwal [description]
+     * @return [type]         [description]
+     */
+    public function getBanksoalByJadwal(Jadwal $jadwal)
+    {
+        $res = HasilUjian::where('jadwal_id', $jadwal->id)
+        ->get()->pluck('banksoal_id');
+
+        $bankSoal = Banksoal::find($res);
+        return SendResponse::acceptData($bankSoal); 
+    }
+
+    /**
+     * [getCapaianSiswa description]
+     * @param  Jadwal   $jadwal   [description]
+     * @param  Banksoal $banksoal [description]
+     * @return [type]             [description]
+     */
+    public function getCapaianSiswa(Jadwal $jadwal, Banksoal $banksoal)
+    {
+        $soal = Soal::where(function($query) use($banksoal) {
+            $query->where('banksoal_id', $banksoal->id)
+            ->where('tipe_soal','!=','2');
+        })->count();
+
+        $sss = JawabanPeserta::with(['peserta' => function($query) {
+            $query->select('id','nama','no_ujian');
+        }])
+        ->whereHas('pertanyaan', function($query) {
+            $query->where('tipe_soal','!=','2');
+        })
+        ->where([
+            'banksoal_id' => $banksoal->id,
+            'jadwal_id' => $jadwal->id
+        ])
+        ->orderBy('soal_id')
+        ->select('id','iscorrect','peserta_id')
+        ->get();
+
+        $grouped = $sss->groupBy('peserta_id');
+
+        $fill = $grouped->map(function($value, $key) {
+            return [
+                'peserta' => [ 
+                    'no_ujian' => $value[0]->peserta->no_ujian,
+                    'nama' => $value[0]->peserta->nama 
+                ],
+                'data' => $value
+            ];
+        });
+        $data = [
+            'pesertas' => $fill,
+            'soal' => $soal
+        ];
+
+        return SendResponse::acceptData($data);
+    }
+
+    public function getCapaianSiswaExcel(Jadwal $jadwal, Banksoal $banksoal)
+    {
+        $soal = Soal::where(function($query) use($banksoal) {
+            $query->where('banksoal_id', $banksoal->id)
+            ->where('tipe_soal','!=','2');
+        })->count();
+
+        $sss = JawabanPeserta::with(['peserta' => function($query) {
+            $query->select('id','nama','no_ujian');
+        }])
+        ->whereHas('pertanyaan', function($query) {
+            $query->where('tipe_soal','!=','2');
+        })
+        ->where([
+            'banksoal_id' => $banksoal->id,
+            'jadwal_id' => $jadwal->id
+        ])
+        ->orderBy('soal_id')
+        ->select('id','iscorrect','peserta_id')
+        ->get();
+
+        $grouped = $sss->groupBy('peserta_id');
+
+        $fill = $grouped->map(function($value, $key) {
+            return [
+                'peserta' => [ 
+                    'no_ujian' => $value[0]->peserta->no_ujian,
+                    'nama' => $value[0]->peserta->nama 
+                ],
+                'data' => $value
+            ];
+        });
+        $data = [
+            'pesertas' => $fill,
+            'soal' => $soal
+        ];
+
+        $export = new CapaianExport($data);
+
+        return Excel::download($export, 'capaian_siswa_'.$banksoal->kode_banksoal.'.xlsx');
     }
 }

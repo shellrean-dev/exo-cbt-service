@@ -54,6 +54,11 @@ class JawabanPeserta extends Model
         }
     }
 
+    public function peserta()
+    {
+        return $this->belongsTo(Peserta::class);
+    }
+
     /**
      * [soal description]
      * @return [type] [description]
