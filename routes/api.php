@@ -59,12 +59,12 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('soals/banksoal/{banksoal}/all','SoalController@getSoalByBanksoalAll');
         Route::get('soals/banksoal/{banksoal}/analys', 'SoalController@getSoalByBanksoalAnalys');
 
-        Route::apiResource('directory', 'DirectoryController');
         Route::post('directory/filemedia', 'DirectoryController@storeFilemedia');
         Route::post('file/upload', 'DirectoryController@uploadFile');
-        Route::delete('directory/filemedia/{filemedia}', 'DirectoryController@deleteFilemedia');
         Route::post('upload/file-audio', 'DirectoryController@uploadAudio');
+        Route::delete('directory/filemedia/{filemedia}', 'DirectoryController@deleteFilemedia');
         Route::get('directory/banksoal/{filemedia}', 'DirectoryController@getDirectoryBanksoal');
+        Route::apiResource('directory', 'DirectoryController');
 
         Route::get('ujians/active', 'UjianAktifController@index');
         Route::get('ujians/sesi', 'UjianAktifController@sesi');

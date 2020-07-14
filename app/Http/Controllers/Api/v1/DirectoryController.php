@@ -18,7 +18,7 @@ class DirectoryController extends Controller
      */
     public function index()
     {
-        $directories = Directory::withCount(['file'])->latest()->get();
+        $directories = Directory::withCount(['file'])->paginate(20);
         return SendResponse::acceptData($directories);
     }
 
