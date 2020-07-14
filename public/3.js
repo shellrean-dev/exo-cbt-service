@@ -10,6 +10,7 @@
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+/* harmony import */ var _entities_notif__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../entities/notif */ "./resources/js/entities/notif.js");
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -61,6 +62,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'KonfirmUjian',
@@ -80,23 +84,25 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     }
   })), Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])('siswa_ujian', {
     ujian: function ujian(state) {
-      return state.dataUjian.data;
+      return state.dataUjian;
     },
     invalidToken: function invalidToken(state) {
       return state.invalidToken;
     }
   })),
-  methods: _objectSpread(_objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapActions"])('siswa_ujian', ['getPesertaDataUjian', 'tokenChecker'])), {}, {
+  methods: _objectSpread(_objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapActions"])('siswa_ujian', ['tokenChecker'])), {}, {
     cekToken: function cekToken() {
       var _this = this;
 
       this.tokenChecker({
         token: this.token_ujian
-      }).then(function () {
+      }).then(function (res) {
         _this.$router.replace({
           name: 'ujian.prepare'
         });
-      })["catch"](function () {});
+      })["catch"](function (error) {
+        _this.$bvToast.toast(error.message, Object(_entities_notif__WEBPACK_IMPORTED_MODULE_1__["errorToas"])());
+      });
     }
   })
 });
@@ -161,92 +167,114 @@ var render = function() {
                     })
                   ]),
                   _vm._v(" "),
-                  _c("div", { staticClass: "form-group" }, [
-                    _c("label", { attrs: { for: "nm_uji" } }, [
-                      _vm._v("Mata Ujian")
-                    ]),
-                    _vm._v(" "),
-                    _vm.jadwal && _vm.ujian
-                      ? _c("p", {
-                          staticClass: "form-control-static",
-                          domProps: { textContent: _vm._s(_vm.jadwal.matpel) }
-                        })
-                      : _vm._e(),
-                    _vm._v(" "),
-                    !_vm.ujian
-                      ? _c("p", { staticClass: "form-control-static" }, [
-                          _vm._v("Tidak ada jadwal ujian pada hari ini")
-                        ])
-                      : _vm._e(),
-                    _vm._v(" "),
-                    _c("span", { staticClass: "line" })
-                  ]),
-                  _vm._v(" "),
-                  _vm.jadwal && _vm.ujian && _vm.ujian.status_ujian != "1"
-                    ? _c("div", { staticClass: "form-group" }, [
-                        _c("label", { attrs: { for: "token" } }, [
-                          _vm._v("Token")
+                  _vm.jadwal && _vm.ujian
+                    ? [
+                        _c("div", { staticClass: "form-group" }, [
+                          _c("label", { attrs: { for: "nm_uji" } }, [
+                            _vm._v("Mata Ujian")
+                          ]),
+                          _vm._v(" "),
+                          _vm.jadwal && _vm.ujian
+                            ? _c("p", {
+                                staticClass: "form-control-static",
+                                domProps: {
+                                  textContent: _vm._s(_vm.jadwal.matpel)
+                                }
+                              })
+                            : _vm._e(),
+                          _vm._v(" "),
+                          !_vm.ujian
+                            ? _c("p", { staticClass: "form-control-static" }, [
+                                _vm._v("Tidak ada jadwal ujian pada hari ini")
+                              ])
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _c("span", { staticClass: "line" })
                         ]),
                         _vm._v(" "),
-                        _c("input", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.token_ujian,
-                              expression: "token_ujian"
-                            }
-                          ],
-                          staticClass: "form-control",
-                          attrs: {
-                            type: "text",
-                            autofocus: "",
-                            placeholder: "Masukkan token"
-                          },
-                          domProps: { value: _vm.token_ujian },
-                          on: {
-                            input: function($event) {
-                              if ($event.target.composing) {
-                                return
-                              }
-                              _vm.token_ujian = $event.target.value
-                            }
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("span", { staticClass: "line" }),
-                        _vm._v(" "),
-                        _vm.invalidToken.token
-                          ? _c("small", { staticClass: "text-danger" }, [
-                              _vm._v("Token tidak sesuai dengan pusat")
+                        _vm.jadwal && _vm.ujian && _vm.ujian.status_ujian != "1"
+                          ? _c("div", { staticClass: "form-group" }, [
+                              _c("label", { attrs: { for: "token" } }, [
+                                _vm._v("Token")
+                              ]),
+                              _vm._v(" "),
+                              _c("input", {
+                                directives: [
+                                  {
+                                    name: "model",
+                                    rawName: "v-model",
+                                    value: _vm.token_ujian,
+                                    expression: "token_ujian"
+                                  }
+                                ],
+                                staticClass: "form-control",
+                                attrs: {
+                                  type: "text",
+                                  autofocus: "",
+                                  placeholder: "Masukkan token"
+                                },
+                                domProps: { value: _vm.token_ujian },
+                                on: {
+                                  input: function($event) {
+                                    if ($event.target.composing) {
+                                      return
+                                    }
+                                    _vm.token_ujian = $event.target.value
+                                  }
+                                }
+                              }),
+                              _vm._v(" "),
+                              _c("span", { staticClass: "line" }),
+                              _vm._v(" "),
+                              _vm.invalidToken.token
+                                ? _c("small", { staticClass: "text-danger" }, [
+                                    _vm._v("Token tidak sesuai")
+                                  ])
+                                : _vm._e(),
+                              _vm._v(" "),
+                              _vm.invalidToken.release
+                                ? _c("small", { staticClass: "text-danger" }, [
+                                    _vm._v("Status token belum dirilis")
+                                  ])
+                                : _vm._e()
                             ])
                           : _vm._e(),
                         _vm._v(" "),
-                        _vm.invalidToken.release
-                          ? _c("small", { staticClass: "text-danger" }, [
-                              _vm._v("Status token belum dirilis")
-                            ])
-                          : _vm._e()
-                      ])
-                    : _vm._e(),
-                  _vm._v(" "),
-                  _vm.jadwal && _vm.ujian && _vm.ujian.status_ujian != "1"
-                    ? _c("div", { staticClass: "form-group" }, [
-                        _c(
-                          "button",
-                          {
-                            staticClass: "btn btn-info w-100 btn-form-ajax",
-                            attrs: { type: "submit", disabled: _vm.isLoading }
-                          },
-                          [
-                            _vm._v(
-                              "\n\t\t\t\t\t\t\t\t\tMulai\n\t\t\t\t\t\t\t\t"
+                        _vm.jadwal && _vm.ujian && _vm.ujian.status_ujian != "1"
+                          ? _c(
+                              "div",
+                              { staticClass: "form-group" },
+                              [
+                                _c(
+                                  "b-button",
+                                  {
+                                    attrs: {
+                                      variant: "info",
+                                      type: "submit",
+                                      block: "",
+                                      disabled: _vm.isLoading
+                                    }
+                                  },
+                                  [
+                                    _vm._v(
+                                      "\n    \t\t\t\t\t\t\t\t\t\t" +
+                                        _vm._s(
+                                          _vm.isLoading
+                                            ? "Processing..."
+                                            : "Submit"
+                                        ) +
+                                        "\n    \t\t\t\t\t\t\t\t\t"
+                                    )
+                                  ]
+                                )
+                              ],
+                              1
                             )
-                          ]
-                        )
-                      ])
+                          : _vm._e()
+                      ]
                     : _vm._e()
-                ]
+                ],
+                2
               )
             ])
           ])
@@ -267,118 +295,6 @@ var staticRenderFns = [
 ]
 render._withStripped = true
 
-
-
-/***/ }),
-
-/***/ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js":
-/*!********************************************************************!*\
-  !*** ./node_modules/vue-loader/lib/runtime/componentNormalizer.js ***!
-  \********************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return normalizeComponent; });
-/* globals __VUE_SSR_CONTEXT__ */
-
-// IMPORTANT: Do NOT use ES2015 features in this file (except for modules).
-// This module is a runtime utility for cleaner component module output and will
-// be included in the final webpack user bundle.
-
-function normalizeComponent (
-  scriptExports,
-  render,
-  staticRenderFns,
-  functionalTemplate,
-  injectStyles,
-  scopeId,
-  moduleIdentifier, /* server only */
-  shadowMode /* vue-cli only */
-) {
-  // Vue.extend constructor export interop
-  var options = typeof scriptExports === 'function'
-    ? scriptExports.options
-    : scriptExports
-
-  // render functions
-  if (render) {
-    options.render = render
-    options.staticRenderFns = staticRenderFns
-    options._compiled = true
-  }
-
-  // functional template
-  if (functionalTemplate) {
-    options.functional = true
-  }
-
-  // scopedId
-  if (scopeId) {
-    options._scopeId = 'data-v-' + scopeId
-  }
-
-  var hook
-  if (moduleIdentifier) { // server build
-    hook = function (context) {
-      // 2.3 injection
-      context =
-        context || // cached call
-        (this.$vnode && this.$vnode.ssrContext) || // stateful
-        (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext) // functional
-      // 2.2 with runInNewContext: true
-      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
-        context = __VUE_SSR_CONTEXT__
-      }
-      // inject component styles
-      if (injectStyles) {
-        injectStyles.call(this, context)
-      }
-      // register component module identifier for async chunk inferrence
-      if (context && context._registeredComponents) {
-        context._registeredComponents.add(moduleIdentifier)
-      }
-    }
-    // used by ssr in case component is cached and beforeCreate
-    // never gets called
-    options._ssrRegister = hook
-  } else if (injectStyles) {
-    hook = shadowMode
-      ? function () {
-        injectStyles.call(
-          this,
-          (options.functional ? this.parent : this).$root.$options.shadowRoot
-        )
-      }
-      : injectStyles
-  }
-
-  if (hook) {
-    if (options.functional) {
-      // for template-only hot-reload because in that case the render fn doesn't
-      // go through the normalizer
-      options._injectStyles = hook
-      // register for functional component in vue file
-      var originalRender = options.render
-      options.render = function renderWithStyleInjection (h, context) {
-        hook.call(context)
-        return originalRender(h, context)
-      }
-    } else {
-      // inject component registration as beforeCreate hook
-      var existing = options.beforeCreate
-      options.beforeCreate = existing
-        ? [].concat(existing, hook)
-        : [hook]
-    }
-  }
-
-  return {
-    exports: scriptExports,
-    options: options
-  }
-}
 
 
 /***/ }),

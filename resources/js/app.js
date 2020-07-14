@@ -3,11 +3,28 @@ import router from './router.js'
 import store from './store.js'
 const App = () =>  import('./App.vue')
 
-import BootstrapVue from 'bootstrap-vue'
+import {
+ ButtonPlugin,
+ FormCheckboxPlugin,
+ FormInputPlugin,
+ ModalPlugin,
+ ToastPlugin,
+ FormRadioPlugin 
+} from 'bootstrap-vue';
+import CKEditor from 'ckeditor4-vue';
 
-Vue.use(BootstrapVue)
+[ButtonPlugin,
+ FormCheckboxPlugin,
+ FormInputPlugin,
+ ModalPlugin,
+ ToastPlugin,
+ FormRadioPlugin  ].forEach(comp => {
+  Vue.use(comp);
+});
+Vue.use(CKEditor);
 
 import { mapActions, mapGetters } from 'vuex'
+import { successToas, errorToas} from './entities/notif'
 
 const app = new Vue({
     el: '#app',
@@ -25,13 +42,8 @@ const app = new Vue({
     created() {
         if (this.isAuth) {
             this.getUserLogin()
-            .catch((err) => {
-                this.$notify({
-                  group: 'foo',
-                  title: 'Error',
-                  type: 'error',
-                  text: 'Sepertinya anda terputus dari server (Error: 00FACCO).'
-                })
+            .catch((error) => {
+                this.$bvToast.toast(error.message, errorToas())
             })
         }
     }

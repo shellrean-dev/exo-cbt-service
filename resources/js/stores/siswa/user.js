@@ -18,6 +18,9 @@ const actions = {
 				commit('ASSIGN_PESERTA_DETAIL', response.data.data)
 				resolve(response.data)
 			})
+            .catch((error) => {
+                reject(error.response.data)
+            })
 		})
 	}
 }

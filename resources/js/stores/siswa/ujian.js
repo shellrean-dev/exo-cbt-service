@@ -59,7 +59,7 @@ const actions = {
 				if (error.response && error.response.status == 422) {
 					commit('SET_ERRORS', error.response.data.errors, { root: true })
 				}
-				reject(error)
+				reject(error.response.data)
 			})
 		})
 	},
@@ -77,7 +77,7 @@ const actions = {
 				if (error.response.status == 422) {
 					commit('SET_ERRORS', error.response.data.errors, { root: true })
 				}
-				reject(error)
+				reject(error.response.data)
 			})
 		}) 
 	},
@@ -92,15 +92,22 @@ const actions = {
 			})
 			.catch((error) => {
 				commit('SET_LOADINGER',false, { root: true })
+                reject(error.response.data)
 			})
 		})
 	},
 	selesaiUjianPeserta({commit}, payload) {
+        commit('SET_LOADING', true, { root: true })
 		return new Promise(( resolve, reject) => {
 			$axios.post(`/ujian/selesai`, payload)
 			.then((response) => {
+                commit('SET_LOADING', false, { root: true })
 				resolve(response.daa)
 			})
+            .catch((error) => {
+                commit('SET_LOADING', false, { root: true })
+                reject(error.response.data)
+            })
 		})
 	},
 	getJawabanPeserta({ commit }, payload) {
@@ -128,11 +135,11 @@ const actions = {
 			.then((response) => {
 				commit('SET_LOADING',false, { root: true })
 				commit('FILLED_DATA_UJIAN', response.data)
-				resolve()
+				resolve(response.data)
 			})
 			.catch((error) => {
 				commit('SET_LOADING',false, { root: true })
-				reject()
+				reject(error.response.data)
 			})
 		})
 	},
@@ -151,11 +158,11 @@ const actions = {
 		return new Promise((resolve, reject) => {
 			$axios.post(`/ujian/ujian-siswa-det`, payload) 
 			.then((response) => {
-				commit('ASSIGN_DATA_UJIAN', response.data)
+				commit('ASSIGN_DATA_UJIAN', response.data.data)
 				resolve(response.data)
 			})
 			.catch((error) => {
-
+                reject(error.response.data)
 			})
 		})
 	},
@@ -164,30 +171,30 @@ const actions = {
 			commit('SET_LOADING',true, { root: true })
 			$axios.post(`/ujian/cektoken`, payload)
 			.then( (response) => {
-				if(response.data.status == 'success') {
-					commit('SET_LOADING',false, { root: true })
-					resolve(response.data)
-				}
-				else if(response.data.status  == 'invalid') {
-					commit('SET_LOADING',false, { root: true })
-					commit('SET_INV_TOKEN_RELEASE', true)
-				}
-				else {
-					commit('SET_LOADING',false, { root: true })
-					commit('SET_INV_TOKEN_INV',true)
-				}
+				commit('SET_LOADING',false, { root: true })
+                resolve(response.data)
 			}) 
 			.catch((error) => {
+                if(error.response.status == 400) {
+                    commit('SET_INV_TOKEN_INV',true)
+                }
 				commit('SET_LOADING',false, { root: true })
+                reject(error.response.data)
 			})
 		})
 	},
 	pesertaMulai({ commit, state }) {
+        commit('SET_LOADING',true, { root: true })
 		return new Promise(( resolve, reject) => {
 			$axios.post(`/ujian/mulai-peserta`) 
 			.then((response) => {
+                commit('SET_LOADING',false, { root: true })
 				resolve(response.data)
 			})
+            .catch((error) => {
+                commit('SET_LOADING',false, { root: true })
+                reject(error.response.data)
+            })
 		})
 	}
 }

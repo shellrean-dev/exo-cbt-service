@@ -22,6 +22,9 @@ const actions = {
 				commit('ASSIGN_UJIAN_AKTIF', response.data.data)
 				resolve(response.data)
 			})
+            .catch((error) => {
+                reject(error.response.data)
+            })
 		})
 	}
 }

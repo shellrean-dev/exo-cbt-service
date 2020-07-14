@@ -20,9 +20,13 @@
         "vue-template-compiler": "^2.6.11"
     },
     "dependencies": {
+        "bootstrap": "^4.5.0",
         "bootstrap-vue": "^2.15.0",
+        "ckeditor4-vue": "^1.0.1",
+        "node-sass": "^4.14.1",
         "vue": "^2.6.11",
         "vue-loading-overlay": "^3.3.2",
+        "vue-router": "^3.3.4",
         "vuex": "^3.5.1"
     }
 }

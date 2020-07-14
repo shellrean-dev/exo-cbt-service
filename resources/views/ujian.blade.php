@@ -9,7 +9,7 @@
 
     <title>ExtraordinaryCBT</title>
 
-    <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/app.css') }}">
     <link rel="stylesheet" href="https://unpkg.com/@coreui/icons/css/free.min.css">
     <link rel="stylesheet" href="{{ asset('css/atlantis.css') }}">
 

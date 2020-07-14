@@ -3,7 +3,7 @@ import Router from 'vue-router'
 import store from './store.js'
 
 const LoginUjian = () => import('./pages/siswa/LoginUjian.vue')
-const IndexUjian = () => import('./pages/siswa/Index.vue')
+import IndexUjian from './pages/siswa/Index.vue'
 const UjianKonfirm = () => import('./pages/siswa/UjianKonfirm.vue')
 const UjianPrepare = () => import('./pages/siswa/UjianPrepare.vue')
 const Kerjakan = () => import('./pages/siswa/Kerjakan.vue')

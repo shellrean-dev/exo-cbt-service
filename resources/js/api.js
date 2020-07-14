@@ -5,8 +5,7 @@ import router from './router.js'
 const $axios = axios.create({
 	baseURL: '/api/v2',
 	headers: {
-        'Accept': 'application/json',
-		'Content-Type' : 'application/json'
+        'Accept': 'application/json'
 	}
 })
 

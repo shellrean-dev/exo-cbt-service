@@ -75,11 +75,13 @@ class UjianController extends Controller
 
         $kj = JawabanSoal::find($request->jawab);
 
-        if($request->essy) {
+        if(isset($request->essy)) {
             $find->esay = $request->essy;
             $find->save();
 
-            return response()->json(['data' => $find,'index' => $request->index]);
+            $send = $find->only('id','banksoal_id','soal_id','jawab', 'esay','ragu_ragu');
+            
+            return response()->json(['data' => $send,'index' => $request->index]);
         }
 
         $id = UjianAktif::first();   
@@ -101,11 +103,17 @@ class UjianController extends Controller
             $ujian->save();
         }
 
+        if(!$kj) {
+            $send = $find->only('id','banksoal_id','soal_id','jawab', 'esay','ragu_ragu');
+            return response()->json(['data' => $send,'index' => $request->index]);
+        }
         $find->jawab = $request->jawab;
         $find->iscorrect = $kj->correct;
         $find->save();
 
-    	return response()->json(['data' => $find,'index' => $request->index]);
+        $send = $find->only('id','banksoal_id','soal_id','jawab', 'esay');
+
+    	return response()->json(['data' => $send,'index' => $request->index]);
     	
     }
 
@@ -121,10 +129,16 @@ class UjianController extends Controller
             'id'            => $request->jawaban_id
         ])->first();
 
+        if(!isset($request->ragu_ragu)) {
+            return response()->json(['data' => $send,'index' => $request->index]); 
+        }
+
         $find->ragu_ragu = $request->ragu_ragu;
         $find->save();
 
-        return response()->json(['data' => $find,'index' => $request->index]);
+        $send = $find->only('id','banksoal_id','soal_id','jawab','esay','ragu_ragu');
+
+        return response()->json(['data' => $send,'index' => $request->index]);
     }
 
     /**
@@ -136,6 +150,7 @@ class UjianController extends Controller
     public function getJawabanPeserta($id)
     {
         $data = JawabanPeserta::where(['soal_id' => $id])->first();
+        $data = $data->only('id','banksoal_id','soal_id','jawab','esay','ragu_ragu');
         return response()->json(['data' => $data]);
     }
 
@@ -160,19 +175,26 @@ class UjianController extends Controller
      */
     public function filled(Request $request)
     {
+        $user = request()->get('peserta-auth');
+
         $id = $request->banksoal;
         $jadwal_id = $request->jadwal_id;
-        $user_id = $request->peserta_id;
-
+        $user_id = $user->id;
         
         $find = JawabanPeserta::with([
-          'soal','soal.jawabans' => function($q) {
-		  $q->inRandomOrder();	
+          'soal' => function($q) {
+            $q->select('id','banksoal_id','pertanyaan','tipe_soal','audio','direction'); 
+        },'soal.jawabans' => function($q) {
+            $q->select('id','soal_id','text_jawaban')
+            ->inRandomOrder();
 	    }
         ])->where([
             'peserta_id'    => $user_id,
             'jadwal_id'     => $jadwal_id,
-        ])->get();
+        ])
+        ->select('id','banksoal_id','soal_id','jawab','esay','ragu_ragu')
+        ->get()
+        ->makeHidden('similiar');
 
         if ($find->count() < 1 ) {
 
@@ -247,13 +269,19 @@ class UjianController extends Controller
 
             
             $find = JawabanPeserta::with([
-                'soal','soal.jawabans' => function($q) {
-                    $q->inRandomOrder();
+                'soal' => function($q) {
+                    $q->select('id','banksoal_id','pertanyaan','tipe_soal','audio','direction'); 
+                },'soal.jawabans' => function($q) {
+                    $q->select('id','soal_id','text_jawaban')
+                    ->inRandomOrder();
                 }
             ])->where([
                 'peserta_id'    => $user_id, 
                 'jadwal_id'     => $jadwal_id,
-            ])->get();
+            ])
+            ->select('id','banksoal_id','soal_id','jawab', 'esay','ragu_ragu')
+            ->get()
+            ->makeHidden('similiar');
 
           
 	  /**
@@ -280,41 +308,57 @@ class UjianController extends Controller
         $diff_in_minutes = $start->diffInSeconds($now);
 
         if($diff_in_minutes > $deUjian->lama) {
-            $ujian = SiswaUjian::where([
-                'jadwal_id'     => $request->jadwal_id, 
-                'peserta_id'    => $request->peserta_id
-            ])->first();
     
             $ujian->status_ujian = 1;
             $ujian->save();
-    
+            
             $salah = JawabanPeserta::where([
                 'iscorrect'     => 0,
                 'jadwal_id'     => $request->jadwal_id, 
-                'peserta_id'    => $request->peserta_id,
-                'jawab_essy'    => null
-            ])->get()->count();
-    
+                'peserta_id'    => $user->id,
+            ])
+            ->whereHas('soal', function($query) {
+                $query->where('tipe_soal','!=', '2');
+            })
+            ->count();
+
             $benar = JawabanPeserta::where([
                 'iscorrect'     => 1,
                 'jadwal_id'     => $request->jadwal_id, 
-                'peserta_id'    => $request->peserta_id
-            ])->get()->count();
+                'peserta_id'    => $user->id
+            ])
+            ->count();
             
             $jml = JawabanPeserta::where([
                 'jadwal_id'     => $request->jadwal_id, 
-                'peserta_id'    => $request->peserta_id
-            ])->get()->count();
+                'peserta_id'    => $user->id
+            ])
+            ->whereHas('soal', function($query) {
+                $query->where('tipe_soal','!=', '2');
+            })
+            ->count();
+
+            $null = JawabanPeserta::where([
+                'jawab'     => 0,
+                'jadwal_id'     => $request->jadwal_id, 
+                'peserta_id'    => $peserta->id,
+            ])
+            ->whereHas('soal', function($query) {
+                $query->where('tipe_soal','!=', '2');
+            })
+            ->count();
     
-            $hasil = ($benar/$jml)*100;
+            $hasil = ($benar/$jml)*70;
     
             HasilUjian::create([
-                'peserta_id'      => $request->peserta_id,
+                'banksoal_id'     => $id,
+                'peserta_id'      => $user->id,
                 'jadwal_id'       => $request->jadwal_id,
                 'jumlah_salah'    => $salah,
                 'jumlah_benar'    => $benar,
-                'tidak_diisi'     => 0,
+                'tidak_diisi'     => $null,
                 'hasil'           => $hasil,
+                'point_esay'      => 0
             ]);
             
             return response()->json(['data' => $find, 'detail' => $ujian]);
@@ -334,9 +378,11 @@ class UjianController extends Controller
      */
     public function sisaWaktu(Request $request)
     {
+        $user = request()->get('peserta-auth');
+
         $detail = SiswaUjian::where([
             'jadwal_id'     => $request->jadwal_id,
-            'peserta_id'    => $request->peserta_id
+            'peserta_id'    => $user->id
         ])->first();
         $detail->sisa_waktu = $request->sisa_waktu;
         $detail->save();
@@ -403,49 +449,72 @@ class UjianController extends Controller
      */
     public function selesai(Request $request)
     {
+        $peserta = request()->get('peserta-auth');
+
 	    $aktif = UjianAktif::first();
         $ujian = SiswaUjian::where([
             'jadwal_id'     => $aktif->ujian_id, 
-            'peserta_id'    => $request->peserta_id
+            'peserta_id'    => $peserta->id
         ])->first();
+
+
+        $hasilUjian = HasilUjian::where([
+            'peserta_id'    => $peserta->id,
+            'jadwal_id'     => $aktif->ujian_id,
+        ])->first();
+
+        if($hasilUjian) {
+            return response()->json(['status' => 'finished']); 
+        }
 
         $ujian->status_ujian = 1;
         $ujian->save();
 
         $banksoal = JawabanPeserta::where([
             'jadwal_id'     => $aktif->ujian_id, 
-            'peserta_id'    => $request->peserta_id
+            'peserta_id'    => $peserta->id
         ])->first();
 
         $salah = JawabanPeserta::where([
             'iscorrect'     => 0,
-            'jadwal_id'     => $aktif->ujian_id, 
-            'peserta_id'    => $request->peserta_id,
-            'esay'    => null
-        ])->get()->count();
+            'jadwal_id'     => $request->jadwal_id, 
+            'peserta_id'    => $peserta->id,
+        ])
+        ->whereHas('soal', function($query) {
+            $query->where('tipe_soal','!=', '2');
+        })
+        ->count();
 
         $benar = JawabanPeserta::where([
             'iscorrect'     => 1,
             'jadwal_id'     => $aktif->ujian_id, 
-            'peserta_id'    => $request->peserta_id
-        ])->get()->count();
+            'peserta_id'    => $peserta->id
+        ])->count();
         
         $jml = JawabanPeserta::where([
-            'jadwal_id'     => $aktif->ujian_id, 
-            'peserta_id'    => $request->peserta_id
-        ])->get()->count();
+            'jadwal_id'     => $request->jadwal_id, 
+            'peserta_id'    => $peserta->id
+        ])
+        ->whereHas('soal', function($query) {
+            $query->where('tipe_soal','!=', '2');
+        })
+        ->count();
 
         $null = JawabanPeserta::where([
-            'jadwal_id'     => $aktif->ujian_id, 
-            'peserta_id'    => $request->peserta_id,
-            'jawab'         => 0
-        ])->get()->count();
+            'jawab'     => 0,
+            'jadwal_id'     => $request->jadwal_id, 
+            'peserta_id'    => $peserta->id,
+        ])
+        ->whereHas('soal', function($query) {
+            $query->where('tipe_soal','!=', '2');
+        })
+        ->count();
 
         $hasil = ($benar/$jml)*100;
 
         HasilUjian::create([
-            'banksoal_id'     => $banksoal->id,
-            'peserta_id'      => $request->peserta_id,
+            'banksoal_id'     => $banksoal->banksoal_id,
+            'peserta_id'      => $peserta->id,
             'jadwal_id'       => $aktif->ujian_id,
             'jumlah_salah'    => $salah,
             'jumlah_benar'    => $benar,
@@ -479,11 +548,11 @@ class UjianController extends Controller
         }
         if($jadwal->token == $request->token) {
             if($jadwal->status_token != 1) {
-                return response()->json(['status' => 'invalid']);
+                return response()->json(['message' => 'Status token belum aktif'], 400);
             }
-            return response()->json(['status' =>'success']);
+            return response()->json(['message' =>'success']);
         }
-        return response()->json(['status' => 'error']);
+        return response()->json(['message' => 'Token tidak sesuai'], 400);
     }
 
     /**
@@ -496,7 +565,9 @@ class UjianController extends Controller
     {
         $peserta = request()->get('peserta-auth');
 
-        $jadwal = UjianAktif::with(['jadwal'])->first()
+        $jadwal = UjianAktif::with(['jadwal' => function($query) {
+            $query->select('id','alias','lama','mulai','banksoal_id');
+        }])->first()
         ->makeHidden('token')
         ->makeHidden('status_token')
         ->makeHidden('created_at')

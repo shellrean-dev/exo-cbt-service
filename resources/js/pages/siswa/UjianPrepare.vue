@@ -23,6 +23,7 @@
 								</div>
 							</form>
 						</div>
+                        <div class="card-footer"></div>
 					</div>
 				</div>
 			</div>
@@ -31,7 +32,9 @@
 					<div class="card card-bg" v-if="jadwal">
 						<div class="card-body">
 							<p>Tombol MULAI hanya akan muncul apabila waktu sekarang sudah melewati waktu mulai tes</p>
-							<button type="button" class="btn btn-info w-100 rounded-pill btn-form-ajax" @click="start" v-if="!disable">MULAI</button>
+							<button type="button" class="btn btn-info w-100 rounded-pill btn-form-ajax" @click="start" v-if="!disable" :disabled="isLoading">
+                                {{ isLoading ? 'Loading...' : 'MULAI' }}
+                            </button>
 						</div>
 					</div>
 				</div>
@@ -41,6 +44,8 @@
 </template>
 <script>
 import { mapActions, mapState } from 'vuex'
+import { successToas, errorToas} from '../../entities/notif'
+
 export default {
 	name: 'PrepareUjian',
 	created() {
@@ -55,6 +60,7 @@ export default {
 		}
 	},
 	computed: {
+        ...mapState(['isLoading']),
 		...mapState('siswa_jadwal', {
 			jadwal: state => state.banksoalAktif,
 			mulai: state => state.banksoalAktif.jadwal.mulai
@@ -65,11 +71,15 @@ export default {
 	},
 	methods: {
 	    ...mapActions('siswa_ujian',['pesertaMulai']),
-	    start() {
-	    	this.pesertaMulai()
-	    	this.$router.replace({ 
-	    		name: 'ujian.while'
-	    	})
+	    async start() {
+            try {
+    	    	await this.pesertaMulai()
+    	    	this.$router.replace({ 
+    	    		name: 'ujian.while'
+    	    	})
+            } catch (error) {
+                this.$bvToast.toast(error.message, errorToas())
+            }
 	    },
 	    starTime() {
 			setInterval( () => {

@@ -71,6 +71,7 @@ class PesertaLoginController extends Controller
 
     public function authenticated()
     {
-        return ['data' => request()->get('peserta-auth')];
+        $peserta = request()->get('peserta-auth')->only('nama','no_ujian','sesi');
+        return ['data' => $peserta];
     }
 }

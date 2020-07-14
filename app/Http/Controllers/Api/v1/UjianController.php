@@ -239,7 +239,7 @@ class UjianController extends Controller
         ])
         ->get();
 
-        if($sames) {
+        if($sames->count() > 1) {
             foreach($sames as $same) {
                 $hasil = HasilUjian::where([
                     'banksoal_id'   => $same->banksoal_id,
