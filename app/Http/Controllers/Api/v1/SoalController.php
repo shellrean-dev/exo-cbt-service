@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
+use App\Imports\BanksoalImport;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use App\JawabanSoal;
@@ -265,5 +267,26 @@ class SoalController extends Controller
         return SendResponse::acceptData($soal);
     }
 
+    /**
+     * [import description]
+     * @param  Request $request [description]
+     * @return [type]           [description]
+     */
+    public function import(Request $request, Banksoal $banksoal)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
 
+        DB::beginTransaction();
+        try {
+            Excel::import(new BanksoalImport($banksoal->id), $request->file('file'));
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return SendResponse::badRequest($e->getMessage());
+        }
+        return SendResponse::accept();
+    }
 }

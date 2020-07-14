@@ -55,6 +55,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::post('soals/{soal}/edit', 'SoalController@update');
         Route::delete('soals/{soal}', 'SoalController@destroy');
         Route::get('soals/banksoal/{banksoal}', 'SoalController@getSoalByBanksoal');
+        Route::post('soals/banksoal/{banksoal}/upload', 'SoalController@import');
         Route::get('soals/banksoal/{banksoal}/all','SoalController@getSoalByBanksoalAll');
         Route::get('soals/banksoal/{banksoal}/analys', 'SoalController@getSoalByBanksoalAnalys');
 

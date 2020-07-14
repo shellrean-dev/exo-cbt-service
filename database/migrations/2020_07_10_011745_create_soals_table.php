@@ -18,7 +18,7 @@ class CreateSoalsTable extends Migration
             $table->unsignedBigInteger('banksoal_id');
             $table->integer('tipe_soal');
             $table->longText('pertanyaan');
-            $table->longText('rujukan');
+            $table->longText('rujukan')->nullable();
             $table->string('audio')->nullable();
             $table->string('direction')->nullable();
             $table->longText('analys')->nullable();
