@@ -85,7 +85,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('ujians/all', 'UjianController@allData');
         Route::get('ujians/active-status', 'UjianController@getActive');
         Route::post('ujians/set-status', 'UjianController@setStatus');
-        Route::apiResource('ujians', 'UjianController');
+        Route::apiResource('ujians', 'UjianController')->only('index','store','destroy');
 
         Route::get('events/all', 'EventController@allData');
         Route::apiResource('events', 'EventController');
