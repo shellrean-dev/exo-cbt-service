@@ -37,6 +37,11 @@
     									</b-button>
     								</div>
                                 </template>
+                                <template v-else>
+                                    <div class="form-group">
+                                        <p class="form-control-static">Anda tidak mendapat jadwal ujian</p>
+                                    </div>
+                                </template>
 							</form>
 						</div>
 					</div>

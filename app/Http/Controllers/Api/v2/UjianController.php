@@ -604,6 +604,9 @@ class UjianController extends Controller
             }
         } 
         $banksoal = Banksoal::with('matpel')->where('id',$id_banksoal)->first();
+        if(!$banksoal) {
+            return response()->json(['data' => []]);   
+        }
 
         $jadwal = $jadwal->toArray();
         $jadwal['matpel'] = $banksoal->matpel->nama;
