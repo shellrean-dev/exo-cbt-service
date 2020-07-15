@@ -70,7 +70,11 @@ class Matpel extends Model
      */
     public function setCorrectorsAttribute($value)
     {
-        $this->attributes['correctors'] = str_replace('"', '', $value);
+        if(is_array($value)) {
+            $this->attributes['correctors'] = json_encode($value);
+        } else {
+            $this->attributes['correctors'] = str_replace('"', '', $value);
+        }
     }
 
     /**
