@@ -169,9 +169,14 @@ class UjianController extends Controller
     {
         $has = JawabanEsay::all()->pluck('jawab_id')->unique();
         $user = request()->user('api');
-
-        $exists = JawabanPeserta::whereNotNull('esay')
-        ->whereNotIn('id', $has)
+        
+        $exists = JawabanPeserta::where( function ($query) use ($has) {
+            $query->whereNotIn('id', $has)
+            ->whereHas('pertanyaan', function($q) {
+                $q->where('tipe_soal','=', '2');
+            })
+            ->whereNotNull('esay');
+        })
         ->get()
         ->pluck('banksoal_id')
         ->unique();
@@ -199,17 +204,20 @@ class UjianController extends Controller
     public function getExistEsayByBanksoal(Banksoal $banksoal)
     {
         $has = JawabanEsay::where('banksoal_id', $banksoal->id)
-        ->get()->pluck('jawab_id');
+        ->get()
+        ->pluck('jawab_id');
         
-        $exists = JawabanPeserta::whereNotIn('id', $has)
+        $exists = JawabanPeserta::where( function ($query) use ($has, $banksoal) {
+            $query->whereNotIn('id', $has)
+            ->whereHas('pertanyaan', function($q) {
+                $q->where('tipe_soal','=', '2');
+            })
+            ->whereNotNull('esay')
+            ->where('banksoal_id', $banksoal->id);
+        })
         ->with(['pertanyaan' => function($q) {
             $q->select(['id','rujukan','pertanyaan']);
         }])
-        ->whereHas('soal', function($query) {
-            $query->where('tipe_soal','!=', '2');
-        })
-        ->whereNotNull('esay')
-        ->where('banksoal_id', $banksoal->id)
         ->paginate(30);
 
         return SendResponse::acceptData($exists);
