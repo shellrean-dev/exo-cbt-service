@@ -91,7 +91,7 @@ class Banksoal extends Model
                 $query->where('tipe_soal','!=', '2');
             })
             ->whereNotNull('esay')
-            ->where('banksoal_id', $this->id)
+            ->where('banksoal_id', $this->id);
         })
         ->count();
     }
