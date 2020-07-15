@@ -3,11 +3,16 @@ import Router from 'vue-router'
 import store from './store.js'
 
 const LoginUjian = () => import('./pages/siswa/LoginUjian.vue')
-import IndexUjian from './pages/siswa/Index.vue'
-const UjianKonfirm = () => import('./pages/siswa/UjianKonfirm.vue')
-const UjianPrepare = () => import('./pages/siswa/UjianPrepare.vue')
-const Kerjakan = () => import('./pages/siswa/Kerjakan.vue')
-const UjianSelesai = () => import('./pages/siswa/UjianSelesai.vue')
+import IndexUjian from './pages/siswa/Index'
+import UjianKonfirm from './pages/siswa/UjianKonfirm'
+import UjianPrepare from './pages/siswa/UjianPrepare'
+import Kerjakan from './pages/siswa/Kerjakan'
+import UjianSelesai from './pages/siswa/UjianSelesai'
+// import IndexUjian from './pages/siswa/Index.vue'
+// const UjianKonfirm = () => import('./pages/siswa/UjianKonfirm.vue')
+// const UjianPrepare = () => import('./pages/siswa/UjianPrepare.vue')
+// const Kerjakan = () => import('./pages/siswa/Kerjakan.vue')
+// const UjianSelesai = () => import('./pages/siswa/UjianSelesai.vue')
 
 Vue.use(Router)
 
