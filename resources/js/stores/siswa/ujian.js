@@ -4,7 +4,7 @@ const state = () => ({
 	jawabanPeserta: [],
 	ujianList: [],
 	filledUjian: [],
-	dataUjian: '',
+	dataUjian: {},
 	invalidToken: {
 		release: false,
 		token: false

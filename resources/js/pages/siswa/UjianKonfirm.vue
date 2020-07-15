@@ -24,14 +24,14 @@
     									<p class="form-control-static" v-if="typeof jadwal.matpel == 'undefined'">Tidak ada jadwal ujian pada hari ini</p>
     									<span class="line"></span>
     								</div>
-    								<div class="form-group" v-if="typeof jadwal.matpel != 'undefined' && ujian && ujian.status_ujian != '1'">
+    								<div class="form-group" v-if="typeof jadwal.matpel != 'undefined' && typeof ujian.status_ujian != 'undefined' && ujian.status_ujian != '1'">
     									<label for="token">Token</label>
     									<input type="text" class="form-control" autofocus="" placeholder="Masukkan token" v-model="token_ujian">
     									<span class="line"></span>
     									<small class="text-danger" v-if="invalidToken.token">Token tidak sesuai</small>
     									<small class="text-danger" v-if="invalidToken.release">Status token belum dirilis</small>
     								</div>
-    								<div class="form-group" v-if="jadwal && ujian && ujian.status_ujian != '1'">
+    								<div class="form-group" v-if="typeof jadwal.matpel != 'undefined' && typeof ujian.status_ujian != 'undefined' && ujian.status_ujian != '1'">
     									<b-button variant="info" type="submit" block :disabled="isLoading">
     										{{ isLoading ? 'Processing...' : 'Submit' }}
     									</b-button>
