@@ -365,8 +365,3 @@ export default {
     }
 }
 </script>
-<style>
-    .custom-control.custom-radio, .custom-control.custom-checkbox {
-        line-height: 34px !important;
-    }
-</style>
