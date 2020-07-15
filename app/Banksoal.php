@@ -85,12 +85,14 @@ class Banksoal extends Model
         ->pluck('jawab_id')
         ->unique();
 
-        return JawabanPeserta::whereNotIn('id', $exists)
-        ->whereHas('soal', function($query) {
-            $query->where('tipe_soal','!=', '2');
+        return JawabanPeserta::where(function($query) use($exists){
+            $query->whereNotIn('id', $exists)
+            ->whereHas('soal', function($query) {
+                $query->where('tipe_soal','!=', '2');
+            })
+            ->whereNotNull('esay')
+            ->where('banksoal_id', $this->id)
         })
-        ->whereNotNull('esay')
-        ->where('banksoal_id', $this->id)
         ->count();
     }
 }
