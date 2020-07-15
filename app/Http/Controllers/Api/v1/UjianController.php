@@ -205,6 +205,9 @@ class UjianController extends Controller
         ->with(['pertanyaan' => function($q) {
             $q->select(['id','rujukan','pertanyaan']);
         }])
+        ->whereHas('soal', function($query) {
+            $query->where('tipe_soal','!=', '2');
+        })
         ->whereNotNull('esay')
         ->where('banksoal_id', $banksoal->id)
         ->paginate(30);
