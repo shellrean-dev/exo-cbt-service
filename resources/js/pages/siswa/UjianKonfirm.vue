@@ -21,10 +21,10 @@
     								<div class="form-group">
     									<label for="nm_uji">Mata Ujian</label>
     									<p class="form-control-static" v-if="typeof jadwal.matpel != 'undefined'" v-text="jadwal.matpel"></p>
-    									<p class="form-control-static" v-if="!ujian">Tidak ada jadwal ujian pada hari ini</p>
+    									<p class="form-control-static" v-if="typeof jadwal.matpel == 'undefined'">Tidak ada jadwal ujian pada hari ini</p>
     									<span class="line"></span>
     								</div>
-    								<div class="form-group" v-if="jadwal && ujian && ujian.status_ujian != '1'">
+    								<div class="form-group" v-if="typeof jadwal.matpel != 'undefined' && ujian && ujian.status_ujian != '1'">
     									<label for="token">Token</label>
     									<input type="text" class="form-control" autofocus="" placeholder="Masukkan token" v-model="token_ujian">
     									<span class="line"></span>
@@ -36,11 +36,6 @@
     										{{ isLoading ? 'Processing...' : 'Submit' }}
     									</b-button>
     								</div>
-                                </template>
-                                <template v-else>
-                                    <div class="form-group">
-                                        <p class="form-control-static">Anda tidak mendapat jadwal ujian</p>
-                                    </div>
                                 </template>
 							</form>
 						</div>
