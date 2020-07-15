@@ -86,6 +86,9 @@ class Banksoal extends Model
         ->unique();
 
         return JawabanPeserta::whereNotIn('id', $exists)
+        ->whereHas('soal', function($query) {
+            $query->where('tipe_soal','!=', '2');
+        })
         ->whereNotNull('esay')
         ->where('banksoal_id', $this->id)
         ->count();
