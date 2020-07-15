@@ -20,7 +20,7 @@
                                 <template v-if="jadwal && ujian">
     								<div class="form-group">
     									<label for="nm_uji">Mata Ujian</label>
-    									<p class="form-control-static" v-if="jadwal && ujian" v-text="jadwal.matpel"></p>
+    									<p class="form-control-static" v-if="typeof jadwal.matpel != 'undefined'" v-text="jadwal.matpel"></p>
     									<p class="form-control-static" v-if="!ujian">Tidak ada jadwal ujian pada hari ini</p>
     									<span class="line"></span>
     								</div>
