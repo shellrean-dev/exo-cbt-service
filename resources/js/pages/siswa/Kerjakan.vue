@@ -213,6 +213,7 @@ export default {
             })
             .catch((error) => {
                 this.$bvToast.toast(error.message, errorToas())
+                this.$bvToast.toast('Terjadi kesalahan, cek koneksi internet', errorToas())
             })
         },
         inputJawabEssy(val) {

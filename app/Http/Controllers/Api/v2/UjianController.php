@@ -215,7 +215,8 @@ class UjianController extends Controller
                     'jawab'         => 0, 
                     'iscorrect'     => 0,
                     'jadwal_id'     => $jadwal_id,
-                    'ragu_ragu'     => 0
+                    'ragu_ragu'     => 0,
+                    'esay'          => ''
                 ]);
                 if ($i++ == $max_soal) break;
             }
@@ -235,7 +236,8 @@ class UjianController extends Controller
                         'jawab'         => 0, 
                         'iscorrect'     => 0,
                         'jadwal_id'     => $jadwal_id,
-                        'ragu_ragu'     => 0
+                        'ragu_ragu'     => 0,
+                        'esay'          => ''
                     ]);
 
                     if ($i++ == $max_soal) break;
@@ -255,7 +257,8 @@ class UjianController extends Controller
                         'jawab'         => 0, 
                         'iscorrect'     => 0,
                         'jadwal_id'     => $jadwal_id,
-                        'ragu_ragu'     => 0
+                        'ragu_ragu'     => 0,
+                        'esay'          => ''
                     ]);
     
                     if ($i++ == $max_essay) break;
