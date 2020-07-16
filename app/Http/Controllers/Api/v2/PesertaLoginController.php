@@ -15,36 +15,25 @@ use Illuminate\Support\Facades\Validator;
 
 class PesertaLoginController extends Controller
 {
-
+    /**
+     * [login description]
+     * @param  Request $request [description]
+     * @return [type]           [description]
+     */
     public function login(Request $request)
     {
 
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'no_ujian'      => 'required|exists:pesertas,no_ujian',
             'password'      => 'required'
         ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors'=>$validator->errors()],422);
-        }
 
         $peserta = Peserta::where([
             'no_ujian' => $request->no_ujian,
             'password' => $request->password
         ])->first();
-        $aktif = UjianAktif::first();
-        
-        if(!$aktif) {
-            return response()->json(['status' => 'Ujian has not been set']);
-        }
 
         if($peserta) {
-            if($peserta->api_token != '') {
-                return response()->json(['status' => 'loggedin']);
-            }
-            if($aktif->kelompok != $peserta->sesi) {
-                return response()->json(['status' => 'non-sesi']);
-            }
             $token = Str::random(128);
             $peserta->update(['api_token' => $token]);
             return response()
@@ -58,6 +47,10 @@ class PesertaLoginController extends Controller
         return response()->json(['status' => 'error']); 
     }
 
+    /**
+     * [logout description]
+     * @return [type] [description]
+     */
     public function logout() 
     {
         $user = request()->get('peserta-auth');
@@ -69,6 +62,10 @@ class PesertaLoginController extends Controller
         return response()->json(['status' => 'success']);
     }
 
+    /**
+     * [authenticated description]
+     * @return [type] [description]
+     */
     public function authenticated()
     {
         $peserta = request()->get('peserta-auth')->only('nama','no_ujian','sesi');

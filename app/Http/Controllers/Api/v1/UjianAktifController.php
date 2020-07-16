@@ -12,6 +12,7 @@ use App\UjianAktif;
 use App\SiswaUjian;
 use App\HasilUjian;
 use App\Peserta;
+use App\Jadwal;
 
 class UjianAktifController extends Controller
 {
@@ -240,6 +241,24 @@ class UjianAktifController extends Controller
             DB::rollback();
             return SendResponse::badRequest($e->getMessage());
         }
+        return SendResponse::accept();
+    }
+
+    /**
+     * [changeSesi description]
+     * @param  Request $request [description]
+     * @param  Jadwal  $jadwal  [description]
+     * @return [type]           [description]
+     */
+    public function changeSesi(Request $request, Jadwal $jadwal )
+    {
+        $request->validate([
+            'sesi'      => 'required'
+        ]);
+
+        $jadwal->sesi = $request->sesi;
+        $jadwal->save();
+
         return SendResponse::accept();
     }
 }

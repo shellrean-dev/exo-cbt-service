@@ -19,7 +19,7 @@
       </div>
       <router-view></router-view>
       <div class="nav-fixed-bottom mb-5">
-        <p class="text-center">&copy; ExtraordinaryCBT 2020 by Shellrean & ICT Team</p>
+        <p class="text-center">&copy; ExtraordinaryCBT 2020 v1.9 by Shellrean & ICT Team</p>
       </div>
   </div>
 </template>
@@ -34,11 +34,14 @@ export default {
         ...mapState('siswa_user', {
             peserta: state => state.pesertaDetail
         }),
+        ...mapState('siswa_ujian', {
+            uncomplete: state => state.uncomplete
+        })
     },
     methods: {
         ...mapActions('siswa_jadwal',['ujianAktif']),
         ...mapActions('siswa_auth',['logoutPeserta']),
-        ...mapActions('siswa_ujian',['getPesertaDataUjian']),
+        ...mapActions('siswa_ujian',['getPesertaDataUjian', 'getPesertaUjian', 'getUncompleteUjian']),
         async logout() { 
             try {
                 await this.logoutPeserta()
@@ -52,10 +55,22 @@ export default {
     },
     async created() {
         try {
-            await this.ujianAktif()
-            await this.getPesertaDataUjian()
+            if(this.$route.name != 'ujian.while') {
+                await this.ujianAktif()
+                await this.getPesertaUjian()
+                await this.getUncompleteUjian()
+            }
         } catch (error) {
             this.$bvToast.toast(error.message, errorToas())
+        }
+    },
+    watch: {
+        uncomplete(val) {
+            if(this.$route.name != 'ujian.while' && typeof val.jadwal_id != 'undefined') {
+                this.$router.replace({ 
+                    name: 'ujian.while'
+                })
+            }
         }
     }
 }

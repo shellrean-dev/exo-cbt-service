@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUjianAktifsTable extends Migration
+class CreateUjiansTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,10 @@ class CreateUjianAktifsTable extends Migration
      */
     public function up()
     {
-        Schema::create('ujian_aktifs', function (Blueprint $table) {
+        Schema::create('ujians', function (Blueprint $table) {
             $table->id();
-            $table->string('kelompok');
-            $table->string('ujian_id');
-            $table->string('token');
-            $table->string('status_token');
+            $table->unsignedBigInteger('jadwal_id');
+            $table->enum('status',['aktif','selesai'])->default('aktif');
             $table->timestamps();
         });
     }
@@ -30,6 +28,6 @@ class CreateUjianAktifsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ujian_aktifs');
+        Schema::dropIfExists('ujians');
     }
 }

@@ -66,9 +66,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('directory/banksoal/{filemedia}', 'DirectoryController@getDirectoryBanksoal');
         Route::apiResource('directory', 'DirectoryController');
 
+        Route::post('ujians/{jadwal}/sesi-change', 'UjianAktifController@changeSesi');
         Route::get('ujians/active', 'UjianAktifController@index');
         Route::get('ujians/sesi', 'UjianAktifController@sesi');
-        Route::post('ujians/status', 'UjianAktifController@storeStatus');
+        // Route::post('ujians/status', 'UjianAktifController@storeStatus');
         Route::post('ujians/token-release', 'UjianAktifController@releaseToken');
         Route::post('ujians/token-change', 'UjianAktifController@changeToken');
         Route::get('ujians/peserta', 'UjianAktifController@getPesertas');
@@ -105,25 +106,17 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
 Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2'], function() {
 
     Route::post('logedin','PesertaLoginController@login');
-
     Route::group(['middleware' => 'peserta'], function() {
         Route::get('peserta-authenticated', 'PesertaLoginController@authenticated');
-
-        Route::get('/peserta/logout','PesertaLoginController@logout');
-        
-        Route::get('/jadwal/aktif', 'UjianController@getUjianAktif');
-
-        Route::get('/ujian/{id}','UjianController@getsoal');
-        Route::post('/ujian/setter','UjianController@getsoal');
-        Route::post('/ujian','UjianController@store');
-        Route::get('/ujian/jawaban/{id}', 'UjianController@getJawabanPeserta');
-        Route::post('/ujian/filled', 'UjianController@filled');
-        Route::post('/ujian/sisa-waktu', 'UjianController@sisaWaktu');
-        Route::post('/ujian/ujian-siswa-det', 'UjianController@detUjian');
+        Route::get('peserta/logout','PesertaLoginController@logout');
+        Route::get('jadwals/peserta', 'JadwalController@getJadwalPeserta');
+        Route::get('ujians/uncomplete','UjianAktifController@uncompleteUjian');
+        Route::get('ujians/peserta', 'UjianAktifController@getUjianPesertaAktif');
+        Route::post('ujians/start', 'UjianAktifController@startUjian');
+        Route::post('ujians/start/time', 'UjianAktifController@startUjianTime');
+        Route::get('ujians/filled', 'UjianAktifController@getJawabanPeserta');
+        Route::post('ujian','UjianController@store');
         Route::post('/ujian/ragu-ragu', 'UjianController@setRagu');
         Route::post('/ujian/selesai', 'UjianController@selesai');
-        Route::post('/ujian/cektoken','UjianController@cekToken');
-
-        Route::post('/ujian/mulai-peserta', 'UjianController@mulaiPeserta');
     });
 });

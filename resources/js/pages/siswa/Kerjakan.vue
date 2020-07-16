@@ -9,7 +9,6 @@
                     <div class="bar-top">
                         <span>SOAL NOMOR</span>
                         <div class="soal-title" id="page">{{ questionIndex+1 }}</div>
-                        <div id="page-count" style="display:none"></div>
                         <div class="right">
                             <div class="btn-group">
                               <button type="button" class="btn btn-outline-danger btn-soal"><i class="cil-clock"></i> {{ prettyTime }}</button>
@@ -56,8 +55,8 @@
                             <span class="cil-chevron-left"></span>
                             Sebelumnya
                         </b-button>
-                        <button id="soal-ragu" class="btn btn-warning ml-auto">
-                            <b-form-checkbox size="lg" value="1" v-model="ragu">Ragu ragu</b-form-checkbox>
+                        <button id="soal-ragu" class="btn btn-warning ml-auto" :disabled="isLoadinger">
+                            <b-form-checkbox size="lg" value="1" v-model="ragu" :disabled="isLoadinger">Ragu ragu</b-form-checkbox>
                         </button>
 
                         <b-button variant="info" class="sesudah" size="md" :disabled="isLoadinger || !listening" @click="next()" v-if="questionIndex+1 != filleds.length">
@@ -67,7 +66,7 @@
                         <b-button variant="success" class="sesudah" size="md" @click="$bvModal.show('modal-selesai')" v-if="questionIndex+1 == filleds.length && checkRagu() == false" :disabled="isLoadinger">
                             SELESAI <i class="cil-check"></i>
                         </b-button>
-                        <b-button variant="danger" class="sesudah" size="md" v-b-modal.modal-1 v-if="questionIndex+1 == filleds.length && checkRagu() == true">
+                        <b-button variant="danger" class="sesudah" size="md" :disabled="isLoadinger" v-b-modal.modal-1 v-if="questionIndex+1 == filleds.length && checkRagu() == true">
                             SELESAI <i class="cil-check"></i>
                         </b-button>
                     </div>
@@ -104,7 +103,7 @@
                 <ul class="nomor-soal" id="nomor-soal">
                     <li v-for="(fiel,index) in filleds" :key="index">
                         <a href="#" :class="{
-                        'isi' : (fiel.jawab != 0 || fiel.esay != null),
+                        'isi' : (fiel.jawab != 0 || fiel.esay != ''),
                         'ragu' : (fiel.ragu_ragu == 1),
                         'active' : (index == questionIndex)}" @click.prevent="toLand(index)" :disabled="isLoadinger">
                             {{ index+1 }} 
@@ -191,13 +190,8 @@ export default {
     methods: {
         ...mapActions('siswa_ujian',['takeFilled','submitJawaban','submitJawabanEssy', 'selesaiUjianPeserta', 'updateRaguJawaban']),
         async filledAllSoal() {
-            const payld = {
-                peserta_id: this.peserta.id,
-                banksoal: this.jadwal.banksoal_id,
-                jadwal_id: this.jadwal.ujian_id
-            }
             try {
-                await this.takeFilled(payld) 
+                await this.takeFilled() 
             } catch (error) {
                 this.$bvToast.toast(error.message, errorToas())
             }
@@ -303,9 +297,11 @@ export default {
         },
     },
     async created() {
-        if(typeof this.jadwal.jadwal != 'undefined') {
-           await this.filledAllSoal()
-           this.start()
+        try {
+            await this.filledAllSoal()
+            this.start()
+        } catch (error) {
+            this.$bvToast.toast(error.message, errorToas())
         }
     },
     watch: {

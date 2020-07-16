@@ -9,16 +9,12 @@ const state = () => ({
 		release: false,
 		token: false
 	},
-	banksoalAktif: ''
+    ujian: {},
+	banksoalAktif: '',
+    uncomplete: {}
 })
 
 const mutations = {
-	ASSIGN_DATA_JAWABAN(state, payload) {
-		state.jawabanPeserta = payload
-	},
-	ASSIGN_DATA_LIST(state, payload) {
-		state.ujianList = payload
-	},
 	FILLED_DATA_UJIAN(state, payload) {
 		state.filledUjian = payload
 	},
@@ -30,18 +26,12 @@ const mutations = {
 	SLICE_RAGU_JAWABAN(state, payload) {
 		state.filledUjian.data[payload.index].ragu_ragu = payload.data.ragu_ragu
 	},
-	ASSIGN_DATA_UJIAN(state, payload) {
-		state.dataUjian = payload
-	},
-	SET_INV_TOKEN_RELEASE(state, payload) {
-		state.invalidToken.release = payload
-		state.invalidToken.token = false
-	},
-	SET_INV_TOKEN_INV(state, payload) {
-		state.invalidToken.token = payload
-		state.invalidToken.release = false
-	},
-	
+    ASSIGN_PESERTA_UJIAN(state, payload) {
+        state.ujian = payload
+    },
+    ASSIGN_PESERTA_UNCOMPLETE_UJIAN(state, payload) {
+        state.uncomplete = payload
+    }
 }
 
 const actions = {
@@ -110,28 +100,10 @@ const actions = {
             })
 		})
 	},
-	getJawabanPeserta({ commit }, payload) {
-		return new Promise((resolve, reject) => {
-			$axios.get(`/ujian/jawaban/${payload}`)
-			.then((response) => {
-				commit('ASSIGN_DATA_JAWABAN', response.data)
-				resolve(response.data)
-			})
-		})
-	},
-	getUjianList({ commit }, payload) {
-		return new Promise((resolve, reject) => {
-			$axios.post(`/ujian/daftar`)
-			.then((response) => {
-				commit('ASSIGN_DATA_LIST', response.data)
-				resolve(response.data)
-			})
-		})
-	},
-	takeFilled({ commit }, payload) {
+	takeFilled({ commit }) {
 		commit('SET_LOADING',true, { root: true })
 		return new Promise((resolve, reject) => {
-			$axios.post(`/ujian/filled`, payload)
+			$axios.get(`/ujians/filled`)
 			.then((response) => {
 				commit('SET_LOADING',false, { root: true })
 				commit('FILLED_DATA_UJIAN', response.data)
@@ -143,50 +115,10 @@ const actions = {
 			})
 		})
 	},
-	updateWaktuSiswa({ commit }, payload) {
-		return new Promise((resolve, reject) => {
-			$axios.post(`/ujian/sisa-waktu`, payload)
-			.then((response) => {
-				resolve(response.data)
-			})
-			.catch((error) => {
-
-			})
-		})
-	}, 
-	getPesertaDataUjian({ commit }, payload) {
-		return new Promise((resolve, reject) => {
-			$axios.post(`/ujian/ujian-siswa-det`, payload) 
-			.then((response) => {
-				commit('ASSIGN_DATA_UJIAN', response.data.data)
-				resolve(response.data)
-			})
-			.catch((error) => {
-                reject(error.response.data)
-			})
-		})
-	},
-	tokenChecker({ commit, state }, payload) {
-		return new Promise(( resolve, reject) => {
-			commit('SET_LOADING',true, { root: true })
-			$axios.post(`/ujian/cektoken`, payload)
-			.then( (response) => {
-				commit('SET_LOADING',false, { root: true })
-                resolve(response.data)
-			}) 
-			.catch((error) => {
-                if(error.response.status == 400) {
-                    commit('SET_INV_TOKEN_INV',true)
-                }
-				commit('SET_LOADING',false, { root: true })
-                reject(error.response.data)
-			})
-		})
-	},
 	pesertaMulai({ commit, state }) {
         commit('SET_LOADING',true, { root: true })
 		return new Promise(( resolve, reject) => {
-			$axios.post(`/ujian/mulai-peserta`) 
+            $axios.post('ujians/start/time') 
 			.then((response) => {
                 commit('SET_LOADING',false, { root: true })
 				resolve(response.data)
@@ -196,7 +128,51 @@ const actions = {
                 reject(error.response.data)
             })
 		})
-	}
+	},
+    startUjian({ commit, state }, payload) {
+        commit('SET_LOADING', true, { root: true })
+        return new Promise(async(resolve, reject) => {
+            try {
+                let network = await $axios.post('ujians/start', payload)
+
+                commit('SET_LOADING', false, { root: true })
+                resolve(network.data)
+            } catch (error) {
+                commit('SET_LOADING', false, { root: true })
+                reject(error.response.data)
+            }
+        })
+    },
+    getPesertaUjian({ commit, state }) {
+        commit('SET_LOADING', true, { root: true })
+        return new Promise(async(resolve, reject) => {
+            try {
+                let network = await $axios.get('ujians/peserta')
+
+                commit('ASSIGN_PESERTA_UJIAN', network.data.data)
+                commit('SET_LOADING', false, { root: true })
+                resolve(network.data)
+            } catch (error) {
+                commit('SET_LOADING', false, { root: true })
+                reject(error.response.data)
+            }
+        })
+    },
+    getUncompleteUjian({ commit, state }) {
+        commit('SET_LOADING', true, { root: true })
+        return new Promise(async(resolve, reject) => {
+            try {
+                let network = await $axios.get('ujians/uncomplete')
+
+                commit('ASSIGN_PESERTA_UNCOMPLETE_UJIAN', network.data.data)
+                commit('SET_LOADING', false, { root: true })
+                resolve(network.data)
+            } catch (error) {
+                commit('SET_LOADING', false, { root: true })
+                reject(error.response.data)
+            }
+        })
+    }
 }
 
 export default {
