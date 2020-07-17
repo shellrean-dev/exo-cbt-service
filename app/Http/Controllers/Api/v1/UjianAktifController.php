@@ -13,6 +13,7 @@ use App\SiswaUjian;
 use App\HasilUjian;
 use App\Peserta;
 use App\Jadwal;
+use App\Token;
 
 class UjianAktifController extends Controller
 {
@@ -85,18 +86,13 @@ class UjianAktifController extends Controller
      */
     public function releaseToken(Request $request) 
     {
-        $ujian = UjianAktif::first();
-        if($ujian) {
-            $ujian->token = $request->token;
-            $ujian->status_token = 1;
-            $ujian->save();
-
-        } else {
-            UjianAktif::create([
-                'token'  => $request->token,
-            ]);
+        $token = Token::orderBy('id')->first();
+        if($token) {
+            $token->status = '1';
+            $token->save();
+            
+            return SendResponse::accept();
         }
-        return SendResponse::accept();
     }
 
     /**
@@ -120,13 +116,10 @@ class UjianAktifController extends Controller
      * [getPesertas description]
      * @return [type] [description]
      */
-    public function getPesertas()
+    public function getPesertas(Jadwal $jadwal)
     {
-        $ujian = UjianAktif::first();
-        if($ujian) {
-            $siswa = SiswaUjian::with('peserta')->where(['jadwal_id' => $ujian->ujian_id])->get();
-            return SendResponse::acceptData($siswa);
-        }
+        $siswa = SiswaUjian::with('peserta')->where(['jadwal_id' => $jadwal->id])->get();
+        return SendResponse::acceptData($siswa);
     }
 
     /**
@@ -260,5 +253,32 @@ class UjianAktifController extends Controller
         $jadwal->save();
 
         return SendResponse::accept();
+    }
+
+    /**
+     * [getToken description]
+     * @return [type] [description]
+     */
+    public function getToken()
+    {
+        $token = Token::orderBy('id')->first();
+
+        if($token) {
+            $to = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', now());
+            $from = $token->updated_at->format('Y-m-d H:i:s');
+            $differ = $to->diffInSeconds($from);
+            if($differ > 900) {
+                $token->token = strtoupper(Str::random(6));
+                $token->status = '0';
+                $token->save();
+            }
+
+            return SendResponse::acceptData($token);
+        }
+        $token = Token::create([
+            'token'     => strtoupper(Str::random(6)),
+            'status'    => 0,
+        ]);
+        return SendResponse::acceptData($token);
     }
 }
