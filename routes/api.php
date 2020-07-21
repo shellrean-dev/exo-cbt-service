@@ -23,6 +23,9 @@ Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel', 'Api\v1\Uj
 
 Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
     Route::post('login', 'AuthController@login');
+    Route::get('login/oauth', 'AuthController@oauth');
+    Route::get('login/sso', 'AuthController@sso');
+    Route::get('login/callback', 'AuthController@callback');
 
     Route::group(['middleware' => 'auth:api'], function() {
         Route::get('user-authenticated', 'UserController@getUserLogin');
@@ -94,6 +97,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('settings/sekolah', 'SettingController@getSettingSekolah');
         Route::post('settings/sekolah', 'SettingController@storeSettingSekolah');
         Route::post('settings/sekolah/logo', 'SettingController@changeLogoSekolah');
+        Route::get('settings', 'SettingController@getSetting');
+        Route::post('settings', 'SettingController@setSetting');
     });
 });
 
