@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
+use App\Setting;
 use App\User;
 use Auth;
 
@@ -45,7 +46,7 @@ class AuthController extends Controller
     {
         if(isset(request()->token) && ! empty(request()->token)) {
             $token = request()->token;
-            $server_url = 'http://localhost:8000/api/user';
+            $server_url = 'http://localhost:82/api/user';
             $response = Http::withToken($token)->get($server_url);
 
             if($response->json() != '') {
@@ -70,14 +71,21 @@ class AuthController extends Controller
      */
     public function sso()
     {
-        $query = http_build_query([
-            'client_id' => 8,
-            'redirect_uri' => 'http://127.0.0.1/api/v1/login/callback',
-            'response_type' => 'code',
-            'scope' => ''
-        ]);
+        $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') 
+            || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+        
+        $setting = Setting::where('name','airlock')->first();
+        if($setting) {
+            $query = http_build_query([
+                'client_id' => $setting->value['client_id'],
+                'redirect_uri' => $protocol.request()->server('HTTP_HOST').'/api/v1/login/callback',
+                'response_type' => 'code',
+                'scope' => ''
+            ]);
 
-        return redirect('http://127.0.0.1:8000/oauth/authorize?'.$query);
+            return redirect($setting->value['server_url'].'?'.$query);
+        }
+        return SendResponse::badRequest('Airlock has not configure');
     }
 
     /**
@@ -86,19 +94,28 @@ class AuthController extends Controller
      */
     public function callback()
     {
-        $server_url = 'http://127.0.0.1:8000/oauth/token';
-        $response = Http::post($server_url, [
-            'grant_type' => 'authorization_code',
-            'client_id' => 8,
-            'client_secret' => 'zce9fznhdiP4amPZBpCTWrSoSwaZtn6Vg9x7oxJu',
-            'redirect_uri' => 'http://127.0.0.1/api/v1/login/callback',
-            'code' => request()->code,
-        ]);
+        $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') 
+            || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+        
+        $setting = Setting::where('name','airlock')->first();
+        if($setting) {
+            $server_url = $setting->value['token_url'];
+            $response = Http::post($server_url, [
+                'grant_type' => 'authorization_code',
+                'client_id' => $setting->value['client_id'],
+                'client_secret' => $setting->value['client_secret'],
+                'redirect_uri' => $protocol.request()->server('HTTP_HOST').'/api/v1/login/callback',
+                'code' => request()->code,
+            ]);
 
-        $res = $response->json();
-        if(isset($res['access_token'])) {
-            return redirect('/auth/'.$res['access_token']);
+            $res = $response->json();
+            if(isset($res['access_token'])) {
+                $token = $res['access_token'];
+
+                return redirect($setting->value['consumer_url'].'/'.$token);
+            }
+            return SendResponse::badRequest('Single Sign On Failed. User mismatch or clash with existing data and SSO can not complete');
         }
-        return SendResponse::badRequest('Single Sign On Failed. User mismatch or clash with existing data and SSO can not complete');
+        return SendResponse::badRequest('Airlock has not configure');
     }
 }

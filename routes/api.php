@@ -26,6 +26,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
     Route::get('login/oauth', 'AuthController@oauth');
     Route::get('login/sso', 'AuthController@sso');
     Route::get('login/callback', 'AuthController@callback');
+    Route::get('settings/auth', 'SettingController@getSetAuth');
 
     Route::group(['middleware' => 'auth:api'], function() {
         Route::get('user-authenticated', 'UserController@getUserLogin');

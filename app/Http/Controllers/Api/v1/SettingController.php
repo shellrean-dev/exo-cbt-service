@@ -139,4 +139,18 @@ class SettingController extends Controller
         $setting->update($request->only('name','value','type'));
         return SendResponse::accept();
     }
+
+    public function getSetAuth()
+    {
+        $settings = Setting::where('type', 'auth')->get();
+        $set = $settings->map(function($item) {
+            return [
+                'name'  => $item->name,
+                'isactive' => $item->value['isactive']
+            ];
+        })->reject(function($item) {
+            return $item['isactive'] == 0;
+        });
+        return SendResponse::acceptData($set->values()->all());
+    }
 }
