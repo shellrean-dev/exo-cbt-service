@@ -33,20 +33,24 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('user-lists', 'UserController@userLists');
         Route::post('user/change-password', 'UserController@changePassword');
         Route::post('users/upload', 'UserController@import');
+        Route::post('users/delete-multiple', 'UserController@destroyMultiple');
         Route::apiResource('users', 'UserController');
 
         Route::get('agamas', 'AgamaController@index');
         
         Route::get('jurusans/all', 'JurusanController@allData');
+        Route::post('jurusans/delete-multiple', 'JurusanController@destroyMultiple');
         Route::apiResource('jurusans', 'JurusanController');
 
         Route::get('pesertas/login', 'PesertaController@getPesertaLogin');
         Route::delete('pesertas/{peserta}/login', 'PesertaController@resetPesertaLogin');
         Route::post('pesertas/upload', 'PesertaController@import');
+        Route::post('pesertas/delete-multiple', 'PesertaController@destroyMultiple');
         Route::apiResource('pesertas', 'PesertaController');
 
         Route::get('matpels/all', 'MatpelController@allData');
         Route::post('matpels/upload', 'MatpelController@import');
+        Route::post('matpels/delete-multiple', 'MatpelController@destroyMultiple');
         Route::apiResource('matpels', 'MatpelController');
 
         Route::get('banksoals/{banksoal}/analys', 'BanksoalController@getAnalys');

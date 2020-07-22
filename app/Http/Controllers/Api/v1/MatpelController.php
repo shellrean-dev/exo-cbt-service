@@ -138,4 +138,28 @@ class MatpelController extends Controller
         }
         return SendResponse::accept();
     }
+
+    /**
+     * Delete multiple matpel
+     *
+     * @author shellrean <wandinak17@gmail.com>
+     * @param \Illuminate\Http\Request $request
+     * @return \App\Actions\SendResponse
+     */
+    public function destroyMultiple(Request $request)
+    {
+        $request->validate([
+            'matpel_id' => 'required'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            Matpel::whereIn('id', $request->matpel_id)->delete();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return SendResponse::badRequest('Error: '.$e->getMessage());
+        }
+        return SendResponse::accept();
+    }
 }

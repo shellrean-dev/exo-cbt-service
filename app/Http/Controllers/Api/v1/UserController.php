@@ -167,4 +167,28 @@ class UserController extends Controller
         }
         return SendResponse::accept();
     }
+
+    /**
+     * Delete user multiple
+     *
+     * @author shellrean <wandinak17@gmail.com>
+     * @param \Illuminate\Http\Request $request
+     * @return \App\Actions\SendResponse
+     */
+    public function destroyMultiple(Request $request)
+    {
+        $request->validate([
+            'user_id'   => 'required|array'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            User::whereIn('id', $request->user_id)->delete();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return SendResponse::badRequest('Error: '.$e->getMessage());
+        }
+        return SendResponse::accept();
+    }
 }

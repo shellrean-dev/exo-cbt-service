@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use App\Jurusan;
+use Illuminate\Support\Facades\DB;
 
 class JurusanController extends Controller
 {
@@ -100,5 +101,32 @@ class JurusanController extends Controller
     {
         $jurusans = Jurusan::orderBy('id')->get();
         return SendResponse::acceptData($jurusans);
+    }
+
+    /**
+     * Multiple destroy jurusan
+     *
+     * @author shellrean <wandinak17@gmail.com>
+     * @param \Iluminate\Http\Request
+     * @return \App\Actions\SendResponse
+     */
+    public function destroyMultiple(Request $request)
+    {
+        $request->validate([
+            'jurusan_id'    => 'required|array'
+        ]);
+
+        $jurusans = $request->jurusan_id;
+
+        DB::beginTransaction();
+
+        try {
+            Jurusan::whereIn('id', $jurusans)->delete();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return SendResponse::badRequest('Error: '.$e->getMessage());    
+        }
+        return SendResponse::accept();
     }
 }   
