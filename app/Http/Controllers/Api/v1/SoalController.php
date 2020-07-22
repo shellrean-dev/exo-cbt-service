@@ -7,8 +7,11 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
 use App\Imports\BanksoalImport;
 use App\Actions\SendResponse;
+use App\Services\WordService;
+use App\Services\SoalService;
 use Illuminate\Http\Request;
 use App\JawabanSoal;
+use App\Directory;
 use App\Banksoal;
 use App\Soal;
 
@@ -287,6 +290,45 @@ class SoalController extends Controller
             DB::rollback();
             return SendResponse::badRequest($e->getMessage());
         }
+        return SendResponse::accept();
+    }
+
+    /**
+     * Import soal from docx
+     *
+     * @author shellrean <wandinak17@gmail.com>
+     * @param \Illuminate\http\Request $request
+     * @param \App\Services\WordService $wordService
+     * @return \App\Actions\SendResponse;
+     */
+    public function wordImport(
+        Request $request, 
+        Banksoal $banksoal, 
+        WordService $wordService, 
+        SoalService $soalService)
+    {
+        $request->validate([
+            'file' => 'required|mimes:docx'
+        ]);
+
+        $dir = Directory::find($banksoal->directory_id);
+
+        $file = $request->file('file');
+        $nama_file = time().$file->getClientOriginalName();
+        $path = $file->storeAs('public/'.$dir->slug,$nama_file);
+
+        $file = storage_path('app/'.$path);
+
+        $read = $wordService->wordFileImport($file, $dir);
+        if(!$read) {
+            return SendResponse::badRequest("Can't read file doc");
+        }
+        $insert = $soalService->importQues($read, $banksoal->id);
+
+        if(!$insert['success']) {
+            return SendResponse::badRequest($insert['message']);
+        }
+
         return SendResponse::accept();
     }
 }

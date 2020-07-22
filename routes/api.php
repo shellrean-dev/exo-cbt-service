@@ -57,6 +57,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('banksoals/all', 'BanksoalController@allData');
         Route::apiResource('banksoals', 'BanksoalController');
 
+        Route::post('soals/import-word/{banksoal}', 'SoalController@wordImport');
         Route::get('soals/{soal}', 'SoalController@show');
         Route::post('soals', 'SoalController@store');
         Route::post('soals/paste', 'SoalController@storePaste');
