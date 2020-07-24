@@ -3002,7 +3002,7 @@ input[type=text] {
   margin-bottom: 1.18125em; }
 
 .master {
-  background-image: url("../img/background.svg");
+  /*background-image: url("../img/background.svg");*/
   background-size: cover;
   background-position: top;
   min-height: 100vh;

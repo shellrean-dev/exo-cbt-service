@@ -52,7 +52,11 @@ class Matpel extends Model
      */
     public function setJurusanIdAttribute($value)
     {
-        $this->attributes['jurusan_id'] = str_replace('"', '', $value);
+        if(is_array($value)) {
+            $this->attributes['jurusan_id'] = json_encode($value);
+        } else {
+            $this->attributes['jurusan_id'] = str_replace('"', '', $value);
+        }
     }
 
     /**

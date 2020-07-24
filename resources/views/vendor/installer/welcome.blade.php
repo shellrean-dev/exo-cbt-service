@@ -1,11 +1,11 @@
 @extends('vendor.installer.layouts.master')
 
 @section('template_title')
-    {{ trans('installer_messages.welcome.templateTitle') }}
+    Extraordinary | Instalasi
 @endsection
 
 @section('title')
-    {{ trans('installer_messages.welcome.title') }}
+    ExtraordinaryCBT Installer
 @endsection
 
 @section('container')
