@@ -60,7 +60,7 @@ class UjianAktifController extends Controller
         }
 
         $peserta = SiswaUjian::create([
-            'peserta_id'        => $peserta['id'],
+            'peserta_id'        => $peserta->id,
             'jadwal_id'         => $request->jadwal_id,
             'mulai_ujian'       => '',
             'sisa_waktu'        => $ujian->lama,
@@ -143,6 +143,10 @@ class UjianAktifController extends Controller
                 continue;
             }
             $banksoal_id = $banksoal['data']; 
+        }
+
+        if($banksoal_id == '') {
+            return SendResponse::badRequest('Anda tidak mendapat banksoal yang sesuai');
         }
 
         $id = $banksoal_id;

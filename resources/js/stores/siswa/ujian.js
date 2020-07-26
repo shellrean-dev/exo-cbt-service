@@ -89,7 +89,7 @@ const actions = {
 	selesaiUjianPeserta({commit}, payload) {
         commit('SET_LOADING', true, { root: true })
 		return new Promise(( resolve, reject) => {
-			$axios.post(`/ujian/selesai`, payload)
+			$axios.get(`/ujian/selesai`, payload)
 			.then((response) => {
                 commit('SET_LOADING', false, { root: true })
 				resolve(response.daa)

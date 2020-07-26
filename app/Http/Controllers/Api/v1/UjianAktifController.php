@@ -208,8 +208,9 @@ class UjianAktifController extends Controller
             ])->first();
 
             $ujian->status_ujian = 1;
-            $peserta->api_token = '';
             $ujian->save();
+            $peserta->api_token = '';
+            $peserta->save();
 
             DB::commit();
         } catch (\Exception $e) {

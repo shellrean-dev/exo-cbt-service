@@ -248,10 +248,7 @@ export default {
         },
         async selesai() {
             try {
-                await this.selesaiUjianPeserta({
-                    peserta_id : this.peserta.id,
-                    jadwal_id : this.detail.jadwal_id
-                })
+                await this.selesaiUjianPeserta()
 
                 this.$router.push({ name: 'ujian.selesai' })
                 clearInterval(this.interval); 

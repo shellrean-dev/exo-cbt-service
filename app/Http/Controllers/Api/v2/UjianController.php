@@ -108,7 +108,7 @@ class UjianController extends Controller
      * @param Illuminate\Http\Request
      * @return Illuminate\Http\Response
      */
-    public function selesai(Request $request)
+    public function selesai()
     {
         $peserta = request()->get('peserta-auth');
 
