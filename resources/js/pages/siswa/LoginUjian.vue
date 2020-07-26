@@ -4,9 +4,9 @@
         <div class="panel-header bg-info-gradient">
           <div class="page-inner py-5">
             <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
-              <div class="logo">
-                <img src="/img/logo-white.png">
-                <h2 class="text-white pb-2 fw-bold">ExtraordinaryCBT</h2>
+              <div class="logo" v-if="typeof setting.sekolah != 'undefined'" >
+                <img :src="setting.sekolah.logo != '' ? '/storage/'+setting.sekolah.logo : '/img/logo-white.png'">
+                <h2 class="text-white pb-2 fw-bold">{{ setting.sekolah.nama != '' ? setting.sekolah.nama : 'ExtraordinaryCBT' }}</h2>
               </div>
             </div>
           </div>
@@ -17,7 +17,7 @@
 					<div class="card mt--5">
 						<div class="card-body">
 							<h4>Selamat Datang</h4>
-							<p>Silahkan login dengan username dan password yang anda miliki</p>
+							<p>Silahkan login dengan no ujian dan password yang anda miliki</p>
 							<form class="auth-form" @submit.prevent="postLogin">
 								<div class="input-group mb-3">
 									<div class="input-group-prepend rounded-0">
@@ -51,7 +51,7 @@
 			</div>
         </div>
         <div class="nav-fixed-bottom">
-        <p class="text-center">&copy; ExtraordinaryCBT 2020 by Shellrean & ICT Team</p>
+        <p class="text-center">&copy; ExtraordinaryCBT 2020 v1.0.11 by Shellrean</p>
       </div>
     </div>
 </div>
@@ -73,7 +73,7 @@
 			}
 		},
 		computed: {
-			...mapGetters(['isAuth','isLoading']),
+			...mapGetters(['isAuth','isLoading','setting']),
 			...mapState(['errors'])
 		},
 		methods: {

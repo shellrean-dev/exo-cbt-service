@@ -7,10 +7,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-
-use Auth;
+use App\Setting;
 use App\Peserta;
-use Illuminate\Support\Facades\Validator;
+
 
 class PesertaLoginController extends Controller
 {
@@ -69,5 +68,17 @@ class PesertaLoginController extends Controller
     {
         $peserta = request()->get('peserta-auth')->only('nama','no_ujian','sesi');
         return ['data' => $peserta];
+    }
+
+    public function getSetting()
+    {
+        $setting = Setting::where('name','set_sekolah')->first();
+        $return = [
+            'sekolah'   => [
+                'logo' => isset($setting->value) ? $setting->value['logo'] : '',
+                'nama' => isset($setting->value) ? $setting->value['nama_sekolah'] : ''
+            ]
+        ];
+        return response()->json(['data' => $return]);
     }
 }

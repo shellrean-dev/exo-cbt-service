@@ -91,7 +91,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       });
     }
   },
-  computed: _objectSpread(_objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapGetters"])(['isAuth', 'isLoading'])), Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])(['errors'])),
+  computed: _objectSpread(_objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapGetters"])(['isAuth', 'isLoading', 'setting'])), Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapState"])(['errors'])),
   methods: _objectSpread(_objectSpread(_objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapActions"])('siswa_auth', ['submit'])), Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapMutations"])(['CLEAR_ERRORS', 'SET_LOADING'])), {}, {
     postLogin: function postLogin() {
       var _this = this;
@@ -134,7 +134,41 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "wrapper overlay-sidebar" }, [
     _c("div", { staticClass: "content" }, [
-      _vm._m(0),
+      _c("div", { staticClass: "panel-header bg-info-gradient" }, [
+        _c("div", { staticClass: "page-inner py-5" }, [
+          _c(
+            "div",
+            {
+              staticClass:
+                "d-flex align-items-left align-items-md-center flex-column flex-md-row"
+            },
+            [
+              typeof _vm.setting.sekolah != "undefined"
+                ? _c("div", { staticClass: "logo" }, [
+                    _c("img", {
+                      attrs: {
+                        src:
+                          _vm.setting.sekolah.logo != ""
+                            ? "/storage/" + _vm.setting.sekolah.logo
+                            : "/img/logo-white.png"
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c("h2", { staticClass: "text-white pb-2 fw-bold" }, [
+                      _vm._v(
+                        _vm._s(
+                          _vm.setting.sekolah.nama != ""
+                            ? _vm.setting.sekolah.nama
+                            : "ExtraordinaryCBT"
+                        )
+                      )
+                    ])
+                  ])
+                : _vm._e()
+            ]
+          )
+        ])
+      ]),
       _vm._v(" "),
       _c("div", { staticClass: "container" }, [
         _c("div", { staticClass: "row justify-content-center" }, [
@@ -145,7 +179,7 @@ var render = function() {
                 _vm._v(" "),
                 _c("p", [
                   _vm._v(
-                    "Silahkan login dengan username dan password yang anda miliki"
+                    "Silahkan login dengan no ujian dan password yang anda miliki"
                   )
                 ]),
                 _vm._v(" "),
@@ -162,7 +196,7 @@ var render = function() {
                   },
                   [
                     _c("div", { staticClass: "input-group mb-3" }, [
-                      _vm._m(1),
+                      _vm._m(0),
                       _vm._v(" "),
                       _c("input", {
                         directives: [
@@ -201,7 +235,7 @@ var render = function() {
                     ]),
                     _vm._v(" "),
                     _c("div", { staticClass: "input-group mb-3" }, [
-                      _vm._m(2),
+                      _vm._m(1),
                       _vm._v(" "),
                       _c("input", {
                         directives: [
@@ -275,36 +309,11 @@ var render = function() {
         ])
       ]),
       _vm._v(" "),
-      _vm._m(3)
+      _vm._m(2)
     ])
   ])
 }
 var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "panel-header bg-info-gradient" }, [
-      _c("div", { staticClass: "page-inner py-5" }, [
-        _c(
-          "div",
-          {
-            staticClass:
-              "d-flex align-items-left align-items-md-center flex-column flex-md-row"
-          },
-          [
-            _c("div", { staticClass: "logo" }, [
-              _c("img", { attrs: { src: "/img/logo-white.png" } }),
-              _vm._v(" "),
-              _c("h2", { staticClass: "text-white pb-2 fw-bold" }, [
-                _vm._v("ExtraordinaryCBT")
-              ])
-            ])
-          ]
-        )
-      ])
-    ])
-  },
   function() {
     var _vm = this
     var _h = _vm.$createElement
@@ -331,7 +340,7 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("div", { staticClass: "nav-fixed-bottom" }, [
       _c("p", { staticClass: "text-center" }, [
-        _vm._v("© ExtraordinaryCBT 2020 by Shellrean & ICT Team")
+        _vm._v("© ExtraordinaryCBT 2020 v1.0.11 by Shellrean")
       ])
     ])
   }

@@ -117,6 +117,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
 Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2'], function() {
 
     Route::post('logedin','PesertaLoginController@login');
+    Route::get('setting', 'PesertaLoginController@getSetting');
+    
     Route::group(['middleware' => 'peserta'], function() {
         Route::get('peserta-authenticated', 'PesertaLoginController@authenticated');
         Route::get('peserta/logout','PesertaLoginController@logout');

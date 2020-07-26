@@ -11,7 +11,7 @@ const mutations = {
 }
 
 const actions = {
-	getUserLogin({ commit, payload}) {
+	getUserLogin({ commit }) {
 		return new Promise((resolve, reject) => {
 			$axios.get(`peserta-authenticated`)
 			.then((response) => {
@@ -21,6 +21,18 @@ const actions = {
             .catch((error) => {
                 reject(error.response.data)
             })
+		})
+	},
+	getSettingSekolah({ commit }) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let network = await $axios.get('setting')
+
+				commit('SET_SETTING', network.data.data, { root: true })
+				resolve(network.data)
+			} catch (error) {
+				reject(error.response.data)
+			}
 		})
 	}
 }
