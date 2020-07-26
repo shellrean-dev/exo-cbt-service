@@ -10,7 +10,6 @@ use Illuminate\Support\Str;
 
 use Auth;
 use App\Peserta;
-use App\UjianAktif;
 use Illuminate\Support\Facades\Validator;
 
 class PesertaLoginController extends Controller

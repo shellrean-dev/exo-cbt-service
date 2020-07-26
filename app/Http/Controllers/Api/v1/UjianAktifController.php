@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use App\Services\UjianService;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -141,9 +142,9 @@ class UjianAktifController extends Controller
      * @param  Peserta $peserta [description]
      * @return [type]           [description]
      */
-    public function resetUjianPeserta(Request $request, Peserta $peserta)
+    public function resetUjianPeserta(Jadwal $jadwal, Peserta $peserta)
     {
-        $aktif = UjianAktif::first()->ujian_id;
+        $aktif = $jadwal->id;
         DB::beginTransaction();
 
         try {
@@ -174,60 +175,41 @@ class UjianAktifController extends Controller
      * @param  Peserta $peserta [description]
      * @return [type]           [description]
      */
-    public function closePeserta(Request $request, Peserta $peserta)
+    public function closePeserta(Jadwal $jadwal, Peserta $peserta)
     {
-        $aktif = UjianAktif::first();
+        $ujian_id = $jadwal->id;
 
         DB::beginTransaction();
 
         try {
+
+            $hasilUjian = HasilUjian::where([
+                'peserta_id'    => $peserta->id,
+                'jadwal_id'     => $ujian_id,
+            ])->first();
+
+            if($hasilUjian) { 
+                return SendResponse::accept();
+            }
+
+            $jawaban = JawabanPeserta::where([
+                'jadwal_id'     => $ujian_id, 
+                'peserta_id'    => $peserta->id
+            ])->first();
+
+            $finished = UjianService::finishingUjian($jawaban->banksoal_id, $ujian_id, $peserta->id);
+            if(!$finished['success']) {
+                return SendResponse::badRequest($finished['message']);
+            }
+
             $ujian = SiswaUjian::where([
-                'jadwal_id'     => $aktif->ujian_id, 
+                'jadwal_id'     => $ujian_id, 
                 'peserta_id'    => $peserta->id
             ])->first();
 
             $ujian->status_ujian = 1;
-            $ujian->save();
-
-            $banksoal = JawabanPeserta::where([
-                'jadwal_id'     => $aktif->ujian_id, 
-                'peserta_id'    => $peserta->id
-            ])->first();
-
-            $salah = JawabanPeserta::where([
-                'iscorrect'     => 0,
-                'jadwal_id'     => $aktif->ujian_id, 
-                'peserta_id'    => $peserta->id,
-                'esay'    => null
-            ])->get()->count();
-
-            $benar = JawabanPeserta::where([
-                'iscorrect'     => 1,
-                'jadwal_id'     => $aktif->ujian_id, 
-                'peserta_id'    => $peserta->id
-            ])->get()->count();
-            
-            $jml = JawabanPeserta::where([
-                'jadwal_id'     => $aktif->ujian_id, 
-                'peserta_id'    => $peserta->id
-            ])->get()->count();
-
-            $hasil = ($benar/$jml)*100;
-
-            HasilUjian::create([
-                'banksoal_id'     => $banksoal->id,
-                'peserta_id'      => $peserta->id,
-                'jadwal_id'       => $aktif->ujian_id,
-                'jumlah_salah'    => $salah,
-                'jumlah_benar'    => $benar,
-                'tidak_diisi'     => 0,
-                'hasil'           => $hasil,
-                'point_esay'      => 0.0,
-                'jawaban_peserta' => ''
-            ]);
-
             $peserta->api_token = '';
-            $peserta->save();
+            $ujian->save();
 
             DB::commit();
         } catch (\Exception $e) {

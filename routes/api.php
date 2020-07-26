@@ -82,8 +82,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::post('ujians/token-change', 'UjianAktifController@changeToken');
         Route::get('ujians/token-get', 'UjianAktifController@getToken');
         Route::get('ujians/{jadwal}/peserta', 'UjianAktifController@getPesertas');
-        Route::get('ujians/peserta/{peserta}/reset', 'UjianAktifController@resetUjianPeserta');
-        Route::get('ujians/peserta/{peserta}/close', 'UjianAktifController@closePeserta');
+        Route::get('ujians/{jadwal}/peserta/{peserta}/reset', 'UjianAktifController@resetUjianPeserta');
+        Route::get('ujians/{jawal}/peserta/{peserta}/close', 'UjianAktifController@closePeserta');
 
         Route::get('ujians/esay/exists', 'UjianController@getExistEsay');
         Route::post('ujians/esay/input', 'UjianController@storeNilaiEsay');
