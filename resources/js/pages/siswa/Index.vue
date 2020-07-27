@@ -19,7 +19,7 @@
       </div>
       <router-view></router-view>
       <div class="nav-fixed-bottom mb-5">
-        <p class="text-center">&copy; ExtraordinaryCBT 2020 v1.0.11 by Shellrean & ICT Team</p>
+        <p class="text-center">&copy; ExtraordinaryCBT 2020 v1.0.11 by Shellrean</p>
       </div>
   </div>
 </template>

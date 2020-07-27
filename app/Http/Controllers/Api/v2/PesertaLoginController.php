@@ -10,7 +10,6 @@ use Illuminate\Support\Str;
 use App\Setting;
 use App\Peserta;
 
-
 class PesertaLoginController extends Controller
 {
     /**
@@ -20,6 +19,7 @@ class PesertaLoginController extends Controller
      */
     public function login(Request $request)
     {
+        $setting = Setting::where('name','ujian')->first();
 
         $request->validate([
             'no_ujian'      => 'required|exists:pesertas,no_ujian',
@@ -32,6 +32,13 @@ class PesertaLoginController extends Controller
         ])->first();
 
         if($peserta) {
+            if(isset($setting->value['reset']) 
+                && $setting->value['reset'] 
+                && $peserta->api_token != '') {
+                    return response()->json([
+                        'status'    => 'loggedin'
+                    ], 200);
+            }
             $token = Str::random(128);
             $peserta->update(['api_token' => $token]);
             return response()
@@ -72,11 +79,16 @@ class PesertaLoginController extends Controller
 
     public function getSetting()
     {
-        $setting = Setting::where('name','set_sekolah')->first();
+        $sekolah = Setting::where('name','set_sekolah')->first();
+        $ujian = Setting::where('name','ujian')->first();
         $return = [
             'sekolah'   => [
-                'logo' => isset($setting->value) ? $setting->value['logo'] : '',
-                'nama' => isset($setting->value) ? $setting->value['nama_sekolah'] : ''
+                'logo' => isset($sekolah->value) ? $sekolah->value['logo'] : '',
+                'nama' => isset($sekolah->value) ? $sekolah->value['nama_sekolah'] : ''
+            ],
+            'text' => [
+                'welcome' => isset($ujian->value) ? $ujian->value['text_welcome'] : '',
+                'finish'  => isset($ujian->value) ? $ujian->value['text_finish'] : ''
             ]
         ];
         return response()->json(['data' => $return]);

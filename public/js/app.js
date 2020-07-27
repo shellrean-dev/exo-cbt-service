@@ -2918,6 +2918,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2931,7 +2933,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
     };
   },
-  computed: _objectSpread(_objectSpread(_objectSpread(_objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapGetters"])(['isAuth', 'isLoading'])), Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapState"])('siswa_jadwal', {
+  computed: _objectSpread(_objectSpread(_objectSpread(_objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapGetters"])(['isAuth', 'isLoading', 'setting'])), Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapState"])('siswa_jadwal', {
     jadwal: function jadwal(state) {
       return state.banksoalAktif;
     }
@@ -3226,10 +3228,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapGetters"])(['isLoading'])),
+  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapGetters"])(['isLoading', 'setting'])),
   methods: _objectSpread(_objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapActions"])('siswa_auth', ['logoutPeserta'])), {}, {
     logout: function logout() {
       var _this = this;
@@ -67882,7 +67887,7 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("div", { staticClass: "nav-fixed-bottom mb-5" }, [
       _c("p", { staticClass: "text-center" }, [
-        _vm._v("© ExtraordinaryCBT 2020 v1.0.11 by Shellrean & ICT Team")
+        _vm._v("© ExtraordinaryCBT 2020 v1.0.11 by Shellrean")
       ])
     ])
   }
@@ -68502,6 +68507,14 @@ var render = function() {
             _vm._m(0),
             _vm._v(" "),
             _c("div", { staticClass: "card-body" }, [
+              typeof _vm.setting.text != "undefined" &&
+              _vm.setting.text.welcome != null
+                ? _c("div", {
+                    staticClass: "alert alert-primary",
+                    domProps: { innerHTML: _vm._s(_vm.setting.text.welcome) }
+                  })
+                : _vm._e(),
+              _vm._v(" "),
               _c(
                 "form",
                 {
@@ -68817,7 +68830,20 @@ var render = function() {
           _vm._m(0),
           _vm._v(" "),
           _c("div", { staticClass: "card-body" }, [
-            _vm._m(1),
+            typeof _vm.setting.text != "undefined" &&
+            _vm.setting.text.finish != null
+              ? _c("div", {
+                  domProps: { innerHTML: _vm._s(_vm.setting.text.finish) }
+                })
+              : _c("p", [
+                  _vm._v(
+                    "\n\t\t\t\t\t\tAnda telah selesai mengerjakan ujian ini. "
+                  ),
+                  _c("br"),
+                  _vm._v(
+                    "\n                        Terimakasih, prestasi penting jujur yang utama"
+                  )
+                ]),
             _vm._v(" "),
             _c("br"),
             _c("br"),
@@ -68844,18 +68870,6 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("div", { staticClass: "card-header" }, [
       _c("h2", { staticClass: "ml-auto" }, [_vm._v("Tes Selesai")])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("p", [
-      _vm._v("\n\t\t\t\t\t\tAnda telah selesai mengerjakan ujian ini. "),
-      _c("br"),
-      _vm._v(
-        "\n                        Terimakasih, prestasi penting jujur yang utama"
-      )
     ])
   }
 ]

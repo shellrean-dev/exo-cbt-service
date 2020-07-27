@@ -8,6 +8,8 @@
 							<h4>Konfirmasi data peserta</h4>
 						</div>
                         <div class="card-body" >
+                            <div class="alert alert-primary" v-if="typeof setting.text != 'undefined' && setting.text.welcome != null" v-html="setting.text.welcome">
+                            </div>
                             <form @submit.prevent="ujianStart" class="form-custom">
                                 <div class="form-group">
                                     <label for="nisn">NO UJIAN</label>
@@ -70,7 +72,7 @@
 	      } 
 	    },
 	    computed: {
-	    	...mapGetters(['isAuth','isLoading']),
+	    	...mapGetters(['isAuth','isLoading','setting']),
 	    	...mapState('siswa_jadwal', {
 	    		jadwal: state => state.banksoalAktif
 	    	}),
