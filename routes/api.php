@@ -19,8 +19,6 @@ use Illuminate\Support\Facades\Route;
  * api response for v1
  */
 
-Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel', 'Api\v1\UjianController@getCapaianSiswaExcel');
-
 Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
     Route::post('login', 'AuthController@login');
     Route::get('login/oauth', 'AuthController@oauth');

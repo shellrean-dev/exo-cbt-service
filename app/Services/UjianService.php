@@ -81,8 +81,10 @@ class UjianService
           'soal' => function($q) {
             $q->select('id','banksoal_id','pertanyaan','tipe_soal','audio','direction'); 
         },'soal.jawabans' => function($q) {
-            $q->select('id','soal_id','text_jawaban')
-            ->inRandomOrder();
+            $q->select('id','soal_id','text_jawaban');
+            if(true) {
+                $q->inRandomOrder();
+            }
         }
         ])->where([
             'peserta_id'    => $peserta_id,
@@ -170,5 +172,20 @@ class UjianService
         $diff_in_minutes = $start->diffInSeconds($now);
         $siswaUjian->sisa_waktu = $deUjian->lama-$diff_in_minutes;
         $siswaUjian->save();
+    }
+
+    /**
+     * [getUjianSiswaBelumSelesai description]
+     * @param  SiswaUjian $siswaUjian [description]
+     * @return [type]                 [description]
+     */
+    public function getUjianSiswaBelumSelesai($peserta_id)
+    {
+        $data = SiswaUjian::where(function($query) use($peserta_id) {
+            $query->where('peserta_id', $peserta_id)
+            ->where('status_ujian','=',3);
+        })->first();
+
+        return $data;
     }
 }

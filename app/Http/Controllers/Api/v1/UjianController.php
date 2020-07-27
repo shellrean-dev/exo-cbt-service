@@ -414,10 +414,10 @@ class UjianController extends Controller
 
     public function getCapaianSiswaExcel(Jadwal $jadwal, Banksoal $banksoal)
     {
-        $soal = Soal::where(function($query) use($banksoal) {
+        $soals = Soal::where(function($query) use($banksoal) {
             $query->where('banksoal_id', $banksoal->id)
             ->where('tipe_soal','!=','2');
-        })->count();
+        })->get();
 
         $sss = JawabanPeserta::with(['peserta' => function($query) {
             $query->select('id','nama','no_ujian');
@@ -430,7 +430,7 @@ class UjianController extends Controller
             'jadwal_id' => $jadwal->id
         ])
         ->orderBy('soal_id')
-        ->select('id','iscorrect','peserta_id')
+        ->select('id','iscorrect','peserta_id', 'soal_id')
         ->get();
 
         $grouped = $sss->groupBy('peserta_id');
@@ -446,7 +446,7 @@ class UjianController extends Controller
         });
         $data = [
             'pesertas' => $fill,
-            'soal' => $soal
+            'soals' => $soals
         ];
 
         $export = new CapaianExport($data);

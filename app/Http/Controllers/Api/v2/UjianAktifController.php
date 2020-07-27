@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v2;
 
 use App\Http\Controllers\Controller;
+use \Illuminate\Support\Facades\DB;
 use App\Services\UjianService;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,7 @@ use Carbon\Carbon;
 use App\Banksoal;
 use App\Jadwal;
 use App\Token;
+use App\Soal;
 
 class UjianAktifController extends Controller
 {
@@ -116,28 +118,25 @@ class UjianAktifController extends Controller
      * [getJawabanPeserta description]
      * @return [type] [description]
      */
-    public function getJawabanPeserta()
+    public function getJawabanPeserta(UjianService $ujianService)
     {
         $peserta = request()->get('peserta-auth');
+        $ujian_siswa = $ujianService->getUjianSiswaBelumSelesai($peserta->id);
 
-        $data = SiswaUjian::where(function($query) use($peserta) {
-            $query->where('peserta_id', $peserta->id)
-            ->where('status_ujian','=',3);
-        })->first();
-
-        if(!$data) {
+        if(!$ujian_siswa) {
             return SendResponse::badRequest('Anda memasuki ujian ini secara ilegal');
         }
 
-        $jadwal = Jadwal::find($data->jadwal_id);
+        // Ambil id banksoal yang terkait dalam jadwal
+        $jadwal = Jadwal::find($ujian_siswa->jadwal_id);
+        $banksoal_ids = array_column($jadwal->banksoal_id, 'jurusan','id');
+        $banksoal_ids = collect($banksoal_ids)->keys();
 
-        $ids = array_column($jadwal->banksoal_id, 'jurusan','id');
-        $ids = collect($ids)->keys();
-        
-        $bks = Banksoal::with('matpel','matpel')->whereIn('id', $ids)->get();
+        $banksoal_diujikan = Banksoal::with('matpel')->whereIn('id', $banksoal_ids)->get();
         $banksoal_id = '';
 
-        foreach($bks as $bk) {
+        // Cari id banksoal yang dapat dipakai oleh siswwa
+        foreach($banksoal_diujikan as $bk) {
             $banksoal = UjianService::getBanksoalPeserta($bk, $peserta);
             if(!$banksoal['success']) {
                 continue;
@@ -145,119 +144,95 @@ class UjianAktifController extends Controller
             $banksoal_id = $banksoal['data']; 
         }
 
+        // Jika tidak dapat menemukan banksoal_id
         if($banksoal_id == '') {
-            return SendResponse::badRequest('Anda tidak mendapat banksoal yang sesuai');
+            return SendResponse::badRequest('Anda tidak mendapat banksoal yang sesuai, silakan hubungi administrator');
         }
 
-        $id = $banksoal_id;
-        $jadwal_id = $data->jadwal_id;
-        $user_id = $peserta->id;
-        
-        $find = UjianService::getJawabanPeserta($jadwal_id, $user_id);
+        $jawaban_peserta = UjianService::getJawabanPeserta($jadwal->id, $peserta->id);
 
-        if ($find->count() < 1 ) {
+        // Jika jawaban siswa belum ada di database
+        if ($jawaban_peserta->count() < 1 ) {
+            //------------------------------------------------------------------
+            $banksoal = Banksoal::find($banksoal_id);
+            $max_pg = $banksoal->jumlah_soal;
+            $max_esay = $banksoal->jumlah_soal_esay;
 
-            $all = Banksoal::with(['pertanyaans','pertanyaans.jawabans'])->where('id',$id)->first();
+            // Soal Pilihan Ganda
+            $pg = Soal::where([
+                'banksoal_id' => $banksoal->id,
+                'tipe_soal' => 1
+            ])->inRandomOrder()->take($max_pg)->get();
 
-            $max_soal = $all->jumlah_soal;
-            $max_essay = $all->jumlah_soal_esay;
-            $i = 1;
-
-            foreach($all->pertanyaans as $p) {
-                if($p->tipe_soal != 3) {
-                    continue;
-                }
-                JawabanPeserta::create([
-                    'peserta_id'    => $user_id, 
-                    'banksoal_id'   => $id, 
-                    'soal_id'       => $p->id, 
-                    'jawab'         => 0, 
+            $soal_pg = $pg->map(function($item) use($peserta, $banksoal, $jadwal) {
+                return [
+                    'peserta_id'    => $peserta->id,
+                    'banksoal_id'   => $banksoal->id,
+                    'soal_id'       => $item->id,
+                    'jawab'         => 0,
                     'iscorrect'     => 0,
-                    'jadwal_id'     => $jadwal_id,
+                    'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
                     'esay'          => ''
-                ]);
-                if ($i++ == $max_soal) break;
-            }
+                ];
+            });
 
-            $collection = $all->pertanyaans;
-            $perta = $collection->shuffle();
+            // Soal Esay
+            $esay = Soal::where([
+                'banksoal_id'   => $banksoal->id,
+                'tipe_soal'     => 2
+            ])->inRandomOrder()->take($max_esay)->get();
 
-            if($perta != null) {
-                foreach($perta as $p) {
-                    if($p->tipe_soal != 1) {
-                        continue;
-                    }
-                    JawabanPeserta::create([
-                        'peserta_id'    => $user_id, 
-                        'banksoal_id'   => $id, 
-                        'soal_id'       => $p->id, 
-                        'jawab'         => 0, 
-                        'iscorrect'     => 0,
-                        'jadwal_id'     => $jadwal_id,
-                        'ragu_ragu'     => 0,
-                        'esay'          => ''
-                    ]);
+            $soal_esay = $esay->map(function($item) use($peserta, $banksoal, $jadwal) {
+                return [
+                    'peserta_id'    => $peserta->id,
+                    'banksoal_id'   => $banksoal->id,
+                    'soal_id'       => $item->id,
+                    'jawab'         => 0,
+                    'iscorrect'     => 0,
+                    'jadwal_id'     => $jadwal->id,
+                    'ragu_ragu'     => 0,
+                    'esay'          => ''
+                ];
+            });
 
-                    if ($i++ == $max_soal) break;
-                }
-            }
+            // Merges
+            $soals = array_merge($soal_pg->values()->toArray(), $soal_esay->values()->toArray());
 
-            if ($max_essay != null && $max_essay > 0) {
-                foreach($perta as $p) {
-                    if($p->tipe_soal != 2) {
-                        continue;
-                    }
-                    
-                    JawabanPeserta::create([
-                        'peserta_id'    => $user_id, 
-                        'banksoal_id'   => $id, 
-                        'soal_id'       => $p->id, 
-                        'jawab'         => 0, 
-                        'iscorrect'     => 0,
-                        'jadwal_id'     => $jadwal_id,
-                        'ragu_ragu'     => 0,
-                        'esay'          => ''
-                    ]);
-    
-                    if ($i++ == $max_essay) break;
-                }
-            }
+            // Insert
+            DB::table('jawaban_pesertas')->insert($soals);
 
-            $find = UjianService::getJawabanPeserta($jadwal_id, $user_id);
+            // Get Jawaban peserta
+            $jawaban_peserta = UjianService::getJawabanPeserta($jadwal->id, $peserta->id);
 
-            return response()->json(['data' => $find, 'detail' => $data]);
+            return response()->json(['data' => $jawaban_peserta, 'detail' => $ujian_siswa]);
         }
-        
+
+        // Get siswa ujian detail
         $ujian = SiswaUjian::where([
-            'jadwal_id'     => $jadwal_id,
-            'peserta_id'    => $user_id
+            'jadwal_id'     => $jadwal->id,
+            'peserta_id'    => $peserta->id
         ])->first();
 
-        $deUjian = Jadwal::find($jadwal_id);
-
+        // Check perbedaan waktu
         $start = Carbon::createFromFormat('H:i:s', $ujian->mulai_ujian);
         $now = Carbon::createFromFormat('H:i:s', Carbon::now()->format('H:i:s'));
-
         $diff_in_minutes = $start->diffInSeconds($now);
 
-        if($diff_in_minutes > $deUjian->lama) {
-    
+        if($diff_in_minutes > $jadwal->lama) {
             $ujian->status_ujian = 1;
             $ujian->save();
-            
-            $finished = UjianService::finishingUjian($id, $jadwal_id, $user_id);
+
+            $finished = UjianService::finishingUjian($banksoal_id, $jadwal->id, $peserta->id);
             if(!$finished['success']) {
                 return SendResponse::badRequest($finished['message']);
             }
-            
-            return response()->json(['data' => $find, 'detail' => $ujian]);
+        } else {
+            $ujian->sisa_waktu = $jadwal->lama-$diff_in_minutes;
+            $ujian->save();
         }
-        
-        $ujian->sisa_waktu = $deUjian->lama-$diff_in_minutes;
-        $ujian->save();
 
-        return response()->json(['data' => $find, 'detail' => $ujian]);
+        return response()->json(['data' => $jawaban_peserta, 'detail' => $ujian]);
     }
 
     /**

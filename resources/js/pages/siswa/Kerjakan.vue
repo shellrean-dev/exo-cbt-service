@@ -56,7 +56,7 @@
                             Sebelumnya
                         </b-button>
                         <button id="soal-ragu" class="btn btn-warning ml-auto" :disabled="isLoadinger">
-                            <b-form-checkbox size="lg" value="1" v-model="ragu" :disabled="isLoadinger">Ragu ragu</b-form-checkbox>
+                            <b-form-checkbox size="lg" :value="1" v-model="filleds[questionIndex].ragu_ragu" :disabled="isLoadinger" @change="sendRagu()">Ragu ragu</b-form-checkbox>
                         </button>
 
                         <b-button variant="info" class="sesudah" size="md" :disabled="isLoadinger || !listening" @click="next()" v-if="questionIndex+1 != filleds.length">
@@ -292,6 +292,20 @@ export default {
             }
             this.$bvModal.hide('modal-direction')
         },
+        sendRagu() {
+            const fill = this.filleds[this.questionIndex]
+            let ragu = fill.ragu_ragu == false || fill.ragu_ragu == '0' ? 1 : 0;
+
+            this.updateRaguJawaban({ 
+                ragu_ragu: ragu,
+                jawaban_id : this.filleds[this.questionIndex].id,
+                index : this.questionIndex
+            })
+            .catch((error) => {
+                this.$bvToast.toast(error.message, errorToas())
+                this.$bvToast.toast('Terjadi kesalahan, cek koneksi internet', errorToas())
+            })
+        }
     },
     async created() {
         try {
@@ -340,14 +354,14 @@ export default {
                 this.start()
             }
         },
-        ragu(val) {
-            if (val == false) {
-                const set = 0
-                this.raguRagu(set)
-            } else {
-                this.raguRagu(val)
-            }
-        },
+        // ragu(val) {
+        //     if (val == false) {
+        //         const set = 0
+        //         this.raguRagu(set)
+        //     } else {
+        //         this.raguRagu(val)
+        //     }
+        // },
         direction(val) {
             if(val != '') {
                 if(this.hasdirec.includes(this.filleds[this.questionIndex].soal.id)) {
