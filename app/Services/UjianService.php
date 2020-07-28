@@ -104,30 +104,67 @@ class UjianService
      */
     public static function finishingUjian($banksoal_id, $jadwal_id, $peserta_id)
     {
+        $banksoal = Banksoal::find($banksoal_id);
+        if(!$banksoal) {
+            return ['success' => false, 'message' => 'Tidak dapat menemukan banksoal'];
+        }
         try { 
+            // Pilihan Ganda
+            $pg_benar = JawabanPeserta::where([
+                'iscorrect'     => 1,
+                'jadwal_id'     => $jadwal_id, 
+                'peserta_id'    => $peserta_id
+            ])
+            ->whereHas('soal', function($query) {
+                $query->where('tipe_soal','=', '1');
+            })
+            ->count();
+
+            $pg_jml = JawabanPeserta::where([
+                'jadwal_id'     => $jadwal_id, 
+                'peserta_id'    => $peserta_id
+            ])
+            ->whereHas('soal', function($query) {
+                $query->where('tipe_soal','=', '1');
+            })
+            ->count();
+            $hasil_pg = 0;
+            if($pg_jml > 0 && $pg_benar > 0) {
+                $hasil_pg = ($pg_benar/$pg_jml)*$banksoal->persen['pilihan_ganda'];
+            }
+
+            // Listening
+            $listening_benar = JawabanPeserta::where([
+                'iscorrect'     => 1,
+                'jadwal_id'     => $jadwal_id, 
+                'peserta_id'    => $peserta_id
+            ])
+            ->whereHas('soal', function($query) {
+                $query->where('tipe_soal','=', '3');
+            })
+            ->count();
+
+            $listening_jml = JawabanPeserta::where([
+                'jadwal_id'     => $jadwal_id, 
+                'peserta_id'    => $peserta_id
+            ])
+            ->whereHas('soal', function($query) {
+                $query->where('tipe_soal','=', '3');
+            })
+            ->count();
+            $hasil_listening = 0;
+            if($listening_jml > 0 && $listening_benar > 0) {
+                $hasil_listening = ($listening_benar/$listening_jml)*$banksoal->persen['listening'];
+            }
+
+            // Resulting Score
             $salah = JawabanPeserta::where([
                 'iscorrect'     => 0,
                 'jadwal_id'     => $jadwal_id, 
                 'peserta_id'    => $peserta_id,
             ])
             ->whereHas('soal', function($query) {
-                $query->where('tipe_soal','!=', '2');
-            })
-            ->count();
-
-            $benar = JawabanPeserta::where([
-                'iscorrect'     => 1,
-                'jadwal_id'     => $jadwal_id, 
-                'peserta_id'    => $peserta_id
-            ])
-            ->count();
-
-            $jml = JawabanPeserta::where([
-                'jadwal_id'     => $jadwal_id, 
-                'peserta_id'    => $peserta_id
-            ])
-            ->whereHas('soal', function($query) {
-                $query->where('tipe_soal','!=', '2');
+                $query->whereIn('tipe_soal',['1','3']);
             })
             ->count();
 
@@ -137,11 +174,12 @@ class UjianService
                 'peserta_id'    => $peserta_id,
             ])
             ->whereHas('soal', function($query) {
-                $query->where('tipe_soal','!=', '2');
+                $query->whereIn('tipe_soal',['1','3']);
             })
             ->count();
 
-            $hasil = ($benar/$jml)*70;
+            $benar = $pg_jml+$listening_jml;
+            $hasil = $hasil_pg+$hasil_listening;
 
             HasilUjian::create([
                 'banksoal_id'     => $banksoal_id,

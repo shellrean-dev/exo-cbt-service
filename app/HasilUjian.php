@@ -41,4 +41,9 @@ class HasilUjian extends Model
     {
         return $this->hasMany(JawabanPeserta::class,'id');
     }
+
+    public function banksoal()
+    {
+        return $this->belongsTo(Banksoal::class);
+    }
 }

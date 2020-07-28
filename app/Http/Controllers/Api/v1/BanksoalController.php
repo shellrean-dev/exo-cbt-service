@@ -56,7 +56,8 @@ class BanksoalController extends Controller
             'jumlah_soal'       => 'required|int',
             'jumlah_pilihan'    => 'required|int',
             'jumlah_soal_listening' => 'required|int',
-            'jumlah_pilihan_listening' => 'required|int'
+            'jumlah_pilihan_listening' => 'required|int',
+            'persen'            => 'required|array'
         ]);
 
         DB::beginTransaction();
@@ -76,6 +77,7 @@ class BanksoalController extends Controller
                 'jumlah_soal_esay'  => $request->jumlah_soal_esay,
                 'jumlah_soal_listening' => $request->jumlah_soal_listening,
                 'jumlah_pilihan_listening' => $request->jumlah_pilihan_listening,
+                'persen'            => $request->persen,
                 'directory_id'      => $direk->id
             ];
 
@@ -117,7 +119,8 @@ class BanksoalController extends Controller
             'jumlah_soal'       => 'required|int',
             'jumlah_pilihan'    => 'required|int',
             'jumlah_soal_listening' => 'required|int',
-            'jumlah_pilihan_listening' => 'required|int'
+            'jumlah_pilihan_listening' => 'required|int',
+            'persen'            => 'required|array'
         ]);
 
         $banksoal->kode_banksoal = $request->kode_banksoal;
@@ -130,6 +133,7 @@ class BanksoalController extends Controller
         $banksoal->jumlah_soal_esay = $request->jumlah_soal_esay;
         $banksoal->jumlah_soal_listening = $request->jumlah_soal_listening;
         $banksoal->jumlah_pilihan_listening = $request->jumlah_pilihan_listening;
+        $banksoal->persen = $request->persen;
         $banksoal->save();
 
         return SendResponse::acceptData($banksoal);

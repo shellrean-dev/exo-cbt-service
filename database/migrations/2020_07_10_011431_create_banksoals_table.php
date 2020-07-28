@@ -21,6 +21,7 @@ class CreateBanksoalsTable extends Migration
             $table->integer('jumlah_soal_listening')->default(0)->comment('jumlah soal listening');
             $table->integer('jumlah_pilihan_listening')->default(4)->comment('jumlah opsi listening');
             $table->integer('jumlah_soal_esay')->default('0')->nullable();
+            $table->string('persen');
             $table->unsignedBigInteger('matpel_id');
             $table->unsignedBigInteger('author');
             $table->unsignedBigInteger('directory_id');

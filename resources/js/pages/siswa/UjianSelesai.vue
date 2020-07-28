@@ -7,7 +7,7 @@
 						<h2 class="ml-auto">Tes Selesai</h2>
                     </div>
 					<div class="card-body">
-                        <div v-if="typeof setting.text != 'undefined' && setting.text.finish != null" v-html="setting.text.finish">
+                        <div v-if="typeof setting.text != 'undefined' && setting.text.finish != null && setting.text.finish != ''" v-html="setting.text.finish">
                             
                         </div>
 						<p v-else>

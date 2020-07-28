@@ -12,6 +12,7 @@ use App\JawabanPeserta;
 use App\UjianAktif;
 use App\SiswaUjian;
 use App\HasilUjian;
+use App\Banksoal;
 use App\Peserta;
 use App\Jadwal;
 use App\Token;
@@ -196,7 +197,6 @@ class UjianAktifController extends Controller
                 'jadwal_id'     => $ujian_id, 
                 'peserta_id'    => $peserta->id
             ])->first();
-
             $finished = UjianService::finishingUjian($jawaban->banksoal_id, $ujian_id, $peserta->id);
             if(!$finished['success']) {
                 return SendResponse::badRequest($finished['message']);

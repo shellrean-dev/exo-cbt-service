@@ -20,6 +20,10 @@ class Banksoal extends Model
         'inputed','koreksi'
     ];
 
+    protected $casts = [
+        'persen'        => 'array'
+    ];
+
     /**
      * [$hidden description]
      * @var [type]

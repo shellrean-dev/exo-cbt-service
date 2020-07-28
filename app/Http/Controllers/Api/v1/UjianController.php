@@ -295,13 +295,17 @@ class UjianController extends Controller
                     'peserta_id'    => $same->peserta_id,
                 ])->first();
 
-                $jmlh = $same->banksoal->jumlah_soal;
+                // Check total question
+                $pg_jmlh = $same->banksoal->jumlah_soal;
+                $listening_jmlh = $same->banksoal->jumlah_soal_listening;
                 $jml_esay =  $same->banksoal->jumlah_soal_esay;
 
                 if($hasil->jumlah_benar == 0) {
                     $hasil_ganda = 0;
                 } else {
-                    $hasil_ganda = ($hasil->jumlah_benar/$jmlh);
+                    $persen = $same->banksoal->persen['pilihan_ganda'] + $same->banksoal->persen['listening'];
+                    $jmlh = $pg_jmlh+$listening_jmlh;
+                    $hasil_ganda = ($hasil->jumlah_benar/$jmlh)*$persen;
                 }
 
                 if($request->val != 0) {
@@ -310,11 +314,8 @@ class UjianController extends Controller
                     $hasil_esay = $hasil->point_esay;
                 }
                 
-                if($jml_esay != 0) {
-                    $hasil_val = ($hasil_ganda*70)+(($hasil_esay)*30);
-                } else {
-                    $hasil_val = $hasil_ganda*100;   
-                }
+                $hasil_val = ($hasil_ganda)+($hasil_esay*$same->banksoal->persen['esay']);
+
                 $hasil->point_esay = $hasil_esay;
                 $hasil->hasil = $hasil_val;
                 $hasil->save();
@@ -337,21 +338,26 @@ class UjianController extends Controller
             'peserta_id'    => $jawab->peserta_id
         ])->first();
 
-        $jmlh = $jawab->banksoal->jumlah_soal;
-        $jml_esay =  $jawab->banksoal->jumlah_soal_esay;
+        // Check total question
+        $pg_jmlh = $same->banksoal->jumlah_soal;
+        $listening_jmlh = $same->banksoal->jumlah_soal_listening;
+        $jml_esay =  $same->banksoal->jumlah_soal_esay;
 
         if($hasil->jumlah_benar == 0) {
             $hasil_ganda = 0;
         } else {
-            $hasil_ganda = ($hasil->jumlah_benar/$jmlh);
+            $persen = $same->banksoal->persen['pilihan_ganda'] + $same->banksoal->persen['listening'];
+            $jmlh = $pg_jmlh+$listening_jmlh;
+            $hasil_ganda = ($hasil->jumlah_benar/$jmlh)*$persen;
         }
 
-        $hasil_esay = $hasil->point_esay + ($request->val/$jml_esay);
-        if($jml_esay != 0) {
-            $hasil_val = ($hasil_ganda*70)+(($hasil_esay)*30);
+        if($request->val != 0) {
+            $hasil_esay = $hasil->point_esay + ($request->val/$jml_esay);
         } else {
-            $hasil_val = $hasil_ganda*100;   
+            $hasil_esay = $hasil->point_esay;
         }
+        $hasil_val = ($hasil_ganda)+($hasil_esay*$same->banksoal->persen['esay']);
+
         $hasil->point_esay = $hasil_esay;
         $hasil->hasil = $hasil_val;
         $hasil->save();

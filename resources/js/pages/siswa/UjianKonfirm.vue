@@ -26,13 +26,13 @@
                                 <template v-if="jadwal && jadwal.length > 0">
                                     <div class="form-group">
                                         <label>Jadwal ujian</label>
-                                        <select class="form-control" v-model="data.jadwal_id" @change="checkToken" required>
+                                        <select class="form-control" v-model="data.jadwal_id" @change="checkToken()" required>
                                             <option :value="jad.id" v-for="jad in jadwal" :key="jad.id">
                                                 {{ jad.alias }}
                                             </option>
                                         </select>
                                     </div>
-                                    <div class="form-group" v-if="">
+                                    <div class="form-group" v-if="active_token">
                                         <label>Token</label>
                                         <input type="text" class="form-control" placeholder="Masukkan token" autofocus="" v-model="data.token" required>
                                     </div>

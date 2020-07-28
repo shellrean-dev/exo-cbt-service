@@ -18,6 +18,16 @@ use Illuminate\Support\Facades\Route;
  * @version 1
  * api response for v1
  */
+Route::get('check-query', function() {
+    $hasil = \App\HasilUjian::with('banksoal')
+                ->where([
+                    'banksoal_id'   => '1',
+                    'jadwal_id'     => '1',
+                    'peserta_id'    => '1',
+                ])->first()->toSql();
+
+                return $hasil;
+});
 
 Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
     Route::post('login', 'AuthController@login');

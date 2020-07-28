@@ -26,8 +26,7 @@ class UjianAktifController extends Controller
     public function startUjian(Request $request) 
     {
         $request->validate([
-            'jadwal_id'     => 'required|exists:jadwals,id',
-            'token'         => 'required'
+            'jadwal_id'     => 'required|exists:jadwals,id'
         ]);
 
         $ujian = Jadwal::find($request->jadwal_id);
