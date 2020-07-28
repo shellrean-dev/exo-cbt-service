@@ -31,21 +31,23 @@ class UjianAktifController extends Controller
         ]);
 
         $ujian = Jadwal::find($request->jadwal_id);
-        $token = Token::orderBy('id')->first();
-        if($token) {
-            $to = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', now());
-            $from = $token->updated_at->format('Y-m-d H:i:s');
-            $differ = $to->diffInSeconds($from);
-            if($differ > 900) {
-                $token->token = strtoupper(Str::random(6));
-                $token->status = '0';
-                $token->save();
-            }
-            if($token->token != $request->token) {
-                return SendResponse::badRequest('Token tidak sesuai');
-            }
-            if($token->status == 0) {
-                return SendResponse::badRequest('Status token belum dirilis');
+        if($ujian->setting['token'] == "1") {  
+            $token = Token::orderBy('id')->first();
+            if($token) {
+                $to = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', now());
+                $from = $token->updated_at->format('Y-m-d H:i:s');
+                $differ = $to->diffInSeconds($from);
+                if($differ > 900) {
+                    $token->token = strtoupper(Str::random(6));
+                    $token->status = '0';
+                    $token->save();
+                }
+                if($token->token != $request->token) {
+                    return SendResponse::badRequest('Token tidak sesuai');
+                }
+                if($token->status == 0) {
+                    return SendResponse::badRequest('Status token belum dirilis');
+                }
             }
         }
 
@@ -149,7 +151,7 @@ class UjianAktifController extends Controller
             return SendResponse::badRequest('Anda tidak mendapat banksoal yang sesuai, silakan hubungi administrator');
         }
 
-        $jawaban_peserta = UjianService::getJawabanPeserta($jadwal->id, $peserta->id);
+        $jawaban_peserta = UjianService::getJawabanPeserta($jadwal->id, $peserta->id, $jadwal->setting['acak_opsi']);
 
         // Jika jawaban siswa belum ada di database
         if ($jawaban_peserta->count() < 1 ) {
@@ -163,7 +165,11 @@ class UjianAktifController extends Controller
             $pg = Soal::where([
                 'banksoal_id' => $banksoal->id,
                 'tipe_soal' => 1
-            ])->inRandomOrder()->take($max_pg)->get();
+            ]);
+            if($jadwal->setting['acak_soal'] == "1") {
+                $pg = $pg->inRandomOrder();
+            }
+            $pg = $pg->take($max_pg)->get();
 
             $soal_pg = $pg->map(function($item) use($peserta, $banksoal, $jadwal) {
                 return [
@@ -182,7 +188,11 @@ class UjianAktifController extends Controller
             $esay = Soal::where([
                 'banksoal_id'   => $banksoal->id,
                 'tipe_soal'     => 2
-            ])->inRandomOrder()->take($max_esay)->get();
+            ]);
+            if($jadwal->setting['acak_soal'] == "1") {
+                $esay = $esay->inRandomOrder();
+            }
+            $esay = $esay->take($max_esay)->get();
 
             $soal_esay = $esay->map(function($item) use($peserta, $banksoal, $jadwal) {
                 return [
@@ -201,7 +211,11 @@ class UjianAktifController extends Controller
             $listening = Soal::where([
                 'banksoal_id'   => $banksoal->id,
                 'tipe_soal'     => 3
-            ])->inRandomOrder()->take($max_listening)->get();
+            ]);
+            if($jadwal->setting['acak_soal'] == "1") {
+                $listening = $listening->inRandomOrder();
+            }
+            $listening = $listening->take($max_listening)->get();
 
             $soal_listening = $listening->map(function($item) use($peserta, $banksoal, $jadwal) {
                 return [
@@ -227,7 +241,7 @@ class UjianAktifController extends Controller
             DB::table('jawaban_pesertas')->insert($soals);
 
             // Get Jawaban peserta
-            $jawaban_peserta = UjianService::getJawabanPeserta($jadwal->id, $peserta->id);
+            $jawaban_peserta = UjianService::getJawabanPeserta($jadwal->id, $peserta->id, $jadwal->setting['acak_opsi']);
 
             return response()->json(['data' => $jawaban_peserta, 'detail' => $ujian_siswa]);
         }

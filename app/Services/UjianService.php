@@ -75,14 +75,14 @@ class UjianService
      * @param  [type] $peserta_id [description]
      * @return [type]             [description]
      */
-    public static function getJawabanPeserta($jadwal_id, $peserta_id)
+    public static function getJawabanPeserta($jadwal_id, $peserta_id, $acak_opsi)
     {
         $find = JawabanPeserta::with([
           'soal' => function($q) {
             $q->select('id','banksoal_id','pertanyaan','tipe_soal','audio','direction'); 
-        },'soal.jawabans' => function($q) {
+        },'soal.jawabans' => function($q) use ($acak_opsi) {
             $q->select('id','soal_id','text_jawaban');
-            if(true) {
+            if($acak_opsi == "1") {
                 $q->inRandomOrder();
             }
         }

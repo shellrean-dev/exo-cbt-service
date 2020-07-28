@@ -21,8 +21,9 @@ class CreateJadwalsTable extends Migration
             $table->time('mulai');
             $table->integer('lama');
             $table->char('status_ujian',1);
-            $table->unsignedBigInteger('event_id');
+            $table->unsignedBigInteger('event_id')->default(0);
             $table->integer('sesi')->default(1);
+            $table->string('setting');
             $table->timestamps();
         });
     }

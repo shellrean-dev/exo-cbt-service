@@ -44,7 +44,7 @@ class PesertaLoginController extends Controller
             return response()
             ->json([
                 'status'    => 'success', 
-                'data'      => $peserta,
+                'data'      => $peserta->only('nama','no_ujian','sesi'),
                 'token'     => $token
             ],200);
         }       

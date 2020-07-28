@@ -49,6 +49,9 @@ class UjianController extends Controller
             'tanggal'           => 'required',
             'mulai'             => 'required',
             'lama'              => 'required|int',
+            'alias'             => 'required',
+            'banksoal_id'       => 'required|array',
+            'setting'           => 'required|array'
         ]);
 
         $data = [
@@ -57,7 +60,8 @@ class UjianController extends Controller
             'tanggal'           => date('Y-m-d',strtotime($request->tanggal)),
             'status_ujian'      => 0,
             'alias'             => $request->alias,
-            'event_id'          => $request->event_id
+            'event_id'          => $request->event_id,
+            'setting'           => $request->setting
         ];
 
         if($request->banksoal_id != '') {
@@ -93,9 +97,9 @@ class UjianController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Jadwal $ujian)
     {
-        //
+        return SendResponse::acceptData($ujian);
     }
 
     /**
@@ -105,9 +109,42 @@ class UjianController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Jadwal $ujian)
     {
-        //
+        $request->validate([
+            'tanggal'       => 'required',
+            'mulai'         => 'required',
+            'lama'          => 'required',
+            'alias'         => 'required',
+            'banksoal_id'       => 'required|array',
+            'setting'           => 'required|array'
+        ]);
+
+        $data = [
+            'mulai'         => date('H:i:s', strtotime($request->mulai)),
+            'lama'          => $request->lama*60,
+            'tanggal'       => date('Y-m-d', strtotime($request->tanggal)),
+            'alias'         => $request->alias,
+            'event_id'      => $request->event_id,
+            'setting'           => $request->setting
+        ];
+
+        if($request->banksoal_id != '') {
+            $fill = array();
+            foreach ($request->banksoal_id as $banksoal) {
+                $fush = [
+                    'id'        => $banksoal['id'],
+                    'jurusan'   => $banksoal['matpel']['jurusan_id']
+                ];
+                array_push($fill, $fush);
+            }
+
+            $data['banksoal_id'] = $fill;
+        }
+
+        $ujian->update($data);
+
+        return SendResponse::accept();
     }
 
     /**

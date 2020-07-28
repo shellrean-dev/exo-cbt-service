@@ -8,7 +8,7 @@
 							<h4>Konfirmasi data peserta</h4>
 						</div>
                         <div class="card-body" >
-                            <div class="alert alert-primary" v-if="typeof setting.text != 'undefined' && setting.text.welcome != null" v-html="setting.text.welcome">
+                            <div class="alert alert-primary" v-if="typeof setting.text != 'undefined' && setting.text.welcome != null && setting.text.welcome != ''" v-html="setting.text.welcome">
                             </div>
                             <form @submit.prevent="ujianStart" class="form-custom">
                                 <div class="form-group">
@@ -26,13 +26,13 @@
                                 <template v-if="jadwal && jadwal.length > 0">
                                     <div class="form-group">
                                         <label>Jadwal ujian</label>
-                                        <select class="form-control" v-model="data.jadwal_id" required>
+                                        <select class="form-control" v-model="data.jadwal_id" @change="checkToken" required>
                                             <option :value="jad.id" v-for="jad in jadwal" :key="jad.id">
                                                 {{ jad.alias }}
                                             </option>
                                         </select>
                                     </div>
-                                    <div class="form-group">
+                                    <div class="form-group" v-if="">
                                         <label>Token</label>
                                         <input type="text" class="form-control" placeholder="Masukkan token" autofocus="" v-model="data.token" required>
                                     </div>
@@ -68,7 +68,8 @@
             data: {
                 jadwal_id: '',
                 token: ''
-            }
+            },
+            active_token: true
 	      } 
 	    },
 	    computed: {
@@ -93,6 +94,16 @@
                 this.$router.replace({ name: 'ujian.prepare' })
             } catch (error) {
                 this.$bvToast.toast(error.message, errorToas())
+            }
+          },
+          checkToken() {
+            let jadwal = this.jadwal.find(x => x.id == this.data.jadwal_id)
+            if(jadwal) {
+                if(jadwal.setting.token == "1") {
+                    this.active_token =  true
+                } else {
+                    this.active_token = false
+                }
             }
           }
 	    }
