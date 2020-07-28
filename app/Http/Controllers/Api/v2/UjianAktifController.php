@@ -157,6 +157,7 @@ class UjianAktifController extends Controller
             $banksoal = Banksoal::find($banksoal_id);
             $max_pg = $banksoal->jumlah_soal;
             $max_esay = $banksoal->jumlah_soal_esay;
+            $max_listening = $banksoal->jumlah_soal_listening;
 
             // Soal Pilihan Ganda
             $pg = Soal::where([
@@ -196,8 +197,31 @@ class UjianAktifController extends Controller
                 ];
             });
 
-            // Merges
-            $soals = array_merge($soal_pg->values()->toArray(), $soal_esay->values()->toArray());
+            // Soal Listening
+            $listening = Soal::where([
+                'banksoal_id'   => $banksoal->id,
+                'tipe_soal'     => 3
+            ])->inRandomOrder()->take($max_listening)->get();
+
+            $soal_listening = $listening->map(function($item) use($peserta, $banksoal, $jadwal) {
+                return [
+                    'peserta_id'    => $peserta->id,
+                    'banksoal_id'   => $banksoal->id,
+                    'soal_id'       => $item->id,
+                    'jawab'         => 0,
+                    'iscorrect'     => 0,
+                    'jadwal_id'     => $jadwal->id,
+                    'ragu_ragu'     => 0,
+                    'esay'          => ''
+                ];
+            });
+
+            // Merges dengan urutan
+            $soals = array_merge(
+                $soal_listening->values()->toArray(),
+                $soal_pg->values()->toArray(), 
+                $soal_esay->values()->toArray()
+            );
 
             // Insert
             DB::table('jawaban_pesertas')->insert($soals);
