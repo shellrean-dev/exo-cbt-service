@@ -300,13 +300,15 @@ class UjianController extends Controller
                 $listening_jmlh = $same->banksoal->jumlah_soal_listening;
                 $jml_esay =  $same->banksoal->jumlah_soal_esay;
 
-                if($hasil->jumlah_benar == 0) {
-                    $hasil_ganda = 0;
-                } else {
-                    $persen = $same->banksoal->persen['pilihan_ganda'] + $same->banksoal->persen['listening'];
-                    $jmlh = $pg_jmlh+$listening_jmlh;
-                    $hasil_ganda = ($hasil->jumlah_benar/$jmlh)*$persen;
+                $hasil_listening = 0;
+                if($hasil->jumlah_benar_listening > 0) {
+                    $hasil_listening = ($hasil->jumlah_benar_listening/$listening_jmlh)*$same->banksoal->persen['listening'];
                 }
+                $hasil_pg = 0;
+                if($hasil->jumlah_benar > 0) {
+                    $hasil_pg = ($hasil->jumlah_benar/$pg_jmlh)*$same->banksoal->persen['pilihan_ganda'];
+                }
+                $hasil_ganda = $hasil_listening+$hasil_pg;
 
                 if($request->val != 0) {
                     $hasil_esay = $hasil->point_esay + ($request->val/$jml_esay);
@@ -339,24 +341,26 @@ class UjianController extends Controller
         ])->first();
 
         // Check total question
-        $pg_jmlh = $same->banksoal->jumlah_soal;
-        $listening_jmlh = $same->banksoal->jumlah_soal_listening;
-        $jml_esay =  $same->banksoal->jumlah_soal_esay;
+        $pg_jmlh = $jawab->banksoal->jumlah_soal;
+        $listening_jmlh = $jawab->banksoal->jumlah_soal_listening;
+        $jml_esay =  $jawab->banksoal->jumlah_soal_esay;
 
-        if($hasil->jumlah_benar == 0) {
-            $hasil_ganda = 0;
-        } else {
-            $persen = $same->banksoal->persen['pilihan_ganda'] + $same->banksoal->persen['listening'];
-            $jmlh = $pg_jmlh+$listening_jmlh;
-            $hasil_ganda = ($hasil->jumlah_benar/$jmlh)*$persen;
+        $hasil_listening = 0;
+        if($hasil->jumlah_benar_listening > 0) {
+            $hasil_listening = ($hasil->jumlah_benar_listening/$listening_jmlh)*$jawab->banksoal->persen['listening'];
         }
+        $hasil_pg = 0;
+        if($hasil->jumlah_benar > 0) {
+            $hasil_pg = ($hasil->jumlah_benar/$pg_jmlh)*$jawab->banksoal->persen['pilihan_ganda'];
+        }
+        $hasil_ganda = $hasil_listening+$hasil_pg;
 
         if($request->val != 0) {
             $hasil_esay = $hasil->point_esay + ($request->val/$jml_esay);
         } else {
             $hasil_esay = $hasil->point_esay;
         }
-        $hasil_val = ($hasil_ganda)+($hasil_esay*$same->banksoal->persen['esay']);
+        $hasil_val = ($hasil_ganda)+($hasil_esay*$jawab->banksoal->persen['esay']);
 
         $hasil->point_esay = $hasil_esay;
         $hasil->hasil = $hasil_val;

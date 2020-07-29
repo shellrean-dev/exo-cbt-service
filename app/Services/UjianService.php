@@ -119,6 +119,15 @@ class UjianService
                 $query->where('tipe_soal','=', '1');
             })
             ->count();
+            $pg_salah = JawabanPeserta::where([
+                'iscorrect'     => 0,
+                'jadwal_id'     => $jadwal_id, 
+                'peserta_id'    => $peserta_id,
+            ])
+            ->whereHas('soal', function($query) {
+                $query->where('tipe_soal','1');
+            })
+            ->count();
 
             $pg_jml = JawabanPeserta::where([
                 'jadwal_id'     => $jadwal_id, 
@@ -143,6 +152,15 @@ class UjianService
                 $query->where('tipe_soal','=', '3');
             })
             ->count();
+            $listening_salah = JawabanPeserta::where([
+                'iscorrect'     => 0,
+                'jadwal_id'     => $jadwal_id, 
+                'peserta_id'    => $peserta_id,
+            ])
+            ->whereHas('soal', function($query) {
+                $query->where('tipe_soal','3');
+            })
+            ->count();
 
             $listening_jml = JawabanPeserta::where([
                 'jadwal_id'     => $jadwal_id, 
@@ -158,16 +176,6 @@ class UjianService
             }
 
             // Resulting Score
-            $salah = JawabanPeserta::where([
-                'iscorrect'     => 0,
-                'jadwal_id'     => $jadwal_id, 
-                'peserta_id'    => $peserta_id,
-            ])
-            ->whereHas('soal', function($query) {
-                $query->whereIn('tipe_soal',['1','3']);
-            })
-            ->count();
-
             $null = JawabanPeserta::where([
                 'jawab'     => 0,
                 'jadwal_id'     => $jadwal_id, 
@@ -177,16 +185,16 @@ class UjianService
                 $query->whereIn('tipe_soal',['1','3']);
             })
             ->count();
-
-            $benar = $pg_jml+$listening_jml;
             $hasil = $hasil_pg+$hasil_listening;
 
             HasilUjian::create([
                 'banksoal_id'     => $banksoal_id,
                 'peserta_id'      => $peserta_id,
                 'jadwal_id'       => $jadwal_id,
-                'jumlah_salah'    => $salah,
-                'jumlah_benar'    => $benar,
+                'jumlah_salah'    => $pg_salah,
+                'jumlah_benar'    => $pg_benar,
+                'jumlah_benar_listening' => $listening_benar,
+                'jumlah_salah_listening' => $listening_salah,
                 'tidak_diisi'     => $null,
                 'hasil'           => $hasil,
                 'point_esay'      => 0

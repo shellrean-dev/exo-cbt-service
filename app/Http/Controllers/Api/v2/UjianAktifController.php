@@ -230,13 +230,20 @@ class UjianAktifController extends Controller
             });
 
             // Merges dengan urutan
-            $soals = array_merge(
-                $soal_listening->values()->toArray(),
-                $soal_pg->values()->toArray(), 
-                $soal_esay->values()->toArray()
-            );
+            $soals = [];
+            $list = collect([
+                '1' => $soal_pg->values()->toArray(),
+                '2' => $soal_esay->values()->toArray(),
+                '3' => $soal_listening->values()->toArray()
+            ]);
+            foreach ($jadwal->setting['list'] as $value) {
+                $soal = $list->get($value['id']);
+                if($soal) {
+                    $soals = array_merge($soals, $soal);
+                }
+            }
 
-            // Insert
+            // // Insert
             DB::table('jawaban_pesertas')->insert($soals);
 
             // Get Jawaban peserta
