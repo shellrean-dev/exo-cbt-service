@@ -18,18 +18,7 @@ use Illuminate\Support\Facades\Route;
  * @version 1
  * api response for v1
  */
-Route::get('check-query', function() {
-    $hasil = \App\HasilUjian::with('banksoal')
-                ->where([
-                    'banksoal_id'   => '1',
-                    'jadwal_id'     => '1',
-                    'peserta_id'    => '1',
-                ])->first()->toSql();
-
-                return $hasil;
-});
-
-Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
+    Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
     Route::post('login', 'AuthController@login');
     Route::get('login/oauth', 'AuthController@oauth');
     Route::get('login/sso', 'AuthController@sso');
@@ -103,6 +92,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('ujians/all', 'UjianController@allData');
         Route::get('ujians/active-status', 'UjianController@getActive');
         Route::post('ujians/set-status', 'UjianController@setStatus');
+        Route::get('ujians/hasil/{hasil}', 'UjianController@getHasilUjianDetail');
         Route::apiResource('ujians', 'UjianController');
 
         Route::get('events/all', 'EventController@allData');

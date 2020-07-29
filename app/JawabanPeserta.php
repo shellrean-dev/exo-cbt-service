@@ -76,4 +76,13 @@ class JawabanPeserta extends Model
     {   
         return $this->belongsTo(Banksoal::class);
     }
+
+    /**
+     * [esay_result description]
+     * @return [type] [description]
+     */
+    public function esay_result()
+    {
+        return $this->hasOne(JawabanEsay::class,'jawab_id');
+    }
 }

@@ -500,4 +500,16 @@ class UjianController extends Controller
 
         return Excel::download($export, 'capaian_siswa_'.$banksoal->kode_banksoal.'.xlsx');
     }
+
+    public function getHasilUjianDetail(HasilUjian $hasil) 
+    {
+        $jawaban = JawabanPeserta::with(['esay_result','soal','soal.jawabans'])
+        ->where([
+            'peserta_id'    => $hasil->peserta_id,
+            'jadwal_id'     => $hasil->jadwal_id
+        ])
+        ->get();
+
+        return SendResponse::acceptData($jawaban);
+    }
 }
