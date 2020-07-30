@@ -340,7 +340,7 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("div", { staticClass: "nav-fixed-bottom" }, [
       _c("p", { staticClass: "text-center" }, [
-        _vm._v("© ExtraordinaryCBT 2020 v1.0.11 by Shellrean")
+        _vm._v("© ExtraordinaryCBT 2020 v1.1.0 by Shellrean")
       ])
     ])
   }

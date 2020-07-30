@@ -51,7 +51,7 @@
 			</div>
         </div>
         <div class="nav-fixed-bottom">
-        <p class="text-center">&copy; ExtraordinaryCBT 2020 v1.2.0 by Shellrean</p>
+        <p class="text-center">&copy; ExtraordinaryCBT 2020 v1.1.0 by Shellrean</p>
       </div>
     </div>
 </div>
