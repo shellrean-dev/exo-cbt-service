@@ -81,10 +81,13 @@ class UjianAktifController extends Controller
     public function getUjianPesertaAktif()
     {
         $peserta = request()->get('peserta-auth');
+        $jadwals = Jadwal::where('status_ujian',1)->get();
+        $jadwal_ids = $jadwals->pluck('id')->toArray();
 
-        $data = SiswaUjian::where(function($query) use($peserta) {
+        $data = SiswaUjian::where(function($query) use($peserta, $jadwal_ids) {
             $query->where('peserta_id', $peserta->id)
-            ->where('status_ujian','=',0);
+            ->where('status_ujian','=',0)
+            ->whereIn('jadwal_id', $jadwal_ids);
         })->first();
         if(!$data) {
             $data = [];
@@ -133,7 +136,7 @@ class UjianAktifController extends Controller
         if(!$jadwal) {
             return SendResponse::badRequest('Anda memasuki ujian ini secara ilegal');
         }
-        
+
         $banksoal_ids = array_column($jadwal->banksoal_id, 'jurusan','id');
         $banksoal_ids = collect($banksoal_ids)->keys();
 
