@@ -130,6 +130,10 @@ class UjianAktifController extends Controller
 
         // Ambil id banksoal yang terkait dalam jadwal
         $jadwal = Jadwal::find($ujian_siswa->jadwal_id);
+        if(!$jadwal) {
+            return SendResponse::badRequest('Anda memasuki ujian ini secara ilegal');
+        }
+        
         $banksoal_ids = array_column($jadwal->banksoal_id, 'jurusan','id');
         $banksoal_ids = collect($banksoal_ids)->keys();
 
