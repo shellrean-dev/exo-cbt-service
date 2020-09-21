@@ -7,50 +7,44 @@ use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-
-use Auth;
+use App\Setting;
 use App\Peserta;
-use App\UjianAktif;
-use Illuminate\Support\Facades\Validator;
 
 class PesertaLoginController extends Controller
 {
-
+    /**
+     * [login description]
+     * @param  Request $request [description]
+     * @return [type]           [description]
+     */
     public function login(Request $request)
     {
+        $setting = Setting::where('name','ujian')->first();
 
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'no_ujian'      => 'required|exists:pesertas,no_ujian',
             'password'      => 'required'
         ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors'=>$validator->errors()],422);
-        }
 
         $peserta = Peserta::where([
             'no_ujian' => $request->no_ujian,
             'password' => $request->password
         ])->first();
-        $aktif = UjianAktif::first();
-        
-        if(!$aktif) {
-            return response()->json(['status' => 'Ujian has not been set']);
-        }
 
         if($peserta) {
-            if($peserta->api_token != '') {
-                return response()->json(['status' => 'loggedin']);
-            }
-            if($aktif->kelompok != $peserta->sesi) {
-                return response()->json(['status' => 'non-sesi']);
+            if(isset($setting->value['reset']) 
+                && $setting->value['reset'] 
+                && $peserta->api_token != '') {
+                    return response()->json([
+                        'status'    => 'loggedin'
+                    ], 200);
             }
             $token = Str::random(128);
             $peserta->update(['api_token' => $token]);
             return response()
             ->json([
                 'status'    => 'success', 
-                'data'      => $peserta,
+                'data'      => $peserta->only('nama','no_ujian','sesi'),
                 'token'     => $token
             ],200);
         }       
@@ -58,6 +52,10 @@ class PesertaLoginController extends Controller
         return response()->json(['status' => 'error']); 
     }
 
+    /**
+     * [logout description]
+     * @return [type] [description]
+     */
     public function logout() 
     {
         $user = request()->get('peserta-auth');
@@ -69,9 +67,30 @@ class PesertaLoginController extends Controller
         return response()->json(['status' => 'success']);
     }
 
+    /**
+     * [authenticated description]
+     * @return [type] [description]
+     */
     public function authenticated()
     {
         $peserta = request()->get('peserta-auth')->only('nama','no_ujian','sesi');
         return ['data' => $peserta];
+    }
+
+    public function getSetting()
+    {
+        $sekolah = Setting::where('name','set_sekolah')->first();
+        $ujian = Setting::where('name','ujian')->first();
+        $return = [
+            'sekolah'   => [
+                'logo' => isset($sekolah->value) ? $sekolah->value['logo'] : '',
+                'nama' => isset($sekolah->value) ? $sekolah->value['nama_sekolah'] : ''
+            ],
+            'text' => [
+                'welcome' => isset($ujian->value) ? $ujian->value['text_welcome'] : '',
+                'finish'  => isset($ujian->value) ? $ujian->value['text_finish'] : ''
+            ]
+        ];
+        return response()->json(['data' => $return]);
     }
 }

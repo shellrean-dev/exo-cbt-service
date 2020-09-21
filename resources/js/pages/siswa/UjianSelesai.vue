@@ -7,7 +7,10 @@
 						<h2 class="ml-auto">Tes Selesai</h2>
                     </div>
 					<div class="card-body">
-						<p>
+                        <div v-if="typeof setting.text != 'undefined' && setting.text.finish != null && setting.text.finish != ''" v-html="setting.text.finish">
+                            
+                        </div>
+						<p v-else>
 						Anda telah selesai mengerjakan ujian ini. <br>
                         Terimakasih, prestasi penting jujur yang utama</p>
                         <br><br>
@@ -24,7 +27,7 @@ import { successToas, errorToas} from '../../entities/notif'
 
 export default {
     computed: {
-        ...mapGetters(['isLoading']),
+        ...mapGetters(['isLoading','setting']),
     },
 	methods: {
       ...mapActions('siswa_auth',['logoutPeserta']),

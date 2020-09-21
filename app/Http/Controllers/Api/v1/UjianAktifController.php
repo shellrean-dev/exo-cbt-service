@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use App\Services\UjianService;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -11,7 +12,10 @@ use App\JawabanPeserta;
 use App\UjianAktif;
 use App\SiswaUjian;
 use App\HasilUjian;
+use App\Banksoal;
 use App\Peserta;
+use App\Jadwal;
+use App\Token;
 
 class UjianAktifController extends Controller
 {
@@ -84,18 +88,13 @@ class UjianAktifController extends Controller
      */
     public function releaseToken(Request $request) 
     {
-        $ujian = UjianAktif::first();
-        if($ujian) {
-            $ujian->token = $request->token;
-            $ujian->status_token = 1;
-            $ujian->save();
-
-        } else {
-            UjianAktif::create([
-                'token'  => $request->token,
-            ]);
+        $token = Token::orderBy('id')->first();
+        if($token) {
+            $token->status = '1';
+            $token->save();
+            
+            return SendResponse::accept();
         }
-        return SendResponse::accept();
     }
 
     /**
@@ -119,13 +118,10 @@ class UjianAktifController extends Controller
      * [getPesertas description]
      * @return [type] [description]
      */
-    public function getPesertas()
+    public function getPesertas(Jadwal $jadwal)
     {
-        $ujian = UjianAktif::first();
-        if($ujian) {
-            $siswa = SiswaUjian::with('peserta')->where(['jadwal_id' => $ujian->ujian_id])->get();
-            return SendResponse::acceptData($siswa);
-        }
+        $siswa = SiswaUjian::with('peserta')->where(['jadwal_id' => $jadwal->id])->get();
+        return SendResponse::acceptData($siswa);
     }
 
     /**
@@ -147,9 +143,9 @@ class UjianAktifController extends Controller
      * @param  Peserta $peserta [description]
      * @return [type]           [description]
      */
-    public function resetUjianPeserta(Request $request, Peserta $peserta)
+    public function resetUjianPeserta(Jadwal $jadwal, Peserta $peserta)
     {
-        $aktif = UjianAktif::first()->ujian_id;
+        $aktif = $jadwal->id;
         DB::beginTransaction();
 
         try {
@@ -180,58 +176,39 @@ class UjianAktifController extends Controller
      * @param  Peserta $peserta [description]
      * @return [type]           [description]
      */
-    public function closePeserta(Request $request, Peserta $peserta)
+    public function closePeserta(Jadwal $jadwal, Peserta $peserta)
     {
-        $aktif = UjianAktif::first();
+        $ujian_id = $jadwal->id;
 
         DB::beginTransaction();
 
         try {
+
+            $hasilUjian = HasilUjian::where([
+                'peserta_id'    => $peserta->id,
+                'jadwal_id'     => $ujian_id,
+            ])->first();
+
+            if($hasilUjian) { 
+                return SendResponse::accept();
+            }
+
+            $jawaban = JawabanPeserta::where([
+                'jadwal_id'     => $ujian_id, 
+                'peserta_id'    => $peserta->id
+            ])->first();
+            $finished = UjianService::finishingUjian($jawaban->banksoal_id, $ujian_id, $peserta->id);
+            if(!$finished['success']) {
+                return SendResponse::badRequest($finished['message']);
+            }
+
             $ujian = SiswaUjian::where([
-                'jadwal_id'     => $aktif->ujian_id, 
+                'jadwal_id'     => $ujian_id, 
                 'peserta_id'    => $peserta->id
             ])->first();
 
             $ujian->status_ujian = 1;
             $ujian->save();
-
-            $banksoal = JawabanPeserta::where([
-                'jadwal_id'     => $aktif->ujian_id, 
-                'peserta_id'    => $peserta->id
-            ])->first();
-
-            $salah = JawabanPeserta::where([
-                'iscorrect'     => 0,
-                'jadwal_id'     => $aktif->ujian_id, 
-                'peserta_id'    => $peserta->id,
-                'esay'    => null
-            ])->get()->count();
-
-            $benar = JawabanPeserta::where([
-                'iscorrect'     => 1,
-                'jadwal_id'     => $aktif->ujian_id, 
-                'peserta_id'    => $peserta->id
-            ])->get()->count();
-            
-            $jml = JawabanPeserta::where([
-                'jadwal_id'     => $aktif->ujian_id, 
-                'peserta_id'    => $peserta->id
-            ])->get()->count();
-
-            $hasil = ($benar/$jml)*100;
-
-            HasilUjian::create([
-                'banksoal_id'     => $banksoal->id,
-                'peserta_id'      => $peserta->id,
-                'jadwal_id'       => $aktif->ujian_id,
-                'jumlah_salah'    => $salah,
-                'jumlah_benar'    => $benar,
-                'tidak_diisi'     => 0,
-                'hasil'           => $hasil,
-                'point_esay'      => 0.0,
-                'jawaban_peserta' => ''
-            ]);
-
             $peserta->api_token = '';
             $peserta->save();
 
@@ -241,5 +218,50 @@ class UjianAktifController extends Controller
             return SendResponse::badRequest($e->getMessage());
         }
         return SendResponse::accept();
+    }
+
+    /**
+     * [changeSesi description]
+     * @param  Request $request [description]
+     * @param  Jadwal  $jadwal  [description]
+     * @return [type]           [description]
+     */
+    public function changeSesi(Request $request, Jadwal $jadwal )
+    {
+        $request->validate([
+            'sesi'      => 'required'
+        ]);
+
+        $jadwal->sesi = $request->sesi;
+        $jadwal->save();
+
+        return SendResponse::accept();
+    }
+
+    /**
+     * [getToken description]
+     * @return [type] [description]
+     */
+    public function getToken()
+    {
+        $token = Token::orderBy('id')->first();
+
+        if($token) {
+            $to = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', now());
+            $from = $token->updated_at->format('Y-m-d H:i:s');
+            $differ = $to->diffInSeconds($from);
+            if($differ > 900) {
+                $token->token = strtoupper(Str::random(6));
+                $token->status = '0';
+                $token->save();
+            }
+
+            return SendResponse::acceptData($token);
+        }
+        $token = Token::create([
+            'token'     => strtoupper(Str::random(6)),
+            'status'    => 0,
+        ]);
+        return SendResponse::acceptData($token);
     }
 }

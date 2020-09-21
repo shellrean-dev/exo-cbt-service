@@ -5,40 +5,51 @@
 				<div class="page-inner mt--5">
 					<div class="card">
 						<div class="card-header">
-							<h4>Konfirmasi Data Peserta</h4>
+							<h4>Konfirmasi data peserta</h4>
 						</div>
-						<div class="card-body">
-							<form id="fmToken" name="fmToken" @submit.prevent="cekToken" class="form-custom form-ajax">
-								<div class="form-group">
-									<label for="nisn">NO UJIAN</label>
-									<p class="form-control-static" v-text="peserta.no_ujian"></p>
-								</div>
-								<div class="form-group">
-									<label for="nama">Nama Peserta</label>
-									<p class="form-control-static" v-text="peserta.nama"></p>
-								</div>
-                                <template v-if="jadwal && ujian">
-    								<div class="form-group">
-    									<label for="nm_uji">Mata Ujian</label>
-    									<p class="form-control-static" v-if="typeof jadwal.matpel != 'undefined'" v-text="jadwal.matpel"></p>
-    									<p class="form-control-static" v-if="typeof jadwal.matpel == 'undefined'">Tidak ada jadwal ujian pada hari ini</p>
-    									<span class="line"></span>
-    								</div>
-    								<div class="form-group" v-if="typeof jadwal.matpel != 'undefined' && typeof ujian.status_ujian != 'undefined' && ujian.status_ujian != '1'">
-    									<label for="token">Token</label>
-    									<input type="text" class="form-control" autofocus="" placeholder="Masukkan token" v-model="token_ujian">
-    									<span class="line"></span>
-    									<small class="text-danger" v-if="invalidToken.token">Token tidak sesuai</small>
-    									<small class="text-danger" v-if="invalidToken.release">Status token belum dirilis</small>
-    								</div>
-    								<div class="form-group" v-if="typeof jadwal.matpel != 'undefined' && typeof ujian.status_ujian != 'undefined' && ujian.status_ujian != '1'">
-    									<b-button variant="info" type="submit" block :disabled="isLoading">
-    										{{ isLoading ? 'Processing...' : 'Submit' }}
-    									</b-button>
-    								</div>
+                        <div class="card-body" >
+                            <div class="alert alert-primary" v-if="typeof setting.text != 'undefined' && setting.text.welcome != null && setting.text.welcome != ''" v-html="setting.text.welcome">
+                            </div>
+                            <form @submit.prevent="ujianStart" class="form-custom">
+                                <div class="form-group">
+                                    <label for="nisn">NO UJIAN</label>
+                                    <p class="form-control-static" v-text="peserta.no_ujian"></p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="nama">Nama Peserta</label>
+                                    <p class="form-control-static" v-text="peserta.nama"></p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="nama">Sesi</label>
+                                    <p class="form-control-static" v-text="peserta.sesi"></p>
+                                </div>
+                                <template v-if="jadwal && jadwal.length > 0">
+                                    <div class="form-group">
+                                        <label>Jadwal ujian</label>
+                                        <select class="form-control" v-model="data.jadwal_id" @change="checkToken()" required>
+                                            <option :value="jad.id" v-for="jad in jadwal" :key="jad.id">
+                                                {{ jad.alias }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" v-if="active_token">
+                                        <label>Token</label>
+                                        <input type="text" class="form-control" placeholder="Masukkan token" autofocus="" v-model="data.token" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <b-button variant="info" type="submit" block :disabled="isLoading">
+                                            {{ isLoading ? 'Processing...' : 'Submit' }}
+                                        </b-button>
+                                    </div>
                                 </template>
-							</form>
-						</div>
+                                <template  v-if="jadwal && jadwal.length == 0">
+                                    <div class="alert alert-info">
+                                        Tidak ada mata ujian untuk anda saat ini
+                                    </div>
+                                </template>
+                            </form>
+                        </div>
+                        <div class="card-footer"></div>
 					</div>
 				</div>
 			</div>
@@ -53,12 +64,16 @@
 		name: 'KonfirmUjian',
 	    data() {
 	      return {
-	        token_ujian : '',
-	        timeout: 0
+	        timeout: 0,
+            data: {
+                jadwal_id: '',
+                token: ''
+            },
+            active_token: true
 	      } 
 	    },
 	    computed: {
-	    	...mapGetters(['isAuth','isLoading']),
+	    	...mapGetters(['isAuth','isLoading','setting']),
 	    	...mapState('siswa_jadwal', {
 	    		jadwal: state => state.banksoalAktif
 	    	}),
@@ -71,18 +86,26 @@
 	    	})
 	    },
 	    methods: {
-	      ...mapActions('siswa_ujian',['tokenChecker']),
-	      cekToken(){
-	      	this.tokenChecker({
-	      		token: this.token_ujian
-	      	})
-	      	.then((res) => {
-	      		this.$router.replace({ name: 'ujian.prepare' })
-	      	})
-	      	.catch((error) => {
-	      		this.$bvToast.toast(error.message, errorToas())
-	      	})
-	      }
+	      ...mapActions('siswa_ujian',[ 'startUjian', 'getPesertaUjian']),
+          async ujianStart(){
+            try {
+                await this.startUjian(this.data)
+                await this.getPesertaUjian()
+                this.$router.replace({ name: 'ujian.prepare' })
+            } catch (error) {
+                this.$bvToast.toast(error.message, errorToas())
+            }
+          },
+          checkToken() {
+            let jadwal = this.jadwal.find(x => x.id == this.data.jadwal_id)
+            if(jadwal) {
+                if(jadwal.setting.token == "1") {
+                    this.active_token =  true
+                } else {
+                    this.active_token = false
+                }
+            }
+          }
 	    }
 	}
 </script>

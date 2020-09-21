@@ -4,9 +4,9 @@
         <div class="panel-header bg-info-gradient">
           <div class="page-inner py-5">
             <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row px-3">
-              <div class="logo">
-                <img src="/img/logo-white.png">
-                <h2 class="text-white pb-2 fw-bold">ExtraordinaryCBT</h2>
+              <div class="logo" v-if="typeof setting.sekolah != 'undefined'" >
+                <img :src="setting.sekolah.logo != '' ? '/storage/'+setting.sekolah.logo : '/img/logo-white.png'">
+                <h2 class="text-white pb-2 fw-bold">{{ setting.sekolah.nama != '' ? setting.sekolah.nama : 'ExtraordinaryCBT' }}</h2>
               </div>
               <div class="ml-md-auto py-2 py-md-0">
                 <span class="text-white btn btn-round mr-2">{{ peserta.nama }}</span>
@@ -19,7 +19,7 @@
       </div>
       <router-view></router-view>
       <div class="nav-fixed-bottom mb-5">
-        <p class="text-center">&copy; ExtraordinaryCBT 2020 by Shellrean & ICT Team</p>
+        <p class="text-center">&copy; ExtraordinaryCBT 2020 v1.1.0 by Shellrean</p>
       </div>
   </div>
 </template>
@@ -30,15 +30,18 @@ import { successToas, errorToas} from '../../entities/notif'
 export default {
     name: 'IndexUjian',
     computed: {
-        ...mapGetters(['isLoading']),
+        ...mapGetters(['isLoading', 'setting']),
         ...mapState('siswa_user', {
             peserta: state => state.pesertaDetail
         }),
+        ...mapState('siswa_ujian', {
+            uncomplete: state => state.uncomplete
+        })
     },
     methods: {
         ...mapActions('siswa_jadwal',['ujianAktif']),
         ...mapActions('siswa_auth',['logoutPeserta']),
-        ...mapActions('siswa_ujian',['getPesertaDataUjian']),
+        ...mapActions('siswa_ujian',['getPesertaDataUjian', 'getPesertaUjian', 'getUncompleteUjian']),
         async logout() { 
             try {
                 await this.logoutPeserta()
@@ -52,10 +55,22 @@ export default {
     },
     async created() {
         try {
-            await this.ujianAktif()
-            await this.getPesertaDataUjian()
+            if(this.$route.name != 'ujian.while') {
+                await this.ujianAktif()
+                await this.getPesertaUjian()
+                await this.getUncompleteUjian()
+            }
         } catch (error) {
             this.$bvToast.toast(error.message, errorToas())
+        }
+    },
+    watch: {
+        uncomplete(val) {
+            if(this.$route.name != 'ujian.while' && typeof val.jadwal_id != 'undefined') {
+                this.$router.replace({ 
+                    name: 'ujian.while'
+                })
+            }
         }
     }
 }

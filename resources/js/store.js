@@ -3,9 +3,6 @@ import Vuex from 'vuex'
 
 import siswa_auth from './stores/siswa/auth.js'
 import siswa_user from './stores/siswa/user.js'
-import siswa_reference from './stores/siswa/reference.js'
-import siswa_banksoal from './stores/siswa/banksoal.js'
-import siswa_soal from './stores/siswa/soal.js'
 import siswa_ujian from './stores/siswa/ujian.js'
 import siswa_jadwal from './stores/siswa/jadwal.js'
 
@@ -15,9 +12,6 @@ const store = new Vuex.Store({
 	modules: {
 		siswa_auth,
 		siswa_user,
-		siswa_reference,
-		siswa_banksoal,
-		siswa_soal,
 		siswa_ujian,
 		siswa_jadwal
 	},
@@ -25,7 +19,8 @@ const store = new Vuex.Store({
 		token: localStorage.getItem('token'),
 		errors: [],
 		isLoading: false,
-		isLoadinger: false
+		isLoadinger: false,
+		setting: []
 	},
 	getters: {
 		isAuth: state => {
@@ -36,6 +31,9 @@ const store = new Vuex.Store({
 		},
 		isLoadinger: state => {
 			return state.isLoadinger
+		},
+		setting: state => {
+			return state.setting
 		}
 	},
 	mutations: {
@@ -53,6 +51,9 @@ const store = new Vuex.Store({
 		},
 		SET_LOADINGER(state, payload) {
 			state.isLoadinger = payload
+		},
+		SET_SETTING(state, payload) {
+			state.setting = payload
 		}
 	}
 })

@@ -18,37 +18,43 @@ use Illuminate\Support\Facades\Route;
  * @version 1
  * api response for v1
  */
-
-Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel', 'Api\v1\UjianController@getCapaianSiswaExcel');
-
-Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
+    Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
     Route::post('login', 'AuthController@login');
+    Route::get('login/oauth', 'AuthController@oauth');
+    Route::get('login/sso', 'AuthController@sso');
+    Route::get('login/callback', 'AuthController@callback');
+    Route::get('settings/auth', 'SettingController@getSetAuth');
 
     Route::group(['middleware' => 'auth:api'], function() {
         Route::get('user-authenticated', 'UserController@getUserLogin');
         Route::get('user-lists', 'UserController@userLists');
         Route::post('user/change-password', 'UserController@changePassword');
         Route::post('users/upload', 'UserController@import');
+        Route::post('users/delete-multiple', 'UserController@destroyMultiple');
         Route::apiResource('users', 'UserController');
 
         Route::get('agamas', 'AgamaController@index');
         
         Route::get('jurusans/all', 'JurusanController@allData');
+        Route::post('jurusans/delete-multiple', 'JurusanController@destroyMultiple');
         Route::apiResource('jurusans', 'JurusanController');
 
         Route::get('pesertas/login', 'PesertaController@getPesertaLogin');
         Route::delete('pesertas/{peserta}/login', 'PesertaController@resetPesertaLogin');
         Route::post('pesertas/upload', 'PesertaController@import');
+        Route::post('pesertas/delete-multiple', 'PesertaController@destroyMultiple');
         Route::apiResource('pesertas', 'PesertaController');
 
         Route::get('matpels/all', 'MatpelController@allData');
         Route::post('matpels/upload', 'MatpelController@import');
+        Route::post('matpels/delete-multiple', 'MatpelController@destroyMultiple');
         Route::apiResource('matpels', 'MatpelController');
 
         Route::get('banksoals/{banksoal}/analys', 'BanksoalController@getAnalys');
         Route::get('banksoals/all', 'BanksoalController@allData');
         Route::apiResource('banksoals', 'BanksoalController');
 
+        Route::post('soals/import-word/{banksoal}', 'SoalController@wordImport');
         Route::get('soals/{soal}', 'SoalController@show');
         Route::post('soals', 'SoalController@store');
         Route::post('soals/paste', 'SoalController@storePaste');
@@ -66,14 +72,15 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('directory/banksoal/{filemedia}', 'DirectoryController@getDirectoryBanksoal');
         Route::apiResource('directory', 'DirectoryController');
 
+        Route::post('ujians/{jadwal}/sesi-change', 'UjianAktifController@changeSesi');
         Route::get('ujians/active', 'UjianAktifController@index');
         Route::get('ujians/sesi', 'UjianAktifController@sesi');
-        Route::post('ujians/status', 'UjianAktifController@storeStatus');
         Route::post('ujians/token-release', 'UjianAktifController@releaseToken');
         Route::post('ujians/token-change', 'UjianAktifController@changeToken');
-        Route::get('ujians/peserta', 'UjianAktifController@getPesertas');
-        Route::get('ujians/peserta/{peserta}/reset', 'UjianAktifController@resetUjianPeserta');
-        Route::get('ujians/peserta/{peserta}/close', 'UjianAktifController@closePeserta');
+        Route::get('ujians/token-get', 'UjianAktifController@getToken');
+        Route::get('ujians/{jadwal}/peserta', 'UjianAktifController@getPesertas');
+        Route::get('ujians/{jadwal}/peserta/{peserta}/reset', 'UjianAktifController@resetUjianPeserta');
+        Route::get('ujians/{jadwal}/peserta/{peserta}/close', 'UjianAktifController@closePeserta');
 
         Route::get('ujians/esay/exists', 'UjianController@getExistEsay');
         Route::post('ujians/esay/input', 'UjianController@storeNilaiEsay');
@@ -85,7 +92,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('ujians/all', 'UjianController@allData');
         Route::get('ujians/active-status', 'UjianController@getActive');
         Route::post('ujians/set-status', 'UjianController@setStatus');
-        Route::apiResource('ujians', 'UjianController')->only('index','store','destroy');
+        Route::get('ujians/hasil/{hasil}', 'UjianController@getHasilUjianDetail');
+        Route::apiResource('ujians', 'UjianController');
 
         Route::get('events/all', 'EventController@allData');
         Route::apiResource('events', 'EventController');
@@ -93,6 +101,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('settings/sekolah', 'SettingController@getSettingSekolah');
         Route::post('settings/sekolah', 'SettingController@storeSettingSekolah');
         Route::post('settings/sekolah/logo', 'SettingController@changeLogoSekolah');
+        Route::get('settings', 'SettingController@getSetting');
+        Route::post('settings', 'SettingController@setSetting');
     });
 });
 
@@ -105,25 +115,19 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
 Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2'], function() {
 
     Route::post('logedin','PesertaLoginController@login');
-
+    Route::get('setting', 'PesertaLoginController@getSetting');
+    
     Route::group(['middleware' => 'peserta'], function() {
         Route::get('peserta-authenticated', 'PesertaLoginController@authenticated');
-
-        Route::get('/peserta/logout','PesertaLoginController@logout');
-        
-        Route::get('/jadwal/aktif', 'UjianController@getUjianAktif');
-
-        Route::get('/ujian/{id}','UjianController@getsoal');
-        Route::post('/ujian/setter','UjianController@getsoal');
-        Route::post('/ujian','UjianController@store');
-        Route::get('/ujian/jawaban/{id}', 'UjianController@getJawabanPeserta');
-        Route::post('/ujian/filled', 'UjianController@filled');
-        Route::post('/ujian/sisa-waktu', 'UjianController@sisaWaktu');
-        Route::post('/ujian/ujian-siswa-det', 'UjianController@detUjian');
-        Route::post('/ujian/ragu-ragu', 'UjianController@setRagu');
-        Route::post('/ujian/selesai', 'UjianController@selesai');
-        Route::post('/ujian/cektoken','UjianController@cekToken');
-
-        Route::post('/ujian/mulai-peserta', 'UjianController@mulaiPeserta');
+        Route::get('peserta/logout','PesertaLoginController@logout');
+        Route::get('jadwals/peserta', 'JadwalController@getJadwalPeserta');
+        Route::get('ujians/uncomplete','UjianAktifController@uncompleteUjian');
+        Route::get('ujians/peserta', 'UjianAktifController@getUjianPesertaAktif');
+        Route::post('ujians/start', 'UjianAktifController@startUjian');
+        Route::post('ujians/start/time', 'UjianAktifController@startUjianTime');
+        Route::get('ujians/filled', 'UjianAktifController@getJawabanPeserta');
+        Route::post('ujian','UjianController@store');
+        Route::post('ujian/ragu-ragu', 'UjianController@setRagu');
+        Route::get('ujian/selesai', 'UjianController@selesai');
     });
 });

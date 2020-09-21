@@ -37,9 +37,10 @@ const app = new Vue({
         ...mapGetters(['isAuth'])
     },
     methods: {
-        ...mapActions('siswa_user', ['getUserLogin'])
+        ...mapActions('siswa_user', ['getUserLogin','getSettingSekolah'])
     },
-    created() {
+    async created() {
+        await this.getSettingSekolah()
         if (this.isAuth) {
             this.getUserLogin()
             .catch((error) => {

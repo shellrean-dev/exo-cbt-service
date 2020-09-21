@@ -16,7 +16,15 @@ class EventController extends Controller
      */
     public function index()
     {
-        //
+        $perPage = isset(request()->paerPage) ? request()->perPage : 10;
+        $search = isset(request()->q) ? request()->q : '';
+
+        $events = EventUjian::orderBy('id');
+        if($search != '') {
+            $events = $events->where('name','LIKE','%'.$search.'%');
+        }
+        $events = $events->paginate($perPage);
+        return SendResponse::acceptData($events);
     }
 
     /**
@@ -44,9 +52,9 @@ class EventController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(EventUjian $event)
     {
-        //
+        return SendResponse::acceptData($event);
     }
 
     /**
@@ -56,9 +64,16 @@ class EventController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, EventUjian $event)
     {
-        //
+        $request->validate([
+            'name'      => 'required'
+        ]);
+
+        $event->update([
+            'name'      => $request->name
+        ]);
+        return SendResponse::accept();
     }
 
     /**
@@ -67,9 +82,10 @@ class EventController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(EventUjian $event)
     {
-        //
+        $event->delete();
+        return SendResponse::accept();
     }
 
     /**

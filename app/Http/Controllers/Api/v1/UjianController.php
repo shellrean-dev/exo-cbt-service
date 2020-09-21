@@ -49,6 +49,9 @@ class UjianController extends Controller
             'tanggal'           => 'required',
             'mulai'             => 'required',
             'lama'              => 'required|int',
+            'alias'             => 'required',
+            'banksoal_id'       => 'required|array',
+            'setting'           => 'required|array'
         ]);
 
         $data = [
@@ -57,7 +60,8 @@ class UjianController extends Controller
             'tanggal'           => date('Y-m-d',strtotime($request->tanggal)),
             'status_ujian'      => 0,
             'alias'             => $request->alias,
-            'event_id'          => $request->event_id
+            'event_id'          => $request->event_id,
+            'setting'           => $request->setting
         ];
 
         if($request->banksoal_id != '') {
@@ -93,9 +97,9 @@ class UjianController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Jadwal $ujian)
     {
-        //
+        return SendResponse::acceptData($ujian);
     }
 
     /**
@@ -105,9 +109,42 @@ class UjianController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Jadwal $ujian)
     {
-        //
+        $request->validate([
+            'tanggal'       => 'required',
+            'mulai'         => 'required',
+            'lama'          => 'required',
+            'alias'         => 'required',
+            'banksoal_id'       => 'required|array',
+            'setting'           => 'required|array'
+        ]);
+
+        $data = [
+            'mulai'         => date('H:i:s', strtotime($request->mulai)),
+            'lama'          => $request->lama*60,
+            'tanggal'       => date('Y-m-d', strtotime($request->tanggal)),
+            'alias'         => $request->alias,
+            'event_id'      => $request->event_id,
+            'setting'           => $request->setting
+        ];
+
+        if($request->banksoal_id != '') {
+            $fill = array();
+            foreach ($request->banksoal_id as $banksoal) {
+                $fush = [
+                    'id'        => $banksoal['id'],
+                    'jurusan'   => $banksoal['matpel']['jurusan_id']
+                ];
+                array_push($fill, $fush);
+            }
+
+            $data['banksoal_id'] = $fill;
+        }
+
+        $ujian->update($data);
+
+        return SendResponse::accept();
     }
 
     /**
@@ -258,14 +295,20 @@ class UjianController extends Controller
                     'peserta_id'    => $same->peserta_id,
                 ])->first();
 
-                $jmlh = $same->banksoal->jumlah_soal;
+                // Check total question
+                $pg_jmlh = $same->banksoal->jumlah_soal;
+                $listening_jmlh = $same->banksoal->jumlah_soal_listening;
                 $jml_esay =  $same->banksoal->jumlah_soal_esay;
 
-                if($hasil->jumlah_benar == 0) {
-                    $hasil_ganda = 0;
-                } else {
-                    $hasil_ganda = ($hasil->jumlah_benar/$jmlh);
+                $hasil_listening = 0;
+                if($hasil->jumlah_benar_listening > 0) {
+                    $hasil_listening = ($hasil->jumlah_benar_listening/$listening_jmlh)*$same->banksoal->persen['listening'];
                 }
+                $hasil_pg = 0;
+                if($hasil->jumlah_benar > 0) {
+                    $hasil_pg = ($hasil->jumlah_benar/$pg_jmlh)*$same->banksoal->persen['pilihan_ganda'];
+                }
+                $hasil_ganda = $hasil_listening+$hasil_pg;
 
                 if($request->val != 0) {
                     $hasil_esay = $hasil->point_esay + ($request->val/$jml_esay);
@@ -273,11 +316,8 @@ class UjianController extends Controller
                     $hasil_esay = $hasil->point_esay;
                 }
                 
-                if($jml_esay != 0) {
-                    $hasil_val = ($hasil_ganda*70)+(($hasil_esay)*30);
-                } else {
-                    $hasil_val = $hasil_ganda*100;   
-                }
+                $hasil_val = ($hasil_ganda)+($hasil_esay*$same->banksoal->persen['esay']);
+
                 $hasil->point_esay = $hasil_esay;
                 $hasil->hasil = $hasil_val;
                 $hasil->save();
@@ -300,21 +340,28 @@ class UjianController extends Controller
             'peserta_id'    => $jawab->peserta_id
         ])->first();
 
-        $jmlh = $jawab->banksoal->jumlah_soal;
+        // Check total question
+        $pg_jmlh = $jawab->banksoal->jumlah_soal;
+        $listening_jmlh = $jawab->banksoal->jumlah_soal_listening;
         $jml_esay =  $jawab->banksoal->jumlah_soal_esay;
 
-        if($hasil->jumlah_benar == 0) {
-            $hasil_ganda = 0;
-        } else {
-            $hasil_ganda = ($hasil->jumlah_benar/$jmlh);
+        $hasil_listening = 0;
+        if($hasil->jumlah_benar_listening > 0) {
+            $hasil_listening = ($hasil->jumlah_benar_listening/$listening_jmlh)*$jawab->banksoal->persen['listening'];
         }
+        $hasil_pg = 0;
+        if($hasil->jumlah_benar > 0) {
+            $hasil_pg = ($hasil->jumlah_benar/$pg_jmlh)*$jawab->banksoal->persen['pilihan_ganda'];
+        }
+        $hasil_ganda = $hasil_listening+$hasil_pg;
 
-        $hasil_esay = $hasil->point_esay + ($request->val/$jml_esay);
-        if($jml_esay != 0) {
-            $hasil_val = ($hasil_ganda*70)+(($hasil_esay)*30);
+        if($request->val != 0) {
+            $hasil_esay = $hasil->point_esay + ($request->val/$jml_esay);
         } else {
-            $hasil_val = $hasil_ganda*100;   
+            $hasil_esay = $hasil->point_esay;
         }
+        $hasil_val = ($hasil_ganda)+($hasil_esay*$jawab->banksoal->persen['esay']);
+
         $hasil->point_esay = $hasil_esay;
         $hasil->hasil = $hasil_val;
         $hasil->save();
@@ -414,10 +461,10 @@ class UjianController extends Controller
 
     public function getCapaianSiswaExcel(Jadwal $jadwal, Banksoal $banksoal)
     {
-        $soal = Soal::where(function($query) use($banksoal) {
+        $soals = Soal::where(function($query) use($banksoal) {
             $query->where('banksoal_id', $banksoal->id)
             ->where('tipe_soal','!=','2');
-        })->count();
+        })->get();
 
         $sss = JawabanPeserta::with(['peserta' => function($query) {
             $query->select('id','nama','no_ujian');
@@ -430,7 +477,7 @@ class UjianController extends Controller
             'jadwal_id' => $jadwal->id
         ])
         ->orderBy('soal_id')
-        ->select('id','iscorrect','peserta_id')
+        ->select('id','iscorrect','peserta_id', 'soal_id')
         ->get();
 
         $grouped = $sss->groupBy('peserta_id');
@@ -446,11 +493,23 @@ class UjianController extends Controller
         });
         $data = [
             'pesertas' => $fill,
-            'soal' => $soal
+            'soals' => $soals
         ];
 
         $export = new CapaianExport($data);
 
         return Excel::download($export, 'capaian_siswa_'.$banksoal->kode_banksoal.'.xlsx');
+    }
+
+    public function getHasilUjianDetail(HasilUjian $hasil) 
+    {
+        $jawaban = JawabanPeserta::with(['esay_result','soal','soal.jawabans'])
+        ->where([
+            'peserta_id'    => $hasil->peserta_id,
+            'jadwal_id'     => $hasil->jadwal_id
+        ])
+        ->get();
+
+        return SendResponse::acceptData($jawaban);
     }
 }

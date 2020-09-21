@@ -18,8 +18,10 @@ class CreateHasilUjiansTable extends Migration
             $table->unsignedBigInteger('banksoal_id');
             $table->unsignedBigInteger('peserta_id');
             $table->unsignedBigInteger('jadwal_id');
-            $table->integer('jumlah_salah');
-            $table->integer('jumlah_benar');
+            $table->integer('jumlah_salah')->default(0);
+            $table->integer('jumlah_benar')->default(0);
+            $table->integer('jumlah_benar_listening')->default(0);
+            $table->integer('jumlah_salah_listening')->default(0);
             $table->float('point_esay');
             $table->integer('tidak_diisi');
             $table->float('hasil');

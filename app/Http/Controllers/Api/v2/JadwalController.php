@@ -3,78 +3,78 @@
 namespace App\Http\Controllers\Api\v2;
 
 use App\Http\Controllers\Controller;
+use App\Actions\SendResponse;
 use Illuminate\Http\Request;
-
-
+use App\SiswaUjian;
+use App\Banksoal;
 use App\Jadwal;
-
-use Illuminate\Support\Facades\Validator;
 
 class JadwalController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * [getJadwalPeserta description]
+     * @return [type] [description]
      */
-    public function index()
+    public function getJadwalPeserta()
     {
-        $jadwal = Jadwal::orderBy('created_at','DESC');
-        $jadwal = $jadwal->paginate(10);
+        $peserta = request()->get('peserta-auth');
+        $hascomplete = SiswaUjian::where([
+            'peserta_id'        => $peserta->id,
+            'status_ujian'      => 1
+        ])->get()->pluck('jadwal_id');
 
-        return response()->json(['data' => $jadwal]);
-    }
+        $jadwals = Jadwal::where([
+            'status_ujian' => 1,
+            'sesi'      => $peserta->sesi
+        ])->get();
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'banksoal_id'       => 'required|exists:banksoals,id',
-            'tanggal'           => 'required|date',
-            'mulai'             => 'required|string',
-            'berakhir'          => 'required|string',
-            'lama'              => 'required|int',
-            'token'             => 'required'
-        ]);
+        $dets = $jadwals->map(function($value, $key) use($peserta) {
+            $ids = array_column($value->banksoal_id, 'jurusan','id');
+            $ids = collect($ids)->keys();
+            
+            $bks = Banksoal::with('matpel','matpel')->whereIn('id', $ids)->get();
+            $det = [
+                'banksoal'  => '',
+                'jadwal'    => ''
+            ];
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()]);
+            foreach($bks as $bk) {
+                if($bk->matpel->agama_id != 0) {
+                    if($bk->matpel->agama_id == $peserta['agama_id']) {
+                        $det['banksoal'] = $bk->id;
+                        $det['jadwal'] = $value->id;
+                    }
+                } else {
+                    if(is_array($bk->matpel->jurusan_id)) {
+                        foreach ($bk->matpel->jurusan_id as $d) {
+                            if($d == $peserta['jurusan_id']) {
+                                $det['banksoal'] = $bk->id;
+                                $det['jadwal'] = $value->id;
+                            }
+                        }
+                    } else {
+                        if($bk->matpel->jurusan_id == 0) {
+                            $det['banksoal'] = $bk->id;
+                            $det['jadwal'] = $value->id;
+                        }
+                    }
+                }   
+            }
+            return $det;
+        });
+
+        $ids = collect($dets)->map(function ($value) {
+            return $value['jadwal'];
+        })->reject(function($value) use($hascomplete) {
+            return $value == '' || in_array($value, $hascomplete->toArray());
+        });
+
+        $ter = $jadwals->whereIn('id', $ids)->values()->toArray();
+
+        if(!$ter) {
+            return SendResponse::acceptData([]);
         }
 
-        $dat = [
-            'banksoal_id'       => $request->banksoal_id,
-            'tanggal'           => $request->tanggal,
-            'mulai'             => $request->mulai,
-            'berakhir'          => $request->berakhir,
-            'lama'              => $request->lama,
-            'token'             => $request->token,
-            'status_ujian'      => $request->status_ujian
-        ];
-
-        $res = Jadwal::create($dat);
-
-        return response()->json(['data' => $res]);
-    }
-
-    /**
-     * Get data of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function getday()
-    {
-        $data = Jadwal::with([
-            'banksoal','banksoal.matpel'
-        ])->where([
-            'tanggal'       => now()->format('Y-m-d'),
-            'status_ujian'  => 1
-        ])->first();
-
-        return response()->json(['data' => $data]);
+        return SendResponse::acceptData($ter);
     }
 }

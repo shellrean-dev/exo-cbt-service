@@ -167,4 +167,21 @@ class PesertaController extends Controller
 
         return SendResponse::accept();
     }
+
+    public function destroyMultiple(Request $request)
+    {
+        $request->validate([    
+            'peserta_id'    => 'required|array'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            Peserta::whereIn('id', $request->peserta_id)->delete();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return SendResponse::badRequest('Error: '.$e->getMessage());
+        }
+        return SendResponse::accept();
+    }
 }
