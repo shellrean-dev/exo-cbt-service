@@ -22,7 +22,7 @@
 								<div class="input-group mb-3">
 									<div class="input-group-prepend rounded-0">
 						                <span class="input-group-text rounded-0">
-						                  <i class="cil-mood-good"></i>
+						                  <i class="flaticon-avatar"></i>
 						                </span>
 						            </div>
 									<input type="text" autofocus="" class="form-control active" :class="{ 'is-invalid' : errors.no_ujian }" v-model="data.no_ujian" placeholder="No peserta" required @keyup="clearError"/>
@@ -31,12 +31,12 @@
 								<div class="input-group mb-3">
 									<div class="input-group-prepend rounded-0">
 						                <span class="input-group-text rounded-0">
-						                  <i class="cil-lock-locked"></i>
+						                  <i class="flaticon-lock"></i>
 						                </span>
 						            </div>
 									<input type="password" class="form-control":class="{ 'is-invalid' : errors.password }"placeholder="Password" v-model="data.password" required @keyup="clearError"/>
 									<div class="invalid-feedback" v-if="errors.password">{{ errors.password[0] }} </div>
-									
+
 								</div>
 								<p v-if="errors" class="text-danger mb-2" v-text="errors.invalid"></p>
 								<b-button variant="info" size="lg" block  :disabled="isLoading" type="submit">
@@ -51,7 +51,7 @@
 			</div>
         </div>
         <div class="nav-fixed-bottom">
-        <p class="text-center">&copy; ExtraordinaryCBT 2020 v1.1.0 by Shellrean</p>
+        <p class="text-center">&copy; ExtraordinaryCBT 2020 v2.0.0 by Shellrean</p>
       </div>
     </div>
 </div>
@@ -90,7 +90,7 @@
 					}
 				})
 				.catch( () => {
-					
+
 				})
 			},
 			clearError() {

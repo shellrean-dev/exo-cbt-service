@@ -1,6 +1,6 @@
 <template>
     <div>
-        <loading :active.sync="isLoading" 
+        <loading :active.sync="isLoading"
         :is-full-page="true"></loading>
 
         <div class="container exam mt--5" v-if="filleds">
@@ -29,7 +29,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="2" :style="'font-size:'+range+'px !important'" 
+                                <td colspan="2" :style="'font-size:'+range+'px !important'"
                                 v-html="filleds[questionIndex].soal.pertanyaan"></td>
                             </tr>
                             <tr v-for="(jawab,index) in filleds[questionIndex].soal.jawabans" :key="index">
@@ -43,14 +43,14 @@
                             <tr v-if="filleds[questionIndex].soal.tipe_soal == 2">
                                 <td height="auto">
                                     <ckeditor v-model="filleds[questionIndex].esay" :config="editorConfig"
-                                    @input="onInput" >
+                                    @input="onInput"  type="inline">
                                     </ckeditor>
                                 </td>
                             </tr>
                         </table>
                     </div>
                     <div class="button-wrapper">
-                        <b-button variant="info" class="sebelum" size="md" 
+                        <b-button variant="info" class="sebelum" size="md"
                         @click="prev()" v-if="questionIndex != 0" :disabled="isLoadinger || !listening">
                             <span class="cil-chevron-left"></span>
                             Sebelumnya
@@ -73,7 +73,7 @@
                 </div>
             </div>
         </div>
-        <b-modal id="modal-selesai" centered class="shadow">
+        <b-modal id="modal-selesai" centered class="shadow" @hide="isKonfirm = false">
             <template v-slot:modal-header="{ close }">
               <h5>Konfirmasi</h5>
             </template>
@@ -106,7 +106,7 @@
                         'isi' : (fiel.jawab != 0 || fiel.esay != ''),
                         'ragu' : (fiel.ragu_ragu == 1),
                         'active' : (index == questionIndex)}" @click.prevent="toLand(index)" :disabled="isLoadinger">
-                            {{ index+1 }} 
+                            {{ index+1 }}
                             <span></span>
                         </a>
                     </li>
@@ -158,6 +158,10 @@ export default {
             range: 16,
             editorConfig: {
                 allowedContent: true,
+                toolbarGroups : [
+                    { name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
+                    { name: 'styles', groups: [ 'styles' ] },
+                ]
             }
         }
     },
@@ -191,7 +195,7 @@ export default {
         ...mapActions('siswa_ujian',['takeFilled','submitJawaban','submitJawabanEssy', 'selesaiUjianPeserta', 'updateRaguJawaban']),
         async filledAllSoal() {
             try {
-                await this.takeFilled() 
+                await this.takeFilled()
             } catch (error) {
                 this.$bvToast.toast(error.message, errorToas())
             }
@@ -199,7 +203,7 @@ export default {
         selectOption(index) {
             const fill = this.filleds[this.questionIndex]
 
-            this.submitJawaban({ 
+            this.submitJawaban({
                 jawaban_id : this.filleds[this.questionIndex].id,
                 jawab : this.filleds[this.questionIndex].soal.jawabans[index].id,
                 correct: this.filleds[this.questionIndex].soal.jawabans[index].correct,
@@ -213,7 +217,7 @@ export default {
         inputJawabEssy(val) {
             const fill = this.filleds[this.questionIndex]
 
-            this.submitJawabanEssy({ 
+            this.submitJawabanEssy({
                 jawaban_id : this.filleds[this.questionIndex].id,
                 index : this.questionIndex,
                 essy: fill.esay
@@ -251,7 +255,7 @@ export default {
                 await this.selesaiUjianPeserta()
 
                 this.$router.push({ name: 'ujian.selesai' })
-                clearInterval(this.interval); 
+                clearInterval(this.interval);
             } catch (error) {
                 this.$bvToast.toast(error.message, errorToas())
             }
@@ -296,7 +300,7 @@ export default {
             const fill = this.filleds[this.questionIndex]
             let ragu = fill.ragu_ragu == false || fill.ragu_ragu == '0' ? 1 : 0;
 
-            this.updateRaguJawaban({ 
+            this.updateRaguJawaban({
                 ragu_ragu: ragu,
                 jawaban_id : this.filleds[this.questionIndex].id,
                 index : this.questionIndex
@@ -321,7 +325,7 @@ export default {
             this.ragu = this.filleds[this.questionIndex].ragu_ragu
             if(this.filleds[this.questionIndex].soal.audio != null) {
                 this.audio = this.filleds[this.questionIndex].soal.audio
-            } 
+            }
             else {
                 this.audio = ''
             }
@@ -342,7 +346,7 @@ export default {
             this.time = val.sisa_waktu
             this.interval = setInterval( () => {
                 if (this.time > 0) {
-                    
+
                 } else {
                     this.selesai()
                 }
@@ -373,3 +377,8 @@ export default {
     }
 }
 </script>
+<style >
+	div[contenteditable] {
+    outline:1px solid #d8dbe0
+}
+</style>

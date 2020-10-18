@@ -52,7 +52,7 @@ class SoalController extends Controller
                         'correct'       => ($request->correct == $key ? '1' : '0')
                     ]);
                 }
-            } 
+            }
 
             DB::commit();
         } catch (\Exception $e) {
@@ -64,7 +64,7 @@ class SoalController extends Controller
     }
 
     /**
-     * 
+     *
      */
     public function storePaste(Request $request)
     {
@@ -302,9 +302,9 @@ class SoalController extends Controller
      * @return \App\Actions\SendResponse;
      */
     public function wordImport(
-        Request $request, 
-        Banksoal $banksoal, 
-        WordService $wordService, 
+        Request $request,
+        Banksoal $banksoal,
+        WordService $wordService,
         SoalService $soalService)
     {
         $request->validate([

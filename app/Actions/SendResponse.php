@@ -77,4 +77,17 @@ class SendResponse
     {
         return response()->json($data, 200);
     }
+
+    /**
+     * 500 Internal server error
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public static function internalServerError($message = '')
+    {
+        return response()->json([
+            'error' => true,
+            'message' => $message != '' ? $message : 'internal server error'
+        ],500);
+    }
 }

@@ -34,7 +34,7 @@ use Illuminate\Support\Facades\Route;
         Route::apiResource('users', 'UserController');
 
         Route::get('agamas', 'AgamaController@index');
-        
+
         Route::get('jurusans/all', 'JurusanController@allData');
         Route::post('jurusans/delete-multiple', 'JurusanController@destroyMultiple');
         Route::apiResource('jurusans', 'JurusanController');
@@ -52,6 +52,7 @@ use Illuminate\Support\Facades\Route;
 
         Route::get('banksoals/{banksoal}/analys', 'BanksoalController@getAnalys');
         Route::get('banksoals/all', 'BanksoalController@allData');
+        Route::get('banksoals/{banksoal}/duplikat', 'BanksoalController@duplikat');
         Route::apiResource('banksoals', 'BanksoalController');
 
         Route::post('soals/import-word/{banksoal}', 'SoalController@wordImport');
@@ -116,7 +117,7 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2'], function() {
 
     Route::post('logedin','PesertaLoginController@login');
     Route::get('setting', 'PesertaLoginController@getSetting');
-    
+
     Route::group(['middleware' => 'peserta'], function() {
         Route::get('peserta-authenticated', 'PesertaLoginController@authenticated');
         Route::get('peserta/logout','PesertaLoginController@logout');

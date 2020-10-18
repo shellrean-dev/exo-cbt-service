@@ -10,15 +10,16 @@
     <title>ExtraordinaryCBT</title>
 
     <link rel="stylesheet" type="text/css" href="{{ asset('css/app.css') }}">
-    <link rel="stylesheet" href="https://unpkg.com/@coreui/icons/css/free.min.css">
     <link rel="stylesheet" href="{{ asset('css/atlantis.css') }}">
 
     <noscript>Scripts are required</noscript>
   </head>
   <body class="c-app">
-  	
+
     <div id="app">
-        <app></app>
+        <app>
+            Kami sedang menyiapkan halaman untuk anda....
+        </app>
     </div>
 
   	<script src="{{ asset('js/app.js') }}"></script>
