@@ -19,7 +19,9 @@ class EventController extends Controller
         $perPage = isset(request()->paerPage) ? request()->perPage : 10;
         $search = isset(request()->q) ? request()->q : '';
 
-        $events = EventUjian::orderBy('id');
+        $events = EventUjian::with(['ujians' => function($query) {
+            $query->select('id','alias','tanggal','mulai','event_id','banksoal_id')->orderBy('tanggal')->orderBy('mulai');
+        }])->orderBy('id');
         if($search != '') {
             $events = $events->where('name','LIKE','%'.$search.'%');
         }

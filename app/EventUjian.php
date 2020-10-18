@@ -19,4 +19,9 @@ class EventUjian extends Model
     protected $hidden = [
         'created_at','updated_at'
     ];
+
+    public function ujians()
+    {
+        return $this->hasMany(Jadwal::class, 'event_id');
+    }
 }

@@ -99,6 +99,10 @@ use Illuminate\Support\Facades\Route;
         Route::get('events/all', 'EventController@allData');
         Route::apiResource('events', 'EventController');
 
+        Route::get('sesi', 'SesiScheduleController@studentBySesi');
+        Route::post('sesi', 'SesiScheduleController@pushToSesi');
+        Route::delete('sesi', 'SesiScheduleController@removeFromSesi');
+
         Route::get('settings/sekolah', 'SettingController@getSettingSekolah');
         Route::post('settings/sekolah', 'SettingController@storeSettingSekolah');
         Route::post('settings/sekolah/logo', 'SettingController@changeLogoSekolah');
