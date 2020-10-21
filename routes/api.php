@@ -101,6 +101,7 @@ use Illuminate\Support\Facades\Route;
 
         Route::get('sesi', 'SesiScheduleController@studentBySesi');
         Route::post('sesi', 'SesiScheduleController@pushToSesi');
+        Route::post('sesi/import', 'SesiScheduleController@importToSesi');
         Route::delete('sesi', 'SesiScheduleController@removeFromSesi');
 
         Route::get('settings/sekolah', 'SettingController@getSettingSekolah');

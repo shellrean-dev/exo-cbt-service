@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Imports\SesiExamScheduleImport;
 use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use App\SesiSchedule;
@@ -124,5 +127,31 @@ class SesiScheduleController extends Controller
         }
 
         return SendResponse::acceptData($sesiSchedule->peserta_ids);
+    }
+
+    /**
+     * Import sesi schedule from sesi
+     *
+     * @param \Illuminate\Http\Request
+     * @since 2.0.0
+     */
+    public function importToSesi(Request $request)
+    {
+        $request->validate([
+            'file'      => 'required|mimes:xlsx,xls',
+            'j'         => 'required'
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            Excel::import(new SesiExamScheduleImport($request->j), $request->file('file'));
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return SendResponse::badRequest($e->getMessage());
+        }
+        return SendResponse::accept();
     }
 }
