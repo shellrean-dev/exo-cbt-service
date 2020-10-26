@@ -33,7 +33,7 @@ class UjianController extends Controller
         } else {
             $ujian = $ujian->paginate(20);
         }
-        $ujian->makeHidden('banksoal_id'); 
+        $ujian->makeHidden('banksoal_id');
         return SendResponse::acceptData($ujian);
     }
 
@@ -60,7 +60,7 @@ class UjianController extends Controller
             'tanggal'           => date('Y-m-d',strtotime($request->tanggal)),
             'status_ujian'      => 0,
             'alias'             => $request->alias,
-            'event_id'          => $request->event_id,
+            'event_id'          => $request->event_id == '' ? 0 : $request->event_id,
             'setting'           => $request->setting
         ];
 
@@ -72,16 +72,16 @@ class UjianController extends Controller
                     'jurusan' => $banksol['matpel']['jurusan_id']
                 ];
                 array_push($fill, $fush);
-            }   
+            }
 
             $data['banksoal_id'] = $fill;
         }
 
-        if($request->server_id != '') { 
+        if($request->server_id != '') {
             $fill = array();
             foreach($request->server_id as $server) {
                 array_push($fill, $server['server_name']);
-            }   
+            }
 
             $data['server_id'] = $fill;
         }
@@ -125,7 +125,7 @@ class UjianController extends Controller
             'lama'          => $request->lama*60,
             'tanggal'       => date('Y-m-d', strtotime($request->tanggal)),
             'alias'         => $request->alias,
-            'event_id'      => $request->event_id,
+            'event_id'      => $request->event_id == '' ? 0 : $request->event_id,
             'setting'           => $request->setting
         ];
 
@@ -206,7 +206,7 @@ class UjianController extends Controller
     {
         $has = JawabanEsay::all()->pluck('jawab_id')->unique();
         $user = request()->user('api');
-        
+
         $exists = JawabanPeserta::where( function ($query) use ($has) {
             $query->whereNotIn('id', $has)
             ->whereHas('pertanyaan', function($q) {
@@ -243,7 +243,7 @@ class UjianController extends Controller
         $has = JawabanEsay::where('banksoal_id', $banksoal->id)
         ->get()
         ->pluck('jawab_id');
-        
+
         $exists = JawabanPeserta::where( function ($query) use ($has, $banksoal) {
             $query->whereNotIn('id', $has)
             ->whereHas('pertanyaan', function($q) {
@@ -274,15 +274,15 @@ class UjianController extends Controller
 
         $jawab = JawabanPeserta::find($request->id);
 
-        $user = request()->user('api'); 
+        $user = request()->user('api');
 
         $has = JawabanEsay::where('banksoal_id', $jawab->banksoal_id)
         ->get()->pluck('jawab_id');
-        
+
         $sames = JawabanPeserta::whereNotIn('id',$has)
         ->where([
-            'esay' => $jawab->esay, 
-            'banksoal_id' => $jawab->banksoal_id, 
+            'esay' => $jawab->esay,
+            'banksoal_id' => $jawab->banksoal_id,
             'soal_id' => $jawab->soal_id
         ])
         ->get();
@@ -315,7 +315,7 @@ class UjianController extends Controller
                 } else {
                     $hasil_esay = $hasil->point_esay;
                 }
-                
+
                 $hasil_val = ($hasil_ganda)+($hasil_esay*$same->banksoal->persen['esay']);
 
                 $hasil->point_esay = $hasil_esay;
@@ -410,7 +410,7 @@ class UjianController extends Controller
         ->get()->pluck('banksoal_id');
 
         $bankSoal = Banksoal::find($res);
-        return SendResponse::acceptData($bankSoal); 
+        return SendResponse::acceptData($bankSoal);
     }
 
     /**
@@ -444,9 +444,9 @@ class UjianController extends Controller
 
         $fill = $grouped->map(function($value, $key) {
             return [
-                'peserta' => [ 
+                'peserta' => [
                     'no_ujian' => $value[0]->peserta->no_ujian,
-                    'nama' => $value[0]->peserta->nama 
+                    'nama' => $value[0]->peserta->nama
                 ],
                 'data' => $value
             ];
@@ -484,9 +484,9 @@ class UjianController extends Controller
 
         $fill = $grouped->map(function($value, $key) {
             return [
-                'peserta' => [ 
+                'peserta' => [
                     'no_ujian' => $value[0]->peserta->no_ujian,
-                    'nama' => $value[0]->peserta->nama 
+                    'nama' => $value[0]->peserta->nama
                 ],
                 'data' => $value
             ];
@@ -501,7 +501,7 @@ class UjianController extends Controller
         return Excel::download($export, 'capaian_siswa_'.$banksoal->kode_banksoal.'.xlsx');
     }
 
-    public function getHasilUjianDetail(HasilUjian $hasil) 
+    public function getHasilUjianDetail(HasilUjian $hasil)
     {
         $jawaban = JawabanPeserta::with(['esay_result','soal','soal.jawabans'])
         ->where([
