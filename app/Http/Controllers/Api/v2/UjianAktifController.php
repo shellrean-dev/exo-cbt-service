@@ -9,6 +9,7 @@ use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\JawabanPeserta;
+use App\SesiSchedule;
 use App\SiswaUjian;
 use Carbon\Carbon;
 use App\Banksoal;
@@ -23,14 +24,14 @@ class UjianAktifController extends Controller
      * @param  Request $request [description]
      * @return [type]           [description]
      */
-    public function startUjian(Request $request) 
+    public function startUjian(Request $request)
     {
         $request->validate([
             'jadwal_id'     => 'required|exists:jadwals,id'
         ]);
 
         $ujian = Jadwal::find($request->jadwal_id);
-        if($ujian->setting['token'] == "1") {  
+        if($ujian->setting['token'] == "1") {
             $token = Token::orderBy('id')->first();
             if($token) {
                 $to = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', now());
@@ -49,8 +50,26 @@ class UjianAktifController extends Controller
                 }
             }
         }
-
         $peserta = request()->get('peserta-auth');
+
+        if($ujian->event_id != '0') {
+            $schedule = SesiSchedule::where([
+                'jadwal_id' => $ujian->id,
+                'sesi'      => $ujian->sesi
+            ])->first();
+            if($schedule) {
+                if(!in_array($peserta->id, $schedule->peserta_ids)){
+                    return SendResponse::badRequest('Anda tidak ada didalam sesi '.$ujian->sesi);
+                }
+            } else {
+                return SendResponse::badRequest('Sesi belum ditentukan, hubungi administrator');
+            }
+        }
+        else {
+            if($peserta->sesi != $ujian->sesi) {
+                return SendResponse::badRequest('Anda tidak ada didalam sesi '.$ujian->sesi);
+            }
+        }
 
         $data = SiswaUjian::where(function($query) use($peserta, $request) {
             $query->where('peserta_id', $peserta->id)
@@ -92,9 +111,9 @@ class UjianAktifController extends Controller
         if(!$data) {
             $data = [];
         }
-        
+
         return SendResponse::acceptData($data);
-    } 
+    }
 
     /**
      * [startUjianTime description]
@@ -115,7 +134,7 @@ class UjianAktifController extends Controller
             $data->save();
         }
         return SendResponse::accept();
-    } 
+    }
 
 
     /**
@@ -149,7 +168,7 @@ class UjianAktifController extends Controller
             if(!$banksoal['success']) {
                 continue;
             }
-            $banksoal_id = $banksoal['data']; 
+            $banksoal_id = $banksoal['data'];
         }
 
         // Jika tidak dapat menemukan banksoal_id
@@ -293,7 +312,7 @@ class UjianAktifController extends Controller
     public function uncompleteUjian()
     {
         $peserta = request()->get('peserta-auth');
-        
+
         $data = SiswaUjian::where(function($query) use($peserta) {
             $query->where('peserta_id', $peserta->id)
             ->where('status_ujian','=',3);
