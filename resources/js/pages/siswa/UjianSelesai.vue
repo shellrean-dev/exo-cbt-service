@@ -41,6 +41,16 @@ export default {
                 this.$bvToast.toast(error.message, errorToas())
             }
         }
-    }
+    },
+    async created() {
+        try {
+            if(this.$route.name != 'ujian.while') {
+                await this.ujianAktif()
+                await this.getPesertaUjian()
+            }
+        } catch (error) {
+            this.$bvToast.toast(error.message, errorToas())
+        }
+    },
 }
 </script>
