@@ -97,6 +97,7 @@ use Illuminate\Support\Facades\Route;
         Route::apiResource('ujians', 'UjianController');
 
         Route::get('events/all', 'EventController@allData');
+        Route::get('events/{id}/ujian', 'EventController@eventDetailData');
         Route::apiResource('events', 'EventController');
 
         Route::get('sesi', 'SesiScheduleController@studentBySesi');
