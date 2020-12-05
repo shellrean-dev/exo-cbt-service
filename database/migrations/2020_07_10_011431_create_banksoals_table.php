@@ -21,7 +21,7 @@ class CreateBanksoalsTable extends Migration
             $table->integer('jumlah_soal_listening')->default(0)->comment('jumlah soal listening');
             $table->integer('jumlah_pilihan_listening')->default(4)->comment('jumlah opsi listening');
             $table->integer('jumlah_soal_esay')->default(0)->nullable();
-            $table->integer('jumlah_pilihan_ganda_kompleks')->default(0)->comment('jumlah soal pilihan ganda kompleks');
+            $table->integer('jumlah_soal_ganda_kompleks')->default(0)->comment('jumlah soal pilihan ganda kompleks');
             $table->integer('jumlah_isian_singkat')->default(0)->comment('jumlah isian singkat');
             $table->integer('jumlah_menjodohkan')->default(0)->comment('jumlah menjodohkan');
 
