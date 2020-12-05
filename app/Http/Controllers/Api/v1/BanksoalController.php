@@ -58,6 +58,9 @@ class BanksoalController extends Controller
             'jumlah_pilihan'    => 'required|int',
             'jumlah_soal_listening' => 'required|int',
             'jumlah_pilihan_listening' => 'required|int',
+            'jumlah_pilihan_ganda_kompleks' => 'required|int',
+            'jumlah_isian_singkat' => 'required|int',
+            'jumlah_menjodohkan' => 'required|int',
             'persen'            => 'required|array'
         ]);
 
@@ -78,6 +81,9 @@ class BanksoalController extends Controller
                 'jumlah_soal_esay'  => $request->jumlah_soal_esay,
                 'jumlah_soal_listening' => $request->jumlah_soal_listening,
                 'jumlah_pilihan_listening' => $request->jumlah_pilihan_listening,
+                'jumlah_pilihan_ganda_kompleks' => $request->jumlah_pilihan_ganda_kompleks,
+                'jumlah_isian_singkat' => $request->jumlah_isian_singkat,
+                'jumlah_menjodohkan' => $request->jumlah_menjodohkan,
                 'persen'            => $request->persen,
                 'directory_id'      => $direk->id
             ];
