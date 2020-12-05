@@ -29,6 +29,7 @@ class SoalController extends Controller
         $request->validate([
             'banksoal_id'   => 'required|exists:banksoals,id',
             'correct'       => 'required_if:tipe_soal,1',
+            'selected'      => 'required_if:tipe_soal,4|array',
             'pertanyaan'    => 'required'
         ]);
 
@@ -44,12 +45,21 @@ class SoalController extends Controller
                 'direction'     => $request->direction
             ]);
 
-            if($request->tipe_soal != 2) {
+            if(in_array($request->tipe_soal, [1,3,4])) {
                 foreach($request->pilihan as $key=>$pilihan) {
+                    if(in_array($request->tipe_soal, [1,3])) { // The tipe soal is PG, Listening
+                        $correct = $request->correct == $key ? '1' : '0';
+                    }
+                    else if($request->tipe_soal == 4) { // The tipe soal is PG Komplek
+                        $correct = in_array($key, $request->selected) ? '1' : '0';
+                    }
+                    else {
+                        $correct = '0';
+                    }
                     JawabanSoal::create([
                         'soal_id'       => $soal->id,
                         'text_jawaban'  => $pilihan,
-                        'correct'       => ($request->correct == $key ? '1' : '0')
+                        'correct'       => $correct,
                     ]);
                 }
             }
