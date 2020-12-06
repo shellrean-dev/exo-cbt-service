@@ -46,6 +46,7 @@ class SoalController extends Controller
             ]);
 
             if(in_array($request->tipe_soal, [1,3,4])) {
+                $data = [];
                 foreach($request->pilihan as $key=>$pilihan) {
                     if(in_array($request->tipe_soal, [1,3])) { // The tipe soal is PG, Listening
                         $correct = $request->correct == $key ? '1' : '0';
@@ -56,12 +57,13 @@ class SoalController extends Controller
                     else {
                         $correct = '0';
                     }
-                    JawabanSoal::create([
+                    array_push($data, [
                         'soal_id'       => $soal->id,
                         'text_jawaban'  => $pilihan,
                         'correct'       => $correct,
                     ]);
                 }
+                DB::table('jawaban_soals')->insert($data);
             }
 
             DB::commit();
@@ -177,6 +179,7 @@ class SoalController extends Controller
         $request->validate([
             'banksoal_id'   => 'required|exists:banksoals,id',
             'correct'       => 'required_if:tipe_soal,1',
+            'selected'      => 'required_if:tipe_soal,4|array',
             'pertanyaan'    => 'required'
         ]);
 
@@ -190,15 +193,26 @@ class SoalController extends Controller
             $soal->rujukan = $request->rujukan;
             $soal->save();
 
-            if($request->tipe_soal != 2 ) {
-            DB::table('jawaban_soals')->where('soal_id',$request->soal_id)->delete();
+            if(in_array($request->tipe_soal, [1,3,4])) {
+                DB::table('jawaban_soals')->where('soal_id',$request->soal_id)->delete();
+                $data = [];
                 foreach($request->pilihan as $key=>$pilihan) {
-                    JawabanSoal::create([
+                    if(in_array($request->tipe_soal, [1,3])) { // The tipe soal is PG, Listening
+                        $correct = $request->correct == $key ? '1' : '0';
+                    }
+                    else if($request->tipe_soal == 4) { // The tipe soal is PG Komplek
+                        $correct = in_array($key, $request->selected) ? '1' : '0';
+                    }
+                    else {
+                        $correct = '0';
+                    }
+                    array_push($data, [
                         'soal_id'       => $soal->id,
                         'text_jawaban'  => $pilihan,
-                        'correct'       => ($request->correct == $key ? '1' : '0')
+                        'correct'       => $correct,
                     ]);
                 }
+                DB::table('jawaban_soals')->insert($data);
             }
             DB::commit();
         } catch (\Exception $e) {
