@@ -185,6 +185,8 @@ class UjianAktifController extends Controller
             $max_pg = $banksoal->jumlah_soal;
             $max_esay = $banksoal->jumlah_soal_esay;
             $max_listening = $banksoal->jumlah_soal_listening;
+            $max_complex = $banksoal->jumlah_soal_ganda_kompleks;
+
 
             // Soal Pilihan Ganda
             $pg = Soal::where([
@@ -255,12 +257,36 @@ class UjianAktifController extends Controller
                 ];
             });
 
+            // Soal Multichoice complex
+            $complex = Soal::where([
+                'banksoal_id'   => $banksoal->id,
+                'tipe_soal'     => 4
+            ]);
+            if($jadwal->setting['acak_soal'] == "1") {
+                $complex = $complex->inRandomOrder();
+            }
+            $complex = $complex->take($max_complex)->get();
+
+            $soal_complex = $complex->map(function($item) use($peserta, $banksoal, $jadwal) {
+                return [
+                    'peserta_id'    => $peserta->id,
+                    'banksoal_id'   => $banksoal->id,
+                    'soal_id'       => $item->id,
+                    'jawab'         => 0,
+                    'iscorrect'     => 0,
+                    'jadwal_id'     => $jadwal->id,
+                    'ragu_ragu'     => 0,
+                    'esay'          => ''
+                ];
+            });
+
             // Merges dengan urutan
             $soals = [];
             $list = collect([
                 '1' => $soal_pg->values()->toArray(),
                 '2' => $soal_esay->values()->toArray(),
-                '3' => $soal_listening->values()->toArray()
+                '3' => $soal_listening->values()->toArray(),
+                '4' => $soal_complex->values()->toArray()
             ]);
             foreach ($jadwal->setting['list'] as $value) {
                 $soal = $list->get($value['id']);
