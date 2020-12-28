@@ -36,15 +36,6 @@ class UjianController extends Controller
 
         $kj = JawabanSoal::find($request->jawab);
 
-        if(isset($request->essy)) {
-            $find->esay = $request->essy;
-            $find->save();
-
-            $send = $find->only('id','banksoal_id','soal_id','jawab', 'esay','ragu_ragu');
-            
-            return response()->json(['data' => $send,'index' => $request->index]);
-        }
-
         $ujian = SiswaUjian::where(function($query) use($peserta) {
             $query->where('peserta_id', $peserta->id)
             ->where('status_ujian','=',3);
@@ -54,14 +45,62 @@ class UjianController extends Controller
             UjianService::kurangiSisaWaktu($ujian);
         }
 
+        if(isset($request->essy)) {
+            $find->esay = $request->essy;
+            $find->save();
+
+            $send = [
+                'id'    => $find->id,
+                'banksoal_id' => $find->banksoal_id,
+                'soal_id' => $find->soal_id,
+                'jawab' => $find->jawab,
+                'jawab_complex' => json_decode($find->jawab_complex, true),
+                'esay' => $find->esay,
+                'ragu_ragu' => $find->ragu_ragu,
+            ];
+            
+            return response()->json(['data' => $send,'index' => $request->index]);
+        }
+
+        if(is_array($request->jawab_complex)) {
+            $find->jawab_complex = json_encode($request->jawab_complex);
+            $find->save();
+            $send = [
+                'id'    => $find->id,
+                'banksoal_id' => $find->banksoal_id,
+                'soal_id' => $find->soal_id,
+                'jawab' => $find->jawab,
+                'jawab_complex' => json_decode($find->jawab_complex, true),
+                'esay' => $find->esay,
+                'ragu_ragu' => $find->ragu_ragu,
+            ];
+            return response()->json(['data' => $send,'index' => $request->index]);
+        }
+
         if(!$kj) {
-            $send = $find->only('id','banksoal_id','soal_id','jawab', 'esay','ragu_ragu');
+            $send = [
+                'id'    => $find->id,
+                'banksoal_id' => $find->banksoal_id,
+                'soal_id' => $find->soal_id,
+                'jawab' => $find->jawab,
+                'jawab_complex' => json_decode($find->jawab_complex, true),
+                'esay' => $find->esay,
+                'ragu_ragu' => $find->ragu_ragu,
+            ];
             return response()->json(['data' => $send,'index' => $request->index]);
         }
         $find->jawab = $request->jawab;
         $find->iscorrect = $kj->correct;
         $find->save();
-        $send = $find->only('id','banksoal_id','soal_id','jawab', 'esay');
+        $send = [
+            'id'    => $find->id,
+            'banksoal_id' => $find->banksoal_id,
+            'soal_id' => $find->soal_id,
+            'jawab' => $find->jawab,
+            'jawab_complex' => json_decode($find->jawab_complex, true),
+            'esay' => $find->esay,
+            'ragu_ragu' => $find->ragu_ragu,
+        ];
     	return response()->json(['data' => $send,'index' => $request->index]);
     	
     }
