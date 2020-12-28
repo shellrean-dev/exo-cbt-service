@@ -28,6 +28,10 @@ class JawabanPeserta extends Model
         'similiar'
     ];
 
+    protected $casts = [
+        'jawab_complex' => 'array',
+    ];
+
     /**
      * [pertanyaan description]
      * @return [type] [description]
