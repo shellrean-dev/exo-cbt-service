@@ -90,10 +90,22 @@ class UjianService
             'peserta_id'    => $peserta_id,
             'jadwal_id'     => $jadwal_id,
         ])
-        ->select('id','banksoal_id','soal_id','jawab','esay','ragu_ragu')
+        ->select('id','banksoal_id','soal_id','jawab','esay','jawab_complex','ragu_ragu')
         ->get()
         ->makeHidden('similiar');
-        return $find;
+        $data = $find->map(function($item) {
+            return [
+                'id'    => $item->id,
+                'banksoal_id' => $item->banksoal_id,
+                'soal_id' => $item->soal_id,
+                'jawab' => $item->jawab,
+                'esay' => $item->esay,
+                'jawab_complex' => json_decode($item->jawab_complex, true),
+                'soal' => $item->soal,
+                'ragu_ragu' => $item->ragu_ragu,
+            ];
+        });
+        return $data;
     }
 
     /**
