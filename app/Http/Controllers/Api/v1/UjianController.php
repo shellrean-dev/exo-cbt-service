@@ -51,6 +51,7 @@ class UjianController extends Controller
             'lama'              => 'required|int',
             'alias'             => 'required',
             'banksoal_id'       => 'required|array',
+            'event_id'          => 'required|exists:event_ujians,id',
             'setting'           => 'required|array'
         ]);
 
