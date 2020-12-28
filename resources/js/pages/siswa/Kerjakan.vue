@@ -34,9 +34,19 @@
                             </tr>
                             <tr v-for="(jawab,index) in filleds[questionIndex].soal.jawabans" :key="index">
                                 <td width="50px" :style="'font-size:'+range+'px !important'">
-                                    <b-form-radio size="lg" v-model="selected" name="jwb" :value="jawab.id"  @change="selectOption(index)">
+                                    <b-form-radio v-model="selected" name="jwb" :value="jawab.id"  @change="selectOption(index)" v-if="[1,3].includes(parseInt(filleds[questionIndex].soal.tipe_soal))">
                                         <span class="text-uppercase">{{ index | charIndex }}</span>.
                                     </b-form-radio>
+                                    <label class="checkbox" v-if="4 == parseInt(filleds[questionIndex].soal.tipe_soal)">
+                                      <span class="checkbox__input">
+                                        <input :checked="filleds[questionIndex].jawab_complex.includes(jawab.id)" type="checkbox" :value="jawab.id"  name="checkbox"  @change="changeCheckbox($event, index)" :disabled="isLoadinger || isLoading">
+                                        <span class="checkbox__control">
+                                          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' aria-hidden="true" focusable="false">
+                                            <path fill='none' stroke='currentColor' stroke-width='3' d='M1.73 12.91l6.37 6.37L22.79 4.59' /></svg>
+                                        </span>
+                                      </span>
+                                      <span class="radio__label">{{ index | charIndex }}</span>
+                                    </label>
                                 </td>
                                 <td :style="'font-size:'+range+'px !important'" v-html="jawab.text_jawaban"></td>
                             </tr>
@@ -103,7 +113,7 @@
                 <ul class="nomor-soal" id="nomor-soal">
                     <li v-for="(fiel,index) in filleds" :key="index">
                         <a href="#" :class="{
-                        'isi' : (fiel.jawab != 0 || fiel.esay != ''),
+                        'isi' : (fiel.jawab != 0 || fiel.esay != '' || fiel.jawab_complex.length != 0),
                         'ragu' : (fiel.ragu_ragu == 1),
                         'active' : (index == questionIndex)}" @click.prevent="toLand(index)" :disabled="isLoadinger">
                             {{ index+1 }}
@@ -145,6 +155,7 @@ export default {
         return {
             questionIndex: '',
             selected: '',
+            selected_complex: [],
             patt: 17,
             sidebar: false,
             ragu: '',
@@ -206,7 +217,6 @@ export default {
             this.submitJawaban({
                 jawaban_id : this.filleds[this.questionIndex].id,
                 jawab : this.filleds[this.questionIndex].soal.jawabans[index].id,
-                correct: this.filleds[this.questionIndex].soal.jawabans[index].correct,
                 index : this.questionIndex
             })
             .catch((error) => {
@@ -309,7 +319,28 @@ export default {
                 this.$bvToast.toast(error.message, errorToas())
                 this.$bvToast.toast('Terjadi kesalahan, cek koneksi internet', errorToas())
             })
-        }
+        },
+        changeCheckbox(e, val) {
+            console.log(e.target.checked)
+          if (e.target.checked === false) {
+            let index = this.filleds[this.questionIndex].jawab_complex.indexOf(val)
+            console.log(index)
+            if (index !== -1) {
+                this.filleds[this.questionIndex].jawab_complex.splice(index, 1)
+            }
+          } else {
+            this.filleds[this.questionIndex].jawab_complex.push(val)      
+          }
+          this.submitJawaban({
+                jawaban_id : this.filleds[this.questionIndex].id,
+                jawab_complex : this.filleds[this.questionIndex].jawab_complex,
+                index : this.questionIndex
+            })
+            .catch((error) => {
+                this.$bvToast.toast(error.message, errorToas())
+                this.$bvToast.toast('Terjadi kesalahan, cek koneksi internet', errorToas())
+            })
+        },
     },
     async created() {
         try {
@@ -381,4 +412,48 @@ export default {
 	div[contenteditable] {
     outline:1px solid #d8dbe0
 }
+.checkbox {
+     display: grid;
+     grid-template-columns: min-content auto;
+     grid-gap: 0.5em;
+     font-size: 2rem;
+     color: var(--color);
+}
+ .checkbox--disabled {
+     color: var(--disabled);
+}
+ .checkbox__control {
+     display: inline-grid;
+     width: 1em;
+     height: 1em;
+     border-radius: 0.25em;
+     border: 0.1em solid currentColor;
+}
+ .checkbox__control svg {
+     transition: transform 0.1s ease-in 25ms;
+     transform: scale(0);
+     transform-origin: bottom left;
+}
+ .checkbox__input {
+     display: grid;
+     grid-template-areas: "checkbox";
+}
+ .checkbox__input > * {
+     grid-area: checkbox;
+}
+ .checkbox__input input {
+     opacity: 0;
+     width: 1em;
+     height: 1em;
+}
+ .checkbox__input input:focus + .checkbox__control {
+     box-shadow: 0 0 0 0.05em #fff, 0 0 0.15em 0.1em currentColor;
+}
+ .checkbox__input input:checked + .checkbox__control svg {
+     transform: scale(1);
+}
+ .checkbox__input input:disabled + .checkbox__control {
+     color: var(--disabled);
+}
+
 </style>
