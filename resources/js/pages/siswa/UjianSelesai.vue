@@ -31,6 +31,8 @@ export default {
     },
 	methods: {
       ...mapActions('siswa_auth',['logoutPeserta']),
+      ...mapActions('siswa_jadwal',['ujianAktif']),
+      ...mapActions('siswa_ujian',['getPesertaUjian']),
       async logout() {
             try {
                 await this.logoutPeserta()

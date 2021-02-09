@@ -19,10 +19,6 @@
                                     <label for="nama">Nama Peserta</label>
                                     <p class="form-control-static" v-text="peserta.nama"></p>
                                 </div>
-                                <div class="form-group">
-                                    <label for="nama">Sesi</label>
-                                    <p class="form-control-static" v-text="peserta.sesi"></p>
-                                </div>
                                 <template v-if="jadwal && jadwal.length > 0">
                                     <div class="form-group">
                                         <label>Jadwal ujian</label>
@@ -55,7 +51,7 @@
 			</div>
 		</div>
 	</div>
-</template> 
+</template>
 <script>
 	import { mapActions, mapState,mapGetters, mapMutations } from 'vuex'
     import { successToas, errorToas} from '../../entities/notif'
@@ -70,7 +66,7 @@
                 token: ''
             },
             active_token: true
-	      } 
+	      }
 	    },
 	    computed: {
 	    	...mapGetters(['isAuth','isLoading','setting']),

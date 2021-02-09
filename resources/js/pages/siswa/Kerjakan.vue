@@ -322,16 +322,16 @@ export default {
         },
         changeCheckbox(e, val) {
             console.log(e.target.checked)
-          if (e.target.checked === false) {
-            let index = this.filleds[this.questionIndex].jawab_complex.indexOf(val)
-            console.log(index)
-            if (index !== -1) {
-                this.filleds[this.questionIndex].jawab_complex.splice(index, 1)
+            if (e.target.checked === false) {
+                let index = this.filleds[this.questionIndex].jawab_complex.indexOf(parseInt(e.target.value))
+                console.log(index)
+                if (index !== -1) {
+                    this.filleds[this.questionIndex].jawab_complex.splice(index, 1)
+                }
+            } else {
+                this.filleds[this.questionIndex].jawab_complex.push(parseInt(e.target.value))
             }
-          } else {
-            this.filleds[this.questionIndex].jawab_complex.push(val)      
-          }
-          this.submitJawaban({
+            this.submitJawaban({
                 jawaban_id : this.filleds[this.questionIndex].id,
                 jawab_complex : this.filleds[this.questionIndex].jawab_complex,
                 index : this.questionIndex
