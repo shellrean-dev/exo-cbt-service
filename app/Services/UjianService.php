@@ -61,7 +61,7 @@ class UjianService
                         $banksoal_id = $banksoal->id;
                     }
                 }
-            }   
+            }
         } catch (\Exception $e) {
             return ['success' => false, 'messge' => $e->getMessage()];
         }
@@ -79,7 +79,7 @@ class UjianService
     {
         $find = JawabanPeserta::with([
           'soal' => function($q) {
-            $q->select('id','banksoal_id','pertanyaan','tipe_soal','audio','direction'); 
+            $q->select('id','banksoal_id','pertanyaan','tipe_soal','audio','direction');
         },'soal.jawabans' => function($q) use ($acak_opsi) {
             $q->select('id','soal_id','text_jawaban');
             if($acak_opsi == "1") {
@@ -120,96 +120,228 @@ class UjianService
         if(!$banksoal) {
             return ['success' => false, 'message' => 'Tidak dapat menemukan banksoal'];
         }
-        try { 
+        try {
             // Pilihan Ganda
-            $pg_benar = JawabanPeserta::where([
-                'iscorrect'     => 1,
-                'jadwal_id'     => $jadwal_id, 
-                'peserta_id'    => $peserta_id
-            ])
-            ->whereHas('soal', function($query) {
-                $query->where('tipe_soal','=', '1');
-            })
-            ->count();
-            $pg_salah = JawabanPeserta::where([
-                'iscorrect'     => 0,
-                'jadwal_id'     => $jadwal_id, 
-                'peserta_id'    => $peserta_id,
-            ])
-            ->whereHas('soal', function($query) {
-                $query->where('tipe_soal','1');
-            })
-            ->count();
-
-            $pg_jml = JawabanPeserta::where([
-                'jadwal_id'     => $jadwal_id, 
-                'peserta_id'    => $peserta_id
-            ])
-            ->whereHas('soal', function($query) {
-                $query->where('tipe_soal','=', '1');
-            })
-            ->count();
             $hasil_pg = 0;
-            if($pg_jml > 0 && $pg_benar > 0) {
-                $hasil_pg = ($pg_benar/$pg_jml)*$banksoal->persen['pilihan_ganda'];
+            $pg_benar = 0;
+            $pg_salah = 0;
+            if($banksoal->jumlah_soal > 0) {
+                $pg_benar = JawabanPeserta::where([
+                    'iscorrect'     => 1,
+                    'jadwal_id'     => $jadwal_id,
+                    'peserta_id'    => $peserta_id
+                ])
+                ->whereHas('soal', function($query) {
+                    $query->where('tipe_soal','=', '1');
+                })
+                ->count();
+                $pg_salah = JawabanPeserta::where([
+                    'iscorrect'     => 0,
+                    'jadwal_id'     => $jadwal_id,
+                    'peserta_id'    => $peserta_id,
+                ])
+                ->whereHas('soal', function($query) {
+                    $query->where('tipe_soal','1');
+                })
+                ->count();
+
+                $pg_jml = JawabanPeserta::where([
+                    'jadwal_id'     => $jadwal_id,
+                    'peserta_id'    => $peserta_id
+                ])
+                ->whereHas('soal', function($query) {
+                    $query->where('tipe_soal','=', '1');
+                })
+                ->count();
+
+                if($pg_jml > 0 && $pg_benar > 0) {
+                    $hasil_pg = ($pg_benar/$pg_jml)*$banksoal->persen['pilihan_ganda'];
+                }
+            }
+
+            // Pilihan Ganda Komplek
+            $hasil_mpg = 0;
+            $mpg_salah = 0;
+            $mpg_benar = 0;
+            if($banksoal->jumlah_soal_ganda_kompleks > 0) {
+                $mpg_benar = JawabanPeserta::where([
+                    'iscorrect'     => 1,
+                    'jadwal_id'     => $jadwal_id,
+                    'peserta_id'    => $peserta_id
+                ])
+                ->whereHas('soal', function($query) {
+                    $query->where('tipe_soal', '=', '4');
+                })
+                ->count();
+
+                $mpg_salah = JawabanPeserta::where([
+                    'iscorrect'     => 0,
+                    'jadwal_id'     => $jadwal_id,
+                    'peserta_id'    => $peserta_id
+                ])
+                ->whereHas('soal', function($query) {
+                    $query->where('tipe_soal', '=', '4');
+                })
+                ->count();
+
+                $mpg_jml = JawabanPeserta::where([
+                    'jadwal_id'     => $jadwal_id,
+                    'peserta_id'    => $peserta_id
+                ])
+                ->whereHas('soal', function($query) {
+                    $query->where('tipe_soal','=', '4');
+                })
+                ->count();
+
+                if($mpg_jml > 0 && $mpg_benar > 0) {
+                    $hasil_mpg = ($mpg_benar/$mpg_jml)*$banksoal->persen['pilihan_ganda_komplek'];
+                }
             }
 
             // Listening
-            $listening_benar = JawabanPeserta::where([
-                'iscorrect'     => 1,
-                'jadwal_id'     => $jadwal_id, 
-                'peserta_id'    => $peserta_id
-            ])
-            ->whereHas('soal', function($query) {
-                $query->where('tipe_soal','=', '3');
-            })
-            ->count();
-            $listening_salah = JawabanPeserta::where([
-                'iscorrect'     => 0,
-                'jadwal_id'     => $jadwal_id, 
-                'peserta_id'    => $peserta_id,
-            ])
-            ->whereHas('soal', function($query) {
-                $query->where('tipe_soal','3');
-            })
-            ->count();
-
-            $listening_jml = JawabanPeserta::where([
-                'jadwal_id'     => $jadwal_id, 
-                'peserta_id'    => $peserta_id
-            ])
-            ->whereHas('soal', function($query) {
-                $query->where('tipe_soal','=', '3');
-            })
-            ->count();
             $hasil_listening = 0;
-            if($listening_jml > 0 && $listening_benar > 0) {
-                $hasil_listening = ($listening_benar/$listening_jml)*$banksoal->persen['listening'];
+            $listening_benar = 0;
+            $listening_salah = 0;
+            if($banksoal->jumlah_soal_listening > 0) {
+                $listening_benar = JawabanPeserta::where([
+                    'iscorrect'     => 1,
+                    'jadwal_id'     => $jadwal_id,
+                    'peserta_id'    => $peserta_id
+                ])
+                ->whereHas('soal', function($query) {
+                    $query->where('tipe_soal','=', '3');
+                })
+                ->count();
+                $listening_salah = JawabanPeserta::where([
+                    'iscorrect'     => 0,
+                    'jadwal_id'     => $jadwal_id,
+                    'peserta_id'    => $peserta_id,
+                ])
+                ->whereHas('soal', function($query) {
+                    $query->where('tipe_soal','3');
+                })
+                ->count();
+
+                $listening_jml = JawabanPeserta::where([
+                    'jadwal_id'     => $jadwal_id,
+                    'peserta_id'    => $peserta_id
+                ])
+                ->whereHas('soal', function($query) {
+                    $query->where('tipe_soal','=', '3');
+                })
+                ->count();
+
+                if($listening_jml > 0 && $listening_benar > 0) {
+                    $hasil_listening = ($listening_benar/$listening_jml)*$banksoal->persen['listening'];
+                }
+            }
+
+            // Isian singkat
+            $hasil_isiang_singkat = 0;
+            $isian_singkat_benar = 0;
+            $isian_singkat_salah = 0;
+            if($banksoal->jumlah_isian_singkat > 0) {
+                $isian_singkat_benar = JawabanPeserta::where([
+                    'iscorrect'     => 1,
+                    'jadwal_id'     => $jadwal_id,
+                    'peserta_id'    => $peserta_id
+                ])
+                ->whereHas('soal', function($query) {
+                    $query->where('tipe_soal','=', '5');
+                })
+                ->count();
+                $isian_singkat_salah = JawabanPeserta::where([
+                    'iscorrect'     => 0,
+                    'jadwal_id'     => $jadwal_id,
+                    'peserta_id'    => $peserta_id,
+                ])
+                ->whereHas('soal', function($query) {
+                    $query->where('tipe_soal','5');
+                })
+                ->count();
+
+                $isiang_singkat_jml = JawabanPeserta::where([
+                    'jadwal_id'     => $jadwal_id,
+                    'peserta_id'    => $peserta_id
+                ])
+                ->whereHas('soal', function($query) {
+                    $query->where('tipe_soal','=', '5');
+                })
+                ->count();
+
+                if($isiang_singkat_jml > 0 && $isian_singkat_benar > 0) {
+                    $hasil_isiang_singkat = ($isian_singkat_benar/$isiang_singkat_jml)*$banksoal->persen['isian_singkat'];
+                }
+            }
+
+            // Menjodohkan
+            $hasil_menjodohkan = 0;
+            $jumlah_menjodohkan_benar = 0;
+            $jumlah_menjodohkan_salah = 0;
+            if($banksoal->jumlah_menjodohkan > 0) {
+                $jumlah_menjodohkan_benar = JawabanPeserta::where([
+                    'iscorrect'     => 1,
+                    'jadwal_id'     => $jadwal_id,
+                    'peserta_id'    => $peserta_id
+                ])
+                ->whereHas('soal', function($query) {
+                    $query->where('tipe_soal','=', '6');
+                })
+                ->count();
+                $jumlah_menjodohkan_salah = JawabanPeserta::where([
+                    'iscorrect'     => 0,
+                    'jadwal_id'     => $jadwal_id,
+                    'peserta_id'    => $peserta_id,
+                ])
+                ->whereHas('soal', function($query) {
+                    $query->where('tipe_soal','6');
+                })
+                ->count();
+
+                $jumlah_menjodohkan_jml = JawabanPeserta::where([
+                    'jadwal_id'     => $jadwal_id,
+                    'peserta_id'    => $peserta_id
+                ])
+                ->whereHas('soal', function($query) {
+                    $query->where('tipe_soal','=', '6');
+                })
+                ->count();
+
+                if($jumlah_menjodohkan_jml > 0 && $jumlah_menjodohkan_benar > 0) {
+                    $hasil_isiang_singkat = ($jumlah_menjodohkan_benar/$jumlah_menjodohkan_jml)*$banksoal->persen['menjodohkan'];
+                }
             }
 
             // Resulting Score
             $null = JawabanPeserta::where([
-                'jawab'     => 0,
-                'jadwal_id'     => $jadwal_id, 
+                'jawab'         => 0,
+                'jadwal_id'     => $jadwal_id,
                 'peserta_id'    => $peserta_id,
             ])
             ->whereHas('soal', function($query) {
                 $query->whereIn('tipe_soal',['1','3']);
             })
             ->count();
-            $hasil = $hasil_pg+$hasil_listening;
+
+            $hasil = $hasil_pg+$hasil_listening+$hasil_mpg+$hasil_isiang_singkat+$hasil_menjodohkan;
 
             HasilUjian::create([
-                'banksoal_id'     => $banksoal_id,
-                'peserta_id'      => $peserta_id,
-                'jadwal_id'       => $jadwal_id,
-                'jumlah_salah'    => $pg_salah,
-                'jumlah_benar'    => $pg_benar,
-                'jumlah_benar_listening' => $listening_benar,
-                'jumlah_salah_listening' => $listening_salah,
-                'tidak_diisi'     => $null,
-                'hasil'           => $hasil,
-                'point_esay'      => 0
+                'banksoal_id'                   => $banksoal_id,
+                'peserta_id'                    => $peserta_id,
+                'jadwal_id'                     => $jadwal_id,
+                'jumlah_salah'                  => $pg_salah,
+                'jumlah_benar'                  => $pg_benar,
+                'jumlah_benar_complek'          => $mpg_benar,
+                'jumlah_salah_complek'          => $mpg_salah,
+                'jumlah_benar_listening'        => $listening_benar,
+                'jumlah_salah_listening'        => $listening_salah,
+                'jumlah_benar_isian_singkat'    => $isian_singkat_benar,
+                'jumlah_salah_isian_singkat'    => $isian_singkat_salah,
+                'jumlah_benar_menjodohkan'      => $jumlah_menjodohkan_benar,
+                'jumlah_salah_menjodohkan'      => $jumlah_menjodohkan_salah,
+                'tidak_diisi'                   => $null,
+                'hasil'                         => $hasil,
+                'point_esay'                    => 0
             ]);
         } catch (\Exception $e) {
             return ['success' => false, 'message' => $e->getMessage()];
