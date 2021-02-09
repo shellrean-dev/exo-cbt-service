@@ -11,6 +11,7 @@ use App\SiswaUjian;
 use App\HasilUjian;
 use App\JawabanSoal;
 use Carbon\Carbon;
+use App\Soal;
 
 class UjianController extends Controller
 {
@@ -63,6 +64,21 @@ class UjianController extends Controller
         }
 
         if(is_array($request->jawab_complex)) {
+            $soal_complex = Soal::with(['jawabans' => function($query) {
+                $query->where('correct', 1);
+            }])
+            ->where("id", $find->soal_id)->first();
+            if ($soal_complex) {
+                $array = $soal_complex->jawabans->map(function($item){
+                    return $item->id;
+                })->toArray();
+                $correct = 0;
+                $complex = array_diff( $request->jawab_complex, [0] );
+                if (array_diff($array,$complex) == array_diff($complex,$array)) {
+                    $correct = 1;
+                }
+                $find->iscorrect = $correct;
+            }
             $find->jawab_complex = json_encode($request->jawab_complex);
             $find->save();
             $send = [
