@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\URL;
+use App\Exports\HasilUjianExport;
 use App\Exports\CapaianExport;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
@@ -401,6 +404,43 @@ class UjianController extends Controller
     }
 
     /**
+     *
+     */
+    public function getResultExcel(Request $request, Jadwal $jadwal)
+    {
+        if (! $request->hasValidSignature()) {
+            abort(401);
+        }
+
+        $res = HasilUjian::with(['peserta' => function ($query) {
+            $query->select('id','nama','no_ujian');
+        }])
+        ->where('jadwal_id', $jadwal->id)
+        ->orderBy('peserta_id')
+        ->get();
+
+        $spreadsheet = HasilUjianExport::export($res,$jadwal->alias);
+        $writer = new Xlsx($spreadsheet);
+
+        $filename = 'Hasil ujian '.$jadwal->alias;
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="'.$filename.'.xlsx"');
+        $writer->save('php://output');
+    }
+
+    /**
+     *
+     */
+    public function getResultExcelLink(Jadwal $jadwal)
+    {
+        $url = URL::temporarySignedRoute(
+            'hasilujian.download.excel', now()->addMinutes(5),['jadwal' => $jadwal->id]
+        );
+
+        return SendResponse::acceptData($url);
+    }
+
+    /**
      * [getBanksoalByJadwal description]
      * @param  Jadwal $jadwal [description]
      * @return [type]         [description]
@@ -460,8 +500,12 @@ class UjianController extends Controller
         return SendResponse::acceptData($data);
     }
 
-    public function getCapaianSiswaExcel(Jadwal $jadwal, Banksoal $banksoal)
+    public function getCapaianSiswaExcel(Request $request, Jadwal $jadwal, Banksoal $banksoal)
     {
+        if (! $request->hasValidSignature()) {
+            abort(401);
+        }
+
         $soals = Soal::where(function($query) use($banksoal) {
             $query->where('banksoal_id', $banksoal->id)
             ->where('tipe_soal','!=','2');
@@ -499,7 +543,16 @@ class UjianController extends Controller
 
         $export = new CapaianExport($data);
 
-        return Excel::download($export, 'capaian_siswa_'.$banksoal->kode_banksoal.'.xlsx');
+        return Excel::download($export, 'Capaian siswa '.$banksoal->kode_banksoal.' '.$jadwal->alias.'.xlsx');
+    }
+
+    public function getCapaianSiswaExcelLink(Jadwal $jadwal, Banksoal $banksoal)
+    {
+        $url = URL::temporarySignedRoute(
+            'capaian.download.excel', now()->addMinutes(5),['jadwal' => $jadwal->id, 'banksoal' => $banksoal->id]
+        );
+
+        return SendResponse::acceptData($url);
     }
 
     public function getHasilUjianDetail(HasilUjian $hasil)
@@ -511,6 +564,25 @@ class UjianController extends Controller
         ])
         ->get();
 
-        return SendResponse::acceptData($jawaban);
+        $data = $jawaban->map(function($item) {
+            return [
+                'banksoal_id' => $item->banksoal_id,
+                'esay' => $item->esay,
+                'esay_result' => $item->esay_result,
+                'id' => $item->id,
+                'iscorrect' => $item->iscorrect,
+                'jadwal_id' => $item->jawab_id,
+                'jawab' => $item->jawab,
+                'jawab_complex' => json_decode($item->jawab_complex),
+                'peserta_id' => $item->peserta_id,
+                'ragu_ragu' => $item->ragu_ragu,
+                'similiar' => $item->similiar,
+                'soal' => $item->soal,
+                'soal_id' => $item->soal_id,
+                'updated_at' => $item->updated_at,
+            ];
+        });
+
+        return SendResponse::acceptData($data);
     }
 }
