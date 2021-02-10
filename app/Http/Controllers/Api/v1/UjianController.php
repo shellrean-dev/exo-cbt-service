@@ -6,6 +6,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\URL;
+use App\Exports\CapaianSiswaExport;
 use App\Exports\HasilUjianExport;
 use App\Exports\CapaianExport;
 use App\Actions\SendResponse;
@@ -541,9 +542,13 @@ class UjianController extends Controller
             'soals' => $soals
         ];
 
-        $export = new CapaianExport($data);
+        $spreadsheet = CapaianSiswaExport::export($data, $banksoal->kode_banksoal, $jadwal->alias);
+        $writer = new Xlsx($spreadsheet);
 
-        return Excel::download($export, 'Capaian siswa '.$banksoal->kode_banksoal.' '.$jadwal->alias.'.xlsx');
+        $filename = 'Capaian siswa '.$banksoal->kode_banksoal.' '.$jadwal->alias;
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="'.$filename.'.xlsx"');
+        $writer->save('php://output');
     }
 
     public function getCapaianSiswaExcelLink(Jadwal $jadwal, Banksoal $banksoal)
