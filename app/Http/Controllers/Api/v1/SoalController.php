@@ -45,7 +45,7 @@ class SoalController extends Controller
                 'direction'     => $request->direction
             ]);
 
-            if(in_array($request->tipe_soal, [1,3,4,5])) {
+            if(in_array($request->tipe_soal, [1,3,4,5,6])) {
                 $data = [];
                 foreach($request->pilihan as $key=>$pilihan) {
                     if(in_array($request->tipe_soal, [1,3])) { // The tipe soal is PG, Listening
@@ -209,7 +209,7 @@ class SoalController extends Controller
             $soal->rujukan = $request->rujukan;
             $soal->save();
 
-            if(in_array($request->tipe_soal, [1,3,4,5])) {
+            if(in_array($request->tipe_soal, [1,3,4,5,6])) {
                 DB::table('jawaban_soals')->where('soal_id',$request->soal_id)->delete();
                 $data = [];
                 foreach($request->pilihan as $key=>$pilihan) {
