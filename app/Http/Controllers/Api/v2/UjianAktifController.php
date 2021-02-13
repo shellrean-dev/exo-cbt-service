@@ -186,6 +186,7 @@ class UjianAktifController extends Controller
             $max_esay = $banksoal->jumlah_soal_esay;
             $max_listening = $banksoal->jumlah_soal_listening;
             $max_complex = $banksoal->jumlah_soal_ganda_kompleks;
+            $max_menjodohkan = $banksoal->jumlah_menjodohkan;
 
 
             // Soal Pilihan Ganda
@@ -280,13 +281,37 @@ class UjianAktifController extends Controller
                 ];
             });
 
+            // Soal  menjodohkan
+            $menjodohkan = Soal::where([
+                'banksoal_id'   => $banksoal->id,
+                'tipe_soal'     => 5
+            ]);
+            if($jadwal->setting['acak_soal'] == "1") {
+                $menjodohkan = $menjodohkan->inRandomOrder();
+            }
+            $menjodohkan = $menjodohkan->take($max_menjodohkan)->get();
+
+            $soal_menjodohkan = $menjodohkan->map(function($item) use($peserta, $banksoal, $jadwal) {
+                return [
+                    'peserta_id'    => $peserta->id,
+                    'banksoal_id'   => $banksoal->id,
+                    'soal_id'       => $item->id,
+                    'jawab'         => 0,
+                    'iscorrect'     => 0,
+                    'jadwal_id'     => $jadwal->id,
+                    'ragu_ragu'     => 0,
+                    'esay'          => ''
+                ];
+            });
+
             // Merges dengan urutan
             $soals = [];
             $list = collect([
                 '1' => $soal_pg->values()->toArray(),
                 '2' => $soal_esay->values()->toArray(),
                 '3' => $soal_listening->values()->toArray(),
-                '4' => $soal_complex->values()->toArray()
+                '4' => $soal_complex->values()->toArray(),
+                '5' => $soal_menjodohkan->values()->toArray(),
             ]);
             foreach ($jadwal->setting['list'] as $value) {
                 $soal = $list->get($value['id']);
