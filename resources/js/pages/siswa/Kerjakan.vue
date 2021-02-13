@@ -29,12 +29,11 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="2" :style="'font-size:'+range+'px !important'"
-                                v-html="filleds[questionIndex].soal.pertanyaan"></td>
+                                <td colspan="2" :style="'font-size:'+range+'px !important'"><RenderString :string="changeToZoomer(filleds[questionIndex].soal.pertanyaan)" /></td>
                             </tr>
                             <tr v-for="(jawab,index) in filleds[questionIndex].soal.jawabans" :key="index">
                                 <td width="50px" :style="'font-size:'+range+'px !important'">
-                                    <b-form-radio v-model="selected" name="jwb" :value="jawab.id"  @change="selectOption(index)" v-if="[1,3].includes(parseInt(filleds[questionIndex].soal.tipe_soal))">
+                                    <b-form-radio size="lg"v-model="selected" name="jwb" :value="jawab.id"  @change="selectOption(index)" v-if="[1,3].includes(parseInt(filleds[questionIndex].soal.tipe_soal))">
                                         <span class="text-uppercase">{{ index | charIndex }}</span>.
                                     </b-form-radio>
                                     <label class="checkbox" v-if="4 == parseInt(filleds[questionIndex].soal.tipe_soal)">
@@ -144,6 +143,7 @@ import { mapActions, mapState, mapGetters, mapMutations} from 'vuex'
 import AudioPlayer from '../../components/siswa/AudioPlayer.vue'
 import _ from 'lodash'
 import { successToas, errorToas} from '../../entities/notif'
+import RenderString from '../../components/siswa/RenderString'
 
 export default {
     name: 'KerjakannUjian',
@@ -341,6 +341,17 @@ export default {
                 this.$bvToast.toast('Terjadi kesalahan, cek koneksi internet', errorToas())
             })
         },
+        changeToZoomer(string) {
+            var elem = document.createElement("div");
+            elem.innerHTML = string;
+
+            var images = elem.getElementsByTagName("img");
+
+            for(var i=0; i < images.length; i++){
+                string = string.replace(/<img.*?>/, `<img role="button" src="${images[i].src}" @click="showImage('${images[i].src}')" />`)
+            }
+            return string
+        }
     },
     async created() {
         try {
@@ -455,5 +466,6 @@ export default {
  .checkbox__input input:disabled + .checkbox__control {
      color: var(--disabled);
 }
+
 
 </style>
