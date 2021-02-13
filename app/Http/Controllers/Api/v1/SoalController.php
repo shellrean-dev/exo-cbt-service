@@ -45,7 +45,7 @@ class SoalController extends Controller
                 'direction'     => $request->direction
             ]);
 
-            if(in_array($request->tipe_soal, [1,3,4])) {
+            if(in_array($request->tipe_soal, [1,3,4,5])) {
                 $data = [];
                 foreach($request->pilihan as $key=>$pilihan) {
                     if(in_array($request->tipe_soal, [1,3])) { // The tipe soal is PG, Listening
@@ -57,6 +57,22 @@ class SoalController extends Controller
                     else {
                         $correct = '0';
                     }
+
+                    // If type question menjodohkan
+                    if ($request->tipe_soal == 5) {
+                        $pair = [
+                            "a"  => [
+                                "id"    => "a".uniqid(),
+                                "text"  => $pilihan["a"]
+                            ],
+                            "b"  => [
+                                "id"    => "b".uniqid(),
+                                "text"  => $pilihan["b"]
+                            ]
+                        ];
+                        $pilihan = json_encode($pair);
+                    }
+
                     array_push($data, [
                         'soal_id'       => $soal->id,
                         'text_jawaban'  => $pilihan,
@@ -193,7 +209,7 @@ class SoalController extends Controller
             $soal->rujukan = $request->rujukan;
             $soal->save();
 
-            if(in_array($request->tipe_soal, [1,3,4])) {
+            if(in_array($request->tipe_soal, [1,3,4,5])) {
                 DB::table('jawaban_soals')->where('soal_id',$request->soal_id)->delete();
                 $data = [];
                 foreach($request->pilihan as $key=>$pilihan) {
@@ -206,6 +222,22 @@ class SoalController extends Controller
                     else {
                         $correct = '0';
                     }
+
+                    // If type question menjodohkan
+                    if ($request->tipe_soal == 5) {
+                        $pair = [
+                            "a"  => [
+                                "id"    => "a".uniqid(),
+                                "text"  => $pilihan["a"]
+                            ],
+                            "b"  => [
+                                "id"    => "b".uniqid(),
+                                "text"  => $pilihan["b"]
+                            ]
+                        ];
+                        $pilihan = json_encode($pair);
+                    }
+
                     array_push($data, [
                         'soal_id'       => $soal->id,
                         'text_jawaban'  => $pilihan,
@@ -256,6 +288,10 @@ class SoalController extends Controller
         $soal = Soal::with('jawabans')->where('banksoal_id',$banksoal->id);
         if (request()->q != '') {
             $soal = $soal->where('pertanyaan', 'LIKE', '%'. request()->q.'%');
+        }
+
+        if (request()->t != '') {
+            $soal = $soal->where("tipe_soal", request()->t);
         }
 
         if (request()->perPage != '') {
