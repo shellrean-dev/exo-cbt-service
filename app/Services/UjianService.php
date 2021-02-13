@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use App\SiswaUjian;
 use App\HasilUjian;
 use App\JawabanPeserta;
+use Illuminate\Support\Arr;
 
 class UjianService
 {
@@ -94,6 +95,24 @@ class UjianService
         ->get()
         ->makeHidden('similiar');
         $data = $find->map(function($item) {
+            if ($item->soal->tipe_soal == 5) {
+                $jwra = [];
+                $jwrb = [];
+                foreach($item->soal->jawabans as $key => $jwb) {
+                    $jwb_arr = json_decode($jwb->text_jawaban, true);
+                    array_push($jwra, [
+                        'id' => $jwb_arr['a']['id'],
+                        'text' => $jwb_arr['a']['text'],
+                    ]);
+                    array_push($jwrb, [
+                        'id' => $jwb_arr['b']['id'],
+                        'text' => $jwb_arr['b']['text'],
+                    ]);   
+                }
+
+                $jwra = Arr::shuffle($jwra);
+                $jwrb = Arr::shuffle($jwrb);
+            }
             return [
                 'id'    => $item->id,
                 'banksoal_id' => $item->banksoal_id,
@@ -101,7 +120,20 @@ class UjianService
                 'jawab' => $item->jawab,
                 'esay' => $item->esay,
                 'jawab_complex' => json_decode($item->jawab_complex, true),
-                'soal' => $item->soal,
+                'soal' => [
+                    'audio' => $item->soal->audio,
+                    'banksoal_id' => $item->soal->banksoal_id,
+                    'direction' => $item->soal->direction,
+                    'id' => $item->soal->id,
+                    'jawabans' => in_array($item->soal->tipe_soal, [1,2,3,4]) ? $item->soal->jawabans : $item->soal->jawabans->map(function($jw, $index) use ($jwra, $jwrb){
+                        return [
+                            'a' => $jwra[$index],
+                            'b' => $jwrb[$index],
+                        ];
+                    }),
+                    'pertanyaan' => $item->soal->pertanyaan,
+                    'tipe_soal' => $item->soal->tipe_soal,
+                ],
                 'ragu_ragu' => $item->ragu_ragu,
             ];
         });
