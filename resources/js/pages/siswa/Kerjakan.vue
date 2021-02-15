@@ -49,8 +49,11 @@
                                 </td>
                                 <td :style="'font-size:'+range+'px !important'" v-html="jawab.text_jawaban"></td>
                             </tr>
-                            <tr v-if="filleds[questionIndex].soal.tipe_soal == 2">
-                                <td height="auto">
+                            <tr v-if="[2,6].includes(filleds[questionIndex].soal.tipe_soal)">
+                                <td v-if="filleds[questionIndex].soal.tipe_soal == 6">
+                                    <input type="text" v-model="filleds[questionIndex].esay" @keyup="onInput"/>
+                                </td>
+                                <td height="auto" v-if="filleds[questionIndex].soal.tipe_soal == 2">
                                     <ckeditor v-model="filleds[questionIndex].esay" :config="editorConfig"
                                     @input="onInput"  type="inline">
                                     </ckeditor>
@@ -226,15 +229,25 @@ export default {
         },
         inputJawabEssy(val) {
             const fill = this.filleds[this.questionIndex]
-
-            this.submitJawabanEssy({
-                jawaban_id : this.filleds[this.questionIndex].id,
-                index : this.questionIndex,
-                essy: fill.esay
-            })
-            .catch((error) => {
-                this.$bvToast.toast(error.message, errorToas())
-            })
+            if (this.filleds[this.questionIndex].soal.tipe_soal == 2) {
+                this.submitJawabanEssy({
+                    jawaban_id : this.filleds[this.questionIndex].id,
+                    index : this.questionIndex,
+                    essy: fill.esay
+                })
+                .catch((error) => {
+                    this.$bvToast.toast(error.message, errorToas())
+                })
+            } else if (this.filleds[this.questionIndex].soal.tipe_soal == 6) {
+               this.submitJawabanEssy({
+                    jawaban_id : this.filleds[this.questionIndex].id,
+                    index : this.questionIndex,
+                    isian: fill.esay
+                })
+                .catch((error) => {
+                    this.$bvToast.toast(error.message, errorToas())
+                })
+            }
         },
         onInput: _.debounce(function (value) {
           this.inputJawabEssy(value)

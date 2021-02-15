@@ -42,7 +42,7 @@ class UjianController extends Controller
             ->where('status_ujian','=',3);
         })->first();
 
-        if($ujian) {         
+        if($ujian) {
             UjianService::kurangiSisaWaktu($ujian);
         }
 
@@ -59,7 +59,34 @@ class UjianController extends Controller
                 'esay' => $find->esay,
                 'ragu_ragu' => $find->ragu_ragu,
             ];
-            
+
+            return response()->json(['data' => $send,'index' => $request->index]);
+        }
+
+        if(isset($request->isian)) {
+            $jwb_soals = JawabanSoal::where('soal_id', $find->soal_id)->get();
+            foreach($jwb_soals as $jwb) {
+                $jwb_strip = strip_tags($jwb->text_jawaban);
+                if (trim($jwb_strip) == trim($request->isian)) {
+                    $find->iscorrect = 1;
+                    break;
+                }
+                $find->iscorrect = 0;
+            }
+
+            $find->esay = $request->isian;
+            $find->save();
+
+            $send = [
+                'id'    => $find->id,
+                'banksoal_id' => $find->banksoal_id,
+                'soal_id' => $find->soal_id,
+                'jawab' => $find->jawab,
+                'jawab_complex' => json_decode($find->jawab_complex, true),
+                'esay' => $find->esay,
+                'ragu_ragu' => $find->ragu_ragu,
+            ];
+
             return response()->json(['data' => $send,'index' => $request->index]);
         }
 
@@ -118,17 +145,17 @@ class UjianController extends Controller
             'ragu_ragu' => $find->ragu_ragu,
         ];
     	return response()->json(['data' => $send,'index' => $request->index]);
-    	
+
     }
 
-    /** 
+    /**
      * Set ragu ragu in siswa
      *
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      * @author shellrean <wandnak17@gmail.com>
      */
-    public function setRagu(Request $request) 
+    public function setRagu(Request $request)
     {
         $peserta = request()->get('peserta-auth');
 
@@ -137,7 +164,7 @@ class UjianController extends Controller
         ])->first();
 
         if(!isset($request->ragu_ragu)) {
-            return response()->json(['data' => $send,'index' => $request->index]); 
+            return response()->json(['data' => $send,'index' => $request->index]);
         }
 
         $ujian = SiswaUjian::where(function($query) use($peserta) {
@@ -145,7 +172,7 @@ class UjianController extends Controller
             ->where('status_ujian','=',3);
         })->first();
 
-        if($ujian) {         
+        if($ujian) {
             UjianService::kurangiSisaWaktu($ujian);
         }
 
@@ -178,12 +205,12 @@ class UjianController extends Controller
             'jadwal_id'     => $ujian->jadwal_id,
         ])->first();
 
-        if($hasilUjian) { 
+        if($hasilUjian) {
             return SendResponse::accept();
         }
 
         $jawaban = JawabanPeserta::where([
-            'jadwal_id'     => $ujian->jadwal_id, 
+            'jadwal_id'     => $ujian->jadwal_id,
             'peserta_id'    => $peserta->id
         ])->first();
 
@@ -196,4 +223,4 @@ class UjianController extends Controller
         return SendResponse::accept();
     }
 }
- 
+

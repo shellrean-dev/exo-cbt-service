@@ -107,12 +107,26 @@ class UjianService
                     array_push($jwrb, [
                         'id' => $jwb_arr['b']['id'],
                         'text' => $jwb_arr['b']['text'],
-                    ]);   
+                    ]);
                 }
 
                 $jwra = Arr::shuffle($jwra);
                 $jwrb = Arr::shuffle($jwrb);
             }
+
+
+            $jawabans = [];
+            if (in_array($item->soal->tipe_soa, [1,2,3,4,5])) {
+                $jawabans = in_array($item->soal->tipe_soal, [1,2,3,4])
+                    ? $item->soal->jawabans
+                    : $item->soal->jawabans->map(function($jw, $index) use ($jwra, $jwrb){
+                    return [
+                        'a' => $jwra[$index],
+                        'b' => $jwrb[$index],
+                    ];
+                });
+            }
+
             return [
                 'id'    => $item->id,
                 'banksoal_id' => $item->banksoal_id,
@@ -125,12 +139,7 @@ class UjianService
                     'banksoal_id' => $item->soal->banksoal_id,
                     'direction' => $item->soal->direction,
                     'id' => $item->soal->id,
-                    'jawabans' => in_array($item->soal->tipe_soal, [1,2,3,4]) ? $item->soal->jawabans : $item->soal->jawabans->map(function($jw, $index) use ($jwra, $jwrb){
-                        return [
-                            'a' => $jwra[$index],
-                            'b' => $jwrb[$index],
-                        ];
-                    }),
+                    'jawabans' => $jawabans,
                     'pertanyaan' => $item->soal->pertanyaan,
                     'tipe_soal' => $item->soal->tipe_soal,
                 ],
@@ -279,7 +288,7 @@ class UjianService
                     'peserta_id'    => $peserta_id
                 ])
                 ->whereHas('soal', function($query) {
-                    $query->where('tipe_soal','=', '5');
+                    $query->where('tipe_soal','=', '6');
                 })
                 ->count();
                 $isian_singkat_salah = JawabanPeserta::where([
@@ -288,7 +297,7 @@ class UjianService
                     'peserta_id'    => $peserta_id,
                 ])
                 ->whereHas('soal', function($query) {
-                    $query->where('tipe_soal','5');
+                    $query->where('tipe_soal','6');
                 })
                 ->count();
 
@@ -297,7 +306,7 @@ class UjianService
                     'peserta_id'    => $peserta_id
                 ])
                 ->whereHas('soal', function($query) {
-                    $query->where('tipe_soal','=', '5');
+                    $query->where('tipe_soal','=', '6');
                 })
                 ->count();
 
@@ -317,7 +326,7 @@ class UjianService
                     'peserta_id'    => $peserta_id
                 ])
                 ->whereHas('soal', function($query) {
-                    $query->where('tipe_soal','=', '6');
+                    $query->where('tipe_soal','=', '5');
                 })
                 ->count();
                 $jumlah_menjodohkan_salah = JawabanPeserta::where([
@@ -326,7 +335,7 @@ class UjianService
                     'peserta_id'    => $peserta_id,
                 ])
                 ->whereHas('soal', function($query) {
-                    $query->where('tipe_soal','6');
+                    $query->where('tipe_soal','5');
                 })
                 ->count();
 
@@ -335,7 +344,7 @@ class UjianService
                     'peserta_id'    => $peserta_id
                 ])
                 ->whereHas('soal', function($query) {
-                    $query->where('tipe_soal','=', '6');
+                    $query->where('tipe_soal','=', '5');
                 })
                 ->count();
 
