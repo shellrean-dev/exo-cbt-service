@@ -25,6 +25,10 @@ use Illuminate\Support\Facades\Route;
     Route::get('login/callback', 'AuthController@callback');
     Route::get('settings/auth', 'SettingController@getSetAuth');
 
+    // Download excel
+    Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel', 'UjianController@getCapaianSiswaExcel')->name('capaian.download.excel');
+    Route::get('ujians/{jadwal}/result/excel', 'UjianController@getResultExcel')->name('hasilujian.download.excel');
+
     Route::group(['middleware' => 'auth:api'], function() {
         Route::get('user-authenticated', 'UserController@getUserLogin');
         Route::get('user-lists', 'UserController@userLists');
@@ -34,7 +38,7 @@ use Illuminate\Support\Facades\Route;
         Route::apiResource('users', 'UserController');
 
         Route::get('agamas', 'AgamaController@index');
-        
+
         Route::get('jurusans/all', 'JurusanController@allData');
         Route::post('jurusans/delete-multiple', 'JurusanController@destroyMultiple');
         Route::apiResource('jurusans', 'JurusanController');
@@ -52,6 +56,7 @@ use Illuminate\Support\Facades\Route;
 
         Route::get('banksoals/{banksoal}/analys', 'BanksoalController@getAnalys');
         Route::get('banksoals/all', 'BanksoalController@allData');
+        Route::get('banksoals/{banksoal}/duplikat', 'BanksoalController@duplikat');
         Route::apiResource('banksoals', 'BanksoalController');
 
         Route::post('soals/import-word/{banksoal}', 'SoalController@wordImport');
@@ -86,9 +91,12 @@ use Illuminate\Support\Facades\Route;
         Route::post('ujians/esay/input', 'UjianController@storeNilaiEsay');
         Route::get('ujians/esay/{banksoal}/koreksi', 'UjianController@getExistEsayByBanksoal');
         Route::get('ujians/{jadwal}/result', 'UjianController@getResult');
+        Route::get('ujians/{jadwal}/result/link', 'UjianController@getResultExcelLink');
+
         Route::get('ujians/{jadwal}/result/banksoal', 'UjianController@getBanksoalByJadwal');
         Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa', 'UjianController@getCapaianSiswa');
-        Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel', 'UjianController@getCapaianSiswaExcel');
+
+        Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/link', 'UjianController@getCapaianSiswaExcelLink');
         Route::get('ujians/all', 'UjianController@allData');
         Route::get('ujians/active-status', 'UjianController@getActive');
         Route::post('ujians/set-status', 'UjianController@setStatus');
@@ -96,7 +104,13 @@ use Illuminate\Support\Facades\Route;
         Route::apiResource('ujians', 'UjianController');
 
         Route::get('events/all', 'EventController@allData');
+        Route::get('events/{id}/ujian', 'EventController@eventDetailData');
         Route::apiResource('events', 'EventController');
+
+        Route::get('sesi', 'SesiScheduleController@studentBySesi');
+        Route::post('sesi', 'SesiScheduleController@pushToSesi');
+        Route::post('sesi/import', 'SesiScheduleController@importToSesi');
+        Route::delete('sesi', 'SesiScheduleController@removeFromSesi');
 
         Route::get('settings/sekolah', 'SettingController@getSettingSekolah');
         Route::post('settings/sekolah', 'SettingController@storeSettingSekolah');
@@ -116,7 +130,7 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2'], function() {
 
     Route::post('logedin','PesertaLoginController@login');
     Route::get('setting', 'PesertaLoginController@getSetting');
-    
+
     Route::group(['middleware' => 'peserta'], function() {
         Route::get('peserta-authenticated', 'PesertaLoginController@authenticated');
         Route::get('peserta/logout','PesertaLoginController@logout');

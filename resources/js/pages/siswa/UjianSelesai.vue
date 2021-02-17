@@ -8,13 +8,13 @@
                     </div>
 					<div class="card-body">
                         <div v-if="typeof setting.text != 'undefined' && setting.text.finish != null && setting.text.finish != ''" v-html="setting.text.finish">
-                            
+
                         </div>
 						<p v-else>
 						Anda telah selesai mengerjakan ujian ini. <br>
                         Terimakasih, prestasi penting jujur yang utama</p>
                         <br><br>
-						<button type="button" class="btn btn-info w-100 rounded-pill btn-form-ajax" @click="logout" :disabled="isLoading">{{ isLoading ? 'Loading...' : 'Logout' }}</button>
+                        <button type="button" class="btn btn-info w-100 rounded-pill btn-form-ajax" @click="$router.push({name: 'ujian.konfirm' })" :disabled="isLoading">{{ isLoading ? 'Loading...' : 'Ke halaman utama' }}</button>
 					</div>
 				</div>
 			</div>
@@ -31,7 +31,9 @@ export default {
     },
 	methods: {
       ...mapActions('siswa_auth',['logoutPeserta']),
-      async logout() { 
+      ...mapActions('siswa_jadwal',['ujianAktif']),
+      ...mapActions('siswa_ujian',['getPesertaUjian']),
+      async logout() {
             try {
                 await this.logoutPeserta()
                 localStorage.removeItem('token')
@@ -41,6 +43,16 @@ export default {
                 this.$bvToast.toast(error.message, errorToas())
             }
         }
-    }
+    },
+    async created() {
+        try {
+            if(this.$route.name != 'ujian.while') {
+                await this.ujianAktif()
+                await this.getPesertaUjian()
+            }
+        } catch (error) {
+            this.$bvToast.toast(error.message, errorToas())
+        }
+    },
 }
 </script>

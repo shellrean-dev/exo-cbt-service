@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\URL;
+use App\Exports\CapaianSiswaExport;
+use App\Exports\HasilUjianExport;
 use App\Exports\CapaianExport;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
@@ -33,7 +37,7 @@ class UjianController extends Controller
         } else {
             $ujian = $ujian->paginate(20);
         }
-        $ujian->makeHidden('banksoal_id'); 
+        $ujian->makeHidden('banksoal_id');
         return SendResponse::acceptData($ujian);
     }
 
@@ -51,6 +55,7 @@ class UjianController extends Controller
             'lama'              => 'required|int',
             'alias'             => 'required',
             'banksoal_id'       => 'required|array',
+            'event_id'          => 'required|exists:event_ujians,id',
             'setting'           => 'required|array'
         ]);
 
@@ -60,7 +65,7 @@ class UjianController extends Controller
             'tanggal'           => date('Y-m-d',strtotime($request->tanggal)),
             'status_ujian'      => 0,
             'alias'             => $request->alias,
-            'event_id'          => $request->event_id,
+            'event_id'          => $request->event_id == '' ? 0 : $request->event_id,
             'setting'           => $request->setting
         ];
 
@@ -72,16 +77,16 @@ class UjianController extends Controller
                     'jurusan' => $banksol['matpel']['jurusan_id']
                 ];
                 array_push($fill, $fush);
-            }   
+            }
 
             $data['banksoal_id'] = $fill;
         }
 
-        if($request->server_id != '') { 
+        if($request->server_id != '') {
             $fill = array();
             foreach($request->server_id as $server) {
                 array_push($fill, $server['server_name']);
-            }   
+            }
 
             $data['server_id'] = $fill;
         }
@@ -125,7 +130,7 @@ class UjianController extends Controller
             'lama'          => $request->lama*60,
             'tanggal'       => date('Y-m-d', strtotime($request->tanggal)),
             'alias'         => $request->alias,
-            'event_id'      => $request->event_id,
+            'event_id'      => $request->event_id == '' ? 0 : $request->event_id,
             'setting'           => $request->setting
         ];
 
@@ -206,7 +211,7 @@ class UjianController extends Controller
     {
         $has = JawabanEsay::all()->pluck('jawab_id')->unique();
         $user = request()->user('api');
-        
+
         $exists = JawabanPeserta::where( function ($query) use ($has) {
             $query->whereNotIn('id', $has)
             ->whereHas('pertanyaan', function($q) {
@@ -243,7 +248,7 @@ class UjianController extends Controller
         $has = JawabanEsay::where('banksoal_id', $banksoal->id)
         ->get()
         ->pluck('jawab_id');
-        
+
         $exists = JawabanPeserta::where( function ($query) use ($has, $banksoal) {
             $query->whereNotIn('id', $has)
             ->whereHas('pertanyaan', function($q) {
@@ -274,15 +279,15 @@ class UjianController extends Controller
 
         $jawab = JawabanPeserta::find($request->id);
 
-        $user = request()->user('api'); 
+        $user = request()->user('api');
 
         $has = JawabanEsay::where('banksoal_id', $jawab->banksoal_id)
         ->get()->pluck('jawab_id');
-        
+
         $sames = JawabanPeserta::whereNotIn('id',$has)
         ->where([
-            'esay' => $jawab->esay, 
-            'banksoal_id' => $jawab->banksoal_id, 
+            'esay' => $jawab->esay,
+            'banksoal_id' => $jawab->banksoal_id,
             'soal_id' => $jawab->soal_id
         ])
         ->get();
@@ -315,7 +320,7 @@ class UjianController extends Controller
                 } else {
                     $hasil_esay = $hasil->point_esay;
                 }
-                
+
                 $hasil_val = ($hasil_ganda)+($hasil_esay*$same->banksoal->persen['esay']);
 
                 $hasil->point_esay = $hasil_esay;
@@ -400,6 +405,43 @@ class UjianController extends Controller
     }
 
     /**
+     *
+     */
+    public function getResultExcel(Request $request, Jadwal $jadwal)
+    {
+        if (! $request->hasValidSignature()) {
+            abort(401);
+        }
+
+        $res = HasilUjian::with(['peserta' => function ($query) {
+            $query->select('id','nama','no_ujian');
+        }])
+        ->where('jadwal_id', $jadwal->id)
+        ->orderBy('peserta_id')
+        ->get();
+
+        $spreadsheet = HasilUjianExport::export($res,$jadwal->alias);
+        $writer = new Xlsx($spreadsheet);
+
+        $filename = 'Hasil ujian '.$jadwal->alias;
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="'.$filename.'.xlsx"');
+        $writer->save('php://output');
+    }
+
+    /**
+     *
+     */
+    public function getResultExcelLink(Jadwal $jadwal)
+    {
+        $url = URL::temporarySignedRoute(
+            'hasilujian.download.excel', now()->addMinutes(5),['jadwal' => $jadwal->id]
+        );
+
+        return SendResponse::acceptData($url);
+    }
+
+    /**
      * [getBanksoalByJadwal description]
      * @param  Jadwal $jadwal [description]
      * @return [type]         [description]
@@ -410,7 +452,7 @@ class UjianController extends Controller
         ->get()->pluck('banksoal_id');
 
         $bankSoal = Banksoal::find($res);
-        return SendResponse::acceptData($bankSoal); 
+        return SendResponse::acceptData($bankSoal);
     }
 
     /**
@@ -444,9 +486,9 @@ class UjianController extends Controller
 
         $fill = $grouped->map(function($value, $key) {
             return [
-                'peserta' => [ 
+                'peserta' => [
                     'no_ujian' => $value[0]->peserta->no_ujian,
-                    'nama' => $value[0]->peserta->nama 
+                    'nama' => $value[0]->peserta->nama
                 ],
                 'data' => $value
             ];
@@ -459,8 +501,12 @@ class UjianController extends Controller
         return SendResponse::acceptData($data);
     }
 
-    public function getCapaianSiswaExcel(Jadwal $jadwal, Banksoal $banksoal)
+    public function getCapaianSiswaExcel(Request $request, Jadwal $jadwal, Banksoal $banksoal)
     {
+        if (! $request->hasValidSignature()) {
+            abort(401);
+        }
+
         $soals = Soal::where(function($query) use($banksoal) {
             $query->where('banksoal_id', $banksoal->id)
             ->where('tipe_soal','!=','2');
@@ -484,9 +530,9 @@ class UjianController extends Controller
 
         $fill = $grouped->map(function($value, $key) {
             return [
-                'peserta' => [ 
+                'peserta' => [
                     'no_ujian' => $value[0]->peserta->no_ujian,
-                    'nama' => $value[0]->peserta->nama 
+                    'nama' => $value[0]->peserta->nama
                 ],
                 'data' => $value
             ];
@@ -496,12 +542,25 @@ class UjianController extends Controller
             'soals' => $soals
         ];
 
-        $export = new CapaianExport($data);
+        $spreadsheet = CapaianSiswaExport::export($data, $banksoal->kode_banksoal, $jadwal->alias);
+        $writer = new Xlsx($spreadsheet);
 
-        return Excel::download($export, 'capaian_siswa_'.$banksoal->kode_banksoal.'.xlsx');
+        $filename = 'Capaian siswa '.$banksoal->kode_banksoal.' '.$jadwal->alias;
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="'.$filename.'.xlsx"');
+        $writer->save('php://output');
     }
 
-    public function getHasilUjianDetail(HasilUjian $hasil) 
+    public function getCapaianSiswaExcelLink(Jadwal $jadwal, Banksoal $banksoal)
+    {
+        $url = URL::temporarySignedRoute(
+            'capaian.download.excel', now()->addMinutes(5),['jadwal' => $jadwal->id, 'banksoal' => $banksoal->id]
+        );
+
+        return SendResponse::acceptData($url);
+    }
+
+    public function getHasilUjianDetail(HasilUjian $hasil)
     {
         $jawaban = JawabanPeserta::with(['esay_result','soal','soal.jawabans'])
         ->where([
@@ -510,6 +569,25 @@ class UjianController extends Controller
         ])
         ->get();
 
-        return SendResponse::acceptData($jawaban);
+        $data = $jawaban->map(function($item) {
+            return [
+                'banksoal_id' => $item->banksoal_id,
+                'esay' => $item->esay,
+                'esay_result' => $item->esay_result,
+                'id' => $item->id,
+                'iscorrect' => $item->iscorrect,
+                'jadwal_id' => $item->jawab_id,
+                'jawab' => $item->jawab,
+                'jawab_complex' => $item->jawab_complex,
+                'peserta_id' => $item->peserta_id,
+                'ragu_ragu' => $item->ragu_ragu,
+                'similiar' => $item->similiar,
+                'soal' => $item->soal,
+                'soal_id' => $item->soal_id,
+                'updated_at' => $item->updated_at,
+            ];
+        });
+
+        return SendResponse::acceptData($data);
     }
 }

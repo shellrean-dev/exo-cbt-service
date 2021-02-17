@@ -8,6 +8,7 @@ use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\JawabanPeserta;
+use App\JawabanSoal;
 use App\Directory;
 use App\Banksoal;
 use App\Soal;
@@ -57,6 +58,9 @@ class BanksoalController extends Controller
             'jumlah_pilihan'    => 'required|int',
             'jumlah_soal_listening' => 'required|int',
             'jumlah_pilihan_listening' => 'required|int',
+            'jumlah_soal_ganda_kompleks' => 'required|int',
+            'jumlah_isian_singkat' => 'required|int',
+            'jumlah_menjodohkan' => 'required|int',
             'persen'            => 'required|array'
         ]);
 
@@ -77,6 +81,9 @@ class BanksoalController extends Controller
                 'jumlah_soal_esay'  => $request->jumlah_soal_esay,
                 'jumlah_soal_listening' => $request->jumlah_soal_listening,
                 'jumlah_pilihan_listening' => $request->jumlah_pilihan_listening,
+                'jumlah_soal_ganda_kompleks' => $request->jumlah_soal_ganda_kompleks,
+                'jumlah_isian_singkat' => $request->jumlah_isian_singkat,
+                'jumlah_menjodohkan' => $request->jumlah_menjodohkan,
                 'persen'            => $request->persen,
                 'directory_id'      => $direk->id
             ];
@@ -120,6 +127,9 @@ class BanksoalController extends Controller
             'jumlah_pilihan'    => 'required|int',
             'jumlah_soal_listening' => 'required|int',
             'jumlah_pilihan_listening' => 'required|int',
+            'jumlah_soal_ganda_kompleks' => 'required|int',
+            'jumlah_isian_singkat' => 'required|int',
+            'jumlah_menjodohkan' => 'required|int',
             'persen'            => 'required|array'
         ]);
 
@@ -133,6 +143,9 @@ class BanksoalController extends Controller
         $banksoal->jumlah_soal_esay = $request->jumlah_soal_esay;
         $banksoal->jumlah_soal_listening = $request->jumlah_soal_listening;
         $banksoal->jumlah_pilihan_listening = $request->jumlah_pilihan_listening;
+        $banksoal->jumlah_soal_ganda_kompleks = $request->jumlah_soal_ganda_kompleks;
+        $banksoal->jumlah_isian_singkat = $request->jumlah_isian_singkat;
+        $banksoal->jumlah_menjodohkan = $request->jumlah_menjodohkan;
         $banksoal->persen = $request->persen;
         $banksoal->save();
 
@@ -157,7 +170,7 @@ class BanksoalController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
-            return SendResponse::badRequest($e->getMessage()); 
+            return SendResponse::badRequest($e->getMessage());
         }
         return SendResponse::accept();
     }
@@ -217,5 +230,64 @@ class BanksoalController extends Controller
         });
 
         return SendResponse::acceptData($fill);
+    }
+
+    /**
+     * Duplikat banksoal
+     *
+     * @param Banksoal $banksoal
+     * @return \App\Actions\SendResponse
+     * @since 2.0.0
+     */
+    public function duplikat(Banksoal $banksoal)
+    {
+        DB::beginTransaction();
+        try {
+            $soals = Soal::with(['jawabans'])->get();
+            $direk = Directory::create([
+                'name'      => $banksoal->kode_banksoal.' (Copy)',
+                'slug'      => Str::slug($banksoal->kode_banksoal.' (Copy)', '-')
+            ]);
+            $data = [
+                'kode_banksoal'     => $banksoal->kode_banksoal.' (Copy)',
+                'matpel_id'         => $banksoal->matpel_id,
+                'author'            => $banksoal->author,
+                'jumlah_soal'       => $banksoal->jumlah_soal,
+                'jumlah_pilihan'    => $banksoal->jumlah_pilihan,
+                'jumlah_soal_esay'  => $banksoal->jumlah_soal_esay,
+                'jumlah_soal_listening' => $banksoal->jumlah_soal_listening,
+                'jumlah_pilihan_listening' => $banksoal->jumlah_pilihan_listening,
+                'persen'            => $banksoal->persen,
+                'directory_id'      => $direk->id
+            ];
+            $newBanksoal = Banksoal::create($data);
+
+            foreach($soals as $soal){
+                $newSoal = Soal::create([
+                    'banksoal_id'   => $newBanksoal->id,
+                    'pertanyaan'    => $soal->pertanyaan,
+                    'tipe_soal'     => $soal->tipe_soal,
+                    'rujukan'       => $soal->rujukan,
+                    'audio'         => $soal->audio,
+                    'direction'     => $soal->direction
+                ]);
+                if($newSoal->tipe_soal != 2) {
+                    foreach($soal->jawabans as $key=>$pilihan) {
+                        JawabanSoal::create([
+                            'soal_id'       => $newSoal->id,
+                            'text_jawaban'  => $pilihan->text_jawaban,
+                            'correct'       => $pilihan->correct
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return SendResponse::internalServerError($e->getMessage());
+        }
+
+        return SendResponse::accept('Banksoal berhasil digandakan');
     }
 }

@@ -22,6 +22,7 @@ class CreatePesertasTable extends Migration
             $table->string('nama');
             $table->string('password');
             $table->string('api_token')->nullable();
+            $table->integer('status')->default(1);
             $table->timestamps();
         });
     }

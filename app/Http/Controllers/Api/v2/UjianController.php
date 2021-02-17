@@ -11,6 +11,7 @@ use App\SiswaUjian;
 use App\HasilUjian;
 use App\JawabanSoal;
 use Carbon\Carbon;
+use App\Soal;
 
 class UjianController extends Controller
 {
@@ -36,44 +37,130 @@ class UjianController extends Controller
 
         $kj = JawabanSoal::find($request->jawab);
 
-        if(isset($request->essy)) {
-            $find->esay = $request->essy;
-            $find->save();
-
-            $send = $find->only('id','banksoal_id','soal_id','jawab', 'esay','ragu_ragu');
-            
-            return response()->json(['data' => $send,'index' => $request->index]);
-        }
-
         $ujian = SiswaUjian::where(function($query) use($peserta) {
             $query->where('peserta_id', $peserta->id)
             ->where('status_ujian','=',3);
         })->first();
 
-        if($ujian) {         
+        if($ujian) {
             UjianService::kurangiSisaWaktu($ujian);
         }
 
+        if(isset($request->essy)) {
+            $find->esay = $request->essy;
+            $find->save();
+
+            $send = [
+                'id'    => $find->id,
+                'banksoal_id' => $find->banksoal_id,
+                'soal_id' => $find->soal_id,
+                'jawab' => $find->jawab,
+                // 'jawab_complex' => json_decode($find->jawab_complex, true),
+                'jawab_complex' => $find->jawab_complex,
+                'esay' => $find->esay,
+                'ragu_ragu' => $find->ragu_ragu,
+            ];
+
+            return response()->json(['data' => $send,'index' => $request->index]);
+        }
+
+        if(isset($request->isian)) {
+            $jwb_soals = JawabanSoal::where('soal_id', $find->soal_id)->get();
+            foreach($jwb_soals as $jwb) {
+                $jwb_strip = strip_tags($jwb->text_jawaban);
+                if (trim($jwb_strip) == trim($request->isian)) {
+                    $find->iscorrect = 1;
+                    break;
+                }
+                $find->iscorrect = 0;
+            }
+
+            $find->esay = $request->isian;
+            $find->save();
+
+            $send = [
+                'id'    => $find->id,
+                'banksoal_id' => $find->banksoal_id,
+                'soal_id' => $find->soal_id,
+                'jawab' => $find->jawab,
+                // 'jawab_complex' => json_decode($find->jawab_complex, true),
+                'jawab_complex' => $find->jawab_complex,
+                'esay' => $find->esay,
+                'ragu_ragu' => $find->ragu_ragu,
+            ];
+
+            return response()->json(['data' => $send,'index' => $request->index]);
+        }
+
+        if(is_array($request->jawab_complex)) {
+            $soal_complex = Soal::with(['jawabans' => function($query) {
+                $query->where('correct', 1);
+            }])
+            ->where("id", $find->soal_id)->first();
+            if ($soal_complex) {
+                $array = $soal_complex->jawabans->map(function($item){
+                    return $item->id;
+                })->toArray();
+                $correct = 0;
+                $complex = array_diff( $request->jawab_complex, [0] );
+                if (array_diff($array,$complex) == array_diff($complex,$array)) {
+                    $correct = 1;
+                }
+                $find->iscorrect = $correct;
+            }
+            $find->jawab_complex = json_encode($request->jawab_complex);
+            $find->save();
+            $send = [
+                'id'    => $find->id,
+                'banksoal_id' => $find->banksoal_id,
+                'soal_id' => $find->soal_id,
+                'jawab' => $find->jawab,
+                // 'jawab_complex' => json_decode($find->jawab_complex, true),
+                'jawab_complex' => $find->jawab_complex,
+                'esay' => $find->esay,
+                'ragu_ragu' => $find->ragu_ragu,
+            ];
+            return response()->json(['data' => $send,'index' => $request->index]);
+        }
+
         if(!$kj) {
-            $send = $find->only('id','banksoal_id','soal_id','jawab', 'esay','ragu_ragu');
+            $send = [
+                'id'    => $find->id,
+                'banksoal_id' => $find->banksoal_id,
+                'soal_id' => $find->soal_id,
+                'jawab' => $find->jawab,
+                // 'jawab_complex' => json_decode($find->jawab_complex, true),
+                'jawab_complex' => $find->jawab_complex,
+                'esay' => $find->esay,
+                'ragu_ragu' => $find->ragu_ragu,
+            ];
             return response()->json(['data' => $send,'index' => $request->index]);
         }
         $find->jawab = $request->jawab;
         $find->iscorrect = $kj->correct;
         $find->save();
-        $send = $find->only('id','banksoal_id','soal_id','jawab', 'esay');
+        $send = [
+            'id'    => $find->id,
+            'banksoal_id' => $find->banksoal_id,
+            'soal_id' => $find->soal_id,
+            'jawab' => $find->jawab,
+            // 'jawab_complex' => json_decode($find->jawab_complex, true),
+            'jawab_complex' => $find->jawab_complex,
+            'esay' => $find->esay,
+            'ragu_ragu' => $find->ragu_ragu,
+        ];
     	return response()->json(['data' => $send,'index' => $request->index]);
-    	
+
     }
 
-    /** 
+    /**
      * Set ragu ragu in siswa
      *
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      * @author shellrean <wandnak17@gmail.com>
      */
-    public function setRagu(Request $request) 
+    public function setRagu(Request $request)
     {
         $peserta = request()->get('peserta-auth');
 
@@ -82,7 +169,7 @@ class UjianController extends Controller
         ])->first();
 
         if(!isset($request->ragu_ragu)) {
-            return response()->json(['data' => $send,'index' => $request->index]); 
+            return response()->json(['data' => $send,'index' => $request->index]);
         }
 
         $ujian = SiswaUjian::where(function($query) use($peserta) {
@@ -90,7 +177,7 @@ class UjianController extends Controller
             ->where('status_ujian','=',3);
         })->first();
 
-        if($ujian) {         
+        if($ujian) {
             UjianService::kurangiSisaWaktu($ujian);
         }
 
@@ -123,12 +210,12 @@ class UjianController extends Controller
             'jadwal_id'     => $ujian->jadwal_id,
         ])->first();
 
-        if($hasilUjian) { 
+        if($hasilUjian) {
             return SendResponse::accept();
         }
 
         $jawaban = JawabanPeserta::where([
-            'jadwal_id'     => $ujian->jadwal_id, 
+            'jadwal_id'     => $ujian->jadwal_id,
             'peserta_id'    => $peserta->id
         ])->first();
 
@@ -141,4 +228,4 @@ class UjianController extends Controller
         return SendResponse::accept();
     }
 }
- 
+

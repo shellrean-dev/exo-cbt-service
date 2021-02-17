@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use App\EventUjian;
+use App\Jadwal;
 
 class EventController extends Controller
 {
@@ -19,7 +20,9 @@ class EventController extends Controller
         $perPage = isset(request()->paerPage) ? request()->perPage : 10;
         $search = isset(request()->q) ? request()->q : '';
 
-        $events = EventUjian::orderBy('id');
+        $events = EventUjian::with(['ujians' => function($query) {
+            $query->select('id','alias','tanggal','mulai','event_id','banksoal_id')->orderBy('tanggal')->orderBy('mulai');
+        }])->orderBy('id');
         if($search != '') {
             $events = $events->where('name','LIKE','%'.$search.'%');
         }
@@ -96,5 +99,41 @@ class EventController extends Controller
     {
         $events = EventUjian::orderBy('id','DESC')->get();
         return SendResponse::acceptData($events);
+    }
+
+    /**
+     * Get event detail
+     * 
+     * @author shellrean <wandinak17@gmail.com>
+     * @param \App\Repositories\EventRepository
+     * @param @event_id
+     * @return \App\Actions\SendResponse
+     */
+    public function eventDetailData($event_id)
+    {
+        $event = EventUjian::find($event_id);
+        $jadwal = Jadwal::with('sesi')->where('event_id', $event_id)
+        ->orderBy('tanggal')->orderBy('mulai')
+        ->select('id', 'alias','tanggal','mulai')
+        ->get()
+        ->makeHidden('kode_banksoal');
+        
+        return SendResponse::acceptData([
+            'event' => $event,
+            'jadwal' => $jadwal->map(function($item) {
+                return [
+                    'id' => $item->id,
+                    'name' => $item->alias,
+                    'tanggal' => $item->tanggal,
+                    'mulai' => $item->mulai,
+                    'sesi' => $item->sesi->map(function($sesi) {
+                        return [
+                            'sesi' => $sesi->sesi,
+                            'peserta' => $sesi->peserta_ids
+                        ];
+                    })
+                ];
+            }),
+        ]);
     }
 }

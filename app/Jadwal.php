@@ -54,7 +54,16 @@ class Jadwal extends Model
     public function event()
     {
         return $this->belongsTo(EventUjian::class);
-    }   
+    }
+
+    /**
+     * Data Sesi Schedule
+     * @return SesiSchedule    
+     */
+    public function sesi()
+    {
+        return $this->hasMany(SesiSchedule::class);
+    }
 
     /**
      * [getKodeBanksoalAttribute description]

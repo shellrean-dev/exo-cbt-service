@@ -32,8 +32,8 @@ class PesertaLoginController extends Controller
         ])->first();
 
         if($peserta) {
-            if(isset($setting->value['reset']) 
-                && $setting->value['reset'] 
+            if(isset($setting->value['reset'])
+                && $setting->value['reset']
                 && $peserta->api_token != '') {
                     return response()->json([
                         'status'    => 'loggedin'
@@ -43,20 +43,20 @@ class PesertaLoginController extends Controller
             $peserta->update(['api_token' => $token]);
             return response()
             ->json([
-                'status'    => 'success', 
+                'status'    => 'success',
                 'data'      => $peserta->only('nama','no_ujian','sesi'),
                 'token'     => $token
             ],200);
-        }       
+        }
 
-        return response()->json(['status' => 'error']); 
+        return response()->json(['status' => 'error']);
     }
 
     /**
      * [logout description]
      * @return [type] [description]
      */
-    public function logout() 
+    public function logout()
     {
         $user = request()->get('peserta-auth');
 
@@ -83,12 +83,12 @@ class PesertaLoginController extends Controller
         $ujian = Setting::where('name','ujian')->first();
         $return = [
             'sekolah'   => [
-                'logo' => isset($sekolah->value) ? $sekolah->value['logo'] : '',
-                'nama' => isset($sekolah->value) ? $sekolah->value['nama_sekolah'] : ''
+                'logo' => isset($sekolah->value['logo']) ? $sekolah->value['logo'] : '',
+                'nama' => isset($sekolah->value['nama_sekolah']) ? $sekolah->value['nama_sekolah'] : ''
             ],
             'text' => [
-                'welcome' => isset($ujian->value) ? $ujian->value['text_welcome'] : '',
-                'finish'  => isset($ujian->value) ? $ujian->value['text_finish'] : ''
+                'welcome' => isset($ujian->value['text_welcome']) ? $ujian->value['text_welcome'] : '',
+                'finish'  => isset($ujian->value['text_finish']) ? $ujian->value['text_finish'] : ''
             ]
         ];
         return response()->json(['data' => $return]);

@@ -19,7 +19,7 @@
       </div>
       <router-view></router-view>
       <div class="nav-fixed-bottom mb-5">
-        <p class="text-center">&copy; ExtraordinaryCBT 2020 v1.1.0 by Shellrean</p>
+        <p class="text-center">&copy; ExtraordinaryCBT 2020 v2.0.0 by Shellrean</p>
       </div>
   </div>
 </template>
@@ -42,7 +42,7 @@ export default {
         ...mapActions('siswa_jadwal',['ujianAktif']),
         ...mapActions('siswa_auth',['logoutPeserta']),
         ...mapActions('siswa_ujian',['getPesertaDataUjian', 'getPesertaUjian', 'getUncompleteUjian']),
-        async logout() { 
+        async logout() {
             try {
                 await this.logoutPeserta()
                 localStorage.removeItem('token')
@@ -67,7 +67,7 @@ export default {
     watch: {
         uncomplete(val) {
             if(this.$route.name != 'ujian.while' && typeof val.jadwal_id != 'undefined') {
-                this.$router.replace({ 
+                this.$router.replace({
                     name: 'ujian.while'
                 })
             }

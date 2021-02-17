@@ -9,6 +9,7 @@ use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\JawabanPeserta;
+use App\SesiSchedule;
 use App\SiswaUjian;
 use Carbon\Carbon;
 use App\Banksoal;
@@ -23,14 +24,14 @@ class UjianAktifController extends Controller
      * @param  Request $request [description]
      * @return [type]           [description]
      */
-    public function startUjian(Request $request) 
+    public function startUjian(Request $request)
     {
         $request->validate([
             'jadwal_id'     => 'required|exists:jadwals,id'
         ]);
 
         $ujian = Jadwal::find($request->jadwal_id);
-        if($ujian->setting['token'] == "1") {  
+        if($ujian->setting['token'] == "1") {
             $token = Token::orderBy('id')->first();
             if($token) {
                 $to = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', now());
@@ -49,8 +50,26 @@ class UjianAktifController extends Controller
                 }
             }
         }
-
         $peserta = request()->get('peserta-auth');
+
+        if($ujian->event_id != '0') {
+            $schedule = SesiSchedule::where([
+                'jadwal_id' => $ujian->id,
+                'sesi'      => $ujian->sesi
+            ])->first();
+            if($schedule) {
+                if(!in_array($peserta->id, $schedule->peserta_ids)){
+                    return SendResponse::badRequest('Anda tidak ada didalam sesi '.$ujian->sesi);
+                }
+            } else {
+                return SendResponse::badRequest('Sesi belum ditentukan, hubungi administrator');
+            }
+        }
+        else {
+            if($peserta->sesi != $ujian->sesi) {
+                return SendResponse::badRequest('Anda tidak ada didalam sesi '.$ujian->sesi);
+            }
+        }
 
         $data = SiswaUjian::where(function($query) use($peserta, $request) {
             $query->where('peserta_id', $peserta->id)
@@ -92,9 +111,9 @@ class UjianAktifController extends Controller
         if(!$data) {
             $data = [];
         }
-        
+
         return SendResponse::acceptData($data);
-    } 
+    }
 
     /**
      * [startUjianTime description]
@@ -115,7 +134,7 @@ class UjianAktifController extends Controller
             $data->save();
         }
         return SendResponse::accept();
-    } 
+    }
 
 
     /**
@@ -149,7 +168,7 @@ class UjianAktifController extends Controller
             if(!$banksoal['success']) {
                 continue;
             }
-            $banksoal_id = $banksoal['data']; 
+            $banksoal_id = $banksoal['data'];
         }
 
         // Jika tidak dapat menemukan banksoal_id
@@ -166,6 +185,10 @@ class UjianAktifController extends Controller
             $max_pg = $banksoal->jumlah_soal;
             $max_esay = $banksoal->jumlah_soal_esay;
             $max_listening = $banksoal->jumlah_soal_listening;
+            $max_complex = $banksoal->jumlah_soal_ganda_kompleks;
+            $max_menjodohkan = $banksoal->jumlah_menjodohkan;
+            $max_isian_singkat = $banksoal->jumlah_isian_singkat;
+
 
             // Soal Pilihan Ganda
             $pg = Soal::where([
@@ -236,12 +259,84 @@ class UjianAktifController extends Controller
                 ];
             });
 
+            // Soal Multichoice complex
+            $complex = Soal::where([
+                'banksoal_id'   => $banksoal->id,
+                'tipe_soal'     => 4
+            ]);
+            if($jadwal->setting['acak_soal'] == "1") {
+                $complex = $complex->inRandomOrder();
+            }
+            $complex = $complex->take($max_complex)->get();
+
+            $soal_complex = $complex->map(function($item) use($peserta, $banksoal, $jadwal) {
+                return [
+                    'peserta_id'    => $peserta->id,
+                    'banksoal_id'   => $banksoal->id,
+                    'soal_id'       => $item->id,
+                    'jawab'         => 0,
+                    'iscorrect'     => 0,
+                    'jadwal_id'     => $jadwal->id,
+                    'ragu_ragu'     => 0,
+                    'esay'          => ''
+                ];
+            });
+
+            // Soal  menjodohkan
+            $menjodohkan = Soal::where([
+                'banksoal_id'   => $banksoal->id,
+                'tipe_soal'     => 5
+            ]);
+            if($jadwal->setting['acak_soal'] == "1") {
+                $menjodohkan = $menjodohkan->inRandomOrder();
+            }
+            $menjodohkan = $menjodohkan->take($max_menjodohkan)->get();
+
+            $soal_menjodohkan = $menjodohkan->map(function($item) use($peserta, $banksoal, $jadwal) {
+                return [
+                    'peserta_id'    => $peserta->id,
+                    'banksoal_id'   => $banksoal->id,
+                    'soal_id'       => $item->id,
+                    'jawab'         => 0,
+                    'iscorrect'     => 0,
+                    'jadwal_id'     => $jadwal->id,
+                    'ragu_ragu'     => 0,
+                    'esay'          => ''
+                ];
+            });
+
+            // Soal  menjodohkan
+            $isian_singkat = Soal::where([
+                'banksoal_id'   => $banksoal->id,
+                'tipe_soal'     => 6
+            ]);
+            if($jadwal->setting['acak_soal'] == "1") {
+                $isian_singkat = $isian_singkat->inRandomOrder();
+            }
+            $isian_singkat = $isian_singkat->take($max_isian_singkat)->get();
+
+            $soal_isian_singkat = $isian_singkat->map(function($item) use($peserta, $banksoal, $jadwal) {
+                return [
+                    'peserta_id'    => $peserta->id,
+                    'banksoal_id'   => $banksoal->id,
+                    'soal_id'       => $item->id,
+                    'jawab'         => 0,
+                    'iscorrect'     => 0,
+                    'jadwal_id'     => $jadwal->id,
+                    'ragu_ragu'     => 0,
+                    'esay'          => ''
+                ];
+            });
+
             // Merges dengan urutan
             $soals = [];
             $list = collect([
                 '1' => $soal_pg->values()->toArray(),
                 '2' => $soal_esay->values()->toArray(),
-                '3' => $soal_listening->values()->toArray()
+                '3' => $soal_listening->values()->toArray(),
+                '4' => $soal_complex->values()->toArray(),
+                // '5' => $soal_menjodohkan->values()->toArray(),
+                '6' => $soal_isian_singkat->values()->toArray(),
             ]);
             foreach ($jadwal->setting['list'] as $value) {
                 $soal = $list->get($value['id']);
@@ -293,7 +388,7 @@ class UjianAktifController extends Controller
     public function uncompleteUjian()
     {
         $peserta = request()->get('peserta-auth');
-        
+
         $data = SiswaUjian::where(function($query) use($peserta) {
             $query->where('peserta_id', $peserta->id)
             ->where('status_ujian','=',3);
