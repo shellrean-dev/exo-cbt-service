@@ -578,7 +578,7 @@ class UjianController extends Controller
                 'iscorrect' => $item->iscorrect,
                 'jadwal_id' => $item->jawab_id,
                 'jawab' => $item->jawab,
-                'jawab_complex' => json_decode($item->jawab_complex),
+                'jawab_complex' => $item->jawab_complex,
                 'peserta_id' => $item->peserta_id,
                 'ragu_ragu' => $item->ragu_ragu,
                 'similiar' => $item->similiar,

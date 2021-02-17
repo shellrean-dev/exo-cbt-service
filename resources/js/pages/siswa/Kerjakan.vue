@@ -251,7 +251,7 @@ export default {
         },
         onInput: _.debounce(function (value) {
           this.inputJawabEssy(value)
-        }, 500),
+        }, 300),
         prev() {
             if (this.filleds.length > 0) this.questionIndex--
         },

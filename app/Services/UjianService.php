@@ -116,7 +116,7 @@ class UjianService
 
 
             $jawabans = [];
-            if (in_array($item->soal->tipe_soa, [1,2,3,4,5])) {
+            if (in_array($item->soal->tipe_soal, [1,2,3,4,5])) {
                 $jawabans = in_array($item->soal->tipe_soal, [1,2,3,4])
                     ? $item->soal->jawabans
                     : $item->soal->jawabans->map(function($jw, $index) use ($jwra, $jwrb){
@@ -133,7 +133,7 @@ class UjianService
                 'soal_id' => $item->soal_id,
                 'jawab' => $item->jawab,
                 'esay' => $item->esay,
-                'jawab_complex' => json_decode($item->jawab_complex, true),
+                'jawab_complex' => $item->jawab_complex,
                 'soal' => [
                     'audio' => $item->soal->audio,
                     'banksoal_id' => $item->soal->banksoal_id,

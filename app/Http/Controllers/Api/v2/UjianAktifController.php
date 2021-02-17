@@ -335,7 +335,7 @@ class UjianAktifController extends Controller
                 '2' => $soal_esay->values()->toArray(),
                 '3' => $soal_listening->values()->toArray(),
                 '4' => $soal_complex->values()->toArray(),
-                '5' => $soal_menjodohkan->values()->toArray(),
+                // '5' => $soal_menjodohkan->values()->toArray(),
                 '6' => $soal_isian_singkat->values()->toArray(),
             ]);
             foreach ($jadwal->setting['list'] as $value) {

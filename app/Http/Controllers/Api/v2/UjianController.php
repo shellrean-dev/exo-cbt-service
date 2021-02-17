@@ -55,7 +55,8 @@ class UjianController extends Controller
                 'banksoal_id' => $find->banksoal_id,
                 'soal_id' => $find->soal_id,
                 'jawab' => $find->jawab,
-                'jawab_complex' => json_decode($find->jawab_complex, true),
+                // 'jawab_complex' => json_decode($find->jawab_complex, true),
+                'jawab_complex' => $find->jawab_complex,
                 'esay' => $find->esay,
                 'ragu_ragu' => $find->ragu_ragu,
             ];
@@ -82,7 +83,8 @@ class UjianController extends Controller
                 'banksoal_id' => $find->banksoal_id,
                 'soal_id' => $find->soal_id,
                 'jawab' => $find->jawab,
-                'jawab_complex' => json_decode($find->jawab_complex, true),
+                // 'jawab_complex' => json_decode($find->jawab_complex, true),
+                'jawab_complex' => $find->jawab_complex,
                 'esay' => $find->esay,
                 'ragu_ragu' => $find->ragu_ragu,
             ];
@@ -113,7 +115,8 @@ class UjianController extends Controller
                 'banksoal_id' => $find->banksoal_id,
                 'soal_id' => $find->soal_id,
                 'jawab' => $find->jawab,
-                'jawab_complex' => json_decode($find->jawab_complex, true),
+                // 'jawab_complex' => json_decode($find->jawab_complex, true),
+                'jawab_complex' => $find->jawab_complex,
                 'esay' => $find->esay,
                 'ragu_ragu' => $find->ragu_ragu,
             ];
@@ -126,7 +129,8 @@ class UjianController extends Controller
                 'banksoal_id' => $find->banksoal_id,
                 'soal_id' => $find->soal_id,
                 'jawab' => $find->jawab,
-                'jawab_complex' => json_decode($find->jawab_complex, true),
+                // 'jawab_complex' => json_decode($find->jawab_complex, true),
+                'jawab_complex' => $find->jawab_complex,
                 'esay' => $find->esay,
                 'ragu_ragu' => $find->ragu_ragu,
             ];
@@ -140,7 +144,8 @@ class UjianController extends Controller
             'banksoal_id' => $find->banksoal_id,
             'soal_id' => $find->soal_id,
             'jawab' => $find->jawab,
-            'jawab_complex' => json_decode($find->jawab_complex, true),
+            // 'jawab_complex' => json_decode($find->jawab_complex, true),
+            'jawab_complex' => $find->jawab_complex,
             'esay' => $find->esay,
             'ragu_ragu' => $find->ragu_ragu,
         ];
