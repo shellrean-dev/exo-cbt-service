@@ -14,7 +14,7 @@ class AddFinishedToOputput
      */
     public function handle(CommandFinished $event): void
     {
-        $message = 'Thanks for using Extraordinary CBT Version 1.1.0';
+        $message = 'Thanks for using Extraordinary CBT Version 2.0.0';
         $event->output->writeln('');
         $event->output->writeln($message);
     }
