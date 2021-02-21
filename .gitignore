@@ -5,6 +5,7 @@
 /vendor
 /public/*.js
 /public/js/app.js
+/public/js/*.txt
 /public/css/app.css
 .env
 .env.backup
