@@ -6,7 +6,7 @@ const LoginUjian = () => import('./pages/siswa/LoginUjian.vue')
 import IndexUjian from './pages/siswa/Index'
 import UjianKonfirm from './pages/siswa/UjianKonfirm'
 import UjianPrepare from './pages/siswa/UjianPrepare'
-import Kerjakan from './pages/siswa/Kerjakan'
+import Ujian from './pages/siswa/Ujian'
 import UjianSelesai from './pages/siswa/UjianSelesai'
 
 Vue.use(Router)
@@ -37,7 +37,7 @@ const router = new Router({
 				{
 					path: 'extraordinary',
 					name: 'ujian.while',
-					component: Kerjakan
+					component: Ujian
 				},
 				{
 					path: 'selesai',
