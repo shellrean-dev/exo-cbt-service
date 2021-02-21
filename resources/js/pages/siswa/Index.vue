@@ -35,7 +35,7 @@
     </div>
     <router-view></router-view>
     <div class="fixed bottom-0 left-0 w-full border-t border-gray-300 text-gray-600 py-2 px-4 text-center bg-white">
-	    <span class="text-sm">&copy; 2021 extraordinary-cbt</span>
+	    <span class="text-sm">&copy; 2021 extraordinary-cbt by shellrean</span>
     </div>
   </div>
 </template>
