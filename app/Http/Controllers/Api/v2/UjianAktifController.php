@@ -147,13 +147,13 @@ class UjianAktifController extends Controller
         $ujian_siswa = $ujianService->getUjianSiswaBelumSelesai($peserta->id);
 
         if(!$ujian_siswa) {
-            return SendResponse::badRequest('Anda memasuki ujian ini secara ilegal');
+            return SendResponse::badRequest('Terjadi kesalahan saat mengambil ujian untuk kamu, silakan logout lalu login kembali');
         }
 
         // Ambil id banksoal yang terkait dalam jadwal
         $jadwal = Jadwal::find($ujian_siswa->jadwal_id);
         if(!$jadwal) {
-            return SendResponse::badRequest('Anda memasuki ujian ini secara ilegal');
+            return SendResponse::badRequest('Terjadi kesalahan saat mengambil jadwal ujian untuk kamu, silakan logout lalu login kembali');
         }
 
         $banksoal_ids = array_column($jadwal->banksoal_id, 'jurusan','id');
@@ -173,7 +173,7 @@ class UjianAktifController extends Controller
 
         // Jika tidak dapat menemukan banksoal_id
         if($banksoal_id == '') {
-            return SendResponse::badRequest('Anda tidak mendapat banksoal yang sesuai, silakan hubungi administrator');
+            return SendResponse::badRequest('Kamu tidak mendapat banksoal yang sesuai, silakan logout lalu hubungi administrator');
         }
 
         $jawaban_peserta = UjianService::getJawabanPeserta($jadwal->id, $peserta->id, $jadwal->setting['acak_opsi']);
