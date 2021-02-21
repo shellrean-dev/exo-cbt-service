@@ -1,0 +1,39 @@
+@import 'https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900&display=swap';
+
+@tailwind base;
+input[type="radio"] + label span {
+  transition: background .2s, transform .2s;
+}
+
+input[type="radio"] + label span:hover,
+input[type="radio"] + label:hover span{
+  transform: scale(1.2);
+}
+
+input[type="radio"]:checked + label span {
+  background-color: #3490DC;
+  box-shadow: 0px 0px 0px 2px white inset;
+}
+
+input[type="radio"]:checked + label{
+  color: #3490DC;
+}
+
+input:checked + svg {
+  display: block;
+}
+
+button:focus, a:focus, input:focus, select:focus, textarea:focus {
+  @apply outline-none;
+}
+
+.swal2-popup {
+  font-size: 0.7rem !important;
+}
+.swal2-popup {
+  border: 2px solid #676565;
+}
+
+@tailwind components;
+@tailwind utilities;
+
