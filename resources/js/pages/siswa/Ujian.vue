@@ -1,7 +1,5 @@
 <template>
   <div class="container md:mx-auto flex flex-col justify-center space-y-4 lg:flex-row lg:space-y-0 lg:space-x-4 -mt-24">
-    <loading :active.sync="isLoading"
-      :is-full-page="true"></loading>
     <div class="w-full lg:w-3/4 lg:py-4 lg:px-4">
       <div class="bg-white border-2 border-gray-300 shadow rounded-t-lg rounded-b-lg"  v-if="filleds">
         <div class="pt-2 pb-2 pr-2 flex justify-between border-b border-gray-300 mb-2 items-center" v-show="!focus">
@@ -97,7 +95,7 @@
 				</div>
 		    <div class="py-2 px-2 flex justify-between border-t border-gray-300 items-center"  v-show="!focus">
 			    <button class="py-1 px-3 border-2 rounded-md hover:shadow-lg"
-          :class="isLoadinger ? 'bg-gray-100 text-gray-600 border-gray-200 ' : 'bg-blue-400 text-white border-blue-400'"
+          :class="isLoadinger ? 'bg-blue-200 text-white border-blue-200' : 'bg-blue-400 text-white border-blue-400'"
           :disabled="isLoadinger || !listening"
           v-if="questionIndex != 0"
           @click="prev()"
@@ -118,7 +116,7 @@
 			      </label>
 			    </div>
 			    <button class="py-1 px-3 border-2 rounded-md hover:shadow-lg"
-          :class="isLoadinger ? 'bg-gray-100 text-gray-600 border-gray-200 ' : 'bg-blue-400 text-white border-blue-400'"
+          :class="isLoadinger ? 'bg-blue-200 text-white border-blue-200' : 'bg-blue-400 text-white border-blue-400'"
           :disabled="isLoadinger || !listening"
           v-if="questionIndex+1 != filleds.length"
           @click="next()"
@@ -126,7 +124,7 @@
 				    <next-line-icon></next-line-icon>
 			    </button>
           <button class="py-1 px-3 border-2 rounded-md hover:shadow-lg"
-          :class="isLoadinger ? 'bg-gray-100 text-gray-600 border-gray-200 ' : 'bg-green-400 text-white border-green-400'"
+          :class="isLoadinger ? 'bg-green-200 text-white border-green-200' : 'bg-green-400 text-white border-green-400'"
           :disabled="isLoadinger || !listening"
           v-if="questionIndex+1 == filleds.length && checkRagu() == false"
           @click="modalConfirm = true"
@@ -135,7 +133,7 @@
 			    </button>
           <button class="py-1 px-3 border-2 rounded-md hover:shadow-lg"
           v-if="questionIndex+1 == filleds.length && checkRagu() == true"
-          :class="isLoadinger ? 'bg-gray-100 text-gray-600 border-gray-200 ' : 'bg-red-400 text-white border-red-400'"
+          :class="isLoadinger ? 'bg-red-200 text-white border-red-200' : 'bg-red-400 text-white border-red-400'"
           :disabled="isLoadinger || !listening"
           @click="doubtExistAlert"
           >
@@ -166,7 +164,6 @@ import ModalDirection from '../../components/ModalDirection'
 import ExpandLineIcon from '../../components/ExpandLineIcon'
 import RenderString from '../../components/siswa/RenderString'
 import AudioPlayer from '../../components/siswa/AudioPlayer.vue'
-import Loading from 'vue-loading-overlay'
 import 'vue-loading-overlay/dist/vue-loading.css'
 import _ from 'lodash'
 
@@ -179,8 +176,7 @@ export default {
     AudioPlayer,
     ModalConfirm,
     ModalQuestion,
-    ModalDirection,
-    Loading
+    ModalDirection
   },
   data() {
     return vue_data
