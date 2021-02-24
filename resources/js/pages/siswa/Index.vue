@@ -1,5 +1,13 @@
 <template>
   <div>
+    <loading
+      color="#007bff"
+      loader="dots"
+      :height="45"
+      :width="45"
+      :active.sync="isLoading"
+      :is-full-page="true"
+    ></loading>
     <div class="pt-6 pb-24 shadow-sm border-gray-300 px-4 bg-blue-400 text-white">
       <div class="flex justify-between flex-col sm:flex-row">
         <div class="flex items-center space-x-1"
@@ -43,9 +51,13 @@
 import { mapState, mapActions, mapGetters } from 'vuex'
 import { successToas, errorToas} from '../../entities/notif'
 import { showSweetError } from '../../entities/alert'
+import Loading from 'vue-loading-overlay'
 
 export default {
   name: 'IndexUjian',
+  components: {
+    Loading,
+  },
   computed: {
     ...mapGetters(['isLoading', 'setting']),
     ...mapState('siswa_user', {
