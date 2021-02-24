@@ -48,7 +48,7 @@
                 <div class="text-xs text-red-600" v-if="errors.password">{{ errors.password[0] }} </div>
               </div>
               <p
-              v-if="errors.length > 0" class="text-red-600 py-2 px-4 bg-red-100 border border-red-300 rounded-md mb-2" v-text="errors.invalid"></p>
+              v-if="typeof errors.invalid != 'undefined' && errors.invalid != ''" class="text-red-600 py-2 px-4 bg-red-100 border border-red-300 rounded-md mb-2" v-text="errors.invalid"></p>
               <div class="">
                 <button class="py-2 px-4 text-center bg-blue-400 text-white rounded-md active:outline-none hover:shadow-lg"
                 :disabled="isLoading"
@@ -105,6 +105,11 @@ import { showSweetError } from '../../entities/alert'
 		  clearError() {
 			  this.CLEAR_ERRORS()
 		  }
-	  }
+	  },
+    watch: {
+      errors(v) {
+        console.log(v)
+      }
+    }
   }
 </script>
