@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v2;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 use App\Services\UjianService;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
@@ -31,41 +32,61 @@ class UjianController extends Controller
 
         $peserta = request()->get('peserta-auth');
 
-        $find = JawabanPeserta::where([
-            'id'            => $request->jawaban_id
-        ])->first();
-
-        $kj = JawabanSoal::find($request->jawab);
-
-        $ujian = SiswaUjian::where(function($query) use($peserta) {
-            $query->where('peserta_id', $peserta->id)
-            ->where('status_ujian','=',3);
-        })->first();
-
-        if($ujian) {
-            UjianService::kurangiSisaWaktu($ujian);
+        // Ambil jawaban peserta
+        // $find = JawabanPeserta::where([
+        //     'id'            => $request->jawaban_id
+        // ])->first();
+        $find = DB::table('jawaban_pesertas')
+            ->where('id', $request->jawaban_id)
+            ->first();
+        
+        if (!$find) {
+            return SendResponse::badRequest('kami tidak dapat menemukan data dari jawaban anda.');
         }
 
+        // ambil ujian yang aktif hari ini
+        $ujian = $this->_getUjianCurrent($peserta);
+
+        if (!$ujian) {
+            return SendResponse::badRequest('Kami tidak dapat menemukan ujian yang sedang anda kamu kerjakan, mungkin jadawl ini sedang tidak aktif. silakan logout lalu hubungi administrator.');
+        }
+
+        if($ujian) {
+            $this->_kurangiWaktu($ujian);
+        }
+
+        // Jika yang dikirimkan adalah esay
         if(isset($request->essy)) {
-            $find->esay = $request->essy;
-            $find->save();
+            try {
+                DB::table('jawaban_pesertas')
+                    ->where('id', $find->id)
+                    ->update([
+                        'esay'  => $request->essy
+                    ]);
+            } catch (\Exception $e) {
+                return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
+            }
 
             $send = [
                 'id'    => $find->id,
                 'banksoal_id' => $find->banksoal_id,
                 'soal_id' => $find->soal_id,
                 'jawab' => $find->jawab,
-                // 'jawab_complex' => json_decode($find->jawab_complex, true),
-                'jawab_complex' => $find->jawab_complex,
-                'esay' => $find->esay,
+                'jawab_complex' => json_decode($find->jawab_complex, true),
+                'esay' => $request->esay,
                 'ragu_ragu' => $find->ragu_ragu,
             ];
 
             return response()->json(['data' => $send,'index' => $request->index]);
         }
 
+        // Jika yang dikirimkan adalah isian singkat
         if(isset($request->isian)) {
-            $jwb_soals = JawabanSoal::where('soal_id', $find->soal_id)->get();
+            // $jwb_soals = JawabanSoal::where('soal_id', $find->soal_id)->get();
+            $jwb_soals = DB::table('jawaban_soals')
+                ->where('soal_id', $find->soal_id)
+                ->get();
+
             foreach($jwb_soals as $jwb) {
                 $jwb_strip = strip_tags($jwb->text_jawaban);
                 if (trim($jwb_strip) == trim($request->isian)) {
@@ -75,16 +96,27 @@ class UjianController extends Controller
                 $find->iscorrect = 0;
             }
 
-            $find->esay = $request->isian;
-            $find->save();
+            try {
+                DB::table('jawaban_pesertas')
+                    ->where('id', $find->id)
+                    ->update([
+                        'iscorrect' => $find->iscorrect,
+                        'esay'      => $request->isian,
+                    ]);
+            } catch (\Exception $e) {
+                return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
+            }
+
+            // $find->esay = $request->isian;
+            // $find->save();
 
             $send = [
                 'id'    => $find->id,
                 'banksoal_id' => $find->banksoal_id,
                 'soal_id' => $find->soal_id,
                 'jawab' => $find->jawab,
-                // 'jawab_complex' => json_decode($find->jawab_complex, true),
-                'jawab_complex' => $find->jawab_complex,
+                'jawab_complex' => json_decode($find->jawab_complex, true),
+                // 'jawab_complex' => $find->jawab_complex,
                 'esay' => $find->esay,
                 'ragu_ragu' => $find->ragu_ragu,
             ];
@@ -92,6 +124,7 @@ class UjianController extends Controller
             return response()->json(['data' => $send,'index' => $request->index]);
         }
 
+        // Jika yang dikirimkan adalah jawaban komleks
         if(is_array($request->jawab_complex)) {
             $soal_complex = Soal::with(['jawabans' => function($query) {
                 $query->where('correct', 1);
@@ -108,44 +141,71 @@ class UjianController extends Controller
                 }
                 $find->iscorrect = $correct;
             }
-            $find->jawab_complex = json_encode($request->jawab_complex);
-            $find->save();
+
+            try {
+                DB::table('jawaban_pesertas')
+                    ->where('id', $find->id)
+                    ->update([
+                        'jawab_complex' => json_encode($request->jawab_complex),
+                        'iscorrect'     => $find->iscorrect,
+                    ]);
+                $find->jawab_complex = json_encode($request->jawab_complex);
+            } catch (\Exception $e) {
+                return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
+            }
+            // $find->jawab_complex = json_encode($request->jawab_complex);
+            // $find->save();
             $send = [
                 'id'    => $find->id,
                 'banksoal_id' => $find->banksoal_id,
                 'soal_id' => $find->soal_id,
                 'jawab' => $find->jawab,
-                // 'jawab_complex' => json_decode($find->jawab_complex, true),
-                'jawab_complex' => $find->jawab_complex,
+                'jawab_complex' => json_decode($find->jawab_complex, true),
+                // 'jawab_complex' => $find->jawab_complex,
                 'esay' => $find->esay,
                 'ragu_ragu' => $find->ragu_ragu,
             ];
             return response()->json(['data' => $send,'index' => $request->index]);
         }
 
+        // Jika yang dikirimkan adalah pilihan ganda
+        $kj = JawabanSoal::find($request->jawab);
         if(!$kj) {
             $send = [
                 'id'    => $find->id,
                 'banksoal_id' => $find->banksoal_id,
                 'soal_id' => $find->soal_id,
                 'jawab' => $find->jawab,
-                // 'jawab_complex' => json_decode($find->jawab_complex, true),
-                'jawab_complex' => $find->jawab_complex,
+                'jawab_complex' => json_decode($find->jawab_complex, true),
+                // 'jawab_complex' => $find->jawab_complex,
                 'esay' => $find->esay,
                 'ragu_ragu' => $find->ragu_ragu,
             ];
             return response()->json(['data' => $send,'index' => $request->index]);
         }
-        $find->jawab = $request->jawab;
-        $find->iscorrect = $kj->correct;
-        $find->save();
+        // $find->jawab = $request->jawab;
+        // $find->iscorrect = $kj->correct;
+        // $find->save();
+
+        try {
+            DB::table('jawaban_pesertas')
+                ->where('id', $find->id)
+                ->update([
+                    'jawab'         => $request->jawab,
+                    'iscorrect'     => $kj->correct,
+                ]);
+            $find->jawab = $request->jawab;
+        } catch (\Exception $e) {
+            return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
+        }
+        
         $send = [
             'id'    => $find->id,
             'banksoal_id' => $find->banksoal_id,
             'soal_id' => $find->soal_id,
             'jawab' => $find->jawab,
-            // 'jawab_complex' => json_decode($find->jawab_complex, true),
-            'jawab_complex' => $find->jawab_complex,
+            'jawab_complex' => json_decode($find->jawab_complex, true),
+            // 'jawab_complex' => $find->jawab_complex,
             'esay' => $find->esay,
             'ragu_ragu' => $find->ragu_ragu,
         ];
@@ -164,25 +224,32 @@ class UjianController extends Controller
     {
         $peserta = request()->get('peserta-auth');
 
-        $find = JawabanPeserta::where([
-            'id'            => $request->jawaban_id
-        ])->first();
+        $find = DB::table('jawaban_pesertas')
+            ->where('id', $request->jawaban_id)
+            ->first();
 
         if(!isset($request->ragu_ragu)) {
             return response()->json(['data' => $send,'index' => $request->index]);
         }
 
-        $ujian = SiswaUjian::where(function($query) use($peserta) {
-            $query->where('peserta_id', $peserta->id)
-            ->where('status_ujian','=',3);
-        })->first();
-
+        $ujian = $this->_getUjianCurrent($peserta);
+        
+        if (!$ujian) {
+            return SendResponse::badRequest('Kami tidak dapat menemukan ujian yang sedang anda kamu kerjakan, mungkin jadawl ini sedang tidak aktif. silakan logout lalu hubungi administrator.');
+        }
         if($ujian) {
-            UjianService::kurangiSisaWaktu($ujian);
+            $this->_kurangiWaktu($ujian);
         }
 
-        $find->ragu_ragu = $request->ragu_ragu;
-        $find->save();
+        try {
+            DB::table('jawaban_pesertas')
+                ->where('id', $find->id)
+                ->update([
+                    'ragu_ragu' => $request->ragu_ragu
+                ]);
+        } catch (\Exception $e) {
+            return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
+        }
 
         $send = $find->only('id','banksoal_id','soal_id','jawab','esay','ragu_ragu');
 
@@ -190,7 +257,7 @@ class UjianController extends Controller
     }
 
     /**
-     * Finish
+     * Selesaikan ujian
      *
      * @param Illuminate\Http\Request
      * @return Illuminate\Http\Response
@@ -199,33 +266,98 @@ class UjianController extends Controller
     {
         $peserta = request()->get('peserta-auth');
 
-        $ujian = SiswaUjian::where(function($query) use($peserta) {
-            $query->where('peserta_id', $peserta->id)
-            ->where('status_ujian','=',3);
-        })->first();
+        $ujian = $this->_getUjianCurrent($peserta);
 
+        // Cek apakah hasil ujian pernah di generate sebelumnya
+        $hasilUjian = DB::table('hasil_ujians')
+            ->where([
+                'peserta_id'    => $peserta->id,
+                'jadwal_id'     => $ujian->jadwal_id,
+            ])
+            ->count();
 
-        $hasilUjian = HasilUjian::where([
-            'peserta_id'    => $peserta->id,
-            'jadwal_id'     => $ujian->jadwal_id,
-        ])->first();
-
-        if($hasilUjian) {
+        if($hasilUjian > 0) {
             return SendResponse::accept();
         }
 
-        $jawaban = JawabanPeserta::where([
-            'jadwal_id'     => $ujian->jadwal_id,
-            'peserta_id'    => $peserta->id
-        ])->first();
+        $jawaban = DB::table('jawaban_pesertas')
+            ->where([
+                'jadwal_id'     => $ujian->jadwal_id,
+                'peserta_id'    => $peserta->id
+            ])
+            ->select('banksoal_id')
+            ->first();
 
-        $finished = UjianService::finishingUjian($jawaban->banksoal_id, $ujian->jadwal_id, $peserta->id);
-        if(!$finished['success']) {
-            return SendResponse::badRequest($finished['message']);
+        try {
+            DB::beginTransaction();
+            $finished = UjianService::finishingUjian($jawaban->banksoal_id, $ujian->jadwal_id, $peserta->id);
+            if(!$finished['success']) {
+                DB::rollback();
+                return SendResponse::badRequest($finished['message']);
+            }
+            DB::table('siswa_ujians')
+                ->where('id', $ujian->id)
+                ->update([
+                    'status_ujian'  => 1,
+                ]);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
         }
-        $ujian->status_ujian = 1;
-        $ujian->save();
         return SendResponse::accept();
+    }
+
+    /**
+     * Kurangi waktu siswa
+     * @param object $ujian
+     */
+    private function _kurangiWaktu($ujian)
+    {
+        $deUjian = DB::table('jadwals')
+            ->where('id', $ujian->jadwal_id)
+            ->first();
+        $start = Carbon::createFromFormat('H:i:s', $ujian->mulai_ujian);
+        $now = Carbon::createFromFormat('H:i:s', Carbon::now()->format('H:i:s'));
+        $diff_in_minutes = $start->diffInSeconds($now);
+
+        try {
+            DB::table('siswa_ujians')
+                ->where('id', $ujian->id)
+                ->update([
+                    'sisa_waktu'    => $deUjian->lama-$diff_in_minutes
+                ]);
+        } catch (\Exception $e) {
+            return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Ambil ujian aktif saat ini 
+     * @param object $peserta
+     */
+    private function _getUjianCurrent($peserta)
+    {
+        // ambil ujian yang aktif hari ini
+        $jadwals = DB::table('jadwals')->where([
+            'status_ujian'  => 1,
+            'tanggal'       => now()->format('Y-m-d')
+        ])
+        ->select('id')
+        ->get();
+        $jadwal_ids = $jadwals->pluck('id')->toArray();
+        
+        // ambil data siswa ujian
+        // yang sedang dikerjakan pada hari ini
+        // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
+        $ujian = DB::table('siswa_ujians')
+            ->where('peserta_id', $peserta->id)
+            ->where('status_ujian', 3)
+            ->whereIn('jadwal_id', $jadwal_ids)
+            ->whereDate('created_at', now()->format('Y-m-d'))
+            ->first();
+
+        return $ujian;
     }
 }
 
