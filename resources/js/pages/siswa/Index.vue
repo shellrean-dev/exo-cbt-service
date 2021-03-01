@@ -8,7 +8,7 @@
       :active.sync="isLoading"
       :is-full-page="true"
     ></loading>
-    <div class="pt-6 pb-24 shadow-sm border-gray-300 px-4 bg-blue-400 text-white">
+    <div class="pt-6 pb-24 shadow-sm border-gray-300 px-4 bg-gradient-to-r from-blue-500 to-blue-400 text-white">
       <div class="flex justify-between flex-col sm:flex-row">
         <div class="flex items-center space-x-1"
         v-if="typeof setting.sekolah != 'undefined'"
@@ -17,7 +17,7 @@
             <img
             :src="setting.sekolah.logo != ''
             ? '/storage/'+setting.sekolah.logo
-            : '/img/tutwuri.jpg'"
+            : '/img/exo.jpg'"
             class="h-12 w-12 object-cover"
             />
           </div>
@@ -42,8 +42,8 @@
       </div>
     </div>
     <router-view></router-view>
-    <div class="fixed bottom-0 left-0 w-full border-t border-gray-300 text-gray-600 py-2 px-4 text-center bg-white">
-	    <span class="text-sm">&copy; 2021 extraordinary-cbt by shellrean</span>
+    <div class="relative sm:fixed bottom-0 left-0 w-full border-t border-gray-300 text-gray-600 py-2 px-4 text-center bg-white">
+	    <span class="text-sm">&copy; 2021 extraordinary-cbt v2.0.0</span>
     </div>
   </div>
 </template>
