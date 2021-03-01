@@ -18,6 +18,7 @@ use App\SiswaUjian;
 use App\HasilUjian;
 use App\JawabanPeserta;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class UjianService
 {
@@ -71,10 +72,11 @@ class UjianService
     }
 
     /**
-     * [getJawabanPeserta description]
-     * @param  [type] $jadwal_id  [description]
-     * @param  [type] $peserta_id [description]
-     * @return [type]             [description]
+     * Ambil jawaban siswa
+     * @param   int $jadwal_id 
+     * @param   int $peserta_id
+     * @param   bool $acak_opsi
+     * @return  object
      */
     public static function getJawabanPeserta($jadwal_id, $peserta_id, $acak_opsi)
     {
@@ -406,16 +408,17 @@ class UjianService
     }
 
     /**
-     * [getUjianSiswaBelumSelesai description]
-     * @param  SiswaUjian $siswaUjian [description]
-     * @return [type]                 [description]
+     * Ambil ujian siswa yang sedang aktif dikerjakan pada hari ini
+     * @param  int $peserta_id
+     * @return Object
      */
     public function getUjianSiswaBelumSelesai($peserta_id)
     {
-        $data = SiswaUjian::where(function($query) use($peserta_id) {
-            $query->where('peserta_id', $peserta_id)
-            ->where('status_ujian','=',3);
-        })->first();
+        $data = DB::table('siswa_ujians')
+            ->where('peserta_id', $peserta_id)
+            ->where('status_ujian', 3)
+            ->whereDate('created_at', now()->format('Y-m-d'))
+            ->first();
 
         return $data;
     }
