@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api\v2;
 
 use App\Http\Controllers\Controller;
@@ -20,9 +19,10 @@ use App\Soal;
 class UjianAktifController extends Controller
 {
     /**
-     * [startUjian description]
-     * @param  Request $request [description]
-     * @return [type]           [description]
+     * Memulai ujian masuk kedalam mode standby
+     * @param  Request $request
+     * @return \App\Actions\SendResponse
+     * @author wandinak17@gmail.com
      */
     public function startUjian(Request $request)
     {
@@ -94,52 +94,126 @@ class UjianAktifController extends Controller
     }
 
     /**
-     * [getUjianPesertaAktif description]
-     * @return [type] [description]
+     * Ambil ujian peserta yang sedang dikerjakan
+     * @return \App\Actions\SendResponse
+     * @author wandinak17@gmail.com
      */
     public function getUjianPesertaAktif()
     {
         $peserta = request()->get('peserta-auth');
-        $jadwals = Jadwal::where('status_ujian',1)->get();
+
+        // ambil ujian yang aktif hari ini
+        $jadwals = DB::table('jadwals')->where([
+            'status_ujian'  => 1,
+            'tanggal'       => now()->format('Y-m-d')
+        ])
+        ->select('id')
+        ->get();
         $jadwal_ids = $jadwals->pluck('id')->toArray();
 
-        $data = SiswaUjian::where(function($query) use($peserta, $jadwal_ids) {
-            $query->where('peserta_id', $peserta->id)
-            ->where('status_ujian','=',0)
-            ->whereIn('jadwal_id', $jadwal_ids);
-        })->first();
+        // ambil data siswa ujian
+        // yang sudah dijalankan pada hari ini
+        // tetapi belum dimulai
+        // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
+        $data = DB::table('siswa_ujians')
+            ->where('peserta_id', $peserta->id)
+            ->where('status_ujian', 0)
+            ->whereIn('jadwal_id', $jadwal_ids)
+            ->whereDate('created_at', now()->format('Y-m-d'))
+            ->first();
+
         if(!$data) {
-            $data = [];
+            return SendResponse::acceptData([]);
         }
 
-        return SendResponse::acceptData($data);
+        $res = [
+            'jadwal_id'     => $data->jadwal_id,
+            'status_ujian'  => $data->status_ujian
+        ];
+
+        return SendResponse::acceptData($res);
     }
 
     /**
-     * [startUjianTime description]
-     * @param  Request $request [description]
-     * @return [type]           [description]
+     * Mulai penghitungan waktu ujian
+     * @param  Request $request
+     * @return \App\Actions\SendResponse
+     * @author wandinak17@gmail.com
      */
     public function startUjianTime(Request $request)
     {
         $peserta = request()->get('peserta-auth');
-        $data = SiswaUjian::where(function($query) use($peserta) {
-            $query->where('peserta_id', $peserta->id)
-            ->where('status_ujian','=',0);
-        })->first();
 
+        // Ambil data yang belum dimulai
+        $data = DB::table('siswa_ujians')
+            ->where('peserta_id', $peserta->id)
+            ->where('status_ujian', '<>', 1)
+            ->whereDate('created_at', now()->format('Y-m-d'))
+            ->first();
+
+        // Jika ini adalah pertama kali peserta 
+        // Melakukan mulai ujian
+        // 3 <= sedang mengerjakan
         if($data->status_ujian != 3) {
-            $data->mulai_ujian = now()->format('H:i:s');
-            $data->status_ujian = 3;
-            $data->save();
+            try{
+                DB::table('siswa_ujians')
+                    ->where('id', $data->id)
+                    ->update([
+                        'mulai_ujian'   => now()->format('H:i:s'),
+                        'status_ujian'  => 3,
+                    ]);
+            }catch(\Exception $e){
+                return SendResponse::internalServerError($e->getMessage());
+            }
         }
+
         return SendResponse::accept();
     }
+    
+    /**
+     * Ambil data ujian siswa yang belum diselesaikan pada hari ini
+     * @return \App\Actions\SendResponse
+     * @author wandinak17@gmail.com
+     */
+    public function uncompleteUjian()
+    {
+        $peserta = request()->get('peserta-auth');
 
+        // ambil ujian yang aktif hari ini
+        $jadwals = DB::table('jadwals')->where([
+            'status_ujian'  => 1,
+            'tanggal'       => now()->format('Y-m-d')
+        ])
+        ->select('id')
+        ->get();
+        $jadwal_ids = $jadwals->pluck('id')->toArray();
+
+        // ambil data siswa ujian
+        // yang sedang dikerjakan pada hari ini
+        // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
+        $data = DB::table('siswa_ujians')
+            ->where('peserta_id', $peserta->id)
+            ->where('status_ujian', 3)
+            ->whereIn('jadwal_id', $jadwal_ids)
+            ->whereDate('created_at', now()->format('Y-m-d'))
+            ->first();
+
+        if(!$data) {
+            return SendResponse::acceptData([]);
+        }
+        
+        $res = [
+            'jadwal_id'     => $data->jadwal_id,
+            'status_ujian'  => $data->status_ujian
+        ];
+
+        return SendResponse::acceptData($res);
+    }
 
     /**
-     * [getJawabanPeserta description]
-     * @return [type] [description]
+     * Ambil soal dan jawaban siswa
+     * @return \App\Actions\SendResponse
+     * @author wandinak17@gmail.com
      */
     public function getJawabanPeserta(UjianService $ujianService)
     {
@@ -147,19 +221,27 @@ class UjianAktifController extends Controller
         $ujian_siswa = $ujianService->getUjianSiswaBelumSelesai($peserta->id);
 
         if(!$ujian_siswa) {
-            return SendResponse::badRequest('Terjadi kesalahan saat mengambil ujian untuk kamu, silakan logout lalu login kembali');
+            return SendResponse::badRequest('Terjadi kesalahan saat mengambil ujian untuk kamu, kamu tidak sedang mengikuti ujian apapun. silakan logout lalu login kembali');
         }
 
         // Ambil id banksoal yang terkait dalam jadwal
-        $jadwal = Jadwal::find($ujian_siswa->jadwal_id);
+        // $jadwal = Jadwal::find($ujian_siswa->jadwal_id);
+        $jadwal = DB::table('jadwals')
+            ->where('id', $ujian_siswa->jadwal_id)
+            ->first();
+        // Jika jadwal yang dikerjakan siswa tidak ditemukan
         if(!$jadwal) {
-            return SendResponse::badRequest('Terjadi kesalahan saat mengambil jadwal ujian untuk kamu, silakan logout lalu login kembali');
+            return SendResponse::badRequest('Terjadi kesalahan saat mengambil jadwal ujian untuk kamu, silakan logout lalu hubungi administrator');
         }
 
-        $banksoal_ids = array_column($jadwal->banksoal_id, 'jurusan','id');
-        $banksoal_ids = collect($banksoal_ids)->keys();
+        // $banksoal_ids = array_column($jadwal->banksoal_id, 'jurusan','id');
+        // $banksoal_ids = collect($banksoal_ids)->keys();
+        // $banksoal_ids = json_decode($jadwal->banksoal_id, 'id');
+        $banksoal_ids = array_column(json_decode($jadwal->banksoal_id, true), 'id');
 
-        $banksoal_diujikan = Banksoal::with('matpel')->whereIn('id', $banksoal_ids)->get();
+        $banksoal_diujikan = Banksoal::with('matpel')
+            ->whereIn('id', $banksoal_ids)
+            ->get();
         $banksoal_id = '';
 
         // Cari id banksoal yang dapat dipakai oleh siswwa
@@ -176,7 +258,12 @@ class UjianAktifController extends Controller
             return SendResponse::badRequest('Kamu tidak mendapat banksoal yang sesuai, silakan logout lalu hubungi administrator');
         }
 
-        $jawaban_peserta = UjianService::getJawabanPeserta($jadwal->id, $peserta->id, $jadwal->setting['acak_opsi']);
+        // Ambil jawaban siswa yang telah digenerate
+        $jawaban_peserta = UjianService::getJawabanPeserta(
+            $jadwal->id, 
+            $peserta->id, 
+            json_decode($jadwal->setting, true)['acak_opsi']
+        );
 
         // Jika jawaban siswa belum ada di database
         if ($jawaban_peserta->count() < 1 ) {
@@ -189,13 +276,14 @@ class UjianAktifController extends Controller
             $max_menjodohkan = $banksoal->jumlah_menjodohkan;
             $max_isian_singkat = $banksoal->jumlah_isian_singkat;
 
+            $setting = json_decode($jadwal->setting, true);
 
             // Soal Pilihan Ganda
             $pg = Soal::where([
                 'banksoal_id' => $banksoal->id,
                 'tipe_soal' => 1
             ]);
-            if($jadwal->setting['acak_soal'] == "1") {
+            if($setting['acak_soal'] == "1") {
                 $pg = $pg->inRandomOrder();
             }
             $pg = $pg->take($max_pg)->get();
@@ -218,7 +306,7 @@ class UjianAktifController extends Controller
                 'banksoal_id'   => $banksoal->id,
                 'tipe_soal'     => 2
             ]);
-            if($jadwal->setting['acak_soal'] == "1") {
+            if($setting['acak_soal'] == "1") {
                 $esay = $esay->inRandomOrder();
             }
             $esay = $esay->take($max_esay)->get();
@@ -241,7 +329,7 @@ class UjianAktifController extends Controller
                 'banksoal_id'   => $banksoal->id,
                 'tipe_soal'     => 3
             ]);
-            if($jadwal->setting['acak_soal'] == "1") {
+            if($setting['acak_soal'] == "1") {
                 $listening = $listening->inRandomOrder();
             }
             $listening = $listening->take($max_listening)->get();
@@ -264,7 +352,7 @@ class UjianAktifController extends Controller
                 'banksoal_id'   => $banksoal->id,
                 'tipe_soal'     => 4
             ]);
-            if($jadwal->setting['acak_soal'] == "1") {
+            if($setting['acak_soal'] == "1") {
                 $complex = $complex->inRandomOrder();
             }
             $complex = $complex->take($max_complex)->get();
@@ -283,34 +371,34 @@ class UjianAktifController extends Controller
             });
 
             // Soal  menjodohkan
-            $menjodohkan = Soal::where([
-                'banksoal_id'   => $banksoal->id,
-                'tipe_soal'     => 5
-            ]);
-            if($jadwal->setting['acak_soal'] == "1") {
-                $menjodohkan = $menjodohkan->inRandomOrder();
-            }
-            $menjodohkan = $menjodohkan->take($max_menjodohkan)->get();
+            // $menjodohkan = Soal::where([
+            //     'banksoal_id'   => $banksoal->id,
+            //     'tipe_soal'     => 5
+            // ]);
+            // if($setting['acak_soal'] == "1") {
+            //     $menjodohkan = $menjodohkan->inRandomOrder();
+            // }
+            // $menjodohkan = $menjodohkan->take($max_menjodohkan)->get();
 
-            $soal_menjodohkan = $menjodohkan->map(function($item) use($peserta, $banksoal, $jadwal) {
-                return [
-                    'peserta_id'    => $peserta->id,
-                    'banksoal_id'   => $banksoal->id,
-                    'soal_id'       => $item->id,
-                    'jawab'         => 0,
-                    'iscorrect'     => 0,
-                    'jadwal_id'     => $jadwal->id,
-                    'ragu_ragu'     => 0,
-                    'esay'          => ''
-                ];
-            });
+            // $soal_menjodohkan = $menjodohkan->map(function($item) use($peserta, $banksoal, $jadwal) {
+            //     return [
+            //         'peserta_id'    => $peserta->id,
+            //         'banksoal_id'   => $banksoal->id,
+            //         'soal_id'       => $item->id,
+            //         'jawab'         => 0,
+            //         'iscorrect'     => 0,
+            //         'jadwal_id'     => $jadwal->id,
+            //         'ragu_ragu'     => 0,
+            //         'esay'          => ''
+            //     ];
+            // });
 
-            // Soal  menjodohkan
+            // Soal  isian singkat
             $isian_singkat = Soal::where([
                 'banksoal_id'   => $banksoal->id,
                 'tipe_soal'     => 6
             ]);
-            if($jadwal->setting['acak_soal'] == "1") {
+            if($setting['acak_soal'] == "1") {
                 $isian_singkat = $isian_singkat->inRandomOrder();
             }
             $isian_singkat = $isian_singkat->take($max_isian_singkat)->get();
@@ -338,18 +426,29 @@ class UjianAktifController extends Controller
                 // '5' => $soal_menjodohkan->values()->toArray(),
                 '6' => $soal_isian_singkat->values()->toArray(),
             ]);
-            foreach ($jadwal->setting['list'] as $value) {
+            foreach ($setting['list'] as $value) {
                 $soal = $list->get($value['id']);
                 if($soal) {
                     $soals = array_merge($soals, $soal);
                 }
             }
 
-            // // Insert
-            DB::table('jawaban_pesertas')->insert($soals);
+            // Insert
+            try {
+                DB::beginTransaction();
+                DB::table('jawaban_pesertas')->insert($soals);
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return SendResponse::internalServerError($e->getMessage());
+            }
 
             // Get Jawaban peserta
-            $jawaban_peserta = UjianService::getJawabanPeserta($jadwal->id, $peserta->id, $jadwal->setting['acak_opsi']);
+            $jawaban_peserta = UjianService::getJawabanPeserta(
+                $jadwal->id, 
+                $peserta->id, 
+                $setting['acak_opsi']
+            );
 
             return response()->json(['data' => $jawaban_peserta, 'detail' => $ujian_siswa]);
         }
@@ -365,37 +464,37 @@ class UjianAktifController extends Controller
         $now = Carbon::createFromFormat('H:i:s', Carbon::now()->format('H:i:s'));
         $diff_in_minutes = $start->diffInSeconds($now);
 
+        // Jika perbedaan waktu telah melebihi 
+        // waktu pengerjaan ujian
         if($diff_in_minutes > $jadwal->lama) {
-            $ujian->status_ujian = 1;
-            $ujian->save();
+            try {
+                DB::beginTransaction();
+                $ujian->status_ujian = 1;
+                $ujian->save();
+    
+                $finished = UjianService::finishingUjian($banksoal_id, $jadwal->id, $peserta->id);
 
-            $finished = UjianService::finishingUjian($banksoal_id, $jadwal->id, $peserta->id);
-            if(!$finished['success']) {
-                return SendResponse::badRequest($finished['message']);
+                if(!$finished['success']) {
+                    DB::rollBack();
+                    return SendResponse::badRequest($finished['message']);
+                }
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return SendResponse::internalServerError($e->getMessage());
             }
         } else {
-            $ujian->sisa_waktu = $jadwal->lama-$diff_in_minutes;
-            $ujian->save();
+            try {
+                DB::beginTransaction();
+                $ujian->sisa_waktu = $jadwal->lama-$diff_in_minutes;
+                $ujian->save();
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return SendResponse::internalServerError($e->getMessage());
+            }
         }
 
         return response()->json(['data' => $jawaban_peserta, 'detail' => $ujian]);
-    }
-
-    /**
-     * [uncompleteUjian description]
-     * @return [type] [description]
-     */
-    public function uncompleteUjian()
-    {
-        $peserta = request()->get('peserta-auth');
-
-        $data = SiswaUjian::where(function($query) use($peserta) {
-            $query->where('peserta_id', $peserta->id)
-            ->where('status_ujian','=',3);
-        })->first();
-        if(!$data) {
-            $data= [];
-        }
-        return SendResponse::acceptData($data);
     }
 }
