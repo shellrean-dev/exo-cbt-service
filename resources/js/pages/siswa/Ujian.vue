@@ -1,6 +1,6 @@
 <template>
-  <div class="container md:mx-auto flex flex-col justify-center space-y-4 lg:flex-row lg:space-y-0 lg:space-x-4 -mt-24">
-    <div class="w-full lg:w-3/4 lg:py-4 lg:px-4">
+  <div class="container md:mx-auto flex flex-col justify-center space-y-4 lg:flex-row lg:space-y-0 lg:space-x-4 -mt-12 sm:-mt-24">
+    <div class="w-full lg:w-3/4 lg:py-4 lg:px-4 mb-20">
       <div class="bg-white border-2 border-gray-300 shadow rounded-t-lg rounded-b-lg"  v-if="filleds">
         <div class="pt-2 pb-2 pr-2 flex justify-between border-b border-gray-300 mb-2 items-center" v-show="!focus">
           <div class="flex items-center">
@@ -23,7 +23,7 @@
 				    </button>
 				    <button @click="focus = !focus" class="py-1 px-1 rounded-md bg-gray-100 text-gray-600 border border-gray-300 hover:shadow-lg">
               <expand-line-icon v-show="!focus"></expand-line-icon>
-              <span v-show="focus">&times;</span>
+              <minimize-line-icon v-show="focus"></minimize-line-icon>
 				    </button>
 			    </div>
 		    </div>
@@ -162,6 +162,7 @@ import ModalConfirm from '../../components/ModalConfirm'
 import ModalQuestion from '../../components/ModalQuestion'
 import ModalDirection from '../../components/ModalDirection'
 import ExpandLineIcon from '../../components/ExpandLineIcon'
+import MinimizeLineIcon from '../../components/MinimizeLineIcon'
 import RenderString from '../../components/siswa/RenderString'
 import AudioPlayer from '../../components/siswa/AudioPlayer.vue'
 import 'vue-loading-overlay/dist/vue-loading.css'
@@ -173,6 +174,7 @@ export default {
     PrevLineIcon,
     AppLineIcon,
     ExpandLineIcon,
+    MinimizeLineIcon,
     AudioPlayer,
     ModalConfirm,
     ModalQuestion,
@@ -249,8 +251,7 @@ export default {
         if(this.hasdirec.includes(this.filleds[this.questionIndex].soal.id)) {
           return
         }
-        this.$bvModal.show('modal-direction')
-
+        this.modalDirection = true
       }
     }
   }
