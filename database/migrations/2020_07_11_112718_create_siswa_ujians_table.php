@@ -18,6 +18,7 @@ class CreateSiswaUjiansTable extends Migration
             $table->unsignedBigInteger('peserta_id');
             $table->unsignedBigInteger('jadwal_id');
             $table->string('mulai_ujian');
+            $table->string('mulai_ujian_shadow');
             $table->integer('uploaded')->default('0');
             $table->integer('sisa_waktu');
             $table->char('status_ujian');
