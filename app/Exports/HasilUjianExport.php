@@ -178,6 +178,8 @@ class HasilUjianExport
 
             $sheet->setCellValue('P'.$row, $value->hasil);
             $sheet->getStyle('P'.$row)->applyFromArray($styleArray);
+
+            $row++;
         }
 
         return $spreadsheet;
