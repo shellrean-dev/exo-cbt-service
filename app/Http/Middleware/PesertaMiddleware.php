@@ -24,6 +24,6 @@ class PesertaMiddleware
             return $next($request);
         }
 
-        return response()->json(['message' => 'unauthorized'], 401);
+        return response()->json(['message' => 'Anda tidak lagi memiliki akses. silakan login kembali'], 401);
     }
 }
