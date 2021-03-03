@@ -19,6 +19,7 @@ class SesiScheduleController extends Controller
      * @param \Illuminate\Http\Request
      * @return \App\Actions\SendResponse
      * @since 2.0.0
+     * @author <wandinak17@gmail.com>
      */
     public function studentBySesi()
     {
@@ -51,6 +52,7 @@ class SesiScheduleController extends Controller
      * @param \Illuminate\Http\Request
      * @return \App\Actions\SendResponse
      * @since 2.0.0
+     * @author <wandinak17@gmail.com>
      */
     public function pushToSesi(Request $request)
     {
@@ -99,6 +101,7 @@ class SesiScheduleController extends Controller
      * @param \Illuminate\Http\Request
      * @return \App\Actions\SendResponse
      * @since 2.0.0
+     * @author <wandinak17@gmail.com>
      */
     public function removeFromSesi(Request $request)
     {
@@ -134,6 +137,7 @@ class SesiScheduleController extends Controller
      *
      * @param \Illuminate\Http\Request
      * @since 2.0.0
+     * @author <wandinak17@gmail.com>
      */
     public function importToSesi(Request $request)
     {
@@ -153,5 +157,49 @@ class SesiScheduleController extends Controller
             return SendResponse::badRequest($e->getMessage());
         }
         return SendResponse::accept();
+    }
+
+    /**
+     * Copy sesi dari default siswa
+     * 
+     * @param \Illuminate\Http\Request
+     * @since 2.0.0
+     * @author <wandinak17@gmail.com>
+     */
+    public function copyFromDefault(Request $request)
+    {
+        $request->validate([
+            'jadwal_id' => 'required|exists:jadwals,id'
+        ]);
+
+        $students = DB::table('pesertas')->select('id','sesi')->get();
+        $groupped = $students->groupBy('sesi');
+
+        $data = [];
+        foreach($groupped->all() as $key => $item) {
+            $sesi = [];
+            foreach($item as $student) {
+                array_push($sesi, $student->id);
+            }
+            array_push($data, [
+                'jadwal_id' => $request->jadwal_id,
+                'sesi'      => $key,
+                'peserta_ids' => json_encode($sesi),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+        
+        try {
+            DB::beginTransaction();
+            
+            DB::table('sesi_schedules')->where('jadwal_id', $request->jadwal_id)->delete();
+            
+            DB::table('sesi_schedules')->insert($data);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return SendResponse::internalServerError('Kesalahan 500. '.$e->getMessage());
+        }
     }
 }
