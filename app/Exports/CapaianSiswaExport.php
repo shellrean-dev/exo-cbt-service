@@ -40,8 +40,9 @@ class CapaianSiswaExport extends ExportExcel
 
         $row = 4;
         $column_header++;
+        $no = 1;
         foreach ($datas['pesertas'] as $key => $fil) {
-            $sheet->setCellValue('A'.$row, $key+1);
+            $sheet->setCellValue('A'.$row, $no);
             $sheet->getStyle('A'.$row)->applyFromArray(self::styleGeneral());
 
             $sheet->setCellValue('B'.$row, $fil['peserta']['no_ujian']);
@@ -68,6 +69,7 @@ class CapaianSiswaExport extends ExportExcel
             $sheet->getStyle($column.$row)->getAlignment()->setHorizontal('center');
 
             $row++;
+            $no++;
         }
 
         return $spreadsheet;
