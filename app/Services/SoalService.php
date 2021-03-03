@@ -26,16 +26,17 @@ class SoalService
 		        $option_count=count($singlequestion['option']);
 		        $ques_type="0";
 		        if($option_count!="0"){
-		         	if($singlequestion['correct']!=""){
+		         	if($singlequestion['correct'] !=""){
 		            	if (strpos($singlequestion['correct'],',') !== false) {
 		              		$ques_type="4";
 		            	}else{
 		              		$ques_type="0";
 		            	}
 		          	}else{
+						$ques_type = "6";
 		            }
 		        }else{
-
+					$ques_type="1";
 		        }
 		        if($ques_type==0){
 				  $ques_type2=1;
@@ -45,6 +46,9 @@ class SoalService
 				}
 				if($ques_type==4) {
 					$ques_type2=4;
+				}
+				if($ques_type==6) {
+					$ques_type2=6;
 				}
 				$corect_position=array(
 					'A' => '0',
@@ -70,7 +74,7 @@ class SoalService
 				try {
 					$soal_id = DB::table('soals')->insertGetId($insert_data);
 
-					if($ques_type=="0" || $ques_type=="4"){
+					if($ques_type=="0" || $ques_type=="4" || $ques_type == "6"){
 						$correct_op=array_filter(explode(',',$singlequestion['correct']));
 						$correct_option_position=array();
 						foreach($correct_op as $v){
