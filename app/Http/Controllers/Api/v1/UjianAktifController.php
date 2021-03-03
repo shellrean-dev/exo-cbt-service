@@ -12,6 +12,7 @@ use App\JawabanPeserta;
 use App\UjianAktif;
 use App\SiswaUjian;
 use App\HasilUjian;
+use Carbon\Carbon;
 use App\Banksoal;
 use App\Peserta;
 use App\Jadwal;
@@ -120,7 +121,11 @@ class UjianAktifController extends Controller
      */
     public function getPesertas(Jadwal $jadwal)
     {
-        $siswa = SiswaUjian::with('peserta')->where(['jadwal_id' => $jadwal->id])->get();
+        $siswa = SiswaUjian::with(['peserta' => function($query) {
+            $query->select('id', 'nama', 'no_ujian');
+        }])
+        ->select('id','jadwal_id','mulai_ujian','mulai_ujian_shadow','sisa_waktu','status_ujian','peserta_id')
+        ->where(['jadwal_id' => $jadwal->id])->get();
         return SendResponse::acceptData($siswa);
     }
 
@@ -149,12 +154,17 @@ class UjianAktifController extends Controller
         DB::beginTransaction();
 
         try {
-            SiswaUjian::where([
+            DB::table('siswa_ujians')->where([
                 'peserta_id'        => $peserta->id,
                 'jadwal_id'         => $aktif
             ])->delete();
 
-            JawabanPeserta::where([
+            DB::table('jawaban_pesertas')->where([
+                'peserta_id'        => $peserta->id,
+                'jadwal_id'         => $aktif
+            ])->delete();
+
+            DB::table('hasil_ujians')->where([
                 'peserta_id'        => $peserta->id,
                 'jadwal_id'         => $aktif
             ])->delete();
@@ -176,41 +186,42 @@ class UjianAktifController extends Controller
      * @param  Peserta $peserta [description]
      * @return [type]           [description]
      */
-    public function closePeserta(Jadwal $jadwal, Peserta $peserta)
+    public function closePeserta($jadwal_id, $peserta_id)
     {
-        $ujian_id = $jadwal->id;
-
-        DB::beginTransaction();
-
         try {
+            $hasilUjian = DB::table('hasil_ujians')->where([
+                'peserta_id'    => $peserta_id,
+                'jadwal_id'     => $jadwal_id,
+            ])->count();
 
-            $hasilUjian = HasilUjian::where([
-                'peserta_id'    => $peserta->id,
-                'jadwal_id'     => $ujian_id,
-            ])->first();
-
-            if($hasilUjian) { 
+            if($hasilUjian > 0) { 
                 return SendResponse::accept();
             }
 
-            $jawaban = JawabanPeserta::where([
-                'jadwal_id'     => $ujian_id, 
-                'peserta_id'    => $peserta->id
-            ])->first();
-            $finished = UjianService::finishingUjian($jawaban->banksoal_id, $ujian_id, $peserta->id);
+            $jawaban = DB::table('jawaban_pesertas')->where([
+                'jadwal_id'     => $jadwal_id, 
+                'peserta_id'    => $peserta_id
+            ])
+            ->select('banksoal_id')
+            ->first();
+
+            DB::beginTransaction();
+            $finished = UjianService::finishingUjian($jawaban->banksoal_id, $jadwal_id, $peserta_id);
             if(!$finished['success']) {
+                DB::rollback();
                 return SendResponse::badRequest($finished['message']);
             }
 
-            $ujian = SiswaUjian::where([
-                'jadwal_id'     => $ujian_id, 
-                'peserta_id'    => $peserta->id
-            ])->first();
+            DB::table('siswa_ujians')->where([
+                'jadwal_id'     => $jadwal_id, 
+                'peserta_id'    => $peserta_id
+            ])->update([
+                'status_ujian'  => 1
+            ]);
 
-            $ujian->status_ujian = 1;
-            $ujian->save();
-            $peserta->api_token = '';
-            $peserta->save();
+            DB::table('pesertas')->where('id', $peserta_id)->update([
+                'api_token' => ''
+            ]);
 
             DB::commit();
         } catch (\Exception $e) {
@@ -263,5 +274,61 @@ class UjianAktifController extends Controller
             'status'    => 0,
         ]);
         return SendResponse::acceptData($token);
+    }
+
+    /**
+     * Tambah waktu ujian untuk siswa
+     * @param int $peserta_id
+     * @param int $jadwal_id
+     */
+    public function addMoreTime(Request $request)
+    {
+        $jadwal_id = $request->jadwal_id;
+        $peserta_id = $request->peserta_id;
+
+        
+        $jadwal = DB::table('jadwals')->where('id', $jadwal_id)
+            ->select('id','lama')
+            ->first();
+        if (!$jadwal) {
+            return SendResponse::badRequest('Kami tidak dapat menemukan jadwal yang diminta');
+        }
+        
+        if (intval($request->minutes) > ($jadwal->lama/60)) {
+            return SendResponse::badRequest('Penambahan waktu tidak boleh melebihi lamanya ujian');
+        }
+
+        $peserta = DB::table('pesertas')->where('id', $peserta_id)
+            ->select('id','no_ujian')
+            ->first();
+        if (!$peserta) {
+            return SendResponse::badRequest('Kami tidak dapat menemukan peserta yang diminta');
+        }
+
+        $ujian = DB::table('siswa_ujians')->where([
+            'jadwal_id' => $jadwal_id,
+            'peserta_id' => $peserta_id
+        ])->first();
+
+        if (!$ujian) {
+            return SendResponse::badRequest('Kami tidak dapat menemukan ujian pada peserta yang diminta');
+        }
+
+        try {
+            $start = Carbon::createFromFormat('H:i:s', $ujian->mulai_ujian_shadow);
+            $curr = $start->addMinutes(intval($request->minutes));
+
+            if ($curr > now()) {
+                return SendResponse::badRequest('Anda menambah waktu ujian siswa diluar nalar, waktu yang ditambahkan akan melebihi waktu anda saat ini');
+            }
+
+            DB::table('siswa_ujians')->where('id', $ujian->id)
+                ->update([
+                    'mulai_ujian_shadow'    => $curr->format('H:i:s')
+                ]);
+        } catch (\Exception $e) {
+            return SendResponse::internalServerError('Kesalahana 500. '.$e->getMessage());
+        }
+        return SendResponse::accept('Waktu pengerjaan siswa no ujian: '.$peserta->no_ujian. ' ditambah '.$request->minutes.' menit, informasikan kepada peserta untuk merefresh browser');
     }
 }
