@@ -11,7 +11,6 @@ class SoalService
 	{
 		foreach($question as $key => $singlequestion){
 			if($key != 0){
-				// $question= str_replace('"','&#34;',$singlequestion['question']);
 				$question = $singlequestion['question'];
 				$question= str_replace("`",'&#39;',$question);
 		        $question= str_replace("‘",'&#39;',$question);
@@ -21,27 +20,31 @@ class SoalService
 
 		        $question= str_replace("â€™",'&#39;',$question);
 		        $question= str_replace("â€",'&#34;',$question);
-		        $question= str_replace("'","&#39;",$question);
-		        $question= str_replace("\n","<br>",$question);
+				$question= str_replace("'","&#39;",$question);
+		        // $question= str_replace("\n","<br>",$question);
 
 		        $option_count=count($singlequestion['option']);
 		        $ques_type="0";
 		        if($option_count!="0"){
 		         	if($singlequestion['correct']!=""){
 		            	if (strpos($singlequestion['correct'],',') !== false) {
-		              		$ques_type="1";
+		              		$ques_type="4";
 		            	}else{
 		              		$ques_type="0";
 		            	}
 		          	}else{
 		            }
 		        }else{
+
 		        }
 		        if($ques_type==0){
 				  $ques_type2=1;
 				}
 				if($ques_type==1){
 					$ques_type2=2;
+				}
+				if($ques_type==4) {
+					$ques_type2=4;
 				}
 				$corect_position=array(
 					'A' => '0',
@@ -57,21 +60,24 @@ class SoalService
 				$insert_data = array(
 					'banksoal_id' => $banksoal_id,
 					'tipe_soal'   => $ques_type2,
-					'pertanyaan' => $question
+					'pertanyaan' => $question,
+					'created_at'	=> now(),
+					'updated_at'	=> now(),
 				);
 
 				DB::beginTransaction();
 
 				try {
-					$soal = Soal::create($insert_data);
+					$soal_id = DB::table('soals')->insertGetId($insert_data);
 
-					if($ques_type=="0" || $ques_type=="1"){
+					if($ques_type=="0" || $ques_type=="4"){
 						$correct_op=array_filter(explode(',',$singlequestion['correct']));
 						$correct_option_position=array();
 						foreach($correct_op as $v){
-							$correct_option_position[]=$corect_position[trim($v)];
+							$correct_option_position[]=$corect_position[trim(strip_tags($v))];
 						}
 
+						$jawabans = [];
 						foreach($singlequestion['option'] as $corect_key => $correct_val){
 							if(in_array($corect_key, $correct_option_position)){
 								$divideratio=count($correct_option_position);
@@ -80,13 +86,16 @@ class SoalService
 								$correctoption =0;
 							}
 
-							$array = [
-								'soal_id' => $soal->id,
+							array_push($jawabans, [
+								'soal_id' => $soal_id,
 								'text_jawaban' => $correct_val,
-								'correct' => $correctoption
-							];
-
-							JawabanSoal::create($array);
+								'correct' => $correctoption,
+								'created_at' => now(),
+								'updated_at' => now(),
+							]);
+						}
+						if(count($jawabans) > 0) {
+							DB::table('jawaban_soals')->insert($jawabans);
 						}
 					}
 
