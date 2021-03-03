@@ -13,8 +13,9 @@ use App\Jadwal;
 class JadwalController extends Controller
 {
     /**
-     * [getJadwalPeserta description]
-     * @return [type] [description]
+     * Ambil data jadwal yang dapat diikuti oleh peserta
+     * @return \App\Actions\SendResponse
+     * @author <wandinak17@gmail.com>
      */
     public function getJadwalPeserta()
     {
