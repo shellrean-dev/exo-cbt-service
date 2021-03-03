@@ -64,6 +64,14 @@ class BanksoalController extends Controller
             'persen'            => 'required|array'
         ]);
 
+        $point = 0;
+        foreach(array_values($request->persen) as $item) {
+            $point += intval($item);
+        }
+        if ($point != 100) {
+            return SendResponse::badRequest('Persentase harus 100 %');
+        }
+
         DB::beginTransaction();
 
         try {
