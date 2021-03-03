@@ -19,6 +19,47 @@ use App\Soal;
 class UjianAktifController extends Controller
 {
     /**
+     * Ambil data ujian siswa yang belum diselesaikan pada hari ini
+     * @return \App\Actions\SendResponse
+     * @author wandinak17@gmail.com
+     */
+    public function uncompleteUjian()
+    {
+        $peserta = request()->get('peserta-auth');
+
+        // ambil ujian yang aktif hari ini
+        $jadwals = DB::table('jadwals')->where([
+            'status_ujian'  => 1,
+            'tanggal'       => now()->format('Y-m-d')
+        ])
+        ->select('id')
+        ->get();
+        $jadwal_ids = $jadwals->pluck('id')->toArray();
+
+        // ambil data siswa ujian
+        // yang sedang dikerjakan pada hari ini
+        // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
+        $data = DB::table('siswa_ujians')
+            ->where('peserta_id', $peserta->id)
+            ->where('status_ujian', 3)
+            ->whereIn('jadwal_id', $jadwal_ids)
+            ->whereDate('created_at', now()->format('Y-m-d'))
+            ->select('jadwal_id', 'status_ujian')
+            ->first();
+
+        if(!$data) {
+            return SendResponse::acceptData([]);
+        }
+        
+        $res = [
+            'jadwal_id'     => $data->jadwal_id,
+            'status_ujian'  => $data->status_ujian
+        ];
+
+        return SendResponse::acceptData($res);
+    }
+    
+    /**
      * Memulai ujian masuk kedalam mode standby
      * @param  Request $request
      * @return \App\Actions\SendResponse
@@ -26,13 +67,22 @@ class UjianAktifController extends Controller
      */
     public function startUjian(Request $request)
     {
+        // validasi jadwal ujian yang diminta
         $request->validate([
             'jadwal_id'     => 'required|exists:jadwals,id'
         ]);
 
-        $ujian = Jadwal::find($request->jadwal_id);
-        if($ujian->setting['token'] == "1") {
+        // cari jadwal ujian yang diminta
+        $ujian = DB::table('jadwals')
+            ->where('id', $request->jadwal_id)
+            ->first();
+
+        // jika token diaktifkan
+        $setting = json_decode($ujian->setting, true);
+        if($setting['token'] == "1") {
+            // Ambil token
             $token = Token::orderBy('id')->first();
+            // $token = DB::table('tokens')->first();
             if($token) {
                 $to = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', now());
                 $from = $token->updated_at->format('Y-m-d H:i:s');
@@ -43,23 +93,38 @@ class UjianAktifController extends Controller
                     $token->save();
                 }
                 if($token->token != $request->token) {
-                    return SendResponse::badRequest('Token tidak sesuai');
+                    return SendResponse::badRequest('Token yang kamu masukkan tidak sesuai, cek token lalu submit kembali');
                 }
                 if($token->status == 0) {
-                    return SendResponse::badRequest('Status token belum dirilis');
+                    return SendResponse::badRequest('Status token belum dirilis, minta administrator untuk merilis token');
                 }
+            } else {
+                DB::table('tokens')->insert([
+                    'token'     => strtoupper(Str::random(6)),
+                    'status'    => '0',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                return SendResponse::badRequest('Token yang kamu masukkan tidak sesuai, cek token lalu submit kembali');
             }
         }
         $peserta = request()->get('peserta-auth');
 
+        // cek pengaturan sesi
         if($ujian->event_id != '0') {
-            $schedule = SesiSchedule::where([
-                'jadwal_id' => $ujian->id,
-                'sesi'      => $ujian->sesi
-            ])->first();
+            // $schedule = SesiSchedule::where([
+            //     'jadwal_id' => $ujian->id,
+            //     'sesi'      => $ujian->sesi
+            // ])->first();
+            $schedule = DB::table('sesi_schedules')
+                ->where([
+                    'jadwal_id' => $ujian->id,
+                    'sesi'      => $ujian->sesi
+                ])
+                ->first();
             if($schedule) {
-                if(!in_array($peserta->id, $schedule->peserta_ids)){
-                    return SendResponse::badRequest('Anda tidak ada didalam sesi '.$ujian->sesi);
+                if(!in_array($peserta->id, json_decode($schedule->peserta_ids, true))){
+                    return SendResponse::badRequest('Anda tidak ada di dalam sesi '.$ujian->sesi.' bila anda merasa seharusnya berada di sesi ini, hubungi administrator');
                 }
             } else {
                 return SendResponse::badRequest('Sesi belum ditentukan, hubungi administrator');
@@ -67,30 +132,64 @@ class UjianAktifController extends Controller
         }
         else {
             if($peserta->sesi != $ujian->sesi) {
-                return SendResponse::badRequest('Anda tidak ada didalam sesi '.$ujian->sesi);
+                return SendResponse::badRequest('Anda tidak ada didalam sesi '.$ujian->sesi.' bila anda merasa seharusnya berada di sesi ini, hubungi administrator');
             }
         }
 
-        $data = SiswaUjian::where(function($query) use($peserta, $request) {
-            $query->where('peserta_id', $peserta->id)
+        // $data = SiswaUjian::where(function($query) use($peserta, $request) {
+        //     $query->where('peserta_id', $peserta->id)
+        //     ->where('jadwal_id', $request->jadwal_id)
+        //     ->where('status_ujian','=',0);
+        // })->first();
+        $data = DB::table('siswa_ujians')
+            ->where('peserta_id', $peserta->id)
             ->where('jadwal_id', $request->jadwal_id)
-            ->where('status_ujian','=',0);
-        })->first();
+            ->where('status_ujian', 0)
+            ->first();
 
         if($data) {
             return SendResponse::accept();
         }
 
-        $peserta = SiswaUjian::create([
-            'peserta_id'        => $peserta->id,
-            'jadwal_id'         => $request->jadwal_id,
-            'mulai_ujian'       => '',
-            'sisa_waktu'        => $ujian->lama,
-            'status_ujian'      => 0,
-            'uploaded'          => 0
-        ]);
+        // $peserta = SiswaUjian::create([
+        //     'peserta_id'        => $peserta->id,
+        //     'jadwal_id'         => $request->jadwal_id,
+        //     'mulai_ujian'       => '',
+        //     'mulai_ujian_shadow'=> '',
+        //     'sisa_waktu'        => $ujian->lama,
+        //     'status_ujian'      => 0,
+        //     'uploaded'          => 0
+        // ]);
+
+        try {
+            DB::table('siswa_ujians')->insert([
+                'peserta_id'        => $peserta->id,
+                'jadwal_id'         => $request->jadwal_id,
+                'mulai_ujian'       => '',
+                'mulai_ujian_shadow'=> '',
+                'sisa_waktu'        => $ujian->lama,
+                'status_ujian'      => 0,
+                'uploaded'          => 0,
+                'created_at'        => now(),
+                'updated_at'        => now(),
+            ]);
+        } catch (\Exception $e) {
+            return SendResponse::internalServerError("Terjadi kesalahan 500. ".$e->getMessage());
+        }
 
         return SendResponse::accept();
+        // $token = "jfldsjflsd";
+        // $cookie = $this->getCookieDetails($token);
+        // return response()->json([])->cookie(
+        //     $cookie['name'], 
+        //     $cookie['value'], 
+        //     $cookie['minutes'], 
+        //     $cookie['path'], 
+        //     $cookie['domain'], 
+        //     $cookie['secure'], 
+        //     $cookie['httponly'], 
+        //     $cookie['samesite']
+        // );
     }
 
     /**
@@ -159,7 +258,8 @@ class UjianAktifController extends Controller
                 DB::table('siswa_ujians')
                     ->where('id', $data->id)
                     ->update([
-                        'mulai_ujian'   => now()->format('H:i:s'),
+                        'mulai_ujian'       => now()->format('H:i:s'),
+                        'mulai_ujian_shadow'=> now()->format('H:i:s'),
                         'status_ujian'  => 3,
                     ]);
             }catch(\Exception $e){
@@ -168,46 +268,6 @@ class UjianAktifController extends Controller
         }
 
         return SendResponse::accept();
-    }
-    
-    /**
-     * Ambil data ujian siswa yang belum diselesaikan pada hari ini
-     * @return \App\Actions\SendResponse
-     * @author wandinak17@gmail.com
-     */
-    public function uncompleteUjian()
-    {
-        $peserta = request()->get('peserta-auth');
-
-        // ambil ujian yang aktif hari ini
-        $jadwals = DB::table('jadwals')->where([
-            'status_ujian'  => 1,
-            'tanggal'       => now()->format('Y-m-d')
-        ])
-        ->select('id')
-        ->get();
-        $jadwal_ids = $jadwals->pluck('id')->toArray();
-
-        // ambil data siswa ujian
-        // yang sedang dikerjakan pada hari ini
-        // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
-        $data = DB::table('siswa_ujians')
-            ->where('peserta_id', $peserta->id)
-            ->where('status_ujian', 3)
-            ->whereIn('jadwal_id', $jadwal_ids)
-            ->whereDate('created_at', now()->format('Y-m-d'))
-            ->first();
-
-        if(!$data) {
-            return SendResponse::acceptData([]);
-        }
-        
-        $res = [
-            'jadwal_id'     => $data->jadwal_id,
-            'status_ujian'  => $data->status_ujian
-        ];
-
-        return SendResponse::acceptData($res);
     }
 
     /**
@@ -268,7 +328,12 @@ class UjianAktifController extends Controller
         // Jika jawaban siswa belum ada di database
         if ($jawaban_peserta->count() < 1 ) {
             //------------------------------------------------------------------
-            $banksoal = Banksoal::find($banksoal_id);
+            // $banksoal = Banksoal::find($banksoal_id);
+            $banksoal = DB::table('banksoals')
+                ->where('id', $banksoal_id)
+                ->first();
+
+            // Ambil maximal dari tiap tiap tipe soal
             $max_pg = $banksoal->jumlah_soal;
             $max_esay = $banksoal->jumlah_soal_esay;
             $max_listening = $banksoal->jumlah_soal_listening;
@@ -276,20 +341,44 @@ class UjianAktifController extends Controller
             $max_menjodohkan = $banksoal->jumlah_menjodohkan;
             $max_isian_singkat = $banksoal->jumlah_isian_singkat;
 
+            // Ambil setting dari jadwal
             $setting = json_decode($jadwal->setting, true);
 
-            // Soal Pilihan Ganda
-            $pg = Soal::where([
-                'banksoal_id' => $banksoal->id,
-                'tipe_soal' => 1
+            // Ambil soal tipe : ganda
+            
+            // $pg = Soal::where([
+            //     'banksoal_id' => $banksoal->id,
+            //     'tipe_soal' => 1
+            // ]);
+            $pg = DB::table('soals')->where([
+                'banksoal_id'   => $banksoal->id,
+                'tipe_soal'     => 1
             ]);
+
+            // Acak soal bila di sett
             if($setting['acak_soal'] == "1") {
                 $pg = $pg->inRandomOrder();
             }
-            $pg = $pg->take($max_pg)->get();
 
-            $soal_pg = $pg->map(function($item) use($peserta, $banksoal, $jadwal) {
-                return [
+            // Ambil soal sebanyak maximum
+            $pg = $pg->take($max_pg)->get();
+            $soal_pg = [];
+
+            // Buat collection untuk jawaban siswa
+            // $soal_pg = $pg->map(function($item) use($peserta, $banksoal, $jadwal) {
+            //     return [
+            //         'peserta_id'    => $peserta->id,
+            //         'banksoal_id'   => $banksoal->id,
+            //         'soal_id'       => $item->id,
+            //         'jawab'         => 0,
+            //         'iscorrect'     => 0,
+            //         'jadwal_id'     => $jadwal->id,
+            //         'ragu_ragu'     => 0,
+            //         'esay'          => ''
+            //     ];
+            // });
+            foreach($pg as $item) {
+                array_push($soal_pg, [
                     'peserta_id'    => $peserta->id,
                     'banksoal_id'   => $banksoal->id,
                     'soal_id'       => $item->id,
@@ -298,21 +387,43 @@ class UjianAktifController extends Controller
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
                     'esay'          => ''
-                ];
-            });
+                ]);
+            }
 
-            // Soal Esay
-            $esay = Soal::where([
+            // Ambil soal tipe :esay
+            // $esay = Soal::where([
+            //     'banksoal_id'   => $banksoal->id,
+            //     'tipe_soal'     => 2
+            // ]);
+            $esay = DB::table('soals')->where([
                 'banksoal_id'   => $banksoal->id,
                 'tipe_soal'     => 2
             ]);
+
+            //Acak soal bila di set
             if($setting['acak_soal'] == "1") {
                 $esay = $esay->inRandomOrder();
             }
+
+            // Ambil soal sebanyak maximum
             $esay = $esay->take($max_esay)->get();
 
-            $soal_esay = $esay->map(function($item) use($peserta, $banksoal, $jadwal) {
-                return [
+            // Buat collection untuk jawaban siswa
+            $soal_esay = [];
+            // $soal_esay = $esay->map(function($item) use($peserta, $banksoal, $jadwal) {
+            //     return [
+            //         'peserta_id'    => $peserta->id,
+            //         'banksoal_id'   => $banksoal->id,
+            //         'soal_id'       => $item->id,
+            //         'jawab'         => 0,
+            //         'iscorrect'     => 0,
+            //         'jadwal_id'     => $jadwal->id,
+            //         'ragu_ragu'     => 0,
+            //         'esay'          => ''
+            //     ];
+            // });
+            foreach($esay as $item) {
+                array_push($soal_esay, [
                     'peserta_id'    => $peserta->id,
                     'banksoal_id'   => $banksoal->id,
                     'soal_id'       => $item->id,
@@ -321,21 +432,43 @@ class UjianAktifController extends Controller
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
                     'esay'          => ''
-                ];
-            });
+                ]);
+            }
 
-            // Soal Listening
-            $listening = Soal::where([
+            // Ambil soal: Listening
+            // $listening = Soal::where([
+            //     'banksoal_id'   => $banksoal->id,
+            //     'tipe_soal'     => 3
+            // ]);
+            $listening = DB::table('soals')->where([
                 'banksoal_id'   => $banksoal->id,
                 'tipe_soal'     => 3
             ]);
+
+            // Acak soal bila di set
             if($setting['acak_soal'] == "1") {
                 $listening = $listening->inRandomOrder();
             }
+
+            // Ambil soal sebanyak maximum
             $listening = $listening->take($max_listening)->get();
 
-            $soal_listening = $listening->map(function($item) use($peserta, $banksoal, $jadwal) {
-                return [
+            // Buat collection untuk jawaban siswa
+            $soal_listening = [];
+            // $soal_listening = $listening->map(function($item) use($peserta, $banksoal, $jadwal) {
+            //     return [
+            //         'peserta_id'    => $peserta->id,
+            //         'banksoal_id'   => $banksoal->id,
+            //         'soal_id'       => $item->id,
+            //         'jawab'         => 0,
+            //         'iscorrect'     => 0,
+            //         'jadwal_id'     => $jadwal->id,
+            //         'ragu_ragu'     => 0,
+            //         'esay'          => ''
+            //     ];
+            // });
+            foreach($listening as $item) {
+                array_push($soal_listening, [
                     'peserta_id'    => $peserta->id,
                     'banksoal_id'   => $banksoal->id,
                     'soal_id'       => $item->id,
@@ -344,21 +477,43 @@ class UjianAktifController extends Controller
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
                     'esay'          => ''
-                ];
-            });
+                ]);
+            }
 
-            // Soal Multichoice complex
-            $complex = Soal::where([
+            // Ambil soal: Multichoice complex
+            // $complex = Soal::where([
+            //     'banksoal_id'   => $banksoal->id,
+            //     'tipe_soal'     => 4
+            // ]);
+            $complex = DB::table('soals')->where([
                 'banksoal_id'   => $banksoal->id,
                 'tipe_soal'     => 4
             ]);
+
+            // Acak soal bila di set
             if($setting['acak_soal'] == "1") {
                 $complex = $complex->inRandomOrder();
             }
+
+            // Ambil soal sebanyak maximum
             $complex = $complex->take($max_complex)->get();
 
-            $soal_complex = $complex->map(function($item) use($peserta, $banksoal, $jadwal) {
-                return [
+            // Buat collection untuk jawaban siswa
+            $soal_complex = [];
+            // $soal_complex = $complex->map(function($item) use($peserta, $banksoal, $jadwal) {
+            //     return [
+            //         'peserta_id'    => $peserta->id,
+            //         'banksoal_id'   => $banksoal->id,
+            //         'soal_id'       => $item->id,
+            //         'jawab'         => 0,
+            //         'iscorrect'     => 0,
+            //         'jadwal_id'     => $jadwal->id,
+            //         'ragu_ragu'     => 0,
+            //         'esay'          => ''
+            //     ];
+            // });
+            foreach($complex as $item) {
+                array_push($soal_complex, [
                     'peserta_id'    => $peserta->id,
                     'banksoal_id'   => $banksoal->id,
                     'soal_id'       => $item->id,
@@ -367,8 +522,8 @@ class UjianAktifController extends Controller
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
                     'esay'          => ''
-                ];
-            });
+                ]);
+            }
 
             // Soal  menjodohkan
             // $menjodohkan = Soal::where([
@@ -393,18 +548,40 @@ class UjianAktifController extends Controller
             //     ];
             // });
 
-            // Soal  isian singkat
-            $isian_singkat = Soal::where([
+            // Ambil soal:  isian singkat
+            // $isian_singkat = Soal::where([
+            //     'banksoal_id'   => $banksoal->id,
+            //     'tipe_soal'     => 6
+            // ]);
+            $isian_singkat = DB::table('soals')->where([
                 'banksoal_id'   => $banksoal->id,
                 'tipe_soal'     => 6
             ]);
+
+            // Acak soal bila di set
             if($setting['acak_soal'] == "1") {
                 $isian_singkat = $isian_singkat->inRandomOrder();
             }
+
+            // Ambil soal sebanyak maximum
             $isian_singkat = $isian_singkat->take($max_isian_singkat)->get();
 
-            $soal_isian_singkat = $isian_singkat->map(function($item) use($peserta, $banksoal, $jadwal) {
-                return [
+            // Buat collection untuk jawaban siswa
+            $soal_isian_singkat = [];
+            // $soal_isian_singkat = $isian_singkat->map(function($item) use($peserta, $banksoal, $jadwal) {
+            //     return [
+            //         'peserta_id'    => $peserta->id,
+            //         'banksoal_id'   => $banksoal->id,
+            //         'soal_id'       => $item->id,
+            //         'jawab'         => 0,
+            //         'iscorrect'     => 0,
+            //         'jadwal_id'     => $jadwal->id,
+            //         'ragu_ragu'     => 0,
+            //         'esay'          => ''
+            //     ];
+            // });
+            foreach($isian_singkat as $item) {
+                array_push($soal_isian_singkat, [
                     'peserta_id'    => $peserta->id,
                     'banksoal_id'   => $banksoal->id,
                     'soal_id'       => $item->id,
@@ -413,18 +590,18 @@ class UjianAktifController extends Controller
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
                     'esay'          => ''
-                ];
-            });
+                ]);
+            }
 
-            // Merges dengan urutan
+            // Gabungkan semua collection dari tipe soal
             $soals = [];
             $list = collect([
-                '1' => $soal_pg->values()->toArray(),
-                '2' => $soal_esay->values()->toArray(),
-                '3' => $soal_listening->values()->toArray(),
-                '4' => $soal_complex->values()->toArray(),
-                // '5' => $soal_menjodohkan->values()->toArray(),
-                '6' => $soal_isian_singkat->values()->toArray(),
+                '1' => $soal_pg,
+                '2' => $soal_esay,
+                '3' => $soal_listening,
+                '4' => $soal_complex,
+                // '5' => $soal_menjodohkan,
+                '6' => $soal_isian_singkat,
             ]);
             foreach ($setting['list'] as $value) {
                 $soal = $list->get($value['id']);
@@ -433,7 +610,7 @@ class UjianAktifController extends Controller
                 }
             }
 
-            // Insert
+            // Insert ke database sebagai jawaban siswa
             try {
                 DB::beginTransaction();
                 DB::table('jawaban_pesertas')->insert($soals);
@@ -443,7 +620,7 @@ class UjianAktifController extends Controller
                 return SendResponse::internalServerError($e->getMessage());
             }
 
-            // Get Jawaban peserta
+            // Ambil jawaban siswa
             $jawaban_peserta = UjianService::getJawabanPeserta(
                 $jadwal->id, 
                 $peserta->id, 
@@ -460,7 +637,7 @@ class UjianAktifController extends Controller
         ])->first();
 
         // Check perbedaan waktu
-        $start = Carbon::createFromFormat('H:i:s', $ujian->mulai_ujian);
+        $start = Carbon::createFromFormat('H:i:s', $ujian->mulai_ujian_shadow);
         $now = Carbon::createFromFormat('H:i:s', Carbon::now()->format('H:i:s'));
         $diff_in_minutes = $start->diffInSeconds($now);
 
@@ -496,5 +673,24 @@ class UjianAktifController extends Controller
         }
 
         return response()->json(['data' => $jawaban_peserta, 'detail' => $ujian]);
+    }
+
+    /**
+     * Ambil konfigurasi cookie
+     * @return array
+     */
+    private function getCookieDetails($token)
+    {
+        return [
+            'name' => '_token',
+            'value' => $token,
+            'minutes' => 1440,
+            'path' => null,
+            'domain' => null,
+            // 'secure' => true, // for production
+            'secure' => null, // for localhost
+            'httponly' => true,
+            'samesite' => true,
+        ];
     }
 }
