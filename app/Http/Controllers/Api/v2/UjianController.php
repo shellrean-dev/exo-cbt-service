@@ -17,7 +17,7 @@ use App\Soal;
 class UjianController extends Controller
 {
     /**
-     * Store data ujian to table
+     * Simpan/Update jawaban siswa pada ujian aktif
      *
      * @param Illuminate\Http\Request
      * @return Illuminate\Http\Response
@@ -33,22 +33,19 @@ class UjianController extends Controller
         $peserta = request()->get('peserta-auth');
 
         // Ambil jawaban peserta
-        // $find = JawabanPeserta::where([
-        //     'id'            => $request->jawaban_id
-        // ])->first();
         $find = DB::table('jawaban_pesertas')
             ->where('id', $request->jawaban_id)
             ->first();
         
         if (!$find) {
-            return SendResponse::badRequest('kami tidak dapat menemukan data dari jawaban anda.');
+            return SendResponse::badRequest('Kami tidak dapat menemukan data dari jawaban kamu.');
         }
 
         // ambil ujian yang aktif hari ini
         $ujian = $this->_getUjianCurrent($peserta);
 
         if (!$ujian) {
-            return SendResponse::badRequest('Kami tidak dapat menemukan ujian yang sedang anda kamu kerjakan, mungkin jadawl ini sedang tidak aktif. silakan logout lalu hubungi administrator.');
+            return SendResponse::badRequest('Kami tidak dapat menemukan ujian yang sedang kamu kerjakan, mungkin jadawal ini sedang tidak aktif. silakan logout lalu hubungi administrator.');
         }
 
         if($ujian) {
@@ -169,7 +166,10 @@ class UjianController extends Controller
         }
 
         // Jika yang dikirimkan adalah pilihan ganda
-        $kj = JawabanSoal::find($request->jawab);
+        $kj = DB::table('jawaban_soals')
+            ->where('id', $request->jawab)
+            ->select('correct')
+            ->first();
         if(!$kj) {
             $send = [
                 'id'    => $find->id,
@@ -261,6 +261,7 @@ class UjianController extends Controller
      *
      * @param Illuminate\Http\Request
      * @return Illuminate\Http\Response
+     * @author shellrean <wandnak17@gmail.com>
      */
     public function selesai()
     {
@@ -311,13 +312,15 @@ class UjianController extends Controller
     /**
      * Kurangi waktu siswa
      * @param object $ujian
+     * @return object
+     * @author shellrean <wandnak17@gmail.com>
      */
     private function _kurangiWaktu($ujian)
     {
         $deUjian = DB::table('jadwals')
             ->where('id', $ujian->jadwal_id)
             ->first();
-        $start = Carbon::createFromFormat('H:i:s', $ujian->mulai_ujian);
+        $start = Carbon::createFromFormat('H:i:s', $ujian->mulai_ujian_shadow);
         $now = Carbon::createFromFormat('H:i:s', Carbon::now()->format('H:i:s'));
         $diff_in_minutes = $start->diffInSeconds($now);
 
@@ -335,6 +338,8 @@ class UjianController extends Controller
     /**
      * Ambil ujian aktif saat ini 
      * @param object $peserta
+     * @return object
+     * @author shellrean <wandnak17@gmail.com>
      */
     private function _getUjianCurrent($peserta)
     {
