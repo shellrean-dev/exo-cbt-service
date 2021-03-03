@@ -22,6 +22,7 @@ class CreateSoalsTable extends Migration
             $table->string('audio')->nullable();
             $table->string('direction')->nullable();
             $table->longText('analys')->nullable();
+            $table->integer('layout')->default(1);
             $table->timestamps();
 
             $table->foreign('banksoal_id')->references('id')->on('banksoals')->onDelete('cascade');

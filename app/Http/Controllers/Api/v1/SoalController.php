@@ -30,7 +30,8 @@ class SoalController extends Controller
             'banksoal_id'   => 'required|exists:banksoals,id',
             'correct'       => 'required_if:tipe_soal,1',
             'selected'      => 'required_if:tipe_soal,4|array',
-            'pertanyaan'    => 'required'
+            'pertanyaan'    => 'required',
+            'layout'        => 'required'
         ]);
 
         DB::beginTransaction();
@@ -42,7 +43,8 @@ class SoalController extends Controller
                 'tipe_soal'     => $request->tipe_soal,
                 'rujukan'       => $request->rujukan,
                 'audio'         => $request->audio,
-                'direction'     => $request->direction
+                'direction'     => $request->direction,
+                'layout'        => $request->layout
             ]);
 
             if(in_array($request->tipe_soal, [1,3,4,5,6])) {
@@ -196,7 +198,8 @@ class SoalController extends Controller
             'banksoal_id'   => 'required|exists:banksoals,id',
             'correct'       => 'required_if:tipe_soal,1',
             'selected'      => 'required_if:tipe_soal,4|array',
-            'pertanyaan'    => 'required'
+            'pertanyaan'    => 'required',
+            'layout'        => 'required'
         ]);
 
         DB::beginTransaction();
@@ -207,6 +210,7 @@ class SoalController extends Controller
             $soal->direction = $request->direction;
             $soal->tipe_soal = $request->tipe_soal;
             $soal->rujukan = $request->rujukan;
+            $soal->layout = $request->layout;
             $soal->save();
 
             if(in_array($request->tipe_soal, [1,3,4,5,6])) {

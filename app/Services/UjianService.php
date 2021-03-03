@@ -82,7 +82,7 @@ class UjianService
     {
         $find = JawabanPeserta::with([
           'soal' => function($q) {
-            $q->select('id','banksoal_id','pertanyaan','tipe_soal','audio','direction');
+            $q->select('id','banksoal_id','pertanyaan','tipe_soal','audio','direction','layout');
         },'soal.jawabans' => function($q) use ($acak_opsi) {
             $q->select('id','soal_id','text_jawaban');
             if($acak_opsi == "1") {
@@ -144,6 +144,7 @@ class UjianService
                     'jawabans' => $jawabans,
                     'pertanyaan' => $item->soal->pertanyaan,
                     'tipe_soal' => $item->soal->tipe_soal,
+                    'layout'    => $item->soal->layout,
                 ],
                 'ragu_ragu' => $item->ragu_ragu,
             ];
