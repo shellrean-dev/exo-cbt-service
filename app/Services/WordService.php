@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class WordService
 {	
@@ -65,7 +66,16 @@ class WordService
         		$ext_img = strtolower(pathinfo($value, PATHINFO_EXTENSION));
         		$imagenew_name=time().$rand_inc_number.".".$ext_img;
         		$old_path=$word_folder."/".$value;
-        		$new_path=$target_dir.$imagenew_name;
+				$new_path=$target_dir.$imagenew_name;
+				
+				DB::table('files')->insert([
+					'directory_id'	=> $directory->id,
+					'filename'		=> $imagenew_name,
+					'path'			=> $new_path,
+					'exstension'	=> $ext_img,
+					'dirname'		=> $directory->slug,
+					'size'			=> 0
+				]);
 
         		rename($old_path,$new_path);
 		        $img = '<img src="'.$dsn.'/storage/'.$directory->slug.'/'.$imagenew_name.'">';
