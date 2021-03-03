@@ -153,4 +153,13 @@ class SettingController extends Controller
         });
         return SendResponse::acceptData($set->values()->all());
     }
+
+    public function infoApp()
+    {
+        return response()->json([
+            'name'      => 'Extraordinary CBT',
+            'author'    => 'shellrean',
+            'email'     => 'wandinak17@gmail.com'
+        ]);
+    }
 }
