@@ -55,7 +55,6 @@ class UjianController extends Controller
             'lama'              => 'required|int',
             'alias'             => 'required',
             'banksoal_id'       => 'required|array',
-            'event_id'          => 'required|exists:event_ujians,id',
             'setting'           => 'required|array'
         ]);
 
@@ -391,9 +390,18 @@ class UjianController extends Controller
     {
         $res = HasilUjian::with(['peserta' => function ($query) {
             $query->select('id','nama','no_ujian');
-        }])
-        ->where('jadwal_id', $jadwal->id)
-        ->orderBy('peserta_id');
+        }]);
+
+        $jurusan = request()->jurusan;
+
+        if ($jurusan != 0 ) {
+            $res->whereHas('peserta', function($query) use ($jurusan) {
+                $query->where('jurusan_id', $jurusan);
+            });
+        }
+
+        $res->where('jadwal_id', $jadwal->id)
+            ->orderBy('peserta_id');
 
         if(request()->perPage != '') {
             $res = $res->paginate(request()->perPage);
@@ -413,9 +421,16 @@ class UjianController extends Controller
             abort(401);
         }
 
-        $res = HasilUjian::with(['peserta' => function ($query) {
+        $jurusan = request()->jurusan;
+
+        $jurusan = explode(',',$jurusan);
+
+        $res = HasilUjian::with(['peserta' => function ($query) use ($jurusan) {
             $query->select('id','nama','no_ujian');
         }])
+        ->whereHas('peserta', function($query) use ($jurusan) {
+            $query->whereIn('jurusan_id', $jurusan);
+        })
         ->where('jadwal_id', $jadwal->id)
         ->orderBy('peserta_id')
         ->get();
@@ -434,8 +449,10 @@ class UjianController extends Controller
      */
     public function getResultExcelLink(Jadwal $jadwal)
     {
+        $jurusan = request()->q;
+
         $url = URL::temporarySignedRoute(
-            'hasilujian.download.excel', now()->addMinutes(5),['jadwal' => $jadwal->id]
+            'hasilujian.download.excel', now()->addMinutes(5),['jadwal' => $jadwal->id, 'jurusan' => $jurusan]
         );
 
         return SendResponse::acceptData($url);
