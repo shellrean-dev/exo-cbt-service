@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Route;
     Route::get('login/sso', 'AuthController@sso');
     Route::get('login/callback', 'AuthController@callback');
     Route::get('settings/auth', 'SettingController@getSetAuth');
+    Route::get('info-app', 'SettingController@infoApp');
 
     // Download excel
     Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel', 'UjianController@getCapaianSiswaExcel')->name('capaian.download.excel');
@@ -86,6 +87,7 @@ use Illuminate\Support\Facades\Route;
         Route::get('ujians/{jadwal}/peserta', 'UjianAktifController@getPesertas');
         Route::get('ujians/{jadwal}/peserta/{peserta}/reset', 'UjianAktifController@resetUjianPeserta');
         Route::get('ujians/{jadwal}/peserta/{peserta}/close', 'UjianAktifController@closePeserta');
+        Route::post('ujians/peserta/add-more-time', 'UjianAktifController@addMoreTime');
 
         Route::get('ujians/esay/exists', 'UjianController@getExistEsay');
         Route::post('ujians/esay/input', 'UjianController@storeNilaiEsay');
@@ -110,6 +112,7 @@ use Illuminate\Support\Facades\Route;
         Route::get('sesi', 'SesiScheduleController@studentBySesi');
         Route::post('sesi', 'SesiScheduleController@pushToSesi');
         Route::post('sesi/import', 'SesiScheduleController@importToSesi');
+        Route::post('sesi/copy', 'SesiScheduleController@copyFromDefault');
         Route::delete('sesi', 'SesiScheduleController@removeFromSesi');
 
         Route::get('settings/sekolah', 'SettingController@getSettingSekolah');
