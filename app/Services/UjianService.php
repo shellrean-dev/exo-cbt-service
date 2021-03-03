@@ -368,7 +368,7 @@ class UjianService
 
             $hasil = $hasil_pg+$hasil_listening+$hasil_mpg+$hasil_isiang_singkat+$hasil_menjodohkan;
 
-            HasilUjian::create([
+            DB::table('hasil_ujians')->insert([
                 'banksoal_id'                   => $banksoal_id,
                 'peserta_id'                    => $peserta_id,
                 'jadwal_id'                     => $jadwal_id,
@@ -384,7 +384,9 @@ class UjianService
                 'jumlah_salah_menjodohkan'      => $jumlah_menjodohkan_salah,
                 'tidak_diisi'                   => $null,
                 'hasil'                         => $hasil,
-                'point_esay'                    => 0
+                'point_esay'                    => 0,
+                'created_at'                    => now(),
+                'updated_at'                    => now()
             ]);
         } catch (\Exception $e) {
             return ['success' => false, 'message' => $e->getMessage()];
@@ -400,7 +402,7 @@ class UjianService
     public static function kurangiSisaWaktu(SiswaUjian $siswaUjian)
     {
         $deUjian = Jadwal::find($siswaUjian->jadwal_id);
-        $start = Carbon::createFromFormat('H:i:s', $siswaUjian->mulai_ujian);
+        $start = Carbon::createFromFormat('H:i:s', $siswaUjian->mulai_ujian_shadow);
         $now = Carbon::createFromFormat('H:i:s', Carbon::now()->format('H:i:s'));
         $diff_in_minutes = $start->diffInSeconds($now);
         $siswaUjian->sisa_waktu = $deUjian->lama-$diff_in_minutes;
@@ -414,9 +416,19 @@ class UjianService
      */
     public function getUjianSiswaBelumSelesai($peserta_id)
     {
+        // ambil ujian yang aktif hari ini
+        $jadwals = DB::table('jadwals')->where([
+            'status_ujian'  => 1,
+            'tanggal'       => now()->format('Y-m-d')
+        ])
+        ->select('id')
+        ->get();
+        $jadwal_ids = $jadwals->pluck('id')->toArray();
+
         $data = DB::table('siswa_ujians')
             ->where('peserta_id', $peserta_id)
             ->where('status_ujian', 3)
+            ->whereIn('jadwal_id', $jadwal_ids)
             ->whereDate('created_at', now()->format('Y-m-d'))
             ->first();
 
