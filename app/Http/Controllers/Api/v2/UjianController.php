@@ -278,7 +278,7 @@ class UjianController extends Controller
             ->count();
 
         if($hasilUjian > 0) {
-            return SendResponse::accept();
+            return SendResponse::badRequest('Ujian ini telah diselesaikan. silakan logout, laporkan perihal ini kepada andministrator');
         }
 
         $jawaban = DB::table('jawaban_pesertas')
