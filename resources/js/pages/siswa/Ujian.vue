@@ -94,41 +94,43 @@
               </ckeditor>
             </div>
 				  </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4"
+          <div class="grid grid-rows-none sm:grid-rows-3 sm:grid-flow-col gap-4 mt-4"
           v-if="filleds[questionIndex].soal.layout == 2"
           >
-            <div class="flex space-x-1"
+            <div
             v-for="(jawab,index) in filleds[questionIndex].soal.jawabans"
             :key="index"
             >
-              <div
-              v-if="[1,3].includes(parseInt(filleds[questionIndex].soal.tipe_soal))"
-              >
-                <div class="flex items-center mr-4 mb-4">
-                  <input :id="'radio1'+index"
-                  v-model="selected" type="radio" name="jwb"
-                  :value="jawab.id" class="hidden"
-                  :disabled="isLoadinger || isLoading"
-                  @change="selectOption(index)"/>
-						      <label :for="'radio1'+index" class="flex items-center cursor-pointer text-xl">
-						        <span class="w-6 h-6 text-sm inline-block mr-2 rounded-full border border-gray-400 flex-no-shrink flex items-center justify-center uppercase">{{ charIndex(index) }}</span>
-						      </label>
+              <div class="flex space-x-1">
+                <div
+                v-if="[1,3].includes(parseInt(filleds[questionIndex].soal.tipe_soal))"
+                >
+                  <div class="flex items-center mr-4 mb-4">
+                    <input :id="'radio1'+index"
+                    v-model="selected" type="radio" name="jwb"
+                    :value="jawab.id" class="hidden"
+                    :disabled="isLoadinger || isLoading"
+                    @change="selectOption(index)"/>
+                    <label :for="'radio1'+index" class="flex items-center cursor-pointer text-xl">
+                      <span class="w-6 h-6 text-sm inline-block mr-2 rounded-full border border-gray-400 flex-no-shrink flex items-center justify-center uppercase">{{ charIndex(index) }}</span>
+                    </label>
+                  </div>
                 </div>
+                <div
+                v-if="4 == parseInt(filleds[questionIndex].soal.tipe_soal)"
+                >
+                  <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
+                    <input
+                    :checked="filleds[questionIndex].jawab_complex.includes(jawab.id)"
+                    :value="jawab.id"
+                    :disabled="isLoadinger || isLoading"
+                    @change="changeCheckbox($event, index)"
+                    type="checkbox" class="opacity-0 absolute">
+                    <svg class="fill-current hidden w-4 h-4 text-green-500 pointer-events-none" viewBox="0 0 20 20"><path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>
+                  </div>
+                </div>
+                <div v-html="jawab.text_jawaban"></div>
               </div>
-              <div
-              v-if="4 == parseInt(filleds[questionIndex].soal.tipe_soal)"
-              >
-						    <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
-				          <input
-                  :checked="filleds[questionIndex].jawab_complex.includes(jawab.id)"
-                  :value="jawab.id"
-                  :disabled="isLoadinger || isLoading"
-                  @change="changeCheckbox($event, index)"
-                  type="checkbox" class="opacity-0 absolute">
-				          <svg class="fill-current hidden w-4 h-4 text-green-500 pointer-events-none" viewBox="0 0 20 20"><path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>
-			          </div>
-              </div>
-              <div v-html="jawab.text_jawaban"></div>
             </div>
             <div
             v-if="[2,6].includes(filleds[questionIndex].soal.tipe_soal)"
