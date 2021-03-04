@@ -524,6 +524,10 @@ class UjianController extends Controller
             abort(401);
         }
 
+        $jurusan = request()->jurusan;
+
+        $jurusan = explode(',',$jurusan);
+
         $soals = Soal::where(function($query) use($banksoal) {
             $query->where('banksoal_id', $banksoal->id)
             ->where('tipe_soal','!=','2');
@@ -532,6 +536,9 @@ class UjianController extends Controller
         $sss = JawabanPeserta::with(['peserta' => function($query) {
             $query->select('id','nama','no_ujian');
         }])
+        ->whereHas('peserta', function($query) use ($jurusan) {
+            $query->whereIn('jurusan_id', $jurusan);
+        })
         ->whereHas('pertanyaan', function($query) {
             $query->where('tipe_soal','!=','2');
         })
@@ -570,8 +577,9 @@ class UjianController extends Controller
 
     public function getCapaianSiswaExcelLink(Jadwal $jadwal, Banksoal $banksoal)
     {
+        $jurusan = request()->q;
         $url = URL::temporarySignedRoute(
-            'capaian.download.excel', now()->addMinutes(5),['jadwal' => $jadwal->id, 'banksoal' => $banksoal->id]
+            'capaian.download.excel', now()->addMinutes(5),['jadwal' => $jadwal->id, 'banksoal' => $banksoal->id,'jurusan' => $jurusan]
         );
 
         return SendResponse::acceptData($url);
