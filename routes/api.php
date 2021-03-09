@@ -121,6 +121,9 @@ use Illuminate\Support\Facades\Route;
         Route::post('settings/sekolah/logo', 'SettingController@changeLogoSekolah');
         Route::get('settings', 'SettingController@getSetting');
         Route::post('settings', 'SettingController@setSetting');
+
+        Route::apiResource('groups', 'GroupController');
+        Route::apiResource('group_members', 'GroupMemberController')->except('show','update');
     });
 });
 
