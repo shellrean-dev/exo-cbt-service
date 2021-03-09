@@ -189,17 +189,17 @@ class UjianService
                 })
                 ->count();
 
-                $pg_jml = JawabanPeserta::where([
-                    'jadwal_id'     => $jadwal_id,
-                    'peserta_id'    => $peserta_id
-                ])
-                ->whereHas('soal', function($query) {
-                    $query->where('tipe_soal','=', '1');
-                })
-                ->count();
+                // $pg_jml = JawabanPeserta::where([
+                //     'jadwal_id'     => $jadwal_id,
+                //     'peserta_id'    => $peserta_id
+                // ])
+                // ->whereHas('soal', function($query) {
+                //     $query->where('tipe_soal','=', '1');
+                // })
+                // ->count();
 
-                if($pg_jml > 0 && $pg_benar > 0) {
-                    $hasil_pg = ($pg_benar/$pg_jml)*$banksoal->persen['pilihan_ganda'];
+                if($pg_benar > 0) {
+                    $hasil_pg = ($pg_benar/$banksoal->jumlah_soal)*$banksoal->persen['pilihan_ganda'];
                 }
             }
 
@@ -228,17 +228,17 @@ class UjianService
                 })
                 ->count();
 
-                $mpg_jml = JawabanPeserta::where([
-                    'jadwal_id'     => $jadwal_id,
-                    'peserta_id'    => $peserta_id
-                ])
-                ->whereHas('soal', function($query) {
-                    $query->where('tipe_soal','=', '4');
-                })
-                ->count();
+                // $mpg_jml = JawabanPeserta::where([
+                //     'jadwal_id'     => $jadwal_id,
+                //     'peserta_id'    => $peserta_id
+                // ])
+                // ->whereHas('soal', function($query) {
+                //     $query->where('tipe_soal','=', '4');
+                // })
+                // ->count();
 
-                if($mpg_jml > 0 && $mpg_benar > 0) {
-                    $hasil_mpg = ($mpg_benar/$mpg_jml)*$banksoal->persen['pilihan_ganda_komplek'];
+                if($mpg_benar > 0) {
+                    $hasil_mpg = ($mpg_benar/$banksoal->jumlah_soal_ganda_kompleks)*$banksoal->persen['pilihan_ganda_komplek'];
                 }
             }
 
@@ -266,17 +266,17 @@ class UjianService
                 })
                 ->count();
 
-                $listening_jml = JawabanPeserta::where([
-                    'jadwal_id'     => $jadwal_id,
-                    'peserta_id'    => $peserta_id
-                ])
-                ->whereHas('soal', function($query) {
-                    $query->where('tipe_soal','=', '3');
-                })
-                ->count();
+                // $listening_jml = JawabanPeserta::where([
+                //     'jadwal_id'     => $jadwal_id,
+                //     'peserta_id'    => $peserta_id
+                // ])
+                // ->whereHas('soal', function($query) {
+                //     $query->where('tipe_soal','=', '3');
+                // })
+                // ->count();
 
-                if($listening_jml > 0 && $listening_benar > 0) {
-                    $hasil_listening = ($listening_benar/$listening_jml)*$banksoal->persen['listening'];
+                if($listening_benar > 0) {
+                    $hasil_listening = ($listening_benar/$banksoal->jumlah_soal_listening)*$banksoal->persen['listening'];
                 }
             }
 
@@ -304,17 +304,17 @@ class UjianService
                 })
                 ->count();
 
-                $isiang_singkat_jml = JawabanPeserta::where([
-                    'jadwal_id'     => $jadwal_id,
-                    'peserta_id'    => $peserta_id
-                ])
-                ->whereHas('soal', function($query) {
-                    $query->where('tipe_soal','=', '6');
-                })
-                ->count();
+                // $isiang_singkat_jml = JawabanPeserta::where([
+                //     'jadwal_id'     => $jadwal_id,
+                //     'peserta_id'    => $peserta_id
+                // ])
+                // ->whereHas('soal', function($query) {
+                //     $query->where('tipe_soal','=', '6');
+                // })
+                // ->count();
 
-                if($isiang_singkat_jml > 0 && $isian_singkat_benar > 0) {
-                    $hasil_isiang_singkat = ($isian_singkat_benar/$isiang_singkat_jml)*$banksoal->persen['isian_singkat'];
+                if($isian_singkat_benar > 0) {
+                    $hasil_isiang_singkat = ($isian_singkat_benar/$banksoal->jumlah_isian_singkat)*$banksoal->persen['isian_singkat'];
                 }
             }
 
@@ -342,17 +342,17 @@ class UjianService
                 })
                 ->count();
 
-                $jumlah_menjodohkan_jml = JawabanPeserta::where([
-                    'jadwal_id'     => $jadwal_id,
-                    'peserta_id'    => $peserta_id
-                ])
-                ->whereHas('soal', function($query) {
-                    $query->where('tipe_soal','=', '5');
-                })
-                ->count();
+                // $jumlah_menjodohkan_jml = JawabanPeserta::where([
+                //     'jadwal_id'     => $jadwal_id,
+                //     'peserta_id'    => $peserta_id
+                // ])
+                // ->whereHas('soal', function($query) {
+                //     $query->where('tipe_soal','=', '5');
+                // })
+                // ->count();
 
-                if($jumlah_menjodohkan_jml > 0 && $jumlah_menjodohkan_benar > 0) {
-                    $hasil_isiang_singkat = ($jumlah_menjodohkan_benar/$jumlah_menjodohkan_jml)*$banksoal->persen['menjodohkan'];
+                if($jumlah_menjodohkan_benar > 0) {
+                    $hasil_isiang_singkat = ($jumlah_menjodohkan_benar/$banksoal->jumlah_menjodohkan)*$banksoal->persen['menjodohkan'];
                 }
             }
 

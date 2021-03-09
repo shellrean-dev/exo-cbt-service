@@ -26,9 +26,8 @@ use Illuminate\Support\Facades\Route;
     Route::get('settings/auth', 'SettingController@getSetAuth');
     Route::get('info-app', 'SettingController@infoApp');
 
-    // Download excel
-    Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel', 'UjianController@getCapaianSiswaExcel')->name('capaian.download.excel');
-    Route::get('ujians/{jadwal}/result/excel', 'UjianController@getResultExcel')->name('hasilujian.download.excel');
+    Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel', 'ResultController@capaianSiswaExcel')->name('capaian.download.excel');
+    Route::get('ujians/{jadwal}/result/excel', 'ResultController@examExcel')->name('hasilujian.download.excel');
 
     Route::group(['middleware' => 'auth:api'], function() {
         Route::get('user-authenticated', 'UserController@getUserLogin');
@@ -89,16 +88,18 @@ use Illuminate\Support\Facades\Route;
         Route::get('ujians/{jadwal}/peserta/{peserta}/close', 'UjianAktifController@closePeserta');
         Route::post('ujians/peserta/add-more-time', 'UjianAktifController@addMoreTime');
 
-        Route::get('ujians/esay/exists', 'UjianController@getExistEsay');
-        Route::post('ujians/esay/input', 'UjianController@storeNilaiEsay');
-        Route::get('ujians/esay/{banksoal}/koreksi', 'UjianController@getExistEsayByBanksoal');
-        Route::get('ujians/{jadwal}/result', 'UjianController@getResult');
-        Route::get('ujians/{jadwal}/result/link', 'UjianController@getResultExcelLink');
+        Route::get('ujians/esay/exists', 'PenilaianController@getExistEsay');
+        Route::post('ujians/esay/input', 'PenilaianController@storeNilaiEsay');
+        Route::get('ujians/esay/{banksoal}/koreksi', 'PenilaianController@getExistEsayByBanksoal');
+        Route::get('ujians/{jadwal}/result', 'ResultController@exam');
+
+        Route::get('ujians/{jadwal}/result/link', 'ResultController@examExcelLink');
 
         Route::get('ujians/{jadwal}/result/banksoal', 'UjianController@getBanksoalByJadwal');
-        Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa', 'UjianController@getCapaianSiswa');
+        Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa', 'ResultController@capaianSiswa');
 
-        Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/link', 'UjianController@getCapaianSiswaExcelLink');
+        Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/link', 'ResultController@capaianSiswaExcelLink');
+
         Route::get('ujians/all', 'UjianController@allData');
         Route::get('ujians/active-status', 'UjianController@getActive');
         Route::post('ujians/set-status', 'UjianController@setStatus');
