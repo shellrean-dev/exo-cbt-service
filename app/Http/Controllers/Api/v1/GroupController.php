@@ -62,7 +62,7 @@ class GroupController extends Controller
                 'created_at' => now(),
                 'updated_at' => now()
             ];
-            if (isset($request->parent_id) && $request->parent_id != '') {
+            if (isset($request->parent_id) && $request->parent_id != '' && $request->parent_id != 0) {
                 $exist = DB::table('groups')
                     ->where('id', $request->parent_id)
                     ->count();
@@ -74,6 +74,30 @@ class GroupController extends Controller
 
             DB::table('groups')->insert($data);
             return SendResponse::accept();
+        } catch (\Exception $e) {
+            return SendResponse::internalServerError('Kesalahan 500.'.$e->getMessage());
+        }
+    }
+
+    /**
+     * Ambil single data grup
+     * 
+     * @param int $group_id
+     * @return \App\Actions\SendResponse
+     * @author <wandinak17@gmail.com>
+     */
+    public function show($group_id)
+    {
+        try {
+            $group = DB::table('groups')
+                ->where('id', $group_id)
+                ->select('id','parent_id','name')
+                ->first();
+
+            if (!$group) {
+                return SendResponse::badRequest('kesalahan, data yang diminta tidak ditemukan');
+            }
+            return SendResponse::acceptData($group);
         } catch (\Exception $e) {
             return SendResponse::internalServerError('Kesalahan 500.'.$e->getMessage());
         }
