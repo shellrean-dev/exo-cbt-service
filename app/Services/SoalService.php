@@ -64,7 +64,7 @@ class SoalService
 				$insert_data = array(
 					'banksoal_id' => $banksoal_id,
 					'tipe_soal'   => $ques_type2,
-					'pertanyaan' => $question,
+					'pertanyaan' => "<p>".$question."</p>",
 					'created_at'	=> now(),
 					'updated_at'	=> now(),
 				);
@@ -78,7 +78,7 @@ class SoalService
 						$correct_op=array_filter(explode(',',$singlequestion['correct']));
 						$correct_option_position=array();
 						foreach($correct_op as $v){
-							$correct_option_position[]=$corect_position[trim(strip_tags($v))];
+							$correct_option_position[]=$corect_position[trim(strip_tags(html_entity_decode($v)))];
 						}
 
 						$jawabans = [];
@@ -92,7 +92,7 @@ class SoalService
 
 							array_push($jawabans, [
 								'soal_id' => $soal_id,
-								'text_jawaban' => $correct_val,
+								'text_jawaban' => "<p>".$correct_val."</p>",
 								'correct' => $correctoption,
 								'created_at' => now(),
 								'updated_at' => now(),
