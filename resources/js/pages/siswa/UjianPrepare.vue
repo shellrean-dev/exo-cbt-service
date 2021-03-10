@@ -35,7 +35,7 @@
 					    <img src="/img/among.svg" class="h-10"/>
 				    </div>
 				    <div class="text-gray-600 flex-1">
-					    ...Tombol mulai akan muncul saat waktu ujian tiba, sebelum itu berdoa terlebih dahulu
+					    Tombol mulai akan muncul saat waktu ujian tiba, sebelum itu berdoa terlebih dahulu
             </div>
 				  </div>
 			  </div>

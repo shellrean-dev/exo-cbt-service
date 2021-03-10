@@ -19,11 +19,11 @@
           <div
           v-else
           class="py-1 px-1 flex space-x-1 bg-gray-100 border border-gray-200 rounded-md mb-4">
-            <div class="">
+            <div class="mr-2">
               <img src="/img/among2.svg" class="h-10"/>
             </div>
             <div class="text-gray-600 flex-1">
-              Anda telah menyelesaikan ujian ini, prestasi penting tetapi jujur yang utama. kembali ke halaman utama bila masih ada ujian selanjutnya.
+              Anda telah menyelesaikan ujian ini, prestasi penting tetapi jujur yang utama. <br>kembali ke halaman utama bila masih ada ujian selanjutnya.
 				    </div>
 			    </div>
 			    <div class="">
