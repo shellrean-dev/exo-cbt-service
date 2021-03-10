@@ -19,11 +19,35 @@ class GroupMemberController extends Controller
     {
         try {
             $group_id = request()->q;
-            $data = DB::table('group_members')
-                ->where('group_id', $group_id)
-                ->join('pesertas', 'group_members.student_id', '=', 'pesertas.id')
+            $group = DB::table('groups')
+                ->where('id', $group_id)
+                ->first();
+
+            if (!$group) {
+                return SendResponse::badRequest('kesalahan, data yang diminta tidak dapat ditemukan');
+            }
+
+            $data = DB::table('group_members');
+
+            if ($group->parent_id == 0) {
+                $childs = DB::table('groups')
+                    ->where('parent_id', $group->id)
+                    ->select('id')
+                    ->get()
+                    ->pluck('id')
+                    ->toArray();
+                if (count($childs) > 0) {
+                    array_push($childs, $group->id);
+                    $data = $data->whereIn('group_id', $childs);
+                } else {
+                    $data = $data->where('group_id', $group_id);
+                }
+            } else {
+                $data = $data->where('group_id', $group_id);
+            }
+            $data = $data->join('pesertas', 'group_members.student_id', '=', 'pesertas.id')
                 ->select('group_members.id', 'pesertas.nama','pesertas.no_ujian')
-                ->paginate(50);
+                ->get();
 
             return SendResponse::acceptData($data);
         } catch (\Exception $e) {
@@ -59,6 +83,40 @@ class GroupMemberController extends Controller
     }
 
     /**
+     * Buat multi-data member baru
+     * 
+     * @param \Illuminate\Http\Request $request
+     * @return \App\Actions\SendResponse
+     * @author <wandinak17@gmail.com>
+     */
+    public function multiStore(Request $request)
+    {
+        $request->validate([
+            'group_id'      => 'required|exists:groups,id',
+            'no_ujians'     => 'required|array'
+        ]);
+
+        try {
+            $students = DB::table('pesertas')
+                ->whereIn('no_ujian', $request->no_ujians)
+                ->select('id')
+                ->get();
+
+            $datas = [];
+            foreach ($students as $student) {
+                array_push($datas, [
+                    'group_id'  => $request->group_id,
+                    'student_id'    => $student->id,
+                ]);
+            }
+
+            DB::table('group_members')->insert($datas);
+        } catch (\Exception $e) {
+            return SendResponse::internalServerError('Kesalahan 500.'.$e->getMessage());
+        }
+    }
+
+    /**
      * Hapus data member
      * 
      * @param int $member_id
@@ -82,6 +140,25 @@ class GroupMemberController extends Controller
             return SendResponse::accept();
         } catch (\Exception $e) {
             return SendResponse::internalServerError('Kesalahan 500.'.$e->getMessage());
+        }
+    }
+
+    /**
+     * Hapus multi-data member
+     * 
+     * @return \App\Actions\SendResponse
+     * @author <wandinak17@gmail.com>
+     */
+    public function multiDestroy()
+    {
+        try {
+            $str_ids = request()->q;
+            $ids = explode(',', $str_ids);
+            DB::table('group_members')
+                ->whereIn('id', $ids)
+                ->delete();
+        } catch (\Exception $e) {
+            return SendResponse::internalServerError('kesalahan 500.'.$e->getMessage());
         }
     }
 }
