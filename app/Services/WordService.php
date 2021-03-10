@@ -31,9 +31,14 @@ class WordService
 			$word_xml = $target_dir."word/document.xml";
 			$word_xml_relation = $target_dir."word/_rels/document.xml.rels";
 			$content = file_get_contents($word_xml);
-			$content = htmlentities(strip_tags($content, "<a:blip><w:p>"));
-			$content= str_replace("&lt;/w:p&gt;", "</p>",$content);
-			$content= str_replace("&lt;w:p&gt;", "<p>",$content);
+			// $content = htmlentities(strip_tags($content, "<a:blip><w:p>"));
+			// $content= str_replace("&lt;/w:p&gt;", "</p>",$content);
+			// $content= str_replace("&lt;w:p&gt;", "<p>",$content);
+			$content = strip_tags($content, "<a:blip><w:p>");
+			// $content = preg_replace("/<w:p\s(.+?)>(.+?)<\/w:p>/is", "<p>$2</p>", $content);
+			$content = preg_replace("/<w:p[^>]*>/is", "<p>", $content);
+			$content = preg_replace("/<\/w:p>/is", "</p>", $content);
+			// $content = htmlentities($content);
 			$xml = simplexml_load_file($word_xml_relation);
 
 			$supported_image = array(
