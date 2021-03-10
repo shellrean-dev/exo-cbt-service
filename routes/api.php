@@ -123,7 +123,11 @@ use Illuminate\Support\Facades\Route;
         Route::post('settings', 'SettingController@setSetting');
 
         Route::apiResource('groups', 'GroupController');
-        Route::apiResource('group_members', 'GroupMemberController')->except('show','update');
+        Route::post('group_members/multiple', 'GroupMemberController@multiStore');
+        Route::delete('group_members/multiple', 'GroupMemberController@multiDestroy');
+        Route::get('group_members', 'GroupMemberController@index');
+        Route::post('group_members', 'GroupMemberController@store');
+        Route::delete('group_members/{id}', 'GroupMemberController@destroy');
     });
 });
 
