@@ -22,7 +22,7 @@ class PesertaLoginController extends Controller
         $setting = Setting::where('name','ujian')->first();
 
         $request->validate([
-            'no_ujian'      => 'required|exists:pesertas,no_ujian',
+            'no_ujian'      => 'required',
             'password'      => 'required'
         ]);
 
