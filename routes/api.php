@@ -124,6 +124,7 @@ use Illuminate\Support\Facades\Route;
 
         Route::apiResource('groups', 'GroupController');
         Route::post('group_members/multiple', 'GroupMemberController@multiStore');
+        Route::post('group_members/import', 'GroupMemberController@multiStoreImport');
         Route::delete('group_members/multiple', 'GroupMemberController@multiDestroy');
         Route::get('group_members', 'GroupMemberController@index');
         Route::post('group_members', 'GroupMemberController@store');
