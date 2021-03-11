@@ -275,10 +275,11 @@ class ResultController extends Controller
         }
         
         $jurusan = request()->q;
+        $group = request()->group;
         $url = URL::temporarySignedRoute(
             'capaian.download.excel', 
             now()->addMinutes(5),
-            ['jadwal' => $jadwal->id, 'banksoal' => $banksoal->id,'jurusan' => $jurusan]
+            ['jadwal' => $jadwal->id, 'banksoal' => $banksoal->id,'jurusan' => $jurusan, 'group' => $group]
         );
 
         return SendResponse::acceptData($url);
@@ -318,8 +319,7 @@ class ResultController extends Controller
         }
 
         $jurusan = request()->jurusan;
-
-        $jurusan = explode(',',$jurusan);
+        $group = request()->group;
 
         $soals = Soal::where(function($query) use($banksoal) {
             $query->where('banksoal_id', $banksoal->id)
@@ -328,11 +328,39 @@ class ResultController extends Controller
 
         $sss = JawabanPeserta::with(['peserta' => function($query) {
             $query->select('id','nama','no_ujian');
-        }])
-        ->whereHas('peserta', function($query) use ($jurusan) {
-            $query->whereIn('jurusan_id', $jurusan);
-        })
-        ->whereHas('pertanyaan', function($query) {
+        }]);
+
+        if ($group != 0 && $group != '') {
+            $groupObj = DB::table('groups')
+                ->where('id', $group)
+                ->first();
+            if ($groupObj->parent_id == 0) {
+                $childs = DB::table('groups')
+                    ->where('parent_id', $group)
+                    ->select('id')
+                    ->get()
+                    ->pluck('id')
+                    ->toArray();
+                array_push($childs, $group);
+                $sss->whereHas('group', function($query) use ($childs) {
+                    $query->whereIn('group_id', $childs);
+                });
+            } else {
+                $sss->whereHas('group', function($query) use ($group) {
+                    $query->where('group_id', $group);
+                });
+            }
+        }
+
+        if ($jurusan != 0 && $jurusan != '') {
+            $jurusan = explode(',',$jurusan);
+            $sss->whereHas('peserta', function($query) use ($jurusan) {
+                $query->whereIn('jurusan_id', $jurusan);
+            });
+        }
+
+        
+        $sss = $sss->whereHas('pertanyaan', function($query) {
             $query->where('tipe_soal','!=','2');
         })
         ->where([

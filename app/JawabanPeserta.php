@@ -71,6 +71,11 @@ class JawabanPeserta extends Model
     {
         return $this->belongsTo('App\Soal','soal_id');
     }
+    
+    public function group()
+    {
+        return $this->hasOne(GroupMember::class, 'student_id', 'peserta_id');
+    }
 
     /**
      * [banksoal description]
