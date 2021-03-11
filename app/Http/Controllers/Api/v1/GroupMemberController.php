@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
+use App\Imports\GroupMemberImport;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 
@@ -113,6 +115,28 @@ class GroupMemberController extends Controller
             DB::table('group_members')->insert($datas);
         } catch (\Exception $e) {
             return SendResponse::internalServerError('Kesalahan 500.'.$e->getMessage());
+        }
+    }
+
+    /**
+     * Import multi-data member 
+     * dari excel
+     * 
+     * @param \Illuminate\Http\Request $request
+     * @return \App\Actions\SendResponse;
+     * @author <wandinak17@gmail.com>
+     */
+    public function multiStoreImport(Request $request)
+    {
+        $request->validate([
+            'file'      => 'required|mimes:xlsx,xls',
+            'group_id'  => 'required|exists:groups,id'
+        ]);
+
+        try {
+            Excel::import(new GroupMemberImport($request->group_id), $request->file('file'));
+        } catch (\Exception $e) {
+            return SendResponse::internalServerError('kesalahan 500.'.$e->getMessage());
         }
     }
 
