@@ -103,7 +103,7 @@ use Illuminate\Support\Facades\Route;
         Route::get('ujians/all', 'UjianController@allData');
         Route::get('ujians/active-status', 'UjianController@getActive');
         Route::post('ujians/set-status', 'UjianController@setStatus');
-        Route::get('ujians/hasil/{hasil}', 'UjianController@getHasilUjianDetail');
+        Route::get('ujians/hasil/{hasil}', 'ResultController@hasilUjianDetail');
         Route::apiResource('ujians', 'UjianController');
 
         Route::get('events/all', 'EventController@allData');
