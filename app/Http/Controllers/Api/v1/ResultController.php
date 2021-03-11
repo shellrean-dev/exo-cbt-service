@@ -38,11 +38,34 @@ class ResultController extends Controller
         }]);
 
         $jurusan = request()->jurusan;
+        $group = request()->group;
 
-        if ($jurusan != 0 ) {
+        if ($jurusan != 0 && $jurusan != '') {
             $res->whereHas('peserta', function($query) use ($jurusan) {
                 $query->where('jurusan_id', $jurusan);
             });
+        }
+
+        if ($group != 0 && $group != '') {
+            $groupObj = DB::table('groups')
+                ->where('id', $group)
+                ->first();
+            if ($groupObj->parent_id == 0) {
+                $childs = DB::table('groups')
+                    ->where('parent_id', $group)
+                    ->select('id')
+                    ->get()
+                    ->pluck('id')
+                    ->toArray();
+                array_push($childs, $group);
+                $res->whereHas('group', function($query) use ($childs) {
+                    $query->whereIn('group_id', $childs);
+                });
+            } else {
+                $res->whereHas('group', function($query) use ($group) {
+                    $query->where('group_id', $group);
+                });
+            }
         }
 
         $res->where('jadwal_id', $jadwal->id)
@@ -75,10 +98,11 @@ class ResultController extends Controller
         }
 
         $jurusan = request()->q;
+        $group = request()->group;
         $url = URL::temporarySignedRoute(
             'hasilujian.download.excel', 
             now()->addMinutes(5),
-            ['jadwal' => $jadwal_id, 'jurusan' => $jurusan]
+            ['jadwal' => $jadwal_id, 'jurusan' => $jurusan, "group" => $group]
         );
 
         return SendResponse::acceptData($url);
@@ -106,17 +130,45 @@ class ResultController extends Controller
         }
 
         $jurusan = request()->jurusan;
-        $jurusan = explode(',',$jurusan);
+        $group = request()->group;
 
         $res = HasilUjian::with(['peserta' => function ($query) use ($jurusan) {
             $query->select('id','nama','no_ujian');
-        }])
-        ->whereHas('peserta', function($query) use ($jurusan) {
-            $query->whereIn('jurusan_id', $jurusan);
-        })
-        ->where('jadwal_id', $jadwal->id)
-        ->orderBy('peserta_id')
-        ->get();
+        }]);
+
+        if ($jurusan != 0 && $jurusan != '') {
+            $jurusan = explode(',',$jurusan);
+            $res->whereHas('peserta', function($query) use ($jurusan) {
+                $query->where('jurusan_id', $jurusan);
+            });
+        }
+
+
+        if ($group != 0 && $group != '') {
+            $groupObj = DB::table('groups')
+                ->where('id', $group)
+                ->first();
+            if ($groupObj->parent_id == 0) {
+                $childs = DB::table('groups')
+                    ->where('parent_id', $group)
+                    ->select('id')
+                    ->get()
+                    ->pluck('id')
+                    ->toArray();
+                array_push($childs, $group);
+                $res->whereHas('group', function($query) use ($childs) {
+                    $query->whereIn('group_id', $childs);
+                });
+            } else {
+                $res->whereHas('group', function($query) use ($group) {
+                    $query->where('group_id', $group);
+                });
+            }
+        }
+        
+        $res = $res->where('jadwal_id', $jadwal->id)
+            ->orderBy('peserta_id')
+            ->get();
 
         $spreadsheet = HasilUjianExport::export($res,$jadwal->alias);
         $writer = new Xlsx($spreadsheet);
@@ -326,7 +378,7 @@ class ResultController extends Controller
      */
     public function hasilUjianDetail($hasil_id)
     {
-        $hasil = DB::table('hasils')
+        $hasil = DB::table('hasil_ujians')
             ->where('id', $hasil_id)
             ->select('peserta_id', 'jadwal_id')
             ->first();
