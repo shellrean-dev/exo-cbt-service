@@ -368,10 +368,8 @@ function sendRagu(e) {
  * @type vue method
  */
 function changeCheckbox(e, val) {
-    console.log(e.target.checked)
     if (e.target.checked === false) {
         let index = this.filleds[this.questionIndex].jawab_complex.indexOf(parseInt(e.target.value))
-        console.log(index)
         if (index !== -1) {
             this.filleds[this.questionIndex].jawab_complex.splice(index, 1)
         }
@@ -419,6 +417,11 @@ function tipeSoalText() {
         'Isian Singkat'
     ]
 
-    const idx = this.filleds[this.questionIndex].soal.tipe_soal
-    return type[idx]
+
+    let idx = this.filleds[this.questionIndex]
+    if (typeof idx != 'undefined') {
+        idx = idx.soal.tipe_soal
+        return type[idx]
+    }
+    return 'Unknown'
 }

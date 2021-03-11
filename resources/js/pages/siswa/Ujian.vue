@@ -1,7 +1,7 @@
 <template>
   <div class="container md:mx-auto flex flex-col justify-center space-y-4 lg:flex-row lg:space-y-0 lg:space-x-4 -mt-12 sm:-mt-24">
     <div class="w-full lg:w-3/4 lg:py-4 lg:px-4 mb-20">
-      <div class="bg-white border-2 border-gray-300 shadow rounded-t-lg rounded-b-lg"  v-if="filleds">
+      <div class="bg-white border-2 border-gray-300 shadow rounded-t-lg rounded-b-lg"  v-if="filleds && typeof filleds[questionIndex] != 'undefined'">
         <div class="pt-2 pb-2 pr-2 flex justify-between border-b border-gray-300 mb-2 items-center" v-show="!focus">
           <div class="flex items-center">
 			      <p class="font-bold w-12 h-10 bg-gray-200 flex items-center pl-2 text-lg rounded-r-full text-gray-700 border-t border-r border-b border-gray-300">{{ questionIndex+1 }}</p>

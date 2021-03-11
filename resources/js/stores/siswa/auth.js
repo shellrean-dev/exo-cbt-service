@@ -70,7 +70,6 @@ function submit({ commit }, payload) {
             commit('SET_LOADING', false, { root: true })
             resolve(network.data)
         } catch (error) {
-            console.log(error)
             if (typeof error.response != 'undefined') {
                 if (error.response.status == 422) {
                     commit('SET_ERRORS',error.response.data.errors, { root: true})

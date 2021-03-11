@@ -120,7 +120,6 @@ import { showSweetError } from '../../entities/alert'
 	  },
     watch: {
       errors(v) {
-        console.log(v)
       }
     }
   }
