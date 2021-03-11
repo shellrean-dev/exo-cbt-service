@@ -65,10 +65,14 @@ class WordService
 
 			$rand_inc_number = 1;
 			foreach ($relation_image as $key => $value) {
-				$rplc_str='&lt;a:blip r:embed=&quot;'.$key.'&quot; cstate=&quot;print&quot;/&gt;';
-				$rplc_str1='&lt;a:blip r:embed=&quot;'.$key.'&quot; cstate=&quot;print&quot;&gt;&lt;/a:blip&gt;';
-				$rplc_str2='&lt;a:blip r:embed=&quot;'.$key.'&quot;&gt;&lt;/a:blip&gt;';
-        		$rplc_str3='&lt;a:blip r:embed=&quot;'.$key.'&quot;/&gt;';
+				// $rplc_str='&lt;a:blip r:embed=&quot;'.$key.'&quot; cstate=&quot;print&quot;/&gt;';
+				// $rplc_str1='&lt;a:blip r:embed=&quot;'.$key.'&quot; cstate=&quot;print&quot;&gt;&lt;/a:blip&gt;';
+				// $rplc_str2='&lt;a:blip r:embed=&quot;'.$key.'&quot;&gt;&lt;/a:blip&gt;';
+				// $rplc_str3='&lt;a:blip r:embed=&quot;'.$key.'&quot;/&gt;';
+				$rplc_str = '<a:blip r:embed="'.$key.'" cstate="print"/>';
+				$rplc_str1 = '<a:blip r:embed="'.$key.'" cstate="print"></a:blip>';
+				$rplc_str2 = '<a:blip r:embed="'.$key.'"></a:blip>';
+				$rplc_str3 = '<a:blip r:embed="'.$key.'"/>';
 
         		$ext_img = strtolower(pathinfo($value, PATHINFO_EXTENSION));
         		$imagenew_name=time().$rand_inc_number.".".$ext_img;
