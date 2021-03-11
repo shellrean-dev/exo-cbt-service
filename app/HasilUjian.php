@@ -37,6 +37,14 @@ class HasilUjian extends Model
         return $this->hasOne(Peserta::class, 'id', 'peserta_id');
     }
 
+    /**
+     * 
+     */
+    public function group()
+    {
+        return $this->hasOne(GroupMember::class, 'student_id', 'peserta_id');
+    }
+
     public function jawabans()
     {
         return $this->hasMany(JawabanPeserta::class,'id');
