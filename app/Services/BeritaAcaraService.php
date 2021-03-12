@@ -8,6 +8,7 @@ use TCPDF;
 class BeritaAcaraService 
 {
     private $pdf;
+    private $event;
 
     public function __construct($event_id) 
     {
@@ -25,6 +26,8 @@ class BeritaAcaraService
             $event = DB::table('event_ujians')
                 ->where('id', $event_id)
                 ->first();
+
+            $this->event = $event;
 
             $set = DB::table('settings')
                 ->where('name','set_sekolah')
@@ -177,7 +180,7 @@ class BeritaAcaraService
      */
     public function download() 
     {
-        $this->pdf->Output('Berita Acara.pdf', 'D');
+        $this->pdf->Output('Berita Acara '.$this->event->name.'.pdf', 'D');
     }
 
     /**
@@ -185,7 +188,7 @@ class BeritaAcaraService
      */
     public function show()
     {
-        $this->pdf->Output('Berita Acara.pdf', 'I');
+        $this->pdf->Output('Berita Acara '.$this->event->name.'.pdf', 'I');
     }
 
     /**

@@ -26,6 +26,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
     Route::get('settings/auth', 'SettingController@getSetAuth');
     Route::get('info-app', 'SettingController@infoApp');
 
+    Route::get('absensi-ujian/{id}', 'ReportingController@absensi_ujian')->name('absensi.download.excel');
     Route::get('berita-acara/{id}', 'ReportingController@berita_acara')->name('beritaacara.download.excel');
 
     Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel', 'ResultController@capaianSiswaExcel')->name('capaian.download.excel');
@@ -112,6 +113,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('events/{id}/ujian', 'EventController@eventDetailData');
         Route::apiResource('events', 'EventController');
         Route::get('berita-acara/{id}/link', 'ReportingController@berita_acara_link');
+        Route::get('absensi-ujian/{id}/link', 'ReportingController@absensi_ujian_link');
 
         Route::get('sesi', 'SesiScheduleController@studentBySesi');
         Route::post('sesi', 'SesiScheduleController@pushToSesi');
