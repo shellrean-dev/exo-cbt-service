@@ -12,7 +12,11 @@ class BeritaAcaraService
 
     public function __construct($event_id) 
     {
-        $this->beritaAcara($event_id);
+        try {
+            $this->beritaAcara($event_id);
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
     }
     /**
      * Cetak laporan berita acara
@@ -34,7 +38,7 @@ class BeritaAcaraService
                 ->first();
             $setting = json_decode($set->value);
         } catch(\Exception $e) {
-            return SendResponse::internalServerError('kesalahan 500. '.$e->getMessage());
+            throw new \Exception($e->getMessage());
         }
         
         $this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);

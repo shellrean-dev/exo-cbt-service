@@ -26,8 +26,12 @@ class ReportingController extends Controller
             return SendResponse::badRequest('Kesalahan, url tidak valid');
         }
         
-        $berita_acara = new BeritaAcaraService($event_id);
-        $berita_acara->download();
+        try {
+            $berita_acara = new BeritaAcaraService($event_id);
+            $berita_acara->download();
+        } catch (\Exception $e) {
+            return SendResponse::internalServerError('kesalahan 500. '.$e->getMessage());
+        }
     }
 
     /**
@@ -39,6 +43,13 @@ class ReportingController extends Controller
      */
     public function berita_acara_link($event_id)
     {
+        $event = DB::table('event_ujians')
+            ->where('id', $event_id)
+            ->count();
+        if ($event < 1) {
+            return SendResponse::badRequest('kesalahan, event tidak ditemukan');
+        }
+
         $url = URL::temporarySignedRoute(
             'beritaacara.download.excel', 
             now()->addMinutes(5),
