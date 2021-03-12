@@ -281,6 +281,8 @@ function start () {
 async function  selesai() {
     try {
         await this.selesaiUjianPeserta()
+        this.$store.state.siswa_ujian.filledUjian = []
+        this.questionIndex = ''
 
         this.$router.push({ name: 'ujian.selesai' })
         clearInterval(this.interval);
@@ -337,7 +339,7 @@ function playDirection() {
         this.hasdirec.push(this.filleds[this.questionIndex].soal.id)
         this.listening = true
     }
-    this.$bvModal.hide('modal-direction')
+    this.modalDirection = false
 }
 
 /**

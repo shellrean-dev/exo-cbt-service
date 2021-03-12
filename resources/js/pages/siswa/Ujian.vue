@@ -18,10 +18,15 @@
             <input type="range" id="vol" name="vol" min="0" max="3" value="1" @change="onChangeRange">
           </div>
 			    <div class="flex space-x-1">
-				    <button @click="modalQuestion = true" class="py-1 px-1 rounded-md bg-gray-100 text-gray-600 border border-gray-300 hover:shadow-lg" v-show="!focus">
+				    <button class="py-1 px-1 rounded-md bg-gray-100 text-gray-600 border border-gray-300 hover:shadow-lg" 
+            @click="modalQuestion = true"
+            v-show="!focus"
+            :disabled="!listening">
 					    <app-line-icon></app-line-icon>
 				    </button>
-				    <button @click="focus = !focus" class="py-1 px-1 rounded-md bg-gray-100 text-gray-600 border border-gray-300 hover:shadow-lg">
+				    <button class="py-1 px-1 rounded-md bg-gray-100 text-gray-600 border border-gray-300 hover:shadow-lg"
+            @click="focus = !focus"
+            >
               <expand-line-icon v-show="!focus"></expand-line-icon>
               <minimize-line-icon v-show="focus"></minimize-line-icon>
 				    </button>
@@ -202,7 +207,7 @@
     </div>
     <modal-confirm v-if="modalConfirm" @close="modalConfirm = false" @finish="selesai"></modal-confirm>
     <modal-question v-if="modalQuestion" @close="modalQuestion = false" @toland="toLand"></modal-question>
-    <modal-direction v-if="modalDirection" @close="modalDirection = false"></modal-direction>
+    <modal-direction v-if="modalDirection" @close="playDirection" @mute="modalDirection = false"></modal-direction>
   </div>
 </template>
 <script>
