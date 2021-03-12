@@ -18,13 +18,15 @@ use Illuminate\Support\Facades\Route;
  * @version 1
  * api response for v1
  */
-    Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
+Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
     Route::post('login', 'AuthController@login');
     Route::get('login/oauth', 'AuthController@oauth');
     Route::get('login/sso', 'AuthController@sso');
     Route::get('login/callback', 'AuthController@callback');
     Route::get('settings/auth', 'SettingController@getSetAuth');
     Route::get('info-app', 'SettingController@infoApp');
+
+    Route::get('berita-acara/{id}', 'ReportingController@berita_acara')->name('beritaacara.download.excel');
 
     Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel', 'ResultController@capaianSiswaExcel')->name('capaian.download.excel');
     Route::get('ujians/{jadwal}/result/excel', 'ResultController@examExcel')->name('hasilujian.download.excel');
@@ -109,6 +111,7 @@ use Illuminate\Support\Facades\Route;
         Route::get('events/all', 'EventController@allData');
         Route::get('events/{id}/ujian', 'EventController@eventDetailData');
         Route::apiResource('events', 'EventController');
+        Route::get('berita-acara/{id}/link', 'ReportingController@berita_acara_link');
 
         Route::get('sesi', 'SesiScheduleController@studentBySesi');
         Route::post('sesi', 'SesiScheduleController@pushToSesi');
