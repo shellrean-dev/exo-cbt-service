@@ -65,13 +65,13 @@ class UjianController extends Controller
             }
 
             $send = [
-                'id'    => $find->id,
-                'banksoal_id' => $find->banksoal_id,
-                'soal_id' => $find->soal_id,
-                'jawab' => $find->jawab,
+                'id'            => $find->id,
+                'banksoal_id'   => $find->banksoal_id,
+                'soal_id'       => $find->soal_id,
+                'jawab'         => $find->jawab,
                 'jawab_complex' => json_decode($find->jawab_complex, true),
-                'esay' => $request->esay,
-                'ragu_ragu' => $find->ragu_ragu,
+                'esay'          => $request->esay,
+                'ragu_ragu'     => $find->ragu_ragu,
             ];
 
             return response()->json(['data' => $send,'index' => $request->index]);
@@ -79,7 +79,6 @@ class UjianController extends Controller
 
         // Jika yang dikirimkan adalah isian singkat
         if(isset($request->isian)) {
-            // $jwb_soals = JawabanSoal::where('soal_id', $find->soal_id)->get();
             $jwb_soals = DB::table('jawaban_soals')
                 ->where('soal_id', $find->soal_id)
                 ->get();
@@ -104,18 +103,14 @@ class UjianController extends Controller
                 return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
             }
 
-            // $find->esay = $request->isian;
-            // $find->save();
-
             $send = [
-                'id'    => $find->id,
-                'banksoal_id' => $find->banksoal_id,
-                'soal_id' => $find->soal_id,
-                'jawab' => $find->jawab,
+                'id'            => $find->id,
+                'banksoal_id'   => $find->banksoal_id,
+                'soal_id'       => $find->soal_id,
+                'jawab'         => $find->jawab,
                 'jawab_complex' => json_decode($find->jawab_complex, true),
-                // 'jawab_complex' => $find->jawab_complex,
-                'esay' => $find->esay,
-                'ragu_ragu' => $find->ragu_ragu,
+                'esay'          => $find->esay,
+                'ragu_ragu'     => $find->ragu_ragu,
             ];
 
             return response()->json(['data' => $send,'index' => $request->index]);
@@ -150,17 +145,15 @@ class UjianController extends Controller
             } catch (\Exception $e) {
                 return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
             }
-            // $find->jawab_complex = json_encode($request->jawab_complex);
-            // $find->save();
+
             $send = [
-                'id'    => $find->id,
-                'banksoal_id' => $find->banksoal_id,
-                'soal_id' => $find->soal_id,
-                'jawab' => $find->jawab,
+                'id'            => $find->id,
+                'banksoal_id'   => $find->banksoal_id,
+                'soal_id'       => $find->soal_id,
+                'jawab'         => $find->jawab,
                 'jawab_complex' => json_decode($find->jawab_complex, true),
-                // 'jawab_complex' => $find->jawab_complex,
-                'esay' => $find->esay,
-                'ragu_ragu' => $find->ragu_ragu,
+                'esay'          => $find->esay,
+                'ragu_ragu'     => $find->ragu_ragu,
             ];
             return response()->json(['data' => $send,'index' => $request->index]);
         }
@@ -172,20 +165,16 @@ class UjianController extends Controller
             ->first();
         if(!$kj) {
             $send = [
-                'id'    => $find->id,
-                'banksoal_id' => $find->banksoal_id,
-                'soal_id' => $find->soal_id,
-                'jawab' => $find->jawab,
+                'id'            => $find->id,
+                'banksoal_id'   => $find->banksoal_id,
+                'soal_id'       => $find->soal_id,
+                'jawab'         => $find->jawab,
                 'jawab_complex' => json_decode($find->jawab_complex, true),
-                // 'jawab_complex' => $find->jawab_complex,
-                'esay' => $find->esay,
-                'ragu_ragu' => $find->ragu_ragu,
+                'esay'          => $find->esay,
+                'ragu_ragu'     => $find->ragu_ragu,
             ];
             return response()->json(['data' => $send,'index' => $request->index]);
         }
-        // $find->jawab = $request->jawab;
-        // $find->iscorrect = $kj->correct;
-        // $find->save();
 
         try {
             DB::table('jawaban_pesertas')
@@ -200,14 +189,13 @@ class UjianController extends Controller
         }
         
         $send = [
-            'id'    => $find->id,
-            'banksoal_id' => $find->banksoal_id,
-            'soal_id' => $find->soal_id,
-            'jawab' => $find->jawab,
+            'id'            => $find->id,
+            'banksoal_id'   => $find->banksoal_id,
+            'soal_id'       => $find->soal_id,
+            'jawab'         => $find->jawab,
             'jawab_complex' => json_decode($find->jawab_complex, true),
-            // 'jawab_complex' => $find->jawab_complex,
-            'esay' => $find->esay,
-            'ragu_ragu' => $find->ragu_ragu,
+            'esay'          => $find->esay,
+            'ragu_ragu'     => $find->ragu_ragu,
         ];
     	return response()->json(['data' => $send,'index' => $request->index]);
 
