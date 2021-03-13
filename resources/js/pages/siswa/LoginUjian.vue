@@ -20,7 +20,7 @@
     </div>
     <div class="container md:mx-auto flex flex-col justify-center space-y-4 lg:flex-row lg:space-y-0 lg:space-x-4 -mt-12 sm:-mt-24">
       <div class="w-full lg:max-w-lg lg:py-4 lg:px-4 mb-20">
-        <div class="bg-white border-2 border-gray-300 shadow rounded-t-lg rounded-b-lg">
+        <div class="bg-white sm:border-2 border-gray-300 shadow rounded-t-lg rounded-b-lg">
           <div class="pt-2 pb-2 px-2 flex justify-between border-b border-gray-300 mb-2 items-center">
             <div class="flex items-center">
               <p class="font-medium text-gray-700 text-lg px-2">Login</p>
@@ -75,7 +75,7 @@
       </div>
     </div>
     <div class="fixed bottom-0 left-0 w-full border-t border-gray-300 text-gray-600 py-2 px-4 text-center bg-white">
-	    <span class="text-sm">&copy; 2021 extraordinary-cbt v2.0.0</span>
+	    <span class="text-sm">&copy; 2021 Extraordinary CBT</span>
     </div>
   </div>
 </template>

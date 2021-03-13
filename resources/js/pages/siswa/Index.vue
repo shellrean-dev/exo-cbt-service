@@ -42,8 +42,8 @@
       </div>
     </div>
     <router-view></router-view>
-    <div class="relative sm:fixed bottom-0 left-0 w-full border-t border-gray-300 text-gray-600 py-2 px-4 text-center bg-white">
-	    <span class="text-sm">&copy; 2021 extraordinary-cbt v2.0.0</span>
+    <div class="fixed bottom-0 left-0 w-full border-t border-gray-300 text-gray-600 py-2 px-4 text-center bg-white">
+	    <span class="text-sm">&copy; 2021 Extraordinary CBT</span>
     </div>
   </div>
 </template>
@@ -105,7 +105,7 @@ export default {
           })
         } else if (val.status_ujian == 0) {
           this.$router.replace({
-            name: 'ujian.while'
+            name: 'ujian.prepare'
           })
         }
       }
