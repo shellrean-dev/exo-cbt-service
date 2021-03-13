@@ -216,6 +216,10 @@ class UjianController extends Controller
             ->where('id', $request->jawaban_id)
             ->first();
 
+        if (!$find) {
+            return SendResponse::badRequest('Kami tidak dapat menemukan jawaban anda');
+        }
+
         if(!isset($request->ragu_ragu)) {
             return response()->json(['data' => $send,'index' => $request->index]);
         }
