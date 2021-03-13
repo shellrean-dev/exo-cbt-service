@@ -41,7 +41,7 @@ class UjianAktifController extends Controller
         // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
         $data = DB::table('siswa_ujians')
             ->where('peserta_id', $peserta->id)
-            ->where('status_ujian', 3)
+            ->whereIn('status_ujian', [0,3])
             ->whereIn('jadwal_id', $jadwal_ids)
             ->whereDate('created_at', now()->format('Y-m-d'))
             ->select('jadwal_id', 'status_ujian')
@@ -82,7 +82,6 @@ class UjianAktifController extends Controller
         if($setting['token'] == "1") {
             // Ambil token
             $token = Token::orderBy('id')->first();
-            // $token = DB::table('tokens')->first();
             if($token) {
                 $to = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', now());
                 $from = $token->updated_at->format('Y-m-d H:i:s');
@@ -112,10 +111,6 @@ class UjianAktifController extends Controller
 
         // cek pengaturan sesi
         if($ujian->event_id != '0') {
-            // $schedule = SesiSchedule::where([
-            //     'jadwal_id' => $ujian->id,
-            //     'sesi'      => $ujian->sesi
-            // ])->first();
             $schedule = DB::table('sesi_schedules')
                 ->where([
                     'jadwal_id' => $ujian->id,
@@ -136,11 +131,6 @@ class UjianAktifController extends Controller
             }
         }
 
-        // $data = SiswaUjian::where(function($query) use($peserta, $request) {
-        //     $query->where('peserta_id', $peserta->id)
-        //     ->where('jadwal_id', $request->jadwal_id)
-        //     ->where('status_ujian','=',0);
-        // })->first();
         $data = DB::table('siswa_ujians')
             ->where('peserta_id', $peserta->id)
             ->where('jadwal_id', $request->jadwal_id)
@@ -148,18 +138,8 @@ class UjianAktifController extends Controller
             ->first();
 
         if($data) {
-            return SendResponse::accept();
+            return SendResponse::accept('mata ujian diambil dari data sebelumnya');
         }
-
-        // $peserta = SiswaUjian::create([
-        //     'peserta_id'        => $peserta->id,
-        //     'jadwal_id'         => $request->jadwal_id,
-        //     'mulai_ujian'       => '',
-        //     'mulai_ujian_shadow'=> '',
-        //     'sisa_waktu'        => $ujian->lama,
-        //     'status_ujian'      => 0,
-        //     'uploaded'          => 0
-        // ]);
 
         try {
             DB::table('siswa_ujians')->insert([
@@ -177,19 +157,7 @@ class UjianAktifController extends Controller
             return SendResponse::internalServerError("Terjadi kesalahan 500. ".$e->getMessage());
         }
 
-        return SendResponse::accept();
-        // $token = "jfldsjflsd";
-        // $cookie = $this->getCookieDetails($token);
-        // return response()->json([])->cookie(
-        //     $cookie['name'], 
-        //     $cookie['value'], 
-        //     $cookie['minutes'], 
-        //     $cookie['path'], 
-        //     $cookie['domain'], 
-        //     $cookie['secure'], 
-        //     $cookie['httponly'], 
-        //     $cookie['samesite']
-        // );
+        return SendResponse::accept('mata ujian diambil dengan mulai ujian baru');
     }
 
     /**
@@ -250,6 +218,10 @@ class UjianAktifController extends Controller
             ->whereDate('created_at', now()->format('Y-m-d'))
             ->first();
 
+        if (!$data) {
+            return SendResponse::badRequest('Kami tidak dapat mengambil ujian untuk kamu, kamu tidak sedang mengikuti ujian apapun. silakan logout lalu login kembali');
+        }
+
         // Jika ini adalah pertama kali peserta 
         // Melakukan mulai ujian
         // 3 <= sedang mengerjakan
@@ -260,7 +232,7 @@ class UjianAktifController extends Controller
                     ->update([
                         'mulai_ujian'       => now()->format('H:i:s'),
                         'mulai_ujian_shadow'=> now()->format('H:i:s'),
-                        'status_ujian'  => 3,
+                        'status_ujian'      => 3,
                     ]);
             }catch(\Exception $e){
                 return SendResponse::internalServerError($e->getMessage());
@@ -285,7 +257,6 @@ class UjianAktifController extends Controller
         }
 
         // Ambil id banksoal yang terkait dalam jadwal
-        // $jadwal = Jadwal::find($ujian_siswa->jadwal_id);
         $jadwal = DB::table('jadwals')
             ->where('id', $ujian_siswa->jadwal_id)
             ->first();
@@ -294,13 +265,12 @@ class UjianAktifController extends Controller
             return SendResponse::badRequest('Terjadi kesalahan saat mengambil jadwal ujian untuk kamu, silakan logout lalu hubungi administrator');
         }
 
-        // $banksoal_ids = array_column($jadwal->banksoal_id, 'jurusan','id');
-        // $banksoal_ids = collect($banksoal_ids)->keys();
-        // $banksoal_ids = json_decode($jadwal->banksoal_id, 'id');
         $banksoal_ids = array_column(json_decode($jadwal->banksoal_id, true), 'id');
-
-        $banksoal_diujikan = Banksoal::with('matpel')
-            ->whereIn('id', $banksoal_ids)
+        
+        $banksoal_diujikan = DB::table('banksoals')
+            ->join('matpels','banksoals.matpel_id','=','matpels.id')
+            ->whereIn('banksoals.id', $banksoal_ids)
+            ->select('banksoals.id','matpels.agama_id','matpels.jurusan_id')
             ->get();
         $banksoal_id = '';
 
@@ -310,7 +280,10 @@ class UjianAktifController extends Controller
             if(!$banksoal['success']) {
                 continue;
             }
-            $banksoal_id = $banksoal['data'];
+            if ($banksoal['data'] != '') {
+                $banksoal_id = $banksoal['data'];
+                break;
+            }
         }
 
         // Jika tidak dapat menemukan banksoal_id
@@ -673,24 +646,5 @@ class UjianAktifController extends Controller
         }
 
         return response()->json(['data' => $jawaban_peserta, 'detail' => $ujian]);
-    }
-
-    /**
-     * Ambil konfigurasi cookie
-     * @return array
-     */
-    private function getCookieDetails($token)
-    {
-        return [
-            'name' => '_token',
-            'value' => $token,
-            'minutes' => 1440,
-            'path' => null,
-            'domain' => null,
-            // 'secure' => true, // for production
-            'secure' => null, // for localhost
-            'httponly' => true,
-            'samesite' => true,
-        ];
     }
 }
