@@ -99,9 +99,15 @@ export default {
   watch: {
     uncomplete(val) {
       if(this.$route.name != 'ujian.while' && typeof val.jadwal_id != 'undefined') {
-        this.$router.replace({
-          name: 'ujian.while'
-        })
+        if (val.status_ujian == 3) {
+          this.$router.replace({
+            name: 'ujian.while'
+          })
+        } else if (val.status_ujian == 0) {
+          this.$router.replace({
+            name: 'ujian.while'
+          })
+        }
       }
     }
   }
