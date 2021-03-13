@@ -139,7 +139,7 @@ class ResultController extends Controller
         if ($jurusan != 0 && $jurusan != '') {
             $jurusan = explode(',',$jurusan);
             $res->whereHas('peserta', function($query) use ($jurusan) {
-                $query->where('jurusan_id', $jurusan);
+                $query->whereIn('jurusan_id', $jurusan);
             });
         }
 
