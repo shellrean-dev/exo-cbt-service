@@ -43,23 +43,24 @@ class UjianService
      * @param  array    $peserta  [description]
      * @return [type]             [description]
      */
-    public static function getBanksoalPeserta(Banksoal $banksoal, Peserta $peserta)
+    public static function getBanksoalPeserta($banksoal, Peserta $peserta)
     {
         $banksoal_id = '';
         try {
-            if($banksoal->matpel->agama_id != 0) {
-                if($banksoal->matpel->agama_id == $peserta['agama_id']) {
+            if($banksoal->agama_id != 0) {
+                if($banksoal->agama_id == $peserta['agama_id']) {
                     $banksoal_id = $banksoal->id;
                 }
             } else {
-                if(is_array($banksoal->matpel->jurusan_id)) {
-                    foreach ($banksoal->matpel->jurusan_id as $d) {
+                $jurusans = $banksoal->jurusan_id == '0' || $banksoal->jurusan_id == '' ? 0 : json_decode($banksoal->jurusan_id, true);
+                if(is_array($jurusans)) {
+                    foreach ($jurusans as $d) {
                         if($d == $peserta['jurusan_id']) {
                             $banksoal_id = $banksoal->id;
                         }
                     }
                 } else {
-                    if($banksoal->matpel->jurusan_id == 0) {
+                    if($banksoal->jurusan_id == 0) {
                         $banksoal_id = $banksoal->id;
                     }
                 }
@@ -189,15 +190,6 @@ class UjianService
                 })
                 ->count();
 
-                // $pg_jml = JawabanPeserta::where([
-                //     'jadwal_id'     => $jadwal_id,
-                //     'peserta_id'    => $peserta_id
-                // ])
-                // ->whereHas('soal', function($query) {
-                //     $query->where('tipe_soal','=', '1');
-                // })
-                // ->count();
-
                 if($pg_benar > 0) {
                     $hasil_pg = ($pg_benar/$banksoal->jumlah_soal)*$banksoal->persen['pilihan_ganda'];
                 }
@@ -228,15 +220,6 @@ class UjianService
                 })
                 ->count();
 
-                // $mpg_jml = JawabanPeserta::where([
-                //     'jadwal_id'     => $jadwal_id,
-                //     'peserta_id'    => $peserta_id
-                // ])
-                // ->whereHas('soal', function($query) {
-                //     $query->where('tipe_soal','=', '4');
-                // })
-                // ->count();
-
                 if($mpg_benar > 0) {
                     $hasil_mpg = ($mpg_benar/$banksoal->jumlah_soal_ganda_kompleks)*$banksoal->persen['pilihan_ganda_komplek'];
                 }
@@ -265,15 +248,6 @@ class UjianService
                     $query->where('tipe_soal','3');
                 })
                 ->count();
-
-                // $listening_jml = JawabanPeserta::where([
-                //     'jadwal_id'     => $jadwal_id,
-                //     'peserta_id'    => $peserta_id
-                // ])
-                // ->whereHas('soal', function($query) {
-                //     $query->where('tipe_soal','=', '3');
-                // })
-                // ->count();
 
                 if($listening_benar > 0) {
                     $hasil_listening = ($listening_benar/$banksoal->jumlah_soal_listening)*$banksoal->persen['listening'];
@@ -304,15 +278,6 @@ class UjianService
                 })
                 ->count();
 
-                // $isiang_singkat_jml = JawabanPeserta::where([
-                //     'jadwal_id'     => $jadwal_id,
-                //     'peserta_id'    => $peserta_id
-                // ])
-                // ->whereHas('soal', function($query) {
-                //     $query->where('tipe_soal','=', '6');
-                // })
-                // ->count();
-
                 if($isian_singkat_benar > 0) {
                     $hasil_isiang_singkat = ($isian_singkat_benar/$banksoal->jumlah_isian_singkat)*$banksoal->persen['isian_singkat'];
                 }
@@ -341,15 +306,6 @@ class UjianService
                     $query->where('tipe_soal','5');
                 })
                 ->count();
-
-                // $jumlah_menjodohkan_jml = JawabanPeserta::where([
-                //     'jadwal_id'     => $jadwal_id,
-                //     'peserta_id'    => $peserta_id
-                // ])
-                // ->whereHas('soal', function($query) {
-                //     $query->where('tipe_soal','=', '5');
-                // })
-                // ->count();
 
                 if($jumlah_menjodohkan_benar > 0) {
                     $hasil_isiang_singkat = ($jumlah_menjodohkan_benar/$banksoal->jumlah_menjodohkan)*$banksoal->persen['menjodohkan'];
