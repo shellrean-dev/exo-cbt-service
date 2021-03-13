@@ -214,6 +214,7 @@ class UjianController extends Controller
 
         $find = DB::table('jawaban_pesertas')
             ->where('id', $request->jawaban_id)
+            ->select('id','banksoal_id','soal_id','jawab','esay','ragu_ragu')
             ->first();
 
         if (!$find) {
@@ -243,9 +244,9 @@ class UjianController extends Controller
             return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
         }
 
-        $send = $find->only('id','banksoal_id','soal_id','jawab','esay','ragu_ragu');
+        // $send = $find->only('id','banksoal_id','soal_id','jawab','esay','ragu_ragu');
 
-        return response()->json(['data' => $send,'index' => $request->index]);
+        return response()->json(['data' => $find,'index' => $request->index]);
     }
 
     /**
