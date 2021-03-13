@@ -27,7 +27,10 @@ class JadwalController extends Controller
         $hascomplete = DB::table('siswa_ujians')->where([
             'peserta_id'        => $peserta->id,
             'status_ujian'      => 1
-        ])->get()->pluck('jadwal_id');
+        ])
+        ->select('jadwal_id')
+        ->get()
+        ->pluck('jadwal_id');
 
         // ujian yang sedang dilaksanakan 'aktif' dan hari ini
         $jadwals = DB::table('jadwals')->where([
@@ -37,65 +40,76 @@ class JadwalController extends Controller
         ->select('id','alias','banksoal_id','lama','mulai','tanggal','setting')
         ->get();
 
-        $dets = $jadwals->map(function($value, $key) use($peserta) {
-            // ambil kolom jurusan sebagai id
-            $ids = array_column(json_decode($value->banksoal_id, true), 'id');
+        $jadwal_ids = [];
+
+        foreach($jadwals as $key => $jadwal) {
+            if (in_array($jadwal->id, $hascomplete->toArray())) {
+                continue;
+            }
+            // ambil value dari field id pada banksoal_id
+            $ids = array_column(json_decode($jadwal->banksoal_id, true), 'id');
 
             // cari banksoal yang digunakan oleh jadwal
-            $bks = Banksoal::with('matpel')->whereIn('id', $ids)->get();
+            $bks = DB::table('banksoals')
+                ->join('matpels','banksoals.matpel_id','=','matpels.id')
+                ->select('banksoals.id','matpels.agama_id','matpels.jurusan_id')
+                ->whereIn('banksoals.id', $ids)
+                ->get();
+
             $det = [
                 'banksoal'  => '',
                 'jadwal'    => ''
             ];
 
+            $jadwal_id = '';
+
             // loop banksoal
             foreach($bks as $bk) {
-                // cek apakah matpel tersebut adalah matpel agam
+                // cek apakah matpel tersebut adalah matpel agama
                 // agama_id != 0
-                if($bk->matpel->agama_id != 0) {
+                if($bk->agama_id != 0) {
                     // cek apakah agama di matpel sama dengan agama di peserta
                     // jika iya maka ambil banksoal
-                    if($bk->matpel->agama_id == $peserta['agama_id']) {
-                        $det['banksoal'] = $bk->id;
-                        $det['jadwal'] = $value->id;
+                    if($bk->agama_id == $peserta['agama_id']) {
+                        $jadwal_id = $jadwal->id;
+                        break;
                     }
                 } else {
-                    // jika jurusan id adalah array
+                    // jika jurusan_id adalah array
                     // artinya ini adalah matpel khusus
-                    if(is_array($bk->matpel->jurusan_id)) {
+                    $jurusans = $bk->jurusan_id == '0' || $bk->jurusan_id == '' ? 0 : json_decode($bk->jurusan_id, true);
+                    if(is_array($jurusans)) {
                         // loop jurusan tersebut
-                        foreach ($bk->matpel->jurusan_id as $d) {
-                            // cek apakah jurusan dari matpel sama dengan jurusan pada peserta
-                            if($d == $peserta['jurusan_id']) {
-                                $det['banksoal'] = $bk->id;
-                                $det['jadwal'] = $value->id;
+                        foreach($jurusans as $d) {
+                            // cek apakah jurusan dari matpel
+                            // sama dengan jurusan pada peserta
+                            if ($d == $peserta['jurusan_id']) {
+                                $jadwal_id = $jadwal->id;
+                                break;
                             }
                         }
                     } else {
                         // jika jurusan id == 0
-                        if($bk->matpel->jurusan_id == 0) {
-                            $det['banksoal'] = $bk->id;
-                            $det['jadwal'] = $value->id;
+                        if ($bk->jurusan_id == 0) {
+                            $jadwal_id = $jadwal->id;
+                            break;
                         }
                     }
                 }
             }
-            return $det;
-        });
+            if ($jadwal_id == '') {
+                continue;
+            }
+            array_push($jadwal_ids, $jadwal_id);
+        }
 
-        $ids = collect($dets)->map(function ($value) {
-            return $value['jadwal'];
-        })->reject(function($value) use($hascomplete) {
-            return $value == '' || in_array($value, $hascomplete->toArray());
-        });
+        $avail_jadwal = $jadwals->whereIn('id', $jadwal_ids)->values();
 
-        $ter = $jadwals->whereIn('id', $ids)->values();
-
-        if(!$ter) {
+        if (!$avail_jadwal) {
             return SendResponse::acceptData([]);
         }
 
-        $ter = $ter->map(function($item) {
+        $avail_jadwal = $avail_jadwal->map(function($item) {
             $setting = json_decode($item->setting);
             return [
                 'id' => $item->id,
@@ -109,6 +123,6 @@ class JadwalController extends Controller
             ];
         });
 
-        return SendResponse::acceptData($ter);
+        return SendResponse::acceptData($avail_jadwal);
     }
 }
