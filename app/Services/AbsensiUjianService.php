@@ -240,7 +240,7 @@ class AbsensiUjianService {
         $pdf->MultiCell(40, 0, "RUANG",0, 'L', 1, 0, '', '', true, 0, false, true, 0);
         $pdf->MultiCell(80, 0, ": _______________________________",0, 'L', 1, 0, '', '', true, 0, false, true, 0);
         $pdf->MultiCell(20, 0, "SESI",0, 'L', 1, 0, '', '', true, 0, false, true, 0);
-        $pdf->MultiCell(50, 0, ": __________________ ",0, 'L', 1, 0, '', '', true, 0, false, true, 0);
+        $pdf->MultiCell(50, 0, ": ".$this->sesi." ",0, 'L', 1, 0, '', '', true, 0, false, true, 0);
         $pdf->Ln(6);
         $pdf->MultiCell(40, 0, "MATA PELAJARAN",0, 'L', 1, 0, '', '', true, 0, false, true, 0);
         $pdf->MultiCell(80, 0, ": _______________________________",0, 'L', 1, 0, '', '', true, 0, false, true, 0);
