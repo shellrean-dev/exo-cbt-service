@@ -28,6 +28,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
 
     Route::get('absensi-ujian/{id}', 'ReportingController@absensi_ujian')->name('absensi.download.excel');
     Route::get('berita-acara/{id}', 'ReportingController@berita_acara')->name('beritaacara.download.excel');
+    Route::get('kartu-peserta', 'EventController@kartu_peserta');
 
     Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel', 'ResultController@capaianSiswaExcel')->name('capaian.download.excel');
     Route::get('ujians/{jadwal}/result/excel', 'ResultController@examExcel')->name('hasilujian.download.excel');

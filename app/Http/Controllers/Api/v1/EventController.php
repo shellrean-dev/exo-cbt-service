@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Exports\KartuPesertaPdf;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use App\EventUjian;
@@ -135,5 +136,15 @@ class EventController extends Controller
                 ];
             }),
         ]);
+    }
+
+    /**
+     * Buat kartu peserta
+     */
+    public function kartu_peserta()
+    {
+        $obj = new KartuPesertaPdf();
+        $obj->generate();
+        $obj->show();
     }
 }
