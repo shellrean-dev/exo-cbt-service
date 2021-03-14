@@ -75,6 +75,9 @@ class SettingController extends Controller
      */
     public function changeLogoSekolah(Request $request)
     {
+        $request->validate([
+            'image' => 'required|mimes:png,jpg,jpeg'
+        ]);
         try {
             $file = $request->file('image');
             $filename = date('d_m_Y_his').'-'.$file->getClientOriginalName();
