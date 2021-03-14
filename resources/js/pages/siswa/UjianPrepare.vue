@@ -1,8 +1,8 @@
 <template>
   <div class="container md:mx-auto flex flex-col justify-center space-y-4 lg:flex-row lg:space-y-0 lg:space-x-4 -mt-12 sm:-mt-24">
     <div class="w-full lg:max-w-xl lg:py-4 lg:px-4 mb-20">
-      <div class="bg-white sm:border-2 border-gray-300 shadow py-2 rounded-t-lg rounded-b-lg">
-        <div class="pt-2 pb-2 px-2 flex justify-between border-b border-gray-300 mb-2 items-center">
+      <div class="bg-white  border-gray-200 shadow sm:shadow-2xl py-2 rounded-t-xl rounded-b-xl">
+        <div class="pt-2 pb-2 px-2 flex justify-between border-b border-gray-200 mb-2 items-center">
           <div class="flex items-center">
             <p class="font-medium text-gray-700 px-2 text-xl">Ruang tunggu ujian</p>
           </div>
@@ -10,7 +10,7 @@
 
           </div>
         </div>
-		    <div class="py-2 px-2 my-2 border-b border-gray-300">
+		    <div class="py-2 px-2 my-2 border-b border-gray-200">
 			    <div class="mb-4">
 			      <label for="" class="text-xs font-semibold text-gray-500 px-1">Ujian</label>
 			      <p class="font-semibold text-gray-700 px-1">{{ datad.alias }}</p>
