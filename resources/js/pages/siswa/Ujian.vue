@@ -32,7 +32,7 @@
 				    </button>
 			    </div>
 		    </div>
-		    <div class="py-2 px-2"
+		    <div class="py-8 px-2 sm:px-8"
         :class="textSize"
         v-if="typeof filleds[questionIndex] != 'undefined'">
           <div class="my-2"
@@ -152,14 +152,14 @@
             </div>
           </div>
 				</div>
-		    <div class="py-4 px-2 flex justify-between border-t border-gray-300 items-center"  v-show="!focus">
-			    <button class="py-1 px-3 border-2 rounded-md hover:shadow-lg"
-          :class="isLoadinger ? 'bg-blue-200 text-white border-blue-200' : 'bg-blue-400 text-white border-blue-400'"
+		    <div class="py-4 px-2 sm:px-4 flex justify-between border-t border-gray-300 items-center"  v-show="!focus">
+			    <button class="py-1 px-3 border-2 rounded-md hover:shadow-lg sm:flex sm:items-center sm:space-x-2"
+          :class="isLoadinger ? 'bg-red-200 text-white border-red-200' : 'bg-red-400 text-white border-red-400'"
           :disabled="isLoadinger || !listening"
           v-if="questionIndex != 0"
           @click="prev()"
           >
-				    <prev-line-icon></prev-line-icon>
+            <prev-line-icon></prev-line-icon> <span class="hidden sm:block">Sebelumnya</span>
 			    </button>
 			    <div>
 						<label class="flex justify-start items-start">
@@ -174,29 +174,29 @@
 			        <div class="select-none">ragu-ragu</div>
 			      </label>
 			    </div>
-			    <button class="py-1 px-3 border-2 rounded-md hover:shadow-lg"
+			    <button class="py-1 px-3 border-2 rounded-md hover:shadow-lg sm:flex sm:items-center sm:space-x-2"
           :class="isLoadinger ? 'bg-blue-200 text-white border-blue-200' : 'bg-blue-400 text-white border-blue-400'"
           :disabled="isLoadinger || !listening"
           v-if="questionIndex+1 != filleds.length"
           @click="next()"
           >
-				    <next-line-icon></next-line-icon>
+				    <span class="hidden sm:block">Selanjutnya</span> <next-line-icon></next-line-icon>
 			    </button>
-          <button class="py-1 px-3 border-2 rounded-md hover:shadow-lg"
+          <button class="py-1 px-3 border-2 rounded-md hover:shadow-lg sm:flex sm:items-center sm:space-x-2"
           :class="isLoadinger ? 'bg-green-200 text-white border-green-200' : 'bg-green-400 text-white border-green-400'"
           :disabled="isLoadinger || !listening"
           v-if="questionIndex+1 == filleds.length && checkRagu() == false"
           @click="modalConfirm = true"
           >
-				    <next-line-icon></next-line-icon>
+				    <span class="hidden sm:block">Selanjutnya</span> <next-line-icon></next-line-icon>
 			    </button>
-          <button class="py-1 px-3 border-2 rounded-md hover:shadow-lg"
+          <button class="py-1 px-3 border-2 rounded-md hover:shadow-lg sm:flex sm:items-center sm:space-x-2"
           v-if="questionIndex+1 == filleds.length && checkRagu() == true"
           :class="isLoadinger ? 'bg-red-200 text-white border-red-200' : 'bg-red-400 text-white border-red-400'"
           :disabled="isLoadinger || !listening"
           @click="doubtExistAlert"
           >
-				    <next-line-icon></next-line-icon>
+				    <span class="hidden sm:block">Selanjutnya</span> <next-line-icon></next-line-icon>
 			    </button>
 		    </div>
       </div>

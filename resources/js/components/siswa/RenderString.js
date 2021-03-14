@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import Panzoom from '@panzoom/panzoom'
 Vue.component("RenderString", {
     props: {
         string: {
@@ -18,8 +19,12 @@ Vue.component("RenderString", {
                     <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-7xl sm:w-full" role="dialog" aria-modal="true" aria-labelledby="modal-headline">
                         <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                             <div class="max-w-7xl">
-                            <img id="myimage" ref="myimage" :src="currImg" :width="100+width+'%'" alt="Girl">
+                                <div id="panzoom-element">
+                                    <img :src="currImg"  alt="Zoom Image Exo">
+                                </div>
                             </div>
+                            <button @click="zoom(1)" class="py-1 px-2 rounded-md bg-green-400 text-white mr-1">ZoomIn</button>
+                            <button @click="zoom(-1)" class="py-1 px-2 rounded-md bg-red-400 text-white">ZoomOut</button>
                         </div>
                         <div class="px-4 border-t-2 border-dashed py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                             <button
@@ -32,13 +37,20 @@ Vue.component("RenderString", {
                 </div>
             </div></div>`,
             components: {
+                
+            },
+            mounted() {
+                this.panzoom = Panzoom(document.getElementById('panzoom-element'), {
+                    maxScale: 5
+                })
             },
             data() {
                 return {
                     currImg: "",
                     imgShow: false,
                     mounted: false,
-                    width: 0
+                    width: 0,
+                    panzoom: {}
                 }
             },
             methods: {
@@ -51,10 +63,10 @@ Vue.component("RenderString", {
                 },
                 getImage() {
                     console.log(this.$refs.myimage)
+                },
+                zoom(level){
+                    level === -1 ? this.panzoom.zoomOut() : this.panzoom.zoomIn()
                 }
-            },
-            mounted() {
-                this.mounted = true
             },
             watch: {
                 imgShow(v) {
