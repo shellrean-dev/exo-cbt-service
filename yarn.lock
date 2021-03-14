@@ -854,6 +854,11 @@
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.3.tgz#2b5a3ab3f918cca48a8c754c08168e3f03eba61b"
   integrity sha512-shAmDyaQC4H92APFoIaVDHCx5bStIocgvbwQyxPRrbUY20V1EYTbSDchWbuwlMG3V17cprZhA6+78JfB+3DTPw==
 
+"@panzoom/panzoom@^4.3.2":
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/@panzoom/panzoom/-/panzoom-4.3.2.tgz#19d13edb858d05531bac54e1f8cf51f53d0dd9fa"
+  integrity sha512-6D4UDsYXowzMJ/1XSbylRj9BGhCR7mQQ5m/s6MiKx11ThLcEiU4kgq59vhS8+RnOGA789FcdmGvK1/hIxyRD+w==
+
 "@tailwindcss/postcss7-compat@^2.0.3", "tailwindcss@npm:@tailwindcss/postcss7-compat":
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/@tailwindcss/postcss7-compat/-/postcss7-compat-2.0.3.tgz#d212aa672eb5aa789fbf1ac253000707603d7676"
@@ -1943,13 +1948,6 @@ cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
   dependencies:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
-
-ckeditor4-vue@^1.0.1:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/ckeditor4-vue/-/ckeditor4-vue-1.1.0.tgz#f5965d4f96a1df9dc7ce638b6b1f796b53015398"
-  integrity sha512-dzIobyow+fXrY7Q08Wr7qY5sSpUfAFCydu0m3+JMH3lLC6kiknuvDl6mPnlhaNvYHD0tDU1dlzGFr7G2than0Q==
-  dependencies:
-    load-script "^1.0.0"
 
 class-utils@^0.3.5:
   version "0.3.6"
@@ -4611,11 +4609,6 @@ load-json-file@^1.0.0:
     pify "^2.0.0"
     pinkie-promise "^2.0.0"
     strip-bom "^2.0.0"
-
-load-script@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/load-script/-/load-script-1.0.0.tgz#0491939e0bee5643ee494a7e3da3d2bac70c6ca4"
-  integrity sha1-BJGTngvuVkPuSUp+PaPSuscMbKQ=
 
 loader-runner@^2.4.0:
   version "2.4.0"
