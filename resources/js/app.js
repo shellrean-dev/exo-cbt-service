@@ -3,9 +3,6 @@ import router from './router.js'
 import store from './store.js'
 import App from './App.vue'
 
-import CKEditor from 'ckeditor4-vue';
-Vue.use(CKEditor);
-
 import VueSweetalert2 from 'vue-sweetalert2'
 import 'sweetalert2/dist/sweetalert2.min.css';
 
