@@ -89,14 +89,12 @@
               v-if="filleds[questionIndex].soal.tipe_soal == 6"
               v-model="filleds[questionIndex].esay"
               @keyup="onInput"/>
-              <ckeditor
-              class="border border-gray-300"
-              v-model="filleds[questionIndex].esay"
-              :config="editorConfig"
-              @input="onInput"
+              <textarea 
+              class="border w-full h-24 border-blue-300 rounded-md text-gray-700 py-1 px-4"
               v-if="filleds[questionIndex].soal.tipe_soal == 2"
-              type="inline">
-              </ckeditor>
+              v-model="filleds[questionIndex].esay"
+              @input="onInput"
+              ></textarea>
             </div>
 				  </div>
           <div class="grid grid-rows-none sm:grid-rows-3 sm:grid-flow-col gap-4 mt-4"
@@ -145,14 +143,12 @@
               v-if="filleds[questionIndex].soal.tipe_soal == 6"
               v-model="filleds[questionIndex].esay"
               @keyup="onInput"/>
-              <ckeditor
-              class="border border-gray-300"
-              v-model="filleds[questionIndex].esay"
-              :config="editorConfig"
-              @input="onInput"
+              <textarea 
+              class="border w-full h-24 border-blue-300 rounded-md text-gray-700 py-1 px-4"
               v-if="filleds[questionIndex].soal.tipe_soal == 2"
-              type="inline">
-              </ckeditor>
+              v-model="filleds[questionIndex].esay"
+              @input="onInput"
+              ></textarea>
             </div>
           </div>
 				</div>
