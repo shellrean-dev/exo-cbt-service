@@ -415,7 +415,9 @@ class ResultController extends Controller
             return SendResponse::badRequest('kesalahan, data yang diminta tidak dapat ditemukan');
         }
 
-        $jawaban = JawabanPeserta::with(['esay_result','soal','soal.jawabans'])
+        $jawaban = JawabanPeserta::with(['peserta' => function($query) {
+            $query->select('id','nama','no_ujian');
+        },'esay_result','soal','soal.jawabans'])
         ->where([
             'peserta_id'    => $hasil->peserta_id,
             'jadwal_id'     => $hasil->jadwal_id
@@ -432,6 +434,8 @@ class ResultController extends Controller
                 'jadwal_id' => $item->jawab_id,
                 'jawab' => $item->jawab,
                 'jawab_complex' => $item->jawab_complex,
+                'peserta_nama'  => $item->peserta->nama,
+                'peserta_no_ujian' => $item->peserta->no_ujian,
                 'peserta_id' => $item->peserta_id,
                 'ragu_ragu' => $item->ragu_ragu,
                 'similiar' => $item->similiar,
