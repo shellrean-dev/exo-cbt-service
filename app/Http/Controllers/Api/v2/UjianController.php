@@ -262,6 +262,10 @@ class UjianController extends Controller
 
         $ujian = $this->_getUjianCurrent($peserta);
 
+        if (!$ujian) {
+            return SendResponse::badRequest('Anda tidak sedang mengerjakan ujian apapun. silakan logout, laporkan perihal ini kepada administrator');
+        }
+
         // Cek apakah hasil ujian pernah di generate sebelumnya
         $hasilUjian = DB::table('hasil_ujians')
             ->where([
@@ -271,6 +275,16 @@ class UjianController extends Controller
             ->count();
 
         if($hasilUjian > 0) {
+            try {
+                DB::table('siswa_ujians')
+                    ->where('id', $ujian->id)
+                    ->update([
+                        'status_ujian'  => 1
+                    ]);
+
+            } catch (\Exception $e) {
+                return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
+            }
             return SendResponse::badRequest('Ujian ini telah diselesaikan. silakan logout, laporkan perihal ini kepada andministrator');
         }
 
@@ -281,6 +295,10 @@ class UjianController extends Controller
             ])
             ->select('banksoal_id')
             ->first();
+        
+        if (!$jawaban) {
+            return SendResponse::badRequest('Anda tidak sedang mengerjakan ujian apapun. silakan logout, laporkan perihal ini kepada administrator');
+        }
 
         try {
             DB::beginTransaction();
