@@ -135,7 +135,7 @@ class PenilaianController extends Controller
             ->where('jawaban_pesertas.banksoal_id', $jawab->banksoal_id)
             ->where('jawaban_pesertas.soal_id', $jawab->soal_id)
             ->join('banksoals', 'jawaban_pesertas.banksoal_id', '=', 'banksoals.id')
-            ->select('jawaban_pesertas.id', 'jawaban_pesertas.esay','jawaban_pesertas.banksoal_id','jawaban_pesertas.soal_id','jawaban_pesertas.jadwal_id','banksoals.jumlah_soal','banksoals.jumlah_soal_listening','banksoals.jumlah_soal_ganda_kompleks','banksoals.jumlah_isian_singkat','banksoals.jumlah_soal_esay','banksoals.persen')
+            ->select('jawaban_pesertas.id', 'jawaban_pesertas.esay','jawaban_pesertas.banksoal_id','jawaban_pesertas.soal_id','jawaban_pesertas.jadwal_id','banksoals.jumlah_soal','banksoals.jumlah_soal_listening','banksoals.jumlah_soal_ganda_kompleks','banksoals.jumlah_isian_singkat','banksoals.jumlah_soal_esay','banksoals.persen', 'jawaban_pesertas.peserta_id')
             ->get();
 
         if ($sames->count() > 1) {
