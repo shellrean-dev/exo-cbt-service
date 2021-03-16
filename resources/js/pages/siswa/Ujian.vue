@@ -262,7 +262,6 @@ export default {
   async created() {
     try {
       await this.filledAllSoal()
-      this.start()
     } catch (error) {
       this.showError(error)
     }
@@ -294,10 +293,12 @@ export default {
       this.time = val.sisa_waktu
       this.interval = setInterval( () => {
         if (this.time > 0) {
+          this.time--
         } else {
           this.selesai()
+          clearInterval(this.interval);
         }
-      }, 5000 )
+      }, 1000 )
     },
     async jadwal(val) {
       if(typeof this.jadwal.jadwal != 'undefined') {

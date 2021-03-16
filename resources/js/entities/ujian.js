@@ -285,7 +285,6 @@ async function  selesai() {
         this.questionIndex = ''
 
         this.$router.push({ name: 'ujian.selesai' })
-        clearInterval(this.interval);
     } catch (error) {
         this.showError(error)
     }
