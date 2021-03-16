@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use App\Setting;
@@ -15,8 +16,16 @@ class SettingController extends Controller
      */
     public function getSettingSekolah()
     {
-        $setting = Setting::where('name','set_sekolah')->first();
-        return SendResponse::acceptData($setting);
+        // $setting = Setting::where('name','set_sekolah')->first();
+        // return SendResponse::acceptData($setting);
+        $setting = DB::table('settings')
+            ->where('name', 'set_sekolah')
+            ->select('id','name','value')
+            ->first();
+        return SendResponse::acceptData([
+            'name'  => $setting->name,
+            'value' => json_decode($setting->value, true)
+        ]);
     }
 
     /**
@@ -107,9 +116,16 @@ class SettingController extends Controller
         if(isset(request()->setting) && !empty(request()->setting)) {
             $setting = request()->setting;
 
-            $sett = Setting::where('name', $setting)->first();
+            // $sett = Setting::where('name', $setting)->first();
+            $sett = DB::table('settings')
+                ->where('name', $setting)
+                ->select('id','name','value')
+                ->first();
             if($sett) {
-                return SendResponse::acceptData($sett);
+                return SendResponse::acceptData([
+                    'name'  => $sett->name,
+                    'value' => json_decode($sett->value, true),
+                ]);
             }
         }
         return SendResponse::acceptData([
