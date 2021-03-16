@@ -153,13 +153,16 @@ class PesertaController extends Controller
      */
     public function getPesertaLogin()
     {
-        $peserta = Peserta::orderBy('no_ujian');
+        // $peserta = Peserta::orderBy('no_ujian');
+        $peserta = DB::table('pesertas')
+            ->select('id','no_ujian','nama');
         $peserta->where('api_token','!=','');
         if (request()->q != '') {
             $peserta = $peserta->where('nama', 'LIKE', '%'.request()->q.'%');
+            $peserta = $peserta->orWhere('no_ujian', 'LIKE', '%'.request()->q.'%');
         }
 
-        $peserta = $peserta->paginate(30);
+        $peserta = $peserta->paginate(10);
         return SendResponse::acceptData($peserta);
     }
 
