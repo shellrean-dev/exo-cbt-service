@@ -119,13 +119,24 @@ class UjianAktifController extends Controller
      * [getPesertas description]
      * @return [type] [description]
      */
-    public function getPesertas(Jadwal $jadwal)
+    public function getPesertas($jadwal_id)
     {
-        $siswa = SiswaUjian::with(['peserta' => function($query) {
-            $query->select('id', 'nama', 'no_ujian');
-        }])
-        ->select('id','jadwal_id','mulai_ujian','mulai_ujian_shadow','sisa_waktu','status_ujian','peserta_id')
-        ->where(['jadwal_id' => $jadwal->id])->get();
+        $jadwal = DB::table('jadwals')
+            ->where('id', $jadwal_id)
+            ->count();
+        if ($jadwal < 1) {
+            return SendResponse::badRequest('kesalahan, jadwal tidak ditemukan');
+        }
+        // $siswa = SiswaUjian::with(['peserta' => function($query) {
+        //     $query->select('id', 'nama', 'no_ujian');
+        // }])
+        // ->select('id','jadwal_id','mulai_ujian','mulai_ujian_shadow','sisa_waktu','status_ujian','peserta_id')
+        // ->where(['jadwal_id' => $jadwal->id])->get();
+        $siswa = DB::table('siswa_ujians')
+            ->join('pesertas', 'siswa_ujians.peserta_id', '=', 'pesertas.id')
+            ->select('siswa_ujians.id', 'siswa_ujians.jadwal_id','siswa_ujians.mulai_ujian','siswa_ujians.mulai_ujian_shadow','siswa_ujians.sisa_waktu','siswa_ujians.status_ujian','siswa_ujians.peserta_id','pesertas.nama','pesertas.no_ujian')
+            ->where(['siswa_ujians.jadwal_id' => $jadwal_id])
+            ->get();
         return SendResponse::acceptData($siswa);
     }
 
