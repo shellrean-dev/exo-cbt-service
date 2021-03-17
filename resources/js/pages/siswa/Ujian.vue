@@ -151,6 +151,64 @@
               ></textarea>
             </div>
           </div>
+		      <div
+          v-if="filleds[questionIndex].soal.layout == 3"
+          >
+            <table class="border-collapse border border-gray-400  w-full">
+              <tr
+              v-for="(jawab,index) in filleds[questionIndex].soal.jawabans"
+              :key="index"
+              >
+                <td class="border border-gray-400" width="50px"
+                v-if="[1,3].includes(parseInt(filleds[questionIndex].soal.tipe_soal))"
+                >
+                  <div class="flex items-center m-2">
+                    <input :id="'radio1'+index"
+                    v-model="selected" type="radio" name="jwb"
+                    :value="jawab.id" class="hidden"
+                    :disabled="isLoadinger || isLoading"
+                    @change="selectOption(index)"/>
+                    <label :for="'radio1'+index" class="flex items-center cursor-pointer text-xl">
+                      <span class="w-6 h-6 text-sm inline-block mr-2 rounded-full border border-gray-400 flex-no-shrink flex items-center justify-center uppercase">{{ charIndex(index) }}</span>
+                    </label>
+                  </div>
+                </td>
+                <td class="border border-gray-400" width="50px"
+                v-if="4 == parseInt(filleds[questionIndex].soal.tipe_soal)"
+                >
+                  <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
+                    <input
+                    :checked="filleds[questionIndex].jawab_complex.includes(jawab.id)"
+                    :value="jawab.id"
+                    :disabled="isLoadinger || isLoading"
+                    @change="changeCheckbox($event, index)"
+                    type="checkbox" class="opacity-0 absolute">
+                    <svg class="fill-current hidden w-4 h-4 text-green-500 pointer-events-none" viewBox="0 0 20 20"><path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>
+                  </div>
+                </td>
+                <td class="border border-gray-400 pl-2"
+                v-html="jawab.text_jawaban"
+                ></td>
+              </tr>
+              <tr
+              v-if="[2,6].includes(filleds[questionIndex].soal.tipe_soal)"
+              >
+                <td>
+                  <input type="text"
+                  class="border border-gray-300 rounded-md text-gray-700 py-1 px-4"
+                  v-if="filleds[questionIndex].soal.tipe_soal == 6"
+                  v-model="filleds[questionIndex].esay"
+                  @keyup="onInput"/>
+                  <textarea 
+                  class="border w-full h-24 border-gray-300 rounded-md text-gray-700 py-1 px-4"
+                  v-if="filleds[questionIndex].soal.tipe_soal == 2"
+                  v-model="filleds[questionIndex].esay"
+                  @input="onInput"
+                  ></textarea>
+                </td>
+              </tr>
+            </table>
+          </div>
 				</div>
 		    <div class="py-4 px-2 sm:px-4 flex justify-between border-t border-gray-300 items-center"  v-show="!focus">
 			    <button class="py-1 px-3 border-2 rounded-md hover:shadow-lg sm:flex sm:items-center sm:space-x-2"
@@ -290,17 +348,20 @@ export default {
       this.questionIndex = 0
     },
     detail(val) {
-      this.time = val.sisa_waktu
-      this.interval = setInterval( () => {
-        if (this.time > 0) {
-          this.time--
-        } else {
-          this.selesai()
-          clearInterval(this.interval);
-        }
-      }, 1000 )
+      clearInterval(this.$store.state.siswa_ujian.interval)
+      if (typeof val != 'undefined') {
+        this.time = val.sisa_waktu
+        this.$store.state.siswa_ujian.interval = setInterval( () => {
+          if (this.time > 0) {
+            this.time--
+          } else {
+            this.selesai()
+          }
+        }, 1000 )
+      }
     },
     async jadwal(val) {
+      console.log('jadwal watcher was called')
       if(typeof this.jadwal.jadwal != 'undefined') {
         await this.filledAllSoal()
         this.start()
