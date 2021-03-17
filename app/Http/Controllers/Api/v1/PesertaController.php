@@ -179,6 +179,27 @@ class PesertaController extends Controller
         return SendResponse::accept();
     }
 
+    /**
+     * Multiple reset api-token peserta
+     * @return \App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
+     */
+    public function multiResetPeserta()
+    {
+        try {
+            $ids = request()->q;
+            $ids = explode(',', $ids);
+
+            DB::table('pesertas')
+                ->whereIn('id', $ids)
+                ->update([
+                    'api_token' => ''
+                ]);
+        } catch (\Exception $e) {
+            return SendResponse::internalServerError('kesalahan 500 ('.$e->getMessage().')');
+        }
+    }
+
     public function destroyMultiple(Request $request)
     {
         $request->validate([    
