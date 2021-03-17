@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
 use App\Imports\BanksoalImport;
+use App\Services\ExoProcessDoc;
 use App\Actions\SendResponse;
 use App\Services\WordService;
 use App\Services\SoalService;
@@ -365,15 +366,10 @@ class SoalController extends Controller
      * @param \App\Services\WordService $wordService
      * @return \App\Actions\SendResponse;
      */
-    public function wordImport(
-        Request $request,
-        Banksoal $banksoal,
-        WordService $wordService,
-        SoalService $soalService)
+    private function _formatStandart($request, $banksoal)
     {
-        $request->validate([
-            'file' => 'required|mimes:docx'
-        ]);
+        $wordService = new WordService();
+        $soalService = new SoalService();
 
         $dir = Directory::find($banksoal->directory_id);
 
@@ -394,5 +390,104 @@ class SoalController extends Controller
         }
 
         return SendResponse::accept();
+    }
+
+    /**
+     * Import soal from docx
+     *
+     * @author shellrean <wandinak17@gmail.com>
+     * @param \Illuminate\http\Request $request
+     * @return \App\Actions\SendResponse;
+     */
+    private function _formatTabled($request, $banksoal)
+    {
+        $dir = DB::table('directories')
+            ->where('id', $banksoal->directory_id)
+            ->first();
+        if (!$dir) {
+            return SendResponse::badRequest('kesalahan, directory tidak ditemukan');
+        }
+
+        $file = $request->file('file');
+        $nama_file = time().$file->getClientOriginalName();
+        $path = $file->storeAs('public/'.$dir->slug,$nama_file);
+
+        $file = storage_path('app/'.$path);
+
+        DB::beginTransaction();
+        try {
+            $exoProc = new ExoProcessDoc('1',$file, $dir);
+            $data = $exoProc->render();
+            $questions = $data['data'];
+            $files = $data['files'];
+            
+            $options = [];
+            foreach($questions as $key => $question) {
+                $soal = [
+                    'banksoal_id'   => $banksoal->id,
+					'tipe_soal'     => $question['type'],
+					'pertanyaan'    => $question['pertanyaan'],
+					'created_at'	=> now(),
+					'updated_at'	=> now(),
+                ];
+
+                $soal_id = DB::table('soals')->insertGetId($soal);
+
+                foreach($question['options'] as $key => $opt) {
+                    $isCorrect = in_array($key, $question['correct']) ? 1 : 0;
+                    array_push($options, [
+                        'soal_id'       => $soal_id,
+                        'text_jawaban'  => $opt,
+                        'correct'       => $isCorrect,
+                        'created_at'    => now(),
+                        'updated_at'    => now(),
+                    ]);
+                }
+            }
+            if (count($options) > 0) {
+                DB::table('jawaban_soals')->insert($options);
+            }
+            if (count($files) > 0) {
+                DB::table('files')->insert($files);
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return SendResponse::badRequest('kesalahan 500 ('.$e->getMessage().')');
+        }
+        return SendResponse::accept();
+    }
+
+    /**
+     * Import soal from docx
+     *
+     * @author shellrean <wandinak17@gmail.com>
+     * @param \Illuminate\http\Request $request
+     * @return \App\Actions\SendResponse;
+     */
+    public function wordImport(Request $request, $banksoal_id)
+    {
+        $request->validate([
+            'file' => 'required|mimes:docx',
+            'format' => 'required'
+        ]);
+
+        $banksoal = DB::table('banksoals')
+            ->where('id', $banksoal_id)
+            ->select('id','directory_id')
+            ->first();
+
+        if (!$banksoal) {
+            return SendResponse::badRequest('kesalahan, banksoal tidak ditemukan');
+        }
+
+        if($request->format == '1') {
+            return $this->_formatStandart($request, $banksoal);
+        }
+        if ($request->format == '2') {
+            return $this->_formatTabled($request, $banksoal);
+        }
+
+        return SendResponse::badRequest('format tidak sesuai');
     }
 }
