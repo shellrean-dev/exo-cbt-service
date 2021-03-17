@@ -283,7 +283,7 @@ async function  selesai() {
         await this.selesaiUjianPeserta()
         this.$store.state.siswa_ujian.filledUjian = []
         this.questionIndex = ''
-
+        clearInterval(this.$store.state.siswa_ujian.interval)
         this.$router.push({ name: 'ujian.selesai' })
     } catch (error) {
         this.showError(error)
