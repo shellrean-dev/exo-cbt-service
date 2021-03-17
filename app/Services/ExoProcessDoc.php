@@ -95,13 +95,13 @@ class ExoProcessDoc
         $this->content = preg_replace("/<w:p[^>]*>/is", "<p>", $this->content);
         $this->content = preg_replace("/<\/w:p>/is", "</p>", $this->content);
 
-        $this->content = preg_replace("/<w:tbl[^>]*>/is", "<table>", $this->content);
+        $this->content = preg_replace("/<w:tbl[^>]*>/is", '<table class="border-collapse border border-gray-300">', $this->content);
         $this->content = preg_replace("/<\/w:tbl>/is", "</table>", $this->content);
 
         $this->content = preg_replace("/<w:tr[^>]*>/is", "<tr>", $this->content);
         $this->content = preg_replace("/<\/w:tr>/is", "</tr>", $this->content);
 
-        $this->content = preg_replace("/<w:tc[^>]*>/is", "<td>", $this->content);
+        $this->content = preg_replace("/<w:tc[^>]*>/is", '<td class="border border-gray-300">', $this->content);
         $this->content = preg_replace("/<\/w:tc>/is", "</td>", $this->content);
     }
 
