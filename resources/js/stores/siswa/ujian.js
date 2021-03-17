@@ -30,7 +30,8 @@ const state = () => ({
 	},
     ujian: {},
 	banksoalAktif: '',
-    uncomplete: {}
+    uncomplete: {},
+    interval: ''
 })
 
 /**
