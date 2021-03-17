@@ -47,6 +47,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
 
         Route::get('pesertas/login', 'PesertaController@getPesertaLogin');
         Route::delete('pesertas/{peserta}/login', 'PesertaController@resetPesertaLogin');
+        Route::get('pesertas/multi-reset-login','PesertaController@multiResetPeserta');
         Route::post('pesertas/upload', 'PesertaController@import');
         Route::post('pesertas/delete-multiple', 'PesertaController@destroyMultiple');
         Route::apiResource('pesertas', 'PesertaController');
