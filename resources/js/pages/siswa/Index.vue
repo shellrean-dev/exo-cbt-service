@@ -79,6 +79,7 @@ export default {
         await this.logoutPeserta()
         localStorage.removeItem('token')
         this.$store.state.token = localStorage.getItem('token')
+        this.$store.state.siswa_ujian.filledUjian = []
         this.$router.push('/')
       } catch (error) {
         this.showError(error)
