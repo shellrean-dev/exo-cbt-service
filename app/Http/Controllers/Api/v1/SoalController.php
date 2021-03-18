@@ -282,6 +282,32 @@ class SoalController extends Controller
     }
 
     /**
+     * Delete multiple question
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
+     */
+    public function multipleDestroy()
+    {
+        DB::beginTransaction();
+        try {
+            $q = request()->q;
+            $ids = explode(',', $q);
+
+            DB::table('jawaban_soals')
+                ->whereIn('soal_id', $ids)
+                ->delete();
+            DB::table('soals')
+                ->whereIn('id', $ids)
+                ->delete();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return SendResponse::internalServerError(sprintf('kesalahan 500 (%s)', $e->getMessage()));
+        }
+        return SendResponse::accept();
+    }
+
+    /**
      * Get soal by banksoal
      *
      * @param int $id
