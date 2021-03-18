@@ -244,8 +244,6 @@ class UjianController extends Controller
             return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
         }
 
-        // $send = $find->only('id','banksoal_id','soal_id','jawab','esay','ragu_ragu');
-
         return response()->json(['data' => $find,'index' => $request->index]);
     }
 

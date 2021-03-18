@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Directory;
 use App\File;
@@ -150,6 +151,35 @@ class DirectoryController extends Controller
         }
         $file->delete();
         return response()->json([],200);
+    }
+
+    /**
+     * Delete filemedia multiple
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
+     */
+    public function deleteMultipleFilemedia()
+    {
+        try {
+            $q = request()->q;
+            $ids = explode(',', $q);
+
+            $files = DB::table('files')
+                ->whereIn('id', $ids)
+                ->select('id','path')
+                ->get();
+
+            foreach($files as $file) {
+                if(file_exists(storage_path('app/'.$file->path))) {
+                    unlink(storage_path('app/'.$file->path));
+                }
+            }
+            DB::table('files')
+                ->whereIn('id', $ids)
+                ->delete();
+        } catch (\Exception $e) {
+            return SendResponse::internalServerError(sprintf("kesalahan 500 (%s)", $e->getMessage()));
+        }
     }
 
     /**

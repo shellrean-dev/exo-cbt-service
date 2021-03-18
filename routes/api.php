@@ -77,6 +77,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::post('file/upload', 'DirectoryController@uploadFile');
         Route::post('upload/file-audio', 'DirectoryController@uploadAudio');
         Route::delete('directory/filemedia/{filemedia}', 'DirectoryController@deleteFilemedia');
+        Route::get('directory/filemedia/multiple-delete', 'DirectoryController@deleteMultipleFilemedia');
         Route::get('directory/banksoal/{filemedia}', 'DirectoryController@getDirectoryBanksoal');
         Route::apiResource('directory', 'DirectoryController');
 
