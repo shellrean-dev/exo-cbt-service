@@ -4,7 +4,7 @@ namespace App\Imports;
 
 use App\Actions\SendResponse;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Db;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 
