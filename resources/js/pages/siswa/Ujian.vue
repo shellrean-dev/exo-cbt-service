@@ -43,9 +43,71 @@
             :file="'/storage/audio/'+audio"
             ></audio-player>
           </div>
-          <div class="my-2">
+          <div class="my-2"
+          v-if="[1,2,3].includes(parseInt(filleds[questionIndex].soal.layout))"
+          >
             <RenderString
             :string="changeToZoomer(filleds[questionIndex].soal.pertanyaan)" />
+          </div>
+          <div class="my-2"
+          v-if="[4].includes(parseInt(filleds[questionIndex].soal.layout))"
+          >
+            <div class="flex space-x-4">
+              <div class="flex-1">
+                <RenderString
+                :string="changeToZoomer(filleds[questionIndex].soal.pertanyaan)" />
+              </div>
+              <div class="w-96">
+                <div class="flex flex-col space-y-3 mt-5">
+                  <div class="flex space-x-1"
+                  v-for="(jawab,index) in filleds[questionIndex].soal.jawabans"
+                  :key="index">
+                    <div
+                    v-if="[1,3].includes(parseInt(filleds[questionIndex].soal.tipe_soal))">
+                      <div class="flex items-center mr-4 mb-4">
+                        <input :id="'radio1'+index"
+                        v-model="selected" type="radio" name="jwb"
+                        :value="jawab.id" class="hidden"
+                        :disabled="isLoadinger || isLoading"
+                        @change="selectOption(index)"/>
+                        <label :for="'radio1'+index" class="flex items-center cursor-pointer text-xl">
+                          <span class="w-6 h-6 text-sm inline-block mr-2 rounded-full border border-gray-400 flex-no-shrink flex items-center justify-center uppercase">{{ charIndex(index) }}</span>
+                        </label>
+                      </div>
+                    </div>
+                    <div
+                    v-if="4 == parseInt(filleds[questionIndex].soal.tipe_soal)"
+                    >
+                      <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
+                        <input
+                        :checked="filleds[questionIndex].jawab_complex.includes(jawab.id)"
+                        :value="jawab.id"
+                        :disabled="isLoadinger || isLoading"
+                        @change="changeCheckbox($event, index)"
+                        type="checkbox" class="opacity-0 absolute">
+                        <svg class="fill-current hidden w-4 h-4 text-green-500 pointer-events-none" viewBox="0 0 20 20"><path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>
+                      </div>
+                    </div>
+                    <div v-html="jawab.text_jawaban"></div>
+                  </div>
+                  <div
+                  v-if="[2,6].includes(filleds[questionIndex].soal.tipe_soal)"
+                  >
+                    <input type="text"
+                    class="border border-gray-300 rounded-md text-gray-700 py-1 px-4"
+                    v-if="filleds[questionIndex].soal.tipe_soal == 6"
+                    v-model="filleds[questionIndex].esay"
+                    @keyup="onInput"/>
+                    <textarea 
+                    class="border w-full h-24 border-gray-300 rounded-md text-gray-700 py-1 px-4"
+                    v-if="filleds[questionIndex].soal.tipe_soal == 2"
+                    v-model="filleds[questionIndex].esay"
+                    @input="onInput"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 			    <div class="flex flex-col space-y-3 mt-5"
           v-if="filleds[questionIndex].soal.layout == 1"
