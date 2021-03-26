@@ -35,7 +35,8 @@ class Jadwal extends Model
     protected $casts = [
         'banksoal_id' => 'array',
         'ids' => 'array',
-        'setting'   => 'array'
+        'setting'   => 'array',
+        'mulai_sesi'    => 'array'
     ];
 
     /**

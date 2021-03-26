@@ -115,7 +115,7 @@ class EventController extends Controller
         $event = EventUjian::find($event_id);
         $jadwal = Jadwal::with('sesi')->where('event_id', $event_id)
         ->orderBy('tanggal')->orderBy('mulai')
-        ->select('id', 'alias','tanggal','mulai')
+        ->select('id', 'alias','tanggal','mulai', 'mulai_sesi')
         ->get()
         ->makeHidden('kode_banksoal');
         
@@ -127,6 +127,7 @@ class EventController extends Controller
                     'name' => $item->alias,
                     'tanggal' => $item->tanggal,
                     'mulai' => $item->mulai,
+                    'mulai_sesi' => $item->mulai_sesi,
                     'sesi' => $item->sesi->map(function($sesi) {
                         return [
                             'sesi' => $sesi->sesi,
