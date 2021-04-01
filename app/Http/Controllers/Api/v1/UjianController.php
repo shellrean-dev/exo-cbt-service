@@ -67,7 +67,9 @@ class UjianController extends Controller
             'alias'             => $request->alias,
             'event_id'          => $request->event_id == '' ? 0 : $request->event_id,
             'setting'           => $request->setting,
-            'mulai_sesi'        => $request->mulai_sesi,
+            'mulai_sesi'    => array_map(function($item) {
+                return date('H:i:s', strtotime($item));
+            }, $request->mulai_sesi)
         ];
 
         if($request->banksoal_id != '') {
