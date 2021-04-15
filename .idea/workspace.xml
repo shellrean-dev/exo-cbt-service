@@ -2,54 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fa80815d-3c16-4cd8-9935-9678ef1199aa" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Agama.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Agama.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Banksoal.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Banksoal.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Directory.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Directory.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/EventUjian.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/EventUjian.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/File.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/File.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Group.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Group.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/GroupMember.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/GroupMember.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/HasilUjian.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/HasilUjian.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Jadwal.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Jadwal.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/JawabanEsay.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/JawabanEsay.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/JawabanPeserta.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/JawabanPeserta.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/JawabanSoal.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/JawabanSoal.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Jurusan.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Jurusan.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Matpel.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Matpel.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Peserta.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Peserta.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Providers/AppServiceProvider.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Providers/AppServiceProvider.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/SesiSchedule.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/SesiSchedule.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Setting.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Setting.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/SiswaUjian.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/SiswaUjian.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Soal.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Soal.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Token.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Token.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Ujian.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Ujian.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/User.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/User.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2014_10_12_000000_create_users_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2014_10_12_000000_create_users_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2019_08_19_000000_create_failed_jobs_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2019_08_19_000000_create_failed_jobs_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_10_011018_create_jurusans_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_10_011018_create_jurusans_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_10_011145_create_matpels_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_10_011145_create_matpels_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_10_011228_create_event_ujians_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_10_011228_create_event_ujians_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_10_011304_create_pesertas_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_10_011304_create_pesertas_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_10_011355_create_directories_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_10_011355_create_directories_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_10_011431_create_banksoals_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_10_011431_create_banksoals_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_10_011535_create_files_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_10_011535_create_files_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_10_011609_create_jadwals_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_10_011609_create_jadwals_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_10_011707_create_hasil_ujians_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_10_011707_create_hasil_ujians_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_10_011745_create_soals_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_10_011745_create_soals_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_10_011826_create_jawaban_soals_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_10_011826_create_jawaban_soals_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_10_011852_create_jawaban_pesertas_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_10_011852_create_jawaban_pesertas_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_10_011939_create_jawaban_esays_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_10_011939_create_jawaban_esays_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_10_012014_create_agamas_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_10_012014_create_agamas_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_10_012151_create_settings_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_10_012151_create_settings_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_11_112718_create_siswa_ujians_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_11_112718_create_siswa_ujians_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_15_120620_create_ujians_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_15_120620_create_ujians_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_15_145941_create_tokens_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_15_145941_create_tokens_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2020_10_18_102712_create_sesi_schedules_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_10_18_102712_create_sesi_schedules_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2021_03_09_184343_create_groups_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2021_03_09_184343_create_groups_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2021_03_09_184914_create_group_members_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2021_03_09_184914_create_group_members_table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/seeds/AgamaSeeder.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/seeds/AgamaSeeder.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/v1/UjianController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/v1/UjianController.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -197,6 +150,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="yarn" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RunManager">
@@ -214,11 +168,50 @@
       <option name="presentableId" value="Default" />
       <updated>1617788925789</updated>
       <workItem from="1617788932927" duration="29000" />
-      <workItem from="1618482911191" duration="6783000" />
+      <workItem from="1618482911191" duration="7105000" />
     </task>
+    <task id="LOCAL-00001" summary=":ambulance: change: primary key use uuid">
+      <created>1618495119156</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1618495119156</updated>
+    </task>
+    <task id="LOCAL-00002" summary=":recycle: change: oauth key use uuid">
+      <created>1618495152981</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1618495152981</updated>
+    </task>
+    <task id="LOCAL-00003" summary=":beers: dump: i dont know how it show">
+      <created>1618495229338</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1618495229338</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value=":ambulance: change: primary key use uuid" />
+    <MESSAGE value=":recycle: change: oauth key use uuid" />
+    <MESSAGE value=":beers: dump: i dont know how it show" />
+    <option name="LAST_COMMIT_MESSAGE" value=":beers: dump: i dont know how it show" />
   </component>
 </project>
