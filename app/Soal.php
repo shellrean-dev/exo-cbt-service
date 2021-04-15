@@ -3,9 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Uuids;
 
 class Soal extends Model
 {
+    use Uuids;
+
     /**
      * [$guarded description]
      * @var array
@@ -45,7 +48,7 @@ class Soal extends Model
     {
         return $this->belongsTo(Banksoal::class,'banksoal_id');
     }
-    
+
     /**
      * [jawabans description]
      * @return [type] [description]

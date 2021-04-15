@@ -14,9 +14,9 @@ class CreateGroupMembersTable extends Migration
     public function up()
     {
         Schema::create('group_members', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('group_id');
-            $table->unsignedBigInteger('student_id');
+            $table->uuid('id')->primary();
+            $table->uuid('group_id');
+            $table->uuid('student_id');
             $table->timestamps();
 
             $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');

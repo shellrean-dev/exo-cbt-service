@@ -14,7 +14,7 @@ class CreateBanksoalsTable extends Migration
     public function up()
     {
         Schema::create('banksoals', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('kode_banksoal', 100);
             $table->integer('jumlah_soal')->comment('jumlah soal pilihan ganda');
             $table->integer('jumlah_pilihan')->default(4)->comment('jumlah pilihan / opsi pada pilihan ganda');
@@ -26,9 +26,9 @@ class CreateBanksoalsTable extends Migration
             $table->integer('jumlah_menjodohkan')->default(0)->comment('jumlah menjodohkan');
 
             $table->string('persen');
-            $table->unsignedBigInteger('matpel_id');
-            $table->unsignedBigInteger('author');
-            $table->unsignedBigInteger('directory_id');
+            $table->uuid('matpel_id');
+            $table->uuid('author');
+            $table->uuid('directory_id');
 
             $table->foreign('matpel_id')->references('id')->on('matpels')->onDelete('cascade');
             $table->foreign('author')->references('id')->on('users')->onDelete('cascade');

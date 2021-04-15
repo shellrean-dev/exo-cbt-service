@@ -14,8 +14,8 @@ class CreateSesiSchedulesTable extends Migration
     public function up()
     {
         Schema::create('sesi_schedules', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('jadwal_id');
+            $table->uuid('id')->primary();
+            $table->uuid('jadwal_id');
             $table->integer('sesi')->default(1);
             $table->text('peserta_ids');
             $table->timestamps();

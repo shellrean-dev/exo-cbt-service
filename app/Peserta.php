@@ -3,9 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Uuids;
 
 class Peserta extends Model
 {
+    use Uuids;
+
     /**
      * [$guarded description]
      * @var array

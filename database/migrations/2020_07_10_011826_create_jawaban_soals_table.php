@@ -14,8 +14,8 @@ class CreateJawabanSoalsTable extends Migration
     public function up()
     {
         Schema::create('jawaban_soals', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('soal_id');
+            $table->uuid('id')->primary();
+            $table->uuid('soal_id');
             $table->longText('text_jawaban');
             $table->char('correct', 1);
             $table->timestamps();

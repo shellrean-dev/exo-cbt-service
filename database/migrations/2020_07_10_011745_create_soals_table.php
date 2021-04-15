@@ -14,8 +14,8 @@ class CreateSoalsTable extends Migration
     public function up()
     {
         Schema::create('soals', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('banksoal_id');
+            $table->uuid('id')->primary();
+            $table->uuid('banksoal_id');
             $table->integer('tipe_soal')->comment('1: Pilihan Ganda | 2: Esay | 3: Listening');
             $table->longText('pertanyaan');
             $table->longText('rujukan')->nullable();

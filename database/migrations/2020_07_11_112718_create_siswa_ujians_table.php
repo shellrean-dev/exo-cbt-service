@@ -14,9 +14,9 @@ class CreateSiswaUjiansTable extends Migration
     public function up()
     {
         Schema::create('siswa_ujians', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('peserta_id');
-            $table->unsignedBigInteger('jadwal_id');
+            $table->uuid('id')->primary();
+            $table->uuid('peserta_id');
+            $table->uuid('jadwal_id');
             $table->string('mulai_ujian');
             $table->string('mulai_ujian_shadow');
             $table->integer('uploaded')->default('0');

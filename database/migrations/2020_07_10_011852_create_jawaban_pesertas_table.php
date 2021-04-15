@@ -14,11 +14,11 @@ class CreateJawabanPesertasTable extends Migration
     public function up()
     {
         Schema::create('jawaban_pesertas', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('banksoal_id');
-            $table->unsignedBigInteger('soal_id');
-            $table->unsignedBigInteger('peserta_id');
-            $table->unsignedBigInteger('jadwal_id');
+            $table->uuid('id')->primary();
+            $table->uuid('banksoal_id');
+            $table->uuid('soal_id');
+            $table->uuid('peserta_id');
+            $table->uuid('jadwal_id');
             $table->bigInteger('jawab');
             $table->string('jawab_complex')->nullable()->default("[]");
             $table->longText('esay')->nullable();

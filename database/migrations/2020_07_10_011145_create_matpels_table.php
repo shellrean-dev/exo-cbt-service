@@ -14,10 +14,10 @@ class CreateMatpelsTable extends Migration
     public function up()
     {
         Schema::create('matpels', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('kode_mapel', 100);
-            $table->string('jurusan_id')->nullable();
-            $table->integer('agama_id')->nullable()->default(0);
+            $table->text('jurusan_id')->nullable();
+            $table->uuid('agama_id')->nullable()->default(null);
             $table->string('correctors')->nullable();
             $table->string('nama');
             $table->timestamps();

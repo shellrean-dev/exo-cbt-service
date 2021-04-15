@@ -2,10 +2,13 @@
 
 namespace App;
 
+use App\Traits\Uuids;
 use Illuminate\Database\Eloquent\Model;
 
 class HasilUjian extends Model
 {
+    use Uuids;
+
     /**
      * [$guarded description]
      * @var array
@@ -32,13 +35,13 @@ class HasilUjian extends Model
      * [peserta description]
      * @return [type] [description]
      */
-    public function peserta() 
+    public function peserta()
     {
         return $this->hasOne(Peserta::class, 'id', 'peserta_id');
     }
 
     /**
-     * 
+     *
      */
     public function group()
     {

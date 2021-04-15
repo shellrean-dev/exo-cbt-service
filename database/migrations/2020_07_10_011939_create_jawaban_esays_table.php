@@ -14,11 +14,11 @@ class CreateJawabanEsaysTable extends Migration
     public function up()
     {
         Schema::create('jawaban_esays', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('banksoal_id');
-            $table->unsignedBigInteger('peserta_id');
-            $table->unsignedBigInteger('jawab_id');
-            $table->unsignedBigInteger('corrected_by');
+            $table->uuid('id')->primary();
+            $table->uuid('banksoal_id');
+            $table->uuid('peserta_id');
+            $table->uuid('jawab_id');
+            $table->uuid('corrected_by');
             $table->float('point');
             $table->timestamps();
 

@@ -2,10 +2,13 @@
 
 namespace App;
 
+use App\Traits\Uuids;
 use Illuminate\Database\Eloquent\Model;
 
 class JawabanPeserta extends Model
 {
+    use Uuids;
+
     /**
      * [$guarded description]
      * @var array
@@ -71,7 +74,7 @@ class JawabanPeserta extends Model
     {
         return $this->belongsTo('App\Soal','soal_id');
     }
-    
+
     public function group()
     {
         return $this->hasOne(GroupMember::class, 'student_id', 'peserta_id');
@@ -82,7 +85,7 @@ class JawabanPeserta extends Model
      * @return [type] [description]
      */
     public function banksoal()
-    {   
+    {
         return $this->belongsTo(Banksoal::class);
     }
 

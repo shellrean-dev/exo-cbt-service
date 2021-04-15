@@ -14,14 +14,14 @@ class CreateJadwalsTable extends Migration
     public function up()
     {
         Schema::create('jadwals', function (Blueprint $table) {
-            $table->id();
-            $table->string('banksoal_id');
+            $table->uuid('id')->primary();
+            $table->uuid('banksoal_id');
             $table->string('alias', 50);
             $table->date('tanggal');
             $table->time('mulai');
             $table->integer('lama');
             $table->char('status_ujian',1);
-            $table->unsignedBigInteger('event_id')->default(0);
+            $table->uuid('event_id')->nullable()->default(null);
             $table->integer('sesi')->default(1);
             $table->string('setting');
             $table->string('mulai_sesi')->default('{}');

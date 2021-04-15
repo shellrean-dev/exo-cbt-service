@@ -3,9 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Uuids;
 
 class Setting extends Model
 {
+    use Uuids;
+
     /**
      * [$guarded description]
      * @var array
@@ -18,5 +21,5 @@ class Setting extends Model
      */
     protected $casts = [
         'value' => 'array'
-    ];  
+    ];
 }

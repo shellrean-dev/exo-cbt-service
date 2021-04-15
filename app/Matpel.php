@@ -3,10 +3,13 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Uuids;
 use DB;
 
 class Matpel extends Model
 {
+    use Uuids;
+
     /**
      * [$guarded description]
      * @var array
@@ -38,7 +41,7 @@ class Matpel extends Model
      * [getJurusansAttribute description]
      * @return [type] [description]
      */
-    public function getJurusansAttribute() 
+    public function getJurusansAttribute()
     {
         if($this->jurusan_id != 0) {
             $jurusans = DB::table('jurusans')->whereIn('id', $this->jurusan_id)->get();
@@ -63,7 +66,7 @@ class Matpel extends Model
      * [setAgamaIdAttribute description]
      * @param [type] $value [description]
      */
-    public function setAgamaIdAttribute($value) 
+    public function setAgamaIdAttribute($value)
     {
         $this->attributes['agama_id'] = str_replace('"', '', $value);
     }

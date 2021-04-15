@@ -2,10 +2,13 @@
 
 namespace App;
 
+use App\Traits\Uuids;
 use Illuminate\Database\Eloquent\Model;
 
 class Jadwal extends Model
 {
+    use Uuids;
+
     /**
      * [$guarded description]
      * @var array
@@ -43,7 +46,7 @@ class Jadwal extends Model
      * [banksoal description]
      * @return [type] [description]
      */
-    public function banksoal() 
+    public function banksoal()
     {
         return $this->hasOne(Banksoal::class,'id','banksoal_id');
     }
@@ -59,7 +62,7 @@ class Jadwal extends Model
 
     /**
      * Data Sesi Schedule
-     * @return SesiSchedule    
+     * @return SesiSchedule
      */
     public function sesi()
     {

@@ -14,8 +14,8 @@ class CreateUjiansTable extends Migration
     public function up()
     {
         Schema::create('ujians', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('jadwal_id');
+            $table->uuid('id')->primary();
+            $table->uuid('jadwal_id');
             $table->enum('status',['aktif','selesai'])->default('aktif');
             $table->timestamps();
         });

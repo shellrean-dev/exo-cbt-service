@@ -14,11 +14,11 @@ class CreatePesertasTable extends Migration
     public function up()
     {
         Schema::create('pesertas', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->integer('sesi');
             $table->string('no_ujian', 50)->unique();
-            $table->integer('agama_id');
-            $table->string('jurusan_id', 10);
+            $table->uuid('agama_id');
+            $table->uuid('jurusan_id', 10);
             $table->string('nama');
             $table->string('password');
             $table->string('api_token')->nullable();

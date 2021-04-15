@@ -14,10 +14,10 @@ class CreateHasilUjiansTable extends Migration
     public function up()
     {
         Schema::create('hasil_ujians', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('banksoal_id');
-            $table->unsignedBigInteger('peserta_id');
-            $table->unsignedBigInteger('jadwal_id');
+            $table->uuid('id')->primary();
+            $table->uuid('banksoal_id');
+            $table->uuid('peserta_id');
+            $table->uuid('jadwal_id');
             $table->integer('jumlah_salah')->default(0);
             $table->integer('jumlah_benar')->default(0);
             $table->integer('jumlah_benar_complek')->default(0);

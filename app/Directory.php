@@ -2,10 +2,13 @@
 
 namespace App;
 
+use App\Traits\Uuids;
 use Illuminate\Database\Eloquent\Model;
 
 class Directory extends Model
 {
+    use Uuids;
+
     /**
      * [$guarded description]
      * @var array

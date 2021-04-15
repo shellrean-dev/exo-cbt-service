@@ -14,7 +14,7 @@ class CreateEventUjiansTable extends Migration
     public function up()
     {
         Schema::create('event_ujians', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('name');
             $table->timestamps();
         });
