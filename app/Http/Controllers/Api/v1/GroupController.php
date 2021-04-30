@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class GroupController extends Controller
 {
     /**
      * Ambil data seluruh data grupping
-     * 
+     *
      * @return \App\Actions\SendResponse
      * @author <wandinak17@gmail.com>
      */
@@ -45,7 +46,7 @@ class GroupController extends Controller
 
     /**
      * Buat data baru grup
-     * 
+     *
      * @param \Illuminate\Http\Request $request
      * @return \App\Actions\SendResponse
      * @author <wandinak17@gmail.com>
@@ -58,6 +59,7 @@ class GroupController extends Controller
 
         try {
             $data = [
+                'id'        => Str::uuid()->toString(),
                 'name'      => $request->name,
                 'created_at' => now(),
                 'updated_at' => now()
@@ -81,7 +83,7 @@ class GroupController extends Controller
 
     /**
      * Ambil single data grup
-     * 
+     *
      * @param int $group_id
      * @return \App\Actions\SendResponse
      * @author <wandinak17@gmail.com>
@@ -105,7 +107,7 @@ class GroupController extends Controller
 
     /**
      * Edit data gorup
-     * 
+     *
      * @param \Illuminate\Http\Request $request
      * @param int $group_id
      * @return \App\Actions\SendResponse
@@ -119,11 +121,11 @@ class GroupController extends Controller
         if (!$group) {
             return SendResponse::badRequest('data yang dikirimkan tidak ditemukan');
         }
-        
+
         $request->validate([
             'name'  => 'required'
         ]);
-        
+
         try {
             $data = [
                 'name'  => $request->name,
@@ -152,7 +154,7 @@ class GroupController extends Controller
 
     /**
      * Remove data group
-     * 
+     *
      * @param int $group_id
      * @return \App\Actions\SendResponse
      * @author <wandinak17@gmail.com>
