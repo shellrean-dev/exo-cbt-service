@@ -4,9 +4,17 @@ namespace App\Http\Middleware;
 
 use Closure;
 use App\Peserta;
+use ShellreanDev\Cache\CacheHandler;
 
 class PesertaMiddleware
 {
+    protected $cache;
+
+    public function __construct(CacheHandler $cache)
+    {
+        $this->cache = $cache;
+    }
+
     /**
      * Handle an incoming request.
      *
@@ -16,11 +24,17 @@ class PesertaMiddleware
      */
     public function handle($request, Closure $next)
     {
-        $user = Peserta::where(['api_token' => $request->bearerToken()])->first();
-        if($user) {
-            
-            $request->attributes->add(['peserta-auth' => $user]);
+        $key = sprintf('peserta:data:token:%s', $request->bearerToken());
+        if ($this->cache->isCached($key)) {
+            $user = $this->cache->getItem($key);
+        } else {
+            $user = Peserta::where(['api_token' => $request->bearerToken()])->first();
 
+            $this->cache->cache($key, $user);
+        }
+        
+        if($user) {
+            $request->attributes->add(['peserta-auth' => $user]);
             return $next($request);
         }
 
