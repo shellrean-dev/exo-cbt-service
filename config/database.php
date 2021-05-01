@@ -91,6 +91,17 @@ return [
             'prefix_indexes' => true,
         ],
 
+        'mongo' => [
+            'driver'    => 'mongodb',
+            'host' => env('MONGODB_HOST', 'localhost'),
+            'port' => env('MONGODB_PORT', 27017),
+            'database' => env('MONGODB_DATABASE', 'homestead'),
+            'username' => env('MONGODB_USERNAME', 'homestead'),
+            'password' => env('MONGODB_PASSWORD', 'secret'),
+            'options' => [
+                'database' => env('MONGODB_AUTHENTICATION_DATABASE', 'admin'), // required with Mongo 3+
+            ],
+        ]
     ],
 
     /*
@@ -119,7 +130,7 @@ return [
 
     'redis' => [
 
-        'client' => env('REDIS_CLIENT', 'phpredis'),
+        'client' => env('REDIS_CLIENT', 'predis'),
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
