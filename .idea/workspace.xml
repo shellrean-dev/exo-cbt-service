@@ -2,14 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fa80815d-3c16-4cd8-9935-9678ef1199aa" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/v1/UjianController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/v1/UjianController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/v1/GroupController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/v1/GroupController.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ComposerSettings" synchronizationState="SYNCHRONIZE">
+  <component name="ComposerSettings" doNotAsk="true" synchronizationState="SYNCHRONIZE">
     <pharConfigPath>$PROJECT_DIR$/composer.json</pharConfigPath>
     <execution />
   </component>
@@ -149,7 +150,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../apps/bidics" />
     <property name="nodejs_package_manager_path" value="yarn" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
@@ -168,7 +169,8 @@
       <option name="presentableId" value="Default" />
       <updated>1617788925789</updated>
       <workItem from="1617788932927" duration="29000" />
-      <workItem from="1618482911191" duration="7105000" />
+      <workItem from="1618482911191" duration="7665000" />
+      <workItem from="1618538468719" duration="57000" />
     </task>
     <task id="LOCAL-00001" summary=":ambulance: change: primary key use uuid">
       <created>1618495119156</created>
@@ -191,7 +193,14 @@
       <option name="project" value="LOCAL" />
       <updated>1618495229338</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary=":boom: change: data break format">
+      <created>1618495420205</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1618495420205</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -207,11 +216,13 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value=":ambulance: change: primary key use uuid" />
     <MESSAGE value=":recycle: change: oauth key use uuid" />
     <MESSAGE value=":beers: dump: i dont know how it show" />
-    <option name="LAST_COMMIT_MESSAGE" value=":beers: dump: i dont know how it show" />
+    <MESSAGE value=":boom: change: data break format" />
+    <option name="LAST_COMMIT_MESSAGE" value=":boom: change: data break format" />
   </component>
 </project>
