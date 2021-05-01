@@ -17,7 +17,7 @@ class CreateMatpelsTable extends Migration
             $table->uuid('id')->primary();
             $table->string('kode_mapel', 100);
             $table->text('jurusan_id')->nullable();
-            $table->uuid('agama_id')->nullable()->default(null);
+            $table->text('agama_id')->nullable()->default(null);
             $table->string('correctors')->nullable();
             $table->string('nama');
             $table->timestamps();
