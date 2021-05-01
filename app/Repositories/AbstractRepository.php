@@ -112,6 +112,8 @@ class AbstractRepository implements RepositoryInterface
             $data = DB::table($this->table)
                 ->where($this->primary_key, $id)
                 ->first();
+            
+            $this->entity = $data;
         } catch (\Exception $e) {
             array_push($this->errors, $e->getMessage());
         }

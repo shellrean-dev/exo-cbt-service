@@ -58,6 +58,51 @@ class JurusanController extends Controller
         if (!$create) {
             return SendResponse::internalServerError();
         }
+        return SendResponse::acceptData($create);
+    }
+
+    /**
+     * @Route(path="api/v3/jurusans/{id}", methods={"GET"})
+     */
+    public function show(string $id, JurusanService $jurusanService)
+    {
+        $find = $jurusanService->find($id);
+        if(is_null($find)) {
+            return SendResponse::internalServerError();
+        }
+        return SendResponse::acceptData($find);
+    }
+
+    /**
+     * @Route(path="api/v3/jurusans/{id}", methods={"PUT"})
+     */
+    public function update(string $id, Request $request, JurusanService $jurusanService)
+    {
+        $request->validate([
+            'nama' => 'required',
+        ]);
+        $allowed = [
+            'id' => '',
+            'nama' => ''
+        ];
+        $request->merge(['id' => $id]);
+
+        $update = $jurusanService->update((object) array_intersect_key($request->all(), $allowed));
+        if (is_null($update)) {
+            return SendResponse::internalServerError();
+        }
+        return SendResponse::acceptData($update);
+    }
+
+    /**
+     * @Route(path="api/v3/jurusans/{id}", methods={"DELETE"})
+     */
+    public function destroy(string $id, JurusanService $jurusanService)
+    {
+        $deleted = $jurusanService->destroy($id);
+        if (!$deleted) {
+            return SendResponse::internalServerError();
+        }
         return SendResponse::accept();
     }
 

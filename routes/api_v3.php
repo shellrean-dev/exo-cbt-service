@@ -14,5 +14,8 @@ Route::namespace('Api\v3')->group(function() {
         Route::post('jurusans-delete', 'JurusanController@deletes');
         Route::get('jurusans', 'JurusanController@index');
         Route::post('jurusans', 'JurusanController@store');
+        Route::get('jurusans/{id}', 'JurusanController@show');
+        Route::put('jurusans/{id}', 'JurusanController@update');
+        Route::delete('jurusans/{id}', 'JurusanController@destroy');
     });
 });
