@@ -7,6 +7,7 @@ namespace ShellreanDev\Services;
 use ShellreanDev\Repositories\RepositoryInterface;
 use ShellreanDev\Cache\CacheHandlerInterface;
 use ShellreanDev\Cache\CacheHandler;
+use Illuminate\Support\Facades\Log;
 use stdClass;
 
 /**
@@ -56,6 +57,9 @@ class AbstractService implements ServiceInterface
     {
         $store = $this->repository->store($input);
         if ($store->getErrors()) {
+            if (config('exo.log')) {
+                Log::emergency($store->getErrors());
+            }
             return null;
         }
         $data = $store->getEntity();
@@ -74,6 +78,9 @@ class AbstractService implements ServiceInterface
     {
         $update = $this->repository->update($input);
         if ($update->getErrors()) {
+            if (config('exo.log')) {
+                Log::emergency($update->getErrors());
+            }
             return null;
         }
         $data = $update->getEntity();
@@ -82,13 +89,16 @@ class AbstractService implements ServiceInterface
 
     /**
      * Get data from repository
-     * @param mixed $id
+     * @param $id
      * @return stdClass
      */
-    public function find(mixed $id): ?stdClass
+    public function find($id): ?stdClass
     {
         $find = $this->repository->findOne($id);
         if ($find->getErrors()) {
+            if (config('exo.log')) {
+                Log::emergency($find->getErrors());
+            }
             return null;
         }
         $data = $find->getEntity();
@@ -97,10 +107,10 @@ class AbstractService implements ServiceInterface
 
     /**
      * Destroy data in repository
-     * @param mixed $id
+     * @param $id
      * @return bool
      */
-    public function destroy(mixed $id): bool
+    public function destroy($id): bool
     {
         $destroy = $this->repository->destroy($id);
         if ($destroy->getErrors()) {

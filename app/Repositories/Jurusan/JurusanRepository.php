@@ -18,6 +18,17 @@ final class JurusanRepository extends AbstractRepository
      */
     protected string $table = 'jurusans';
 
+    protected bool $timestamps = false;
+
+    /**
+     * Get table 
+     * @return string
+     */
+    public function getTable(): string
+    {
+        return $this->table;
+    }
+
     /**
      * Fetch all data
      * @return self

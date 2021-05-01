@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use ShellreanDev\Cache\CacheHandler;
 use ShellreanDev\Services\AbstractService;
+use ShellreanDev\Services\PaginationService;
 use ShellreanDev\Repositories\Jurusan\JurusanRepository;
 
 /**
@@ -14,13 +15,31 @@ use ShellreanDev\Repositories\Jurusan\JurusanRepository;
  */
 final class JurusanService extends AbstractService
 {
+    private $pagination;
+
     /**
      * Dependency injection
+     * @param CacheHandler $cache
+     * @param JurusanRepository $repository
      */
-    public function __construct(CacheHandler $cache, JurusanRepository $repository)
+    public function __construct(CacheHandler $cache, JurusanRepository $repository, PaginationService $pagination)
     {
         $this->cache = $cache;
         $this->repository = $repository;
+        $this->pagination = $pagination;
+    }
+
+    /**
+     * Fetch pagination data
+     * @return iterable
+     */
+    public function paginate(array $condition, int $perPage = 10)
+    {
+        $paginate = $this->pagination->build($this->repository, $condition, $perPage);
+        if (!$paginate) {
+            return null;
+        }
+        return $paginate;
     }
 
     /**
@@ -72,6 +91,7 @@ final class JurusanService extends AbstractService
             }
             return false;
         }
+        DB::commit();
         return true;
     }
 }
