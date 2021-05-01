@@ -5,6 +5,10 @@
 use Faker\Generator as Faker;
 use {{ namespacedModel }};
 
+/**
+ * {{ class }} Factory
+ * @author shellrean <wandinak17@gmail.com>
+ */
 $factory->define({{ model }}::class, function (Faker $faker) {
     return [
         //

@@ -5,6 +5,10 @@ namespace {{ namespace }};
 use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
 
+/**
+ * {{ class }} Job
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class {{ class }}
 {
     use Dispatchable, Queueable;

@@ -7,6 +7,10 @@ use {{ rootNamespace }}Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use {{ namespacedParentModel }};
 
+/**
+ * {{ class }} Controller
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class {{ class }} extends Controller
 {
     /**

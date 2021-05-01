@@ -4,6 +4,10 @@ namespace {{ namespace }};
 
 use Closure;
 
+/**
+ * {{ class }} Middleware
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class {{ class }}
 {
     /**
