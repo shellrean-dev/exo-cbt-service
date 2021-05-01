@@ -17,5 +17,9 @@ Route::namespace('Api\v3')->group(function() {
         Route::get('jurusans/{id}', 'JurusanController@show');
         Route::put('jurusans/{id}', 'JurusanController@update');
         Route::delete('jurusans/{id}', 'JurusanController@destroy');
+
+        Route::get('matpels-all', 'MatpelController@all');
+        Route::post('matpels-delete', 'MatpelController@deletes');
+        Route::post('matpels-import', 'MatpelController@import');
     });
 });
