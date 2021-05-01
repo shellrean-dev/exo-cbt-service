@@ -46,7 +46,7 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapWebRoutes();
 
-        //
+        $this->mapApiv3Routes();
     }
 
     /**
@@ -76,5 +76,20 @@ class RouteServiceProvider extends ServiceProvider
             ->middleware('api')
             ->namespace($this->namespace)
             ->group(base_path('routes/api.php'));
+    }
+
+    /**
+     * Define the "apiv3" routes for the application.
+     * 
+     * These routes are typically stateless.
+     * 
+     * @return void
+     */
+    protected function mapApiv3Routes()
+    {
+        Route::prefix('api/v3')
+            ->middleware('api')
+            ->namespace($this->namespace)
+            ->group(base_path('routes/api_v3.php'));
     }
 }
