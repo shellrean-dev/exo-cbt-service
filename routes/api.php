@@ -39,10 +39,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::post('users/delete-multiple', 'UserController@destroyMultiple');
         Route::apiResource('users', 'UserController');
 
-        Route::get('agamas', 'AgamaController@index');
+        Route::get('agamas', 'AgamaController@index'); //migrated
 
-        Route::get('jurusans/all', 'JurusanController@allData');
-        Route::post('jurusans/delete-multiple', 'JurusanController@destroyMultiple');
+        Route::get('jurusans/all', 'JurusanController@allData'); // migrated
+        Route::post('jurusans/delete-multiple', 'JurusanController@destroyMultiple'); // migrated
         Route::apiResource('jurusans', 'JurusanController');
 
         Route::get('pesertas/login', 'PesertaController@getPesertaLogin');
