@@ -2,6 +2,17 @@
 
 return [
     /*
+    | Current Extraordinary CBT version
+    | @name ristretto
+    | @code 3.0.0
+    |
+    */
+    'version' => [
+        'name' => 'ristretto',
+        'code' => '3.0.0'
+    ],
+
+    /*
     |--------------------------------------------------------------------------
     | Konfigurasi ujian default
     |--------------------------------------------------------------------------
@@ -10,7 +21,7 @@ return [
     | bagaimana cara memanage nya dengan rapih dan terstruktur
     |
     */
-    'token_expired' => 600,
+    'token_expired' => env('EXO_TOKEN_EXAM_EXPIRES', 600),
 
-    'log' => true
+    'log' => env('EXO_ALLOW_LOG_ERROR', true),
 ];
