@@ -14,7 +14,7 @@ class AddFinishedToOputput
      */
     public function handle(CommandFinished $event): void
     {
-        $message = 'Thanks for using Extraordinary CBT Version 2.0.0';
+        $message = sprintf('Thanks for using Extraordinary CBT %s version %s', config('exo.version.name'), config('exo.version.code'));
         $event->output->writeln('');
         $event->output->writeln($message);
     }
