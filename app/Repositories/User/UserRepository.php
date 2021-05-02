@@ -15,5 +15,14 @@ final class UserRepository extends AbstractRepository
      * Table of repository
      * @var string $table
      */
-    protected string $table = '';
+    protected string $table = 'users';
+
+    /**
+     * Get repository's table
+     * @return string
+     */
+    public function getTable()
+    {
+        return $this->table;
+    }
 }

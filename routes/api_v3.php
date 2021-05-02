@@ -25,5 +25,10 @@ Route::namespace('Api\v3')->group(function() {
         Route::post('matpels', 'MatpelController@store');
         Route::get('matpels/{id}','MatpelController@show');
         Route::put('matpels/{id}', 'MatpelController@update');
+
+        Route::get('users', 'UserController@index');
+        Route::post('users', 'UserController@store');
+        Route::get('users/{id}', 'UserController@show');
+        Route::put('users/{id}' ,'UserController@update');
     });
 });

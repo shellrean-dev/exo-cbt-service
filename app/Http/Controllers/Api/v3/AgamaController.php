@@ -15,9 +15,6 @@ class AgamaController extends Controller
 {
     /**
      * @Route(path="api/v3/agamas", method={"GET"})
-     * 
-     * @param AgamaService $agamaService
-     * @return SendResponse
      */
     public function index(AgamaService $agamaService)
     {
