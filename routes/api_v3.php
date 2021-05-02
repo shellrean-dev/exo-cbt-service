@@ -21,5 +21,9 @@ Route::namespace('Api\v3')->group(function() {
         Route::get('matpels-all', 'MatpelController@all');
         Route::post('matpels-delete', 'MatpelController@deletes');
         Route::post('matpels-import', 'MatpelController@import');
+        Route::get('matpels', 'MatpelController@index');
+        Route::post('matpels', 'MatpelController@store');
+        Route::get('matpels/{id}','MatpelController@show');
+        Route::put('matpels/{id}', 'MatpelController@update');
     });
 });

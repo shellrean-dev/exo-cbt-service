@@ -13,7 +13,9 @@ use Maatwebsite\Excel\Facades\Excel;
 use ShellreanDev\Utils\Error;
 use ShellreanDev\Cache\CacheHandler;
 use ShellreanDev\Services\AbstractService;
+use ShellreanDev\Services\PaginationService;
 use ShellreanDev\Repositories\Matpel\MatpelRepository;
+use stdClass;
 
 /**
  * MatpelService service
@@ -21,13 +23,32 @@ use ShellreanDev\Repositories\Matpel\MatpelRepository;
  */
 final class MatpelService extends AbstractService
 {
+    protected $pagination;
+
     /**
      * Dependency injection
      */
-    public function __construct(CacheHandler $cache, MatpelRepository $repository)
+    public function __construct(CacheHandler $cache, MatpelRepository $repository, PaginationService $pagination)
     {
         $this->cache = $cache;
         $this->repository = $repository;
+        $this->pagination = $pagination;
+    }
+
+    /**
+     * Get single data source interpret
+     * @return stdClass
+     */
+    public function findOne(string $id): ?stdClass
+    {
+        $find = $this->find($id);
+        if (!$find) {
+            return null;
+        }
+
+        $find->jurusan_id = $find->jurusan_id ? json_decode($find->jurusan_id) : [];
+        $find->correctors = $find->correctors ? json_decode($find->correctors) : [];
+        return $find;
     }
 
     /**
@@ -50,8 +71,8 @@ final class MatpelService extends AbstractService
 
             $data = $fetch->getEntities();
             $data = $data->map(function($item) {
-                $item->jurusan_id = json_decode($item->jurusan_id);
-                $item->correctors = json_decode($item->correctors);
+                $item->jurusan_id = $item->jurusan_id ? json_decode($item->jurusan_id) : [];
+                $item->correctors = $item->correctors ? json_decode($item->correctors) : [];
                 return $item;
             });
             $this->cache->cache($key, $data);
@@ -109,5 +130,19 @@ final class MatpelService extends AbstractService
             return false;
         }
         return true;
+    }
+
+    /**
+     * Paginate dat source
+     * @param array $conditions
+     * @return 
+     */
+    public function paginate(array $conditions, int $limit)
+    {
+        $service = $this->pagination->build($this->repository, $conditions, $limit);
+        if (is_null($service)) {
+            return null;
+        }
+        return $service;
     }
 }

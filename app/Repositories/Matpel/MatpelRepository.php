@@ -19,6 +19,15 @@ final class MatpelRepository extends AbstractRepository
     protected string $table = 'matpels';
 
     /**
+     * Get table repository name
+     * @return string
+     */
+    public function getTable()
+    {
+        return $this->table;
+    }
+
+    /**
      * Get all data source
      * @return self
      */

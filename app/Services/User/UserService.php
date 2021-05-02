@@ -5,6 +5,7 @@ namespace ShellreanDev\Services\User;
 use Illuminate\Support\Facades\Log;
 use ShellreanDev\Cache\CacheHandler;
 use ShellreanDev\Services\AbstractService;
+use ShellreanDev\Repositories\User\UserRepository;
 
 /**
  * UserService service
@@ -14,9 +15,12 @@ final class UserService extends AbstractService
 {
     /**
      * Dependency injection
+     * @param CacheHandler $cache
+     * @param UserRepository $repository
      */
-    public function __construct(CacheHandler $cache)
+    public function __construct(CacheHandler $cache, UserRepository $repository)
     {
         $this->cache = $cache;
+        $this->repository = $repository;
     }
 }
