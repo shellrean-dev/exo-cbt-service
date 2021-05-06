@@ -26,9 +26,12 @@ Route::namespace('Api\v3')->group(function() {
         Route::get('matpels/{id}','MatpelController@show');
         Route::put('matpels/{id}', 'MatpelController@update');
 
+        Route::post('users-import', 'UserController@import');
+        Route::post('users-delete', 'UserController@deletes');
         Route::get('users', 'UserController@index');
         Route::post('users', 'UserController@store');
         Route::get('users/{id}', 'UserController@show');
         Route::put('users/{id}' ,'UserController@update');
+        Route::delete('users/{id}', 'UserController@destroy');
     });
 });

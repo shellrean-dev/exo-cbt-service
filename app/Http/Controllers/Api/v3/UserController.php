@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\v3;
 
 use App\Actions\SendResponse;
 use App\Http\Controllers\Controller;
-
+use App\Rules\ArrayUuid;
 use Illuminate\Http\Request;
 
 use ShellreanDev\Services\User\UserService;
@@ -103,5 +103,52 @@ class UserController extends Controller
             return SendResponse::internalServerError();
         }
         return SendResponse::acceptData($update);
+    }
+
+    /**
+     * @Route(path="api/v3/users/{id}", methods={"DELETE"})
+     */
+    public function destroy(string $id, Request $request, UserService $userService)
+    {
+        $deleted = $userService->destroy($id);
+        if (!$deleted) {
+            return SendResponse::internalServerError('cannot delete user');
+        }
+
+        return SendResponse::accept('delete user success');
+    }
+    
+    /**
+     * @Route(path="api/v3/users-import", methods={"POST"})
+     */
+    public function import(Request $request, UserService $userService)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
+
+        $import = $userService->import($request->file('file'));
+        if (!$import) {
+            return SendResponse::internalServerError('cannot import user');
+        }
+
+        return SendResponse::accept('import users success');
+    }
+
+    /**
+     * @Route(path="api/v3/users-delete", methods={"POST"})
+     */
+    public function deletes(Request $request, UserService $userService)
+    {
+        $request->validate([
+            'user_ids' => ['required', new ArrayUuid]
+        ]);
+
+        $deletes = $userService->deletes($request->user_ids);
+        if (!$deletes) {
+            return SendResponse::internalServerError('cannot delete users');
+        }
+
+        return SendResponse::accept('success delete users');
     }
 }

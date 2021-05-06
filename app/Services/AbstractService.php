@@ -14,7 +14,7 @@ use stdClass;
  * Abstract service
  * @author shellrean
  */
-class AbstractService implements ServiceInterface
+abstract class AbstractService implements ServiceInterface
 {
     /**
      * Repository of service
