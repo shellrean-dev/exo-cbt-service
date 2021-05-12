@@ -28,11 +28,11 @@ class AgamaSeeder extends Seeder
         DB::table('agamas')->insert(array_map(function($item) use ($timestamps) {
             return array_merge($item, $timestamps);
         },[
-            [ 'id' => $sclrs[0], 'nama' => 'Islam' ],
-            [ 'id' => $sclrs[1], 'nama' => 'Protestan' ],
-            [ 'id' => $sclrs[2], 'nama' => 'Katolik' ],
-            [ 'id' => $sclrs[3], 'nama' => 'Hindu' ],
-            [ 'id' => $sclrs[4], 'nama' => 'Budha']
+            [ 'id' => $sclrs[0], 'kode' => 'ISLAM','nama' => 'Islam' ],
+            [ 'id' => $sclrs[1], 'kode' => 'PROTESTAN','nama' => 'Protestan' ],
+            [ 'id' => $sclrs[2], 'kode' => 'KATOLIK','nama' => 'Katolik' ],
+            [ 'id' => $sclrs[3], 'kode' => 'HINDU','nama' => 'Hindu' ],
+            [ 'id' => $sclrs[4], 'kode' => 'BUDHA','nama' => 'Budha']
         ],));
     }
 }
