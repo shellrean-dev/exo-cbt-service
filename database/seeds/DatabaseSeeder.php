@@ -15,5 +15,6 @@ class DatabaseSeeder extends Seeder
         $this->call(AgamaSeeder::class);
         $this->call(TokenSeeder::class);
         $this->call(SettingSeeder::class);
+        $this->call(InfoFeatureSeeder::class);
     }
 }

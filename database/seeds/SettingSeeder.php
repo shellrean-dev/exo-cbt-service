@@ -26,5 +26,11 @@ class SettingSeeder extends Seeder
             ],
             'type' => 'sekolah'
         ]);
+
+        Setting::create([
+            'name'  => 'token',
+            'value' => 900,
+            'type' => 'general'
+        ]);
     }
 }

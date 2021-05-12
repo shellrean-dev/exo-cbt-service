@@ -86,7 +86,14 @@ class UjianAktifController extends Controller
                 $to = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', now());
                 $from = $token->updated_at->format('Y-m-d H:i:s');
                 $differ = $to->diffInSeconds($from);
-                if($differ > 900) {
+                $setting_token = DB::table('settings')->where('name', 'token')->first();
+                if (!$setting_token) {
+                    return SendResponse::badRequest('Kesalahan dalam installasi token, hubungi administrator'); 
+                }
+                $token_expired = intval($setting_token->value);
+                $token_expired = $token_expired ? $token_expired : 900;
+
+                if($differ > $token_expired) {
                     $token->token = strtoupper(Str::random(6));
                     $token->status = '0';
                     $token->save();

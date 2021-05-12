@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Route;
  * @author shellrean <wandinak17@gmail.com>
  */
 Route::namespace('Api\v3')->group(function() {
+    Route::get('feature-info', 'AppInfoController@info');
+
     Route::middleware('auth:api')->group(function() {
         Route::get('agamas', 'AgamaController@index');
 
