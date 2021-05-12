@@ -24,6 +24,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
     Route::get('login/sso', 'AuthController@sso');
     Route::get('login/callback', 'AuthController@callback');
     Route::get('settings/auth', 'SettingController@getSetAuth');
+    Route::get('settings-public-sekolah', 'SettingController@getSettingPublicSekolah');
     Route::get('info-app', 'SettingController@infoApp');
 
     Route::get('absensi-ujian/{id}', 'ReportingController@absensi_ujian')->name('absensi.download.excel');

@@ -16,8 +16,6 @@ class SettingController extends Controller
      */
     public function getSettingSekolah()
     {
-        // $setting = Setting::where('name','set_sekolah')->first();
-        // return SendResponse::acceptData($setting);
         $setting = DB::table('settings')
             ->where('name', 'set_sekolah')
             ->select('id','name','value')
@@ -25,6 +23,27 @@ class SettingController extends Controller
         return SendResponse::acceptData([
             'name'  => $setting->name,
             'value' => json_decode($setting->value, true)
+        ]);
+    }
+
+    /**
+     * [allSetting description]
+     * @return [type] [description]
+     */
+    public function getSettingPublicSekolah()
+    {
+        $setting = DB::table('settings')
+            ->where('name', 'set_sekolah')
+            ->select('id','name','value')
+            ->first();
+
+        $value = json_decode($setting->value, true);
+        $sekolah_name = isset($value['nama_sekolah']) ? $value['nama_sekolah'] : '';
+        $logo = isset($value['logo']) && $value['logo'] != '' ? env('APP_URL').'/storage/'.$value['logo'] : '';
+
+        return SendResponse::acceptData([
+            'sekolah_name'  => $sekolah_name,
+            'logo' => $logo
         ]);
     }
 
@@ -39,7 +58,8 @@ class SettingController extends Controller
             'nama_sekolah'      => 'required',
             'email'         => 'required|email',
             'alamat'        => 'required',
-            'kepala_sekolah' => 'required'
+            'kepala_sekolah' => 'required',
+            'tingkat' => 'required'
         ]);
 
         $sekolah = Setting::where('name', 'set_sekolah')->first();
@@ -56,7 +76,8 @@ class SettingController extends Controller
                 'email' => $request->email,
                 'alamat'    => $request->alamat,
                 'kepala_sekolah' => $request->kepala_sekolah,
-                'nip_kepsek' => $request->nip_kepsek
+                'nip_kepsek' => $request->nip_kepsek,
+                'tingkat' => $request->tingkat
             ];
             $sekolah->save();
         } else {
@@ -68,13 +89,14 @@ class SettingController extends Controller
                     'email' => $request->email,
                     'alamat'    => $request->alamat,
                     'kepala_sekolah' => $request->kepala_sekolah,
-                    'nip_kepsek' => $request->nip_kepsek
+                    'nip_kepsek' => $request->nip_kepsek,
+                    'tingkat' => $request->tingkat,
                 ],
                 'type' => 'sekolah'
             ]); 
         }
 
-        SendResponse::accept();
+        return SendResponse::accept();
     }
 
     /**
@@ -116,7 +138,6 @@ class SettingController extends Controller
         if(isset(request()->setting) && !empty(request()->setting)) {
             $setting = request()->setting;
 
-            // $sett = Setting::where('name', $setting)->first();
             $sett = DB::table('settings')
                 ->where('name', $setting)
                 ->select('id','name','value')
@@ -142,7 +163,7 @@ class SettingController extends Controller
     {
         $request->validate([
             'name'      => 'required',
-            'value'     => 'required'
+            'value'     => 'required|int'
         ]);
 
         $setting = Setting::where('name', $request->name)->first();
@@ -177,6 +198,8 @@ class SettingController extends Controller
     {
         return response()->json([
             'name'      => 'Extraordinary CBT',
+            'version' => '3.0.0',
+            'code' => 'ristretto',
             'author'    => 'shellrean',
             'email'     => 'wandinak17@gmail.com'
         ]);
