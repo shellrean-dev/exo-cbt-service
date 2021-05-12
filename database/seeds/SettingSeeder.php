@@ -21,7 +21,8 @@ class SettingSeeder extends Seeder
                 'email' => '',
                 'alamat' => '',
                 'kepala_sekolah' => '',
-                'nip_kepsek' => ''
+                'nip_kepsek' => '',
+                'tingkat' => 'SMK-SMA'
             ],
             'type' => 'sekolah'
         ]);
