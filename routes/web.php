@@ -13,4 +13,4 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::view('/{any}', 'ujian')->where('any','.*');
+Route::view('/{any}', 'ujian')->where('any','.*');

@@ -9,6 +9,7 @@
  */
 namespace App\Services;
 
+use Exception;
 use App\Ujian;
 use App\Jadwal;
 use App\Peserta;
