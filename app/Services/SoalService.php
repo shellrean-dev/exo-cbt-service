@@ -2,8 +2,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
-use App\JawabanSoal;
-use App\Soal;
+use Illuminate\Support\Str;
 
 class SoalService
 {
@@ -61,7 +60,9 @@ class SoalService
 					'H' => '7'
 				);
 
+				$soal_id = Str::uuid()->toString();
 				$insert_data = array(
+					'id' => $soal_id,
 					'banksoal_id' => $banksoal_id,
 					'tipe_soal'   => $ques_type2,
 					'pertanyaan' => "<p>".$question."</p>",
@@ -72,7 +73,7 @@ class SoalService
 				DB::beginTransaction();
 
 				try {
-					$soal_id = DB::table('soals')->insertGetId($insert_data);
+					DB::table('soals')->insert($insert_data);
 
 					if($ques_type=="0" || $ques_type=="4" || $ques_type == "6"){
 						$correct_op=array_filter(explode(',',$singlequestion['correct']));
@@ -91,6 +92,7 @@ class SoalService
 							}
 
 							array_push($jawabans, [
+								'id'	=> Str::uuid()->toString(),
 								'soal_id' => $soal_id,
 								'text_jawaban' => "<p>".$correct_val."</p>",
 								'correct' => $correctoption,

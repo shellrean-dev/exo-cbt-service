@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Imports\GroupMemberImport;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class GroupMemberController extends Controller
 {
@@ -73,6 +74,7 @@ class GroupMemberController extends Controller
 
         try {
             DB::table('group_members')->insert([
+                'id'            => Str::uuid()->toString(),
                 'group_id'      => $request->group_id,
                 'student_id'    => $request->student_id,
                 'created_at'    => now(),
@@ -107,6 +109,7 @@ class GroupMemberController extends Controller
             $datas = [];
             foreach ($students as $student) {
                 array_push($datas, [
+                    'id'    => Str::uuid()->toString(),
                     'group_id'  => $request->group_id,
                     'student_id'    => $student->id,
                 ]);

@@ -11,6 +11,7 @@ use App\Actions\SendResponse;
 use App\Services\WordService;
 use App\Services\SoalService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use App\JawabanSoal;
 use App\Directory;
 use App\Banksoal;
@@ -449,7 +450,10 @@ class SoalController extends Controller
             
             $options = [];
             foreach($questions as $key => $question) {
+                $soal_id = Str::uuid()->toString();
+                
                 $soal = [
+                    'id'            => $soal_id,
                     'banksoal_id'   => $banksoal->id,
 					'tipe_soal'     => $question['type'],
 					'pertanyaan'    => $question['pertanyaan'],
@@ -457,11 +461,12 @@ class SoalController extends Controller
 					'updated_at'	=> now(),
                 ];
 
-                $soal_id = DB::table('soals')->insertGetId($soal);
+                DB::table('soals')->insert($soal);
 
                 foreach($question['options'] as $key => $opt) {
                     $isCorrect = in_array($key, $question['correct']) ? 1 : 0;
                     array_push($options, [
+                        'id'            => Str::uuid()->toString(),
                         'soal_id'       => $soal_id,
                         'text_jawaban'  => $opt,
                         'correct'       => $isCorrect,

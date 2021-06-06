@@ -2,6 +2,7 @@
 namespace App\Services;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class WordService
 {	
@@ -75,6 +76,7 @@ class WordService
 				$new_path=$target_dir.$imagenew_name;
 				
 				DB::table('files')->insert([
+					'id'			=> Str::uuid()->toString(),
 					'directory_id'	=> $directory->id,
 					'filename'		=> $imagenew_name,
 					'path'			=> $new_path,

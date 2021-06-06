@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Str;
+
 class ExoProcessDoc
 {
     private $template;
@@ -139,6 +141,7 @@ class ExoProcessDoc
             $new_path=$this->target_dir.$imagenew_name;
 
             array_push($images, [
+                'id'            => Str::uuid()->toString(),
                 'directory_id'	=> $this->directory->id,
                 'filename'		=> $imagenew_name,
                 'path'			=> $new_path,
