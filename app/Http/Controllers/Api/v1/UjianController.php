@@ -38,6 +38,7 @@ class UjianController extends Controller
             $ujian = $ujian->paginate(20);
         }
         $ujian->makeHidden('banksoal_id');
+        $ujian->makeVisible('groups');
         return SendResponse::acceptData($ujian);
     }
 
@@ -85,6 +86,19 @@ class UjianController extends Controller
             $data['banksoal_id'] = $fill;
         }
 
+        if($request->group_ids != '') {
+            $fill = array();
+            foreach($request->group_ids as $group) {
+                $fush = [
+                    'id' => $group['id'],
+                    'parent' => $group['parent_id']
+                ];
+                array_push($fill, $fush);
+            }
+
+            $data['group_ids'] = $fill;
+        }
+
         if($request->server_id != '') {
             $fill = array();
             foreach($request->server_id as $server) {
@@ -96,7 +110,7 @@ class UjianController extends Controller
 
         Jadwal::create($data);
 
-        return SendResponse::accept();
+        return SendResponse::accept('banksoal created');
     }
 
     /**
@@ -152,6 +166,19 @@ class UjianController extends Controller
             }
 
             $data['banksoal_id'] = $fill;
+        }
+
+        if($request->group_ids != '') {
+            $fill = array();
+            foreach($request->group_ids as $group) {
+                $fush = [
+                    'id' => $group['id'],
+                    'parent' => $group['parent_id']
+                ];
+                array_push($fill, $fush);
+            }
+
+            $data['group_ids'] = $fill;
         }
 
         $ujian->update($data);

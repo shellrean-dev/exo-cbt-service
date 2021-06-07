@@ -20,7 +20,7 @@ class Jadwal extends Model
      * @var [type]
      */
     protected $appends = [
-        'kode_banksoal','ids', 'banksoal'
+        'kode_banksoal','ids', 'banksoal', 'groups'
     ];
 
     /**
@@ -28,7 +28,7 @@ class Jadwal extends Model
      * @var [type]
      */
     protected $hidden = [
-        'created_at','updated_at','ids', 'banksoal'
+        'created_at','updated_at','ids', 'banksoal','groups'
     ];
 
     /**
@@ -37,6 +37,7 @@ class Jadwal extends Model
      */
     protected $casts = [
         'banksoal_id' => 'array',
+        'group_ids' => 'array',
         'ids' => 'array',
         'setting'   => 'array',
         'mulai_sesi'    => 'array'
@@ -77,6 +78,19 @@ class Jadwal extends Model
     {
         $ids = array_column($this->banksoal_id, 'id');
         return Banksoal::whereIn('id', $ids)->get()->pluck('kode_banksoal');
+    }
+
+    /**
+     * Get group name
+     * @return array
+     */
+    public function getGroupsAttribute()
+    {
+        if ($this->group_ids != null && $this->group_ids != '') {
+            $ids = array_column($this->group_ids, 'id');
+            return Group::whereIn('id', $ids)->get()->pluck('name'); 
+        }
+        return [];
     }
 
     /**
