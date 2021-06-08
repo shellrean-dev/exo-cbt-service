@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -137,31 +136,5 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('group_members', 'GroupMemberController@index');
         Route::post('group_members', 'GroupMemberController@store');
         Route::delete('group_members/{id}', 'GroupMemberController@destroy');
-    });
-});
-
-/*
-|--------------------------------------------------------------------------
-| API Routes Fo peserta
-|--------------------------------------------------------------------------
-|
-*/
-Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2'], function() {
-
-    Route::post('logedin','PesertaLoginController@login');
-    Route::get('setting', 'PesertaLoginController@getSetting');
-
-    Route::group(['middleware' => 'peserta'], function() {
-        Route::get('peserta-authenticated', 'PesertaLoginController@authenticated');
-        Route::get('peserta/logout','PesertaLoginController@logout');
-        Route::get('jadwals/peserta', 'JadwalController@getJadwalPeserta');
-        Route::get('ujians/uncomplete','UjianAktifController@uncompleteUjian');
-        Route::get('ujians/peserta', 'UjianAktifController@getUjianPesertaAktif');
-        Route::post('ujians/start', 'UjianAktifController@startUjian');
-        Route::post('ujians/start/time', 'UjianAktifController@startUjianTime');
-        Route::get('ujians/filled', 'UjianAktifController@getJawabanPeserta');
-        Route::post('ujian','UjianController@store');
-        Route::post('ujian/ragu-ragu', 'UjianController@setRagu');
-        Route::get('ujian/selesai', 'UjianController@selesai');
     });
 });
