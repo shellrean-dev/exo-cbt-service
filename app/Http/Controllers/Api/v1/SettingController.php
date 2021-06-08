@@ -7,19 +7,32 @@ use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use App\Setting;
+use ShellreanDev\Cache\CacheHandler;
 
 class SettingController extends Controller
 {
     /**
-     * [allSetting description]
-     * @return [type] [description]
+     * Get setting sekolah
+     * 
+     * @param ShellreanDev\Cache\CacheHandler $cache
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
-    public function getSettingSekolah()
+    public function getSettingSekolah(CacheHandler $cache)
     {
-        $setting = DB::table('settings')
-            ->where('name', 'set_sekolah')
-            ->select('id','name','value')
-            ->first();
+        // ambil data setting sekolah
+        $key = md5(sprintf('setting:data:set_sekolah'));
+        if ($cache->isCached($key)) {
+            $setting = $cache->getItem($key);
+        } else {
+            $setting = DB::table('settings')
+                ->where('name', 'set_sekolah')
+                ->select('id','name','value')
+                ->first();
+
+            $cache->cache($key, $setting);
+        }
+        
         return SendResponse::acceptData([
             'name'  => $setting->name,
             'value' => json_decode($setting->value, true)
@@ -27,15 +40,26 @@ class SettingController extends Controller
     }
 
     /**
-     * [allSetting description]
-     * @return [type] [description]
+     * Get setting sekolah public
+     * 
+     * @param ShellreanDev\Cache\CacheHandler $cache
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
-    public function getSettingPublicSekolah()
+    public function getSettingPublicSekolah(CacheHandler $cache)
     {
-        $setting = DB::table('settings')
-            ->where('name', 'set_sekolah')
-            ->select('id','name','value')
-            ->first();
+        // ambil data setting sekolah
+        $key = md5(sprintf('setting:data:set_sekolah'));
+        if ($cache->isCached($key)) {
+            $setting = $cache->getItem($key);
+        } else {
+            $setting = DB::table('settings')
+                ->where('name', 'set_sekolah')
+                ->select('id','name','value')
+                ->first();
+
+            $cache->cache($key, $setting);
+        }
 
         $value = json_decode($setting->value, true);
         $sekolah_name = isset($value['nama_sekolah']) ? $value['nama_sekolah'] : '';
@@ -48,11 +72,14 @@ class SettingController extends Controller
     }
 
     /**
-     * [storeSettingSekolah description]
-     * @param  Request $request [description]
-     * @return [type]           [description]
+     * Store setting sekolah
+     * 
+     * @param Illuminate\Http\Request $request
+     * @param ShellreanDev\Cache\CacheHandler $cache
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
-    public function storeSettingSekolah(Request $request)
+    public function storeSettingSekolah(Request $request, CacheHandler $cache)
     {
         $request->validate([
             'nama_sekolah'      => 'required',
@@ -81,7 +108,7 @@ class SettingController extends Controller
             ];
             $sekolah->save();
         } else {
-            Setting::create([
+            $sekolah = Setting::create([
                 'name'  => 'set_sekolah',
                 'value' => [
                     'logo' => '',
@@ -96,13 +123,23 @@ class SettingController extends Controller
             ]); 
         }
 
+        // set cache setting sekolah
+        $key = md5(sprintf('setting:data:set_sekolah'));
+        $setting = DB::table('settings')
+                ->where('name', 'set_sekolah')
+                ->select('id','name','value')
+                ->first();
+        $cache->cache($key, $setting);
+
         return SendResponse::accept();
     }
 
     /**
-     * [changeLogoSekolah description]
-     * @param  Request $request [description]
-     * @return [type]           [description]
+     * Change logo sekolah
+     * 
+     * @param  Illuminate\Httpp\Request $request
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function changeLogoSekolah(Request $request)
     {
@@ -129,9 +166,10 @@ class SettingController extends Controller
     }
 
     /**
-     * [getSetting description]
-     * @return [type] [description]
+     * Get data setting
      * 
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function getSetting()
     {
@@ -156,8 +194,11 @@ class SettingController extends Controller
     }
 
     /**
-     * [setSetting description]
-     * @param Request $request [description]
+     * Store data setting
+     * 
+     * @param Illuminate\Http\Request $request
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function setSetting(Request $request)
     {
@@ -180,6 +221,12 @@ class SettingController extends Controller
         return SendResponse::accept();
     }
 
+    /**
+     * Get setting authentication method
+     * 
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
+     */
     public function getSetAuth()
     {
         $settings = Setting::where('type', 'auth')->get();
@@ -194,6 +241,12 @@ class SettingController extends Controller
         return SendResponse::acceptData($set->values()->all());
     }
 
+    /**
+     * Get app info
+     * 
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
+     */
     public function infoApp()
     {
         return response()->json([
