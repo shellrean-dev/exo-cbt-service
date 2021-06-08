@@ -28,11 +28,13 @@ class PesertaMiddleware
         if ($this->cache->isCached($key)) {
             $user = $this->cache->getItem($key);
         } else {
-            $user = Peserta::where(['api_token' => $request->bearerToken()])->first();
+            $user = Peserta::with('group')
+                ->where(['api_token' => $request->bearerToken()])
+                ->first();
 
             $this->cache->cache($key, $user);
         }
-        
+
         if($user) {
             $request->attributes->add(['peserta-auth' => $user]);
             return $next($request);
