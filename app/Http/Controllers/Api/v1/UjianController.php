@@ -11,6 +11,7 @@ use App\Exports\HasilUjianExport;
 use App\Exports\CapaianExport;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\JawabanPeserta;
 use App\JawabanEsay;
@@ -18,13 +19,15 @@ use App\HasilUjian;
 use App\Banksoal;
 use App\Jadwal;
 use App\Soal;
+use ShellreanDev\Cache\CacheHandler;
 
 class UjianController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function index()
     {
@@ -45,8 +48,9 @@ class UjianController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param  Illuminate\Http\Request  $request
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function store(Request $request)
     {
@@ -116,8 +120,9 @@ class UjianController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  App\Jadwal $ujian
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function show(Jadwal $ujian)
     {
@@ -127,9 +132,10 @@ class UjianController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  Illuminate\Http\Request  $request
+     * @param  App\Jadwal  $ujian
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function update(Request $request, Jadwal $ujian)
     {
@@ -189,8 +195,9 @@ class UjianController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  App\Jadwal  $ujian
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function destroy(Jadwal $ujian)
     {
@@ -201,15 +208,27 @@ class UjianController extends Controller
     /**
      * Set status ujian.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param  Illuminate\Http\Request  $request
+     * @param  ShellreanDev\Cache\CacheHandler $cache
+     * @author shellrean <wandinak17@gmail.com>
      */
-    public function setStatus(Request $request)
+    public function setStatus(Request $request, CacheHandler $cache)
     {
         $jadwal = Jadwal::find($request->id);
         if($jadwal) {
             $jadwal->status_ujian = $request->status;
             $jadwal->save();
+
+            // set cache ujian 'aktif' hari ini
+            $key = md5(sprintf('jadwal:data:active:today'));
+            $jadwals = DB::table('jadwals')->where([
+                'status_ujian'  => 1,
+                'tanggal'       => now()->format('Y-m-d')
+            ])
+            ->select('id','alias','banksoal_id','lama','mulai','tanggal','setting','group_ids')
+            ->get();
+
+            $cache->cache($key, $jadwals);
 
             return SendResponse::accept();
         }
@@ -219,7 +238,8 @@ class UjianController extends Controller
     /**
      * Get all ujian without pagination
      *
-     * @return \Illuminate\http\Response
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function allData()
     {
@@ -228,8 +248,10 @@ class UjianController extends Controller
     }
 
     /**
-     * [getActive description]
-     * @return [type] [description]
+     * Get data with status active
+     * 
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function getActive()
     {
@@ -238,9 +260,10 @@ class UjianController extends Controller
     }
 
     /**
-     * [getBanksoalByJadwal description]
-     * @param  Jadwal $jadwal [description]
-     * @return [type]         [description]
+     * Get banksoal by jadwal
+     * 
+     * @param  App\Jadwal $jadwal
+     * @return App\Actions\SendResponse
      */
     public function getBanksoalByJadwal(Jadwal $jadwal)
     {
