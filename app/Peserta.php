@@ -10,14 +10,15 @@ class Peserta extends Model
     use Uuids;
 
     /**
-     * [$guarded description]
+     * protected unviewable property
      * @var array
      */
     protected $guarded = [];
 
     /**
-     * [agama description]
-     * @return [type] [description]
+     * Peserta's agama
+     * @return object
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function agama()
     {
@@ -25,11 +26,22 @@ class Peserta extends Model
     }
 
     /**
-     * [jurusan description]
-     * @return [type] [description]
+     * Peserta's jurusan
+     * @return object
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function jurusan()
     {
         return $this->belongsTo(Jurusan::class);
+    }
+
+    /**
+     * Group member
+     * @return object
+     * @author shellrean <wandinak17@gmail.com>
+     */
+    public function group()
+    {
+        return $this->belongsTo(GroupMember::class,'id', 'student_id');
     }
 }
