@@ -19,7 +19,7 @@ class CreateJawabanPesertasTable extends Migration
             $table->uuid('soal_id');
             $table->uuid('peserta_id');
             $table->uuid('jadwal_id');
-            $table->bigInteger('jawab');
+            $table->string('jawab')->default(0);
             $table->string('jawab_complex')->nullable()->default("[]");
             $table->longText('esay')->nullable();
             $table->char('ragu_ragu',1)->default(0);
