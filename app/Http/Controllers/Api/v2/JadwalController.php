@@ -8,6 +8,7 @@ use App\Actions\SendResponse;
 use App\Group;
 
 use ShellreanDev\Cache\CacheHandler;
+use ShellreanDev\Services\Jadwal\JadwalService;
 
 class JadwalController extends Controller
 {
@@ -16,42 +17,17 @@ class JadwalController extends Controller
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
-    public function getJadwalPeserta(CacheHandler $cache)
+    public function getJadwalPeserta(CacheHandler $cache, JadwalService $jadwalService)
     {
         // data peserta
         $peserta = request()->get('peserta-auth');
 
         // ambil data jadwal
         // yang telah diselesaikan peserta
-        $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta->id));
-        if ($cache->isCached($key)) {
-            $hascomplete = $cache->getItem($key);
-        } else {
-            $hascomplete = DB::table('siswa_ujians')->where([
-                'peserta_id'        => $peserta->id,
-                'status_ujian'      => 1
-            ])
-            ->select('jadwal_id')
-            ->get()
-            ->pluck('jadwal_id');
-
-            $cache->cache($key, $hascomplete);
-        }
+        $hascomplete = $jadwalService->hasCompletedBy($peserta->id);
 
         // ujian yang sedang dilaksanakan 'aktif' dan hari ini
-        $key = md5(sprintf('jadwal:data:active:today'));
-        if ($cache->isCached($key)) {
-            $jadwals = $cache->getItem($key);
-        } else {
-            $jadwals = DB::table('jadwals')->where([
-                'status_ujian'  => 1,
-                'tanggal'       => now()->format('Y-m-d')
-            ])
-            ->select('id','alias','banksoal_id','lama','mulai','tanggal','setting','group_ids')
-            ->get();
-
-            $cache->cache($key, $jadwals);
-        }
+        $jadwals = $jadwalService->activeToday();
 
         $jadwal_ids = [];
 
