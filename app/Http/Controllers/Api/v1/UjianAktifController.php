@@ -17,6 +17,7 @@ use App\Banksoal;
 use App\Peserta;
 use App\Jadwal;
 use App\Token;
+use ShellreanDev\Cache\CacheHandler;
 
 class UjianAktifController extends Controller
 {
@@ -159,7 +160,7 @@ class UjianAktifController extends Controller
      * @param  Peserta $peserta [description]
      * @return [type]           [description]
      */
-    public function resetUjianPeserta(Jadwal $jadwal, Peserta $peserta)
+    public function resetUjianPeserta(Jadwal $jadwal, Peserta $peserta, CacheHandler $cache)
     {
         $aktif = $jadwal->id;
         DB::beginTransaction();
@@ -182,6 +183,10 @@ class UjianAktifController extends Controller
         
             $peserta->api_token = '';
             $peserta->save();
+
+            // remove completed jadwal cache
+            $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta->id));
+            $cache->cache($key, '', 0);
 
             DB::commit();
         } catch (\Exception $e) {
