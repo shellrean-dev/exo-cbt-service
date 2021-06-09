@@ -92,6 +92,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('ujians/{jadwal}/peserta/{peserta}/reset', 'UjianAktifController@resetUjianPeserta');
         Route::get('ujians/{jadwal}/multi-reset', 'UjianAktifController@multiResetUjianPeserta');
         Route::get('ujians/{jadwal}/peserta/{peserta}/close', 'UjianAktifController@closePeserta');
+        Route::get('ujians/{jadwal}/multi-close', 'UjianAktifController@multiClosePeserta');
         Route::post('ujians/peserta/add-more-time', 'UjianAktifController@addMoreTime');
 
         Route::get('ujians/esay/exists', 'PenilaianController@getExistEsay');
