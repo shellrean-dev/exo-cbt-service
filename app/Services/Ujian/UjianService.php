@@ -223,7 +223,7 @@ final class UjianService extends AbstractService
             ->get()
             ->makeHidden('similiar');
 
-            if ($find) {
+            if ($find->count() > 0) {
                 $this->cache->cache($key, $find);
             }
         }

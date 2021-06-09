@@ -374,12 +374,12 @@ class UjianAktifController extends Controller
             $setting = json_decode($jadwal->setting, true);
 
             // Ambil soal tipe : ganda
-            $key = md5(sprintf('soals:data:banksoal:%s:ganda:acak:%s:max:%d', 
-                $banksoal->id, $setting['acak_soal'], $max_pg
-            ));
-            if ($cache->isCached($key)) {
-                $pg = $cache->getItem($key);
-            } else {
+            // $key = md5(sprintf('soals:data:banksoal:%s:ganda:acak:%s:max:%d', 
+            //     $banksoal->id, $setting['acak_soal'], $max_pg
+            // ));
+            // if ($cache->isCached($key)) {
+            //     $pg = $cache->getItem($key);
+            // } else {
                 $pg = DB::table('soals')->where([
                     'banksoal_id'   => $banksoal->id,
                     'tipe_soal'     => 1
@@ -393,8 +393,8 @@ class UjianAktifController extends Controller
                 // Ambil soal sebanyak maximum
                 $pg = $pg->take($max_pg)->get();
                 
-                $cache->cache($key, $pg);
-            }
+            //     $cache->cache($key, $pg);
+            // }
 
             
             // Buat collection untuk jawaban siswa
@@ -409,18 +409,20 @@ class UjianAktifController extends Controller
                     'iscorrect'     => 0,
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
-                    'esay'          => ''
+                    'esay'          => '',
+                    'created_at'    => now(),
+                    'updated_at'    => now()
                 ]);
             }
 
             // Ambil soal tipe :esay
-            $key = md5(sprintf('soals:data:banksoal:%s:esay:acak:%s:max:%d', 
-                $banksoal->id, $setting['acak_soal'], $max_esay
-            ));
+            // $key = md5(sprintf('soals:data:banksoal:%s:esay:acak:%s:max:%d', 
+            //     $banksoal->id, $setting['acak_soal'], $max_esay
+            // ));
 
-            if ($cache->isCached($key)) {
-                $esay = $cache->getItem($key);
-            } else {
+            // if ($cache->isCached($key)) {
+            //     $esay = $cache->getItem($key);
+            // } else {
                 $esay = DB::table('soals')->where([
                     'banksoal_id'   => $banksoal->id,
                     'tipe_soal'     => 2
@@ -434,8 +436,8 @@ class UjianAktifController extends Controller
                 // Ambil soal sebanyak maximum
                 $esay = $esay->take($max_esay)->get();
                 
-                $cache->cache($key, $esay);
-            }
+            //     $cache->cache($key, $esay);
+            // }
 
             // Buat collection untuk jawaban siswa
             $soal_esay = [];
@@ -449,17 +451,19 @@ class UjianAktifController extends Controller
                     'iscorrect'     => 0,
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
-                    'esay'          => ''
+                    'esay'          => '',
+                    'created_at'    => now(),
+                    'updated_at'    => now()
                 ]);
             }
 
             // Ambil soal: Listening
-            $key = md5(sprintf('soals:data:banksoal:%s:listening:acak:%s:max:%d', 
-                $banksoal->id, $setting['acak_soal'], $max_listening
-            ));
-            if ($cache->isCached($key)) {
-                $listening = $cache->getItem($key);
-            } else {
+            // $key = md5(sprintf('soals:data:banksoal:%s:listening:acak:%s:max:%d', 
+            //     $banksoal->id, $setting['acak_soal'], $max_listening
+            // ));
+            // if ($cache->isCached($key)) {
+            //     $listening = $cache->getItem($key);
+            // } else {
                 $listening = DB::table('soals')->where([
                     'banksoal_id'   => $banksoal->id,
                     'tipe_soal'     => 3
@@ -473,8 +477,8 @@ class UjianAktifController extends Controller
                 // Ambil soal sebanyak maximum
                 $listening = $listening->take($max_listening)->get();
 
-                $cache->cache($key, $listening);
-            }
+            //     $cache->cache($key, $listening);
+            // }
 
             // Buat collection untuk jawaban siswa
             $soal_listening = [];
@@ -488,17 +492,19 @@ class UjianAktifController extends Controller
                     'iscorrect'     => 0,
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
-                    'esay'          => ''
+                    'esay'          => '',
+                    'created_at'    => now(),
+                    'updated_at'    => now()
                 ]);
             }
 
             // Ambil soal: Multichoice complex
-            $key = md5(sprintf('soals:data:banksoal:%s:multichoice-complex:acak:%s:max:%d', 
-                $banksoal->id, $setting['acak_soal'], $max_complex
-            ));
-            if ($cache->isCached($key)) {
-                $complex = $cache->getItem($key);
-            } else {
+            // $key = md5(sprintf('soals:data:banksoal:%s:multichoice-complex:acak:%s:max:%d', 
+            //     $banksoal->id, $setting['acak_soal'], $max_complex
+            // ));
+            // if ($cache->isCached($key)) {
+            //     $complex = $cache->getItem($key);
+            // } else {
                 $complex = DB::table('soals')->where([
                     'banksoal_id'   => $banksoal->id,
                     'tipe_soal'     => 4
@@ -512,8 +518,8 @@ class UjianAktifController extends Controller
                 // Ambil soal sebanyak maximum
                 $complex = $complex->take($max_complex)->get();
 
-                $cache->cache($key, $complex);
-            }
+            //     $cache->cache($key, $complex);
+            // }
 
             // Buat collection untuk jawaban siswa
             $soal_complex = [];
@@ -527,7 +533,9 @@ class UjianAktifController extends Controller
                     'iscorrect'     => 0,
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
-                    'esay'          => ''
+                    'esay'          => '',
+                    'created_at'    => now(),
+                    'updated_at'    => now()
                 ]);
             }
 
@@ -555,12 +563,12 @@ class UjianAktifController extends Controller
             // });
 
             // Ambil soal:  isian singkat
-            $key = md5(sprintf('soals:data:banksoal:%s:isian-singkat:acak:%s:max:%d', 
-                $banksoal->id, $setting['acak_soal'], $max_isian_singkat
-            ));
-            if ($cache->isCached($key)) {
-                $isian_singkat = $cache->getItem($key);
-            } else {
+            // $key = md5(sprintf('soals:data:banksoal:%s:isian-singkat:acak:%s:max:%d', 
+            //     $banksoal->id, $setting['acak_soal'], $max_isian_singkat
+            // ));
+            // if ($cache->isCached($key)) {
+            //     $isian_singkat = $cache->getItem($key);
+            // } else {
                 $isian_singkat = DB::table('soals')->where([
                     'banksoal_id'   => $banksoal->id,
                     'tipe_soal'     => 6
@@ -574,8 +582,8 @@ class UjianAktifController extends Controller
                 // Ambil soal sebanyak maximum
                 $isian_singkat = $isian_singkat->take($max_isian_singkat)->get();
 
-                $cache->cache($key, $isian_singkat);
-            }
+            //     $cache->cache($key, $isian_singkat);
+            // }
 
             // Buat collection untuk jawaban siswa
             $soal_isian_singkat = [];
@@ -589,7 +597,9 @@ class UjianAktifController extends Controller
                     'iscorrect'     => 0,
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
-                    'esay'          => ''
+                    'esay'          => '',
+                    'created_at'    => now(),
+                    'updated_at'    => now()
                 ]);
             }
 
@@ -621,9 +631,9 @@ class UjianAktifController extends Controller
             }
 
             // Ambil jawaban siswa
-            $jawaban_peserta = UjianService::getJawabanPeserta(
-                $jadwal->id, 
-                $peserta->id, 
+            $jawaban_peserta = $devUjianService->pesertaAnswers(
+                $jadwal->id,
+                $peserta->id,
                 $setting['acak_opsi']
             );
 

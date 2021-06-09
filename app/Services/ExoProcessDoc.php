@@ -147,7 +147,9 @@ class ExoProcessDoc
                 'path'			=> $new_path,
                 'exstension'	=> $ext_img,
                 'dirname'		=> $this->directory->slug,
-                'size'			=> 0
+                'size'			=> 0,
+                'created_at'    => now(),
+                'updated_at'    => now()
             ]);
 
             rename($old_path,$new_path);
