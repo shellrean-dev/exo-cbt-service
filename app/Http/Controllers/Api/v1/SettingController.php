@@ -204,7 +204,7 @@ class SettingController extends Controller
     {
         $request->validate([
             'name'      => 'required',
-            'value'     => 'required|int'
+            'value'     => 'required'
         ]);
 
         $setting = Setting::where('name', $request->name)->first();
