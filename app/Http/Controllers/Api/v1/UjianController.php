@@ -137,7 +137,7 @@ class UjianController extends Controller
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
-    public function update(Request $request, Jadwal $ujian)
+    public function update(Request $request, Jadwal $ujian, CacheHandler $cache)
     {
         $request->validate([
             'tanggal'       => 'required',
@@ -188,6 +188,9 @@ class UjianController extends Controller
         }
 
         $ujian->update($data);
+
+        $key = md5(sprintf('jadwal:data:active:today'));
+        $cache->cache($key, [], 0);
 
         return SendResponse::accept();
     }
