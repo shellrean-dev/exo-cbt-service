@@ -35,14 +35,18 @@ class SiswaUjian extends Model
      */
     public function getStatusAttribute()
     {
-        if($this->status_ujian == '0') {
-            $res = 'Belum mulai';
-        }
-        elseif($this->status_ujian == '3') {
-            $res = 'Sedang mengerjakan';
-        }
-        elseif($this->status_ujian == '1') {
-            $res = 'Test selesai';
+        switch(trim($this->status_ujian)) {
+            case '0':
+                $res = 'Belum mulai';
+                break;
+            case '3':
+                $res = 'Sedang mengerjakan';
+                break;
+            case '1':
+                $res = 'Test selesai';
+                break;
+            default:
+                $res = 'Untrace';
         }
 
         return $res;
