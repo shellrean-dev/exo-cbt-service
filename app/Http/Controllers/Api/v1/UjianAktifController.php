@@ -18,6 +18,7 @@ use App\Peserta;
 use App\Jadwal;
 use App\Token;
 use ShellreanDev\Cache\CacheHandler;
+use ShellreanDev\Services\Jadwal\JadwalService;
 
 class UjianAktifController extends Controller
 {
@@ -187,6 +188,56 @@ class UjianAktifController extends Controller
             // remove completed jadwal cache
             $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta->id));
             $cache->cache($key, '', 0);
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return SendResponse::badRequest($e->getMessage());
+        }
+        return SendResponse::accept();
+    }
+
+    /**
+     * Multiple reset peserta ujian
+     * 
+     * @param App\Jadwal $jadwal
+     * @param ShellreanDev\Cache\CacheHandler $cache
+     * @return App\Actions\SendResponse
+     */
+    public function multiResetUjianPeserta(Jadwal $jadwal, CacheHandler $cache)
+    {
+        $aktif = $jadwal->id;
+        DB::beginTransaction();
+
+        $pesertas = explode(',', request()->q);
+
+        try {
+            DB::table('siswa_ujians')
+                ->where('jadwal_id', $aktif)
+                ->whereIn('peserta_id', $pesertas)
+                ->delete();
+
+            DB::table('jawaban_pesertas')
+                ->where('jadwal_id', $aktif)
+                ->whereIn('peserta_id', $pesertas)
+                ->delete();
+
+            DB::table('hasil_ujians')
+                ->where('jadwal_id', $aktif)
+                ->whereIn('peserta_id', $pesertas)
+                ->delete();
+
+            DB::table('pesertas')
+                ->whereIn('id', $pesertas)
+                ->update([
+                    'api_token' => ''
+                ]);
+
+            foreach ($pesertas as $peserta) {
+                // remove completed jadwal cache
+                $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta));
+                $cache->cache($key, '', 0);
+            }
 
             DB::commit();
         } catch (\Exception $e) {
