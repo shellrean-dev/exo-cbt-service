@@ -2,28 +2,28 @@
 
 namespace App\Http\Controllers\Api\v2;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
-use App\Services\UjianService;
-use App\Actions\SendResponse;
-use Illuminate\Http\Request;
-use App\JawabanPeserta;
-use App\SiswaUjian;
-use App\HasilUjian;
-use App\JawabanSoal;
-use Carbon\Carbon;
 use App\Soal;
+use App\Actions\SendResponse;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+use ShellreanDev\Cache\CacheHandler;
+use ShellreanDev\Services\Ujian\UjianService;
 
 class UjianController extends Controller
 {
     /**
      * Simpan/Update jawaban siswa pada ujian aktif
      *
-     * @param Illuminate\Http\Request
+     * @param Illuminate\Http\Request $request
+     * @param ShellreanDev\Services\UjianService $ujianService
+     * @param Shellreandev\Cache\CacheHandler $cache
      * @return Illuminate\Http\Response
      * @author shellrean <wandnak17@gmail.com>
      */
-    public function store(Request $request)
+    public function store(Request $request, UjianService $ujianService, CacheHandler $cache)
     {
         $request->validate([
             'jawaban_id' => 'required',
@@ -33,24 +33,34 @@ class UjianController extends Controller
         $peserta = request()->get('peserta-auth');
 
         // Ambil jawaban peserta
-        $find = DB::table('jawaban_pesertas')
-            ->where('id', $request->jawaban_id)
-            ->first();
+        $key = md5(sprintf('jawaban_pesertas:jawab:%s:single', $request->jawaban_id));
+        if ($cache->isCached($key)) {
+            $find = $cache->getItem($key);
+        } else {
+            $find = DB::table('jawaban_pesertas')
+                ->where('id', $request->jawaban_id)
+                ->first();
+
+            $cache->cache($key, $find);
+        }
         
         if (!$find) {
             return SendResponse::badRequest('Kami tidak dapat menemukan data dari jawaban kamu.');
         }
 
         // ambil ujian yang aktif hari ini
-        $ujian = $this->_getUjianCurrent($peserta);
+        // $ujian = $this->_getUjianCurrent($peserta);
+        // ambil data siswa ujian
+        // yang sedang dikerjakan pada hari ini
+        // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
+        $ujian = $ujianService->onProgressToday($peserta->id);
 
         if (!$ujian) {
             return SendResponse::badRequest('Kami tidak dapat menemukan ujian yang sedang kamu kerjakan, mungkin jadawal ini sedang tidak aktif. silakan logout lalu hubungi administrator.');
         }
 
-        if($ujian) {
-            $this->_kurangiWaktu($ujian);
-        }
+        // kurangi waktu ujian
+        $ujianService->updateReminingTime($ujian);
 
         // Jika yang dikirimkan adalah esay
         if(isset($request->essy)) {
@@ -79,9 +89,17 @@ class UjianController extends Controller
 
         // Jika yang dikirimkan adalah isian singkat
         if(isset($request->isian)) {
-            $jwb_soals = DB::table('jawaban_soals')
-                ->where('soal_id', $find->soal_id)
-                ->get();
+            // ambil jawaban soal
+            $key = md5(sprintf('jawaban_soals:datas:soal:%s', $find->soal_id));
+            if ($cache->isCached($key)) {
+                $jwb_soals = $cache->getItem($key);
+            } else {
+                $jwb_soals = DB::table('jawaban_soals')
+                    ->where('soal_id', $find->soal_id)
+                    ->get();
+
+                $cache->cache($key, $jwb_soals);
+            }
 
             foreach($jwb_soals as $jwb) {
                 $jwb_strip = strip_tags($jwb->text_jawaban);
@@ -118,10 +136,20 @@ class UjianController extends Controller
 
         // Jika yang dikirimkan adalah jawaban komleks
         if(is_array($request->jawab_complex)) {
-            $soal_complex = Soal::with(['jawabans' => function($query) {
-                $query->where('correct', 1);
-            }])
-            ->where("id", $find->soal_id)->first();
+            // ambil soal complex
+            $key = md5(sprintf('jawabans:data:%s:relation:jawabans', $find->soal_id));
+            if ($cache->isCached($key)) {
+                $soal_complex = $cache->getItem($key);
+            } else {
+                $soal_complex = Soal::with(['jawabans' => function($query) {
+                    $query->where('correct', 1);
+                }])
+                ->where("id", $find->soal_id)
+                ->first();
+
+                $cache->cache($key, $soal_complex);
+            }
+            
             if ($soal_complex) {
                 $array = $soal_complex->jawabans->map(function($item){
                     return $item->id;
@@ -159,10 +187,17 @@ class UjianController extends Controller
         }
 
         // Jika yang dikirimkan adalah pilihan ganda
-        $kj = DB::table('jawaban_soals')
-            ->where('id', $request->jawab)
-            ->select('correct')
-            ->first();
+        $key = md5(sprintf('jawaban_soals:data:%s:only:correct', $request->jawab));
+        if ($cache->isCached($key)) {
+            $kj = $cache->getItem($key);
+        } else {
+            $kj = DB::table('jawaban_soals')
+                ->where('id', $request->jawab)
+                ->select('correct')
+                ->first();
+
+            $cache->cache($key, $kj);
+        }
         if(!$kj) {
             $send = [
                 'id'            => $find->id,
@@ -204,35 +239,48 @@ class UjianController extends Controller
     /**
      * Set ragu ragu in siswa
      *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @param Illuminate\Http\Request $request
+     * @param ShellreanDev\Services\UjianService $ujianService
+     * @param ShellreanDev\Cache\CacheHandler $cache
+     * @return Illuminate\Http\Response
      * @author shellrean <wandnak17@gmail.com>
      */
-    public function setRagu(Request $request)
+    public function setRagu(Request $request, UjianService $ujianService, CacheHandler $cache)
     {
         $peserta = request()->get('peserta-auth');
 
-        $find = DB::table('jawaban_pesertas')
-            ->where('id', $request->jawaban_id)
-            ->select('id','banksoal_id','soal_id','jawab','esay','ragu_ragu')
-            ->first();
+        // ambil jawaban peserta
+        $key = md5(sprintf('jawaban_pesertas:data:%s:single:%s', $request->jawaban_id, __METHOD__));
+        if ($cache->isCached($key)) {
+            $find = $cache->getItem($key);
+        } else {
+            $find = DB::table('jawaban_pesertas')
+                ->where('id', $request->jawaban_id)
+                ->select('id','banksoal_id','soal_id','jawab','esay','ragu_ragu')
+                ->first();
+
+            $cache->cache($key, $find);
+        }
 
         if (!$find) {
             return SendResponse::badRequest('Kami tidak dapat menemukan jawaban anda');
         }
 
         if(!isset($request->ragu_ragu)) {
-            return response()->json(['data' => $send,'index' => $request->index]);
+            return response()->json(['data' => $find,'index' => $request->index]);
         }
 
-        $ujian = $this->_getUjianCurrent($peserta);
+        // ambil data siswa ujian
+        // yang sedang dikerjakan pada hari ini
+        // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
+        $ujian = $ujianService->onProgressToday($peserta->id);
         
         if (!$ujian) {
             return SendResponse::badRequest('Kami tidak dapat menemukan ujian yang sedang anda kamu kerjakan, mungkin jadawl ini sedang tidak aktif. silakan logout lalu hubungi administrator.');
         }
-        if($ujian) {
-            $this->_kurangiWaktu($ujian);
-        }
+
+        // update sisa waktu ujian
+        $ujianService->updateReminingTime($ujian);
 
         try {
             DB::table('jawaban_pesertas')
@@ -250,15 +298,18 @@ class UjianController extends Controller
     /**
      * Selesaikan ujian
      *
-     * @param Illuminate\Http\Request
+     * @param ShellreanDev\Services\UjianService $ujianService
      * @return Illuminate\Http\Response
      * @author shellrean <wandnak17@gmail.com>
      */
-    public function selesai()
+    public function selesai(UjianService $ujianService)
     {
         $peserta = request()->get('peserta-auth');
 
-        $ujian = $this->_getUjianCurrent($peserta);
+        // ambil data siswa ujian
+        // yang sedang dikerjakan pada hari ini
+        // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
+        $ujian = $ujianService->onProgressToday($peserta->id);
 
         if (!$ujian) {
             return SendResponse::badRequest('Anda tidak sedang mengerjakan ujian apapun. silakan logout, laporkan perihal ini kepada administrator');
@@ -286,6 +337,8 @@ class UjianController extends Controller
             return SendResponse::badRequest('Ujian ini telah diselesaikan. silakan logout, laporkan perihal ini kepada andministrator');
         }
 
+        // ambil hanya banksoal untuk
+        // jawaban peserta pertama
         $jawaban = DB::table('jawaban_pesertas')
             ->where([
                 'jadwal_id'     => $ujian->jadwal_id,
@@ -300,11 +353,9 @@ class UjianController extends Controller
 
         try {
             DB::beginTransaction();
-            $finished = UjianService::finishingUjian($jawaban->banksoal_id, $ujian->jadwal_id, $peserta->id);
-            if(!$finished['success']) {
-                DB::rollback();
-                return SendResponse::badRequest($finished['message']);
-            }
+            
+            $ujianService->finishing($jawaban->banksoal_id, $ujian->jadwal_id, $peserta->id);
+
             DB::table('siswa_ujians')
                 ->where('id', $ujian->id)
                 ->update([
@@ -315,63 +366,7 @@ class UjianController extends Controller
             DB::rollback();
             return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
         }
-        return SendResponse::accept();
-    }
-
-    /**
-     * Kurangi waktu siswa
-     * @param object $ujian
-     * @return object
-     * @author shellrean <wandnak17@gmail.com>
-     */
-    private function _kurangiWaktu($ujian)
-    {
-        $deUjian = DB::table('jadwals')
-            ->where('id', $ujian->jadwal_id)
-            ->first();
-        $start = Carbon::createFromFormat('H:i:s', $ujian->mulai_ujian_shadow);
-        $now = Carbon::createFromFormat('H:i:s', Carbon::now()->format('H:i:s'));
-        $diff_in_minutes = $start->diffInSeconds($now);
-
-        try {
-            DB::table('siswa_ujians')
-                ->where('id', $ujian->id)
-                ->update([
-                    'sisa_waktu'    => $deUjian->lama-$diff_in_minutes
-                ]);
-        } catch (\Exception $e) {
-            return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
-        }
-    }
-
-    /**
-     * Ambil ujian aktif saat ini 
-     * @param object $peserta
-     * @return object
-     * @author shellrean <wandnak17@gmail.com>
-     */
-    private function _getUjianCurrent($peserta)
-    {
-        // ambil ujian yang aktif hari ini
-        $jadwals = DB::table('jadwals')->where([
-            'status_ujian'  => 1,
-            'tanggal'       => now()->format('Y-m-d')
-        ])
-        ->select('id')
-        ->get();
-        $jadwal_ids = $jadwals->pluck('id')->toArray();
-        
-        // ambil data siswa ujian
-        // yang sedang dikerjakan pada hari ini
-        // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
-        $ujian = DB::table('siswa_ujians')
-            ->where('peserta_id', $peserta->id)
-            ->where('status_ujian', 3)
-            ->whereIn('jadwal_id', $jadwal_ids)
-            ->whereDate('created_at', now()->format('Y-m-d'))
-            ->first();
-
-        return $ujian;
+        return SendResponse::accept('ujian berhasil diselesaikan');
     }
 }
 
