@@ -8,6 +8,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use App\SesiSchedule;
 use App\Peserta;
 
@@ -182,6 +183,7 @@ class SesiScheduleController extends Controller
                 array_push($sesi, $student->id);
             }
             array_push($data, [
+                'id'        => Str::uuid()->toString(),
                 'jadwal_id' => $request->jadwal_id,
                 'sesi'      => $key,
                 'peserta_ids' => json_encode($sesi),
