@@ -7,6 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithStartRow;
+use Illuminate\Support\Str;
 
 class GroupMemberImport implements ToCollection, WithStartRow
 {
@@ -33,6 +34,7 @@ class GroupMemberImport implements ToCollection, WithStartRow
         $data = [];
         foreach($students as $student) {
             array_push($data, [
+                'id'        => Str::uuid()->toString(),
                 'group_id'  => $this->group_id,
                 'student_id' => $student->id,
                 'created_at' => now(),

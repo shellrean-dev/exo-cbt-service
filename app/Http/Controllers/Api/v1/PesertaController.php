@@ -20,10 +20,6 @@ class PesertaController extends Controller
      */
     public function index()
     {
-        // $peserta = Peserta::with('agama','jurusan')->orderBy('id');
-        // if (request()->q != '') {
-        //     $peserta = $peserta->where('nama', 'LIKE', '%'.request()->q.'%');
-        // }
         $peserta = DB::table('pesertas')
             ->join('agamas','pesertas.agama_id','=','agamas.id')
             ->join('jurusans','pesertas.jurusan_id','=','jurusans.id')

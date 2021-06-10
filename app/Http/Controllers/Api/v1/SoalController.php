@@ -245,6 +245,7 @@ class SoalController extends Controller
                     }
 
                     array_push($data, [
+                        'id'            => Str::uuid()->toString(),
                         'soal_id'       => $soal->id,
                         'text_jawaban'  => $pilihan,
                         'correct'       => $correct,

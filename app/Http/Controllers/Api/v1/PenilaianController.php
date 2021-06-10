@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PenilaianController extends Controller
 {
@@ -199,6 +200,7 @@ class PenilaianController extends Controller
                         ]);
 
                     DB::table('jawaban_esays')->insert([
+                        'id'            => Str::uuid()->toString(),
                         'banksoal_id'   => $same->banksoal_id,
                         'peserta_id'    => $same->peserta_id,
                         'jawab_id'      => $same->id,
@@ -275,6 +277,7 @@ class PenilaianController extends Controller
                     'hasil'         => $hasil_val,
                 ]);
             DB::table('jawaban_esays')->insert([
+                'id'            => Str::uuid()->toString(),
                 'banksoal_id'   => $jawab->banksoal_id,
                 'peserta_id'    => $jawab->peserta_id,
                 'jawab_id'      => $jawab->id,
