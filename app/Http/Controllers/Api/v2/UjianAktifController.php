@@ -12,6 +12,7 @@ use App\SesiSchedule;
 use App\SiswaUjian;
 use Carbon\Carbon;
 use App\Banksoal;
+use App\HasilUjian;
 use App\Jadwal;
 use App\Token;
 use App\Soal;
@@ -282,7 +283,7 @@ class UjianAktifController extends Controller
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
-    public function getJawabanPeserta(UjianService $ujianService, DevUjianService $devUjianService, CacheHandler $cache)
+    public function getJawabanPeserta(DevUjianService $devUjianService, CacheHandler $cache)
     {
         $peserta = request()->get('peserta-auth');
         // $ujian_siswa = $ujianService->getUjianSiswaBelumSelesai($peserta->id);
@@ -696,5 +697,40 @@ class UjianAktifController extends Controller
         }
 
         return response()->json(['data' => $jawaban_peserta, 'detail' => $ujian]);
+    }
+
+    /**
+     * Hasil ujian siswa
+     */
+    public function getHasilUjian(JadwalService $jadwalService)
+    {
+        $peserta = request()->get('peserta-auth');
+
+        // ambil ujian yang aktif hari ini
+        $jadwals = $jadwalService->activeToday();
+
+        $viewable = [];
+        foreach ($jadwals as $jadwal) {
+            if ($jadwal->view_result == 1) {
+                $viewable[] = $jadwal->id;
+            }
+        }
+
+        if (count($viewable) < 1) {
+            return SendResponse::acceptData([]);
+        }
+
+        // Ambil hasil ujian siswa
+        $hasil = DB::table('hasil_ujians')
+            ->whereIn('hasil_ujians.jadwal_id', $viewable)
+            ->where('hasil_ujians.peserta_id', $peserta->id)
+            ->join('jadwals', 'jadwals.id', '=', 'hasil_ujians.jadwal_id')
+            ->select([
+                'jadwals.alias',
+                'hasil_ujians.hasil'
+            ])
+            ->get();
+
+        return SendResponse::acceptData($hasil);
     }
 }

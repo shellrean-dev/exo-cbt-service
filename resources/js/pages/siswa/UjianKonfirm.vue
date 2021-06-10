@@ -1,18 +1,34 @@
 <template>
   <div class="container md:mx-auto flex flex-col justify-center space-y-4 lg:flex-row lg:space-y-0 lg:space-x-4 -mt-12 sm:-mt-24">
+    <div class="w-full lg:max-w-xl lg:py-4 lg:px-4 mb-5 lg:mb-20"
+    v-if="typeof setting.text != 'undefined' && setting.text.welcome != null && setting.text.welcome != ''"
+    >
+      <div class="bg-white border-gray-200 shadow sm:shadow-2xl py-2 rounded-t-xl rounded-b-xl">
+        <div class="py-2 px-4 rounded-md mb-2" v-html="setting.text.welcome">
+        </div>
+      </div>
+    </div>
     <div class="w-full lg:max-w-xl lg:py-4 lg:px-4 mb-20">
       <div class="bg-white border-gray-200 shadow sm:shadow-2xl py-2 rounded-t-xl rounded-b-xl">
-        <div class="pt-2 pb-2 px-2 flex justify-between border-b border-gray-200 mb-2 items-center">
-          <div class="flex items-center">
-            <p class="font-medium text-gray-700 px-2 text-xl">Konfirmasi data peserta</p>
+        <div class="flex pt-2 pb-2">
+          <div class="px-2 py-1 border-b-2 mb-2 cursor-pointer"
+          :class="tab == 0 ? 'border-blue-400' : 'border-gray-200'"
+          @click="tab = 0"
+          >
+            <p class="font-medium text-gray-700 px-2">Ujian</p>
           </div>
-          <div class="flex justify-end space-x-2 mb-2 items-center">
-
+          <div class="px-2 py-1 border-b-2 mb-2 cursor-pointer"
+          :class="tab == 1 ? 'border-blue-400' : 'border-gray-200'"
+          @click="tab = 1"
+          >
+            <p class="font-medium text-gray-700 px-2">Hasil</p>
+          </div>
+          <div class="flex-1 py-2 border-b-2 border-gray-200 mb-2">
           </div>
         </div>
-		    <div class="py-2 px-2 my-2 border-b border-gray-200">
-          <div class="py-2 px-4 bg-blue-100 border border-gray-300 text-blue-600 rounded-md" v-if="typeof setting.text != 'undefined' && setting.text.welcome != null && setting.text.welcome != ''" v-html="setting.text.welcome">
-          </div>
+		    <div class="py-2 px-2 my-2 border-b border-gray-200"
+        v-if="tab == 0"
+        >
 			    <div class="mb-4">
 			      <label for="" class="text-xs font-semibold text-gray-500 px-1">Nama Peserta</label>
 			      <p class="font-semibold text-gray-700 px-1">{{ peserta.nama }}</p>
@@ -44,10 +60,39 @@
               <button type="submit" class="py-2 px-4 text-center bg-blue-400 text-white rounded-md hover:shadow-lg" :class="{ isLoading: 'bg-blue-300' }">{{ isLoading ? 'Loading...' : 'Submit' }}</button>
             </div>
           </form>
-          <div v-else class="py-2 px-4 bg-blue-100 border border-gray-300 text-blue-600 rounded-md">
+          <div v-else class="py-2 px-4 bg-yellow-100 border border-gray-300 text-yellow-600 rounded-md">
             Tidak ada mata ujian untuk anda saat ini
           </div>
 			  </div>
+        <div class="py-2 px-2 my-2 border-b border-gray-200"
+        v-if="tab == 1"
+        >
+          <table class="min-w-max w-full table-auto">
+            <thead>
+              <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                <th class="py-3 px-6 text-left">Ujian</th>
+                <th class="py-3 px-6 text-left">Hasil</th>
+              </tr>
+            </thead>
+            <tbody class="text-gray-600 text-sm font-light">
+              <tr class="border-b border-gray-200 hover:bg-gray-100"
+              v-for="(hasil, index) in hasils"
+              :key="index"
+              >
+                <td class="py-3 px-6 text-left whitespace-nowrap">
+                  <div class="flex items-center">
+                    <span class="font-medium">{{ hasil.alias }}</span>
+                  </div>
+                </td>
+                <td class="py-3 px-6 text-left">
+                  <div class="flex items-center">
+                    <span>{{ hasil.hasil }}</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 		  </div>
     </div>
   </div>
@@ -65,7 +110,8 @@
           jadwal_id: '',
           token: ''
         },
-        active_token: true
+        active_token: true,
+        tab: 0
 	    }
 	  },
 	  computed: {
@@ -78,11 +124,12 @@
 		   }),
 	  	...mapState('siswa_ujian', {
 	  		ujian: state => state.dataUjian,
-	  		invalidToken: state => state.invalidToken
+	  		invalidToken: state => state.invalidToken,
+        hasils: state => state.hasils,
 	  	})
 	  },
 	  methods: {
-	    ...mapActions('siswa_ujian',[ 'startUjian', 'getPesertaUjian']),
+	    ...mapActions('siswa_ujian',[ 'startUjian', 'getPesertaUjian','getHasilUjian']),
       showError(err) {
         showSweetError(this, err)
       },
@@ -105,6 +152,9 @@
           }
         }
       }
-	  }
+	  },
+    created() {
+      this.getHasilUjian();
+    }
 	}
 </script>

@@ -12,7 +12,8 @@ const endpoint = Object.freeze({
     startTime: 'ujians/start/time',
     start: 'ujians/start',
     peserta: 'ujians/peserta',
-    uncomplete: 'ujians/uncomplete'
+    uncomplete: 'ujians/uncomplete',
+    hasils: 'ujian/hasils'
 })
 
 /**
@@ -29,6 +30,7 @@ const state = () => ({
 		token: false
 	},
     ujian: {},
+    hasils: [],
 	banksoalAktif: '',
     uncomplete: {},
     interval: ''
@@ -43,7 +45,8 @@ const mutations = {
 	SLICE_DATA_RESP,
 	SLICE_RAGU_JAWABAN,
     ASSIGN_PESERTA_UJIAN,
-    ASSIGN_PESERTA_UNCOMPLETE_UJIAN
+    ASSIGN_PESERTA_UNCOMPLETE_UJIAN,
+    ASSIGN_HASIL_UJIAN,
 }
 
 /**
@@ -59,7 +62,8 @@ const actions = {
 	pesertaMulai,
     startUjian,
     getPesertaUjian,
-    getUncompleteUjian
+    getUncompleteUjian,
+    getHasilUjian
 }
 
 /**
@@ -132,6 +136,15 @@ function ASSIGN_PESERTA_UJIAN(state, payload) {
  */
 function ASSIGN_PESERTA_UNCOMPLETE_UJIAN(state, payload) {
     state.uncomplete = payload
+}
+
+/**
+ * Assig hasil ujian to state
+ * @param {*} state 
+ * @param {*} payload
+ */
+function ASSIGN_HASIL_UJIAN(state, payload) {
+    state.hasils = payload
 }
 
 /**
@@ -311,6 +324,26 @@ function getUncompleteUjian({ commit, state }) {
             let network = await $axios.get(endpoint.uncomplete)
 
             commit('ASSIGN_PESERTA_UNCOMPLETE_UJIAN', network.data.data)
+            commit('SET_LOADING', false, { root: true })
+            resolve(network.data)
+        } catch (error) {
+            reject(getError(error))
+            commit('SET_LOADING', false, { root: true })
+        }
+    })
+}
+
+/**
+ * Get peserta's hasil ujian
+ * @param {*} commit
+ */
+function getHasilUjian({ commit }) {
+    return new Promise(async(resolve, reject) => {
+        try {
+            commit('SET_LOADING', true, { root: true })
+            let network = await $axios.get(endpoint.hasils)
+
+            commit('ASSIGN_HASIL_UJIAN', network.data.data)
             commit('SET_LOADING', false, { root: true })
             resolve(network.data)
         } catch (error) {

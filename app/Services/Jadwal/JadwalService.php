@@ -54,7 +54,8 @@ final class JadwalService extends AbstractService
                 'mulai',
                 'tanggal',
                 'setting',
-                'group_ids'
+                'group_ids',
+                'view_result'
             )
             ->get();
 

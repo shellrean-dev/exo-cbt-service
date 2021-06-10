@@ -26,6 +26,7 @@ class CreateJadwalsTable extends Migration
             $table->integer('sesi')->default(1);
             $table->string('setting');
             $table->string('mulai_sesi')->default('{}');
+            $table->integer('view_result')->default(0);
             $table->timestamps();
         });
     }
