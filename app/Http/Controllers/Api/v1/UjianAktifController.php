@@ -334,9 +334,10 @@ class UjianAktifController extends Controller
     /**
      * @Route(path="api/v1/ujians/token-get", methods={"GET"})
      * 
+     * @param ShellreanDev\Cache\CacheHandler $cache
      * @return App\Actions\SendResponse
      */
-    public function getToken()
+    public function getToken(CacheHandler $cache)
     {
         $token = Token::orderBy('id')->first();
 
@@ -344,7 +345,24 @@ class UjianAktifController extends Controller
             $to = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', now());
             $from = $token->updated_at->format('Y-m-d H:i:s');
             $differ = $to->diffInSeconds($from);
-            if($differ > 900) {
+
+            // ambil setting token
+            $key = md5(sprintf('setting:token:single'));
+            if ($cache->isCached($key)) {
+                $setting_token = $cache->getItem($key);
+            } else {
+                $setting_token = DB::table('settings')->where('name', 'token')->first();
+
+                $cache->cache($key, $setting_token);
+            }
+            if (!$setting_token) {
+                return SendResponse::badRequest('Kesalahan dalam installasi token'); 
+            }
+
+            $token_expired = intval($setting_token->value);
+            $token_expired = $token_expired ? $token_expired : 900;
+
+            if($differ > $token_expired) {
                 $token->token = strtoupper(Str::random(6));
                 $token->status = '0';
                 $token->save();
