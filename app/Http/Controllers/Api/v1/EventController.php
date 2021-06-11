@@ -3,18 +3,23 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
-use App\Exports\KartuPesertaPdf;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use App\EventUjian;
 use App\Jadwal;
 
+/**
+ * EventController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class EventController extends Controller
 {
     /**
+     * @Route(path="api/v1/events", methods={"GET"})
+     * 
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Illuminate\Http\Response
      */
     public function index()
     {
@@ -32,10 +37,12 @@ class EventController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/events", methods={"POST"})
+     * 
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param  Illuminate\Http\Request  $request
+     * @return Illuminate\Http\Response
      */
     public function store(Request $request)
     {
@@ -51,10 +58,12 @@ class EventController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/events/{id}", methods={"GET"})
+     * 
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  App\EventUjian $event
+     * @return Illuminate\Http\Response
      */
     public function show(EventUjian $event)
     {
@@ -62,11 +71,13 @@ class EventController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/events/{id}", methods={"PUT", "PATCH"})
+     * 
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  Illuminate\Http\Request  $request
+     * @param  App\EventUjian $event
+     * @return Illuminate\Http\Response
      */
     public function update(Request $request, EventUjian $event)
     {
@@ -81,10 +92,12 @@ class EventController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/events/{id}", methods={"DELETE"})
+     * 
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  App\EventUjian $event
+     * @return Illuminate\Http\Response
      */
     public function destroy(EventUjian $event)
     {
@@ -93,8 +106,9 @@ class EventController extends Controller
     }
 
     /**
-     * [allData description]
-     * @return [type] [description]
+     * @Route(path="api/v1/events/all", methods={"GET"})
+     * 
+     * @return App\Actions\SendResponse
      */
     public function allData()
     {
@@ -103,12 +117,13 @@ class EventController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/events/{event_id}/ujian", methods={"GET"})
+     * 
      * Get event detail
      * 
+     * @param string $event_id
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @param \App\Repositories\EventRepository
-     * @param @event_id
-     * @return \App\Actions\SendResponse
      */
     public function eventDetailData($event_id)
     {
@@ -137,15 +152,5 @@ class EventController extends Controller
                 ];
             }),
         ]);
-    }
-
-    /**
-     * Buat kartu peserta
-     */
-    public function kartu_peserta()
-    {
-        $obj = new KartuPesertaPdf();
-        $obj->generate();
-        $obj->show();
     }
 }

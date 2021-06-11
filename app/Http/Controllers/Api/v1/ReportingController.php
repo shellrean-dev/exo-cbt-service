@@ -9,16 +9,21 @@ use App\Actions\SendResponse;
 
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
 
+/**
+ * ReportingController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class ReportingController extends Controller
 {
     /**
+     * @Route(path="api/v1/berita-acara/{id}", methods={"GET"})
+     * 
      * Download berita acara pdf
      * 
      * @param $event_id
      * @return void
-     * @author <wandinak17@gmail.com>
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function berita_acara($event_id)
     {
@@ -35,11 +40,13 @@ class ReportingController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/berita-acara/{id}/link", methods={"GET"})
+     * 
      * Buat berita acara pdf link
      * 
      * @param $event_id
      * @return void
-     * @author <wandinak17@gmail.com>
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function berita_acara_link($event_id)
     {
@@ -59,11 +66,13 @@ class ReportingController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/absensi-ujian/{id}", methods={"GET"})
+     * 
      * Download absesnsi pdf
      * 
      * @param $jadwal_id
      * @return void
-     * @author <wandinak17@gmail.com>
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function absensi_ujian($jadwal_id)
     {
@@ -81,11 +90,13 @@ class ReportingController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/absensi-ujian/{id}/link", methods={"GET"})
+     * 
      * Buat berita acara pdf link
      * 
      * @param $event_id
      * @return void
-     * @author <wandinak17@gmail.com>
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function absensi_ujian_link($jadwal_id)
     {

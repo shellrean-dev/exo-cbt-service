@@ -10,13 +10,19 @@ use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use App\Matpel;
 
+/**
+ * MatpelController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class MatpelController extends Controller
 {
     /**
+     * @Route(path="api/v1/matpels", methods={"GET"})
+     * 
      * Display a listing of the resource.
      *
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return  \App\Actions\SendResponse
      */
     public function index()
     {
@@ -31,11 +37,13 @@ class MatpelController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/matpels", methods={"POST"})
+     * 
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Illuminate\Http\Request  $request
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return  \App\Actions\SendResponse
      */
     public function store(Request $request)
     {
@@ -56,11 +64,13 @@ class MatpelController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/matpels/{matpel}", methods={"GET"})
+     * 
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  App\Matpel $matpel
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return  \App\Actions\SendResponse
      */
     public function show(Matpel $matpel)
     {
@@ -68,11 +78,14 @@ class MatpelController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/matpels/{matpel}", methods={"PUT","PATCH"s})
+     * 
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Illuminate\Http\Request  $request
+     * @param App\Matpel $matpel
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return  \App\Actions\SendResponse
      */
     public function update(Request $request, Matpel $matpel)
     {
@@ -92,11 +105,13 @@ class MatpelController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/matpels/{matpel}", methods={"DELETE"})
+     * 
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param App\Matpel $matpel
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return  \App\Actions\SendResponse
      */
     public function destroy(Matpel $matpel)
     {
@@ -105,10 +120,12 @@ class MatpelController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/matpls/all", methods={"GET"})
+     * 
      * Display all of the resource.
      *
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return  \App\Actions\SendResponse
      */
     public function allData()
     {
@@ -117,9 +134,10 @@ class MatpelController extends Controller
     }
 
     /**
-     * [import description]
-     * @param  Request $request [description]
-     * @return [type]           [description]
+     * @Route(path="api/v1/matpels/upload", methods={"POST"})
+     * 
+     * @param  Illuminate\Http\Request $request
+     * @return App\Actions\SendResponse
      */
     public function import(Request $request)
     {
@@ -140,11 +158,13 @@ class MatpelController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/matpels/delete-multiple", methods={"POST"})
+     * 
      * Delete multiple matpel
      *
+     * @param Illuminate\Http\Request $request
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @param \Illuminate\Http\Request $request
-     * @return \App\Actions\SendResponse
      */
     public function destroyMultiple(Request $request)
     {

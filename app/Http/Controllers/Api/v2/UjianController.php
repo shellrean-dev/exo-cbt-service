@@ -12,9 +12,15 @@ use Illuminate\Support\Facades\DB;
 use ShellreanDev\Cache\CacheHandler;
 use ShellreanDev\Services\Ujian\UjianService;
 
+/**
+ * UjianController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class UjianController extends Controller
 {
     /**
+     * @Route(path="api/v2/ujian", methods={"POST"})
+     * 
      * Simpan/Update jawaban siswa pada ujian aktif
      *
      * @param Illuminate\Http\Request $request
@@ -237,6 +243,8 @@ class UjianController extends Controller
     }
 
     /**
+     * @Route(path="api/v2/ujian/ragu-ragu", methods={"POST"})
+     * 
      * Set ragu ragu in siswa
      *
      * @param Illuminate\Http\Request $request
@@ -296,6 +304,8 @@ class UjianController extends Controller
     }
 
     /**
+     * @Route(path="api/v2/ujian/selesai", methods={"GET"})
+     * 
      * Selesaikan ujian
      *
      * @param ShellreanDev\Services\UjianService $ujianService

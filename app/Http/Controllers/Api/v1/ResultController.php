@@ -9,19 +9,24 @@ use App\Exports\CapaianSiswaExport;
 use Illuminate\Support\Facades\DB;
 use App\Exports\HasilUjianExport;
 use App\Actions\SendResponse;
-use Illuminate\Http\Request;
 use App\JawabanPeserta;
 use App\HasilUjian;
 use App\Soal;
 
+/**
+ * ResultingController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class ResultController extends Controller
 {
     /**
+     * @Route(path="api/v1/ujians/{jadwal}/result", methods={"GET"})
+     * 
      * Ambil data hasil ujian peserta
      * 
-     * @param int $jadwal_id
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @param string $jadwal_id
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function exam($jadwal_id)
     {
@@ -81,12 +86,14 @@ class ResultController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/ujians/{jadwal}/result/link", methods={"GET"})
+     * 
      * Buat link untuk download excel hasil ujian 
      * peserta
      * 
-     * @param int $jadwal_id
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @param string $jadwal_id
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function examExcelLink($jadwal_id)
     {
@@ -109,11 +116,13 @@ class ResultController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/ujians/{jadwal}/result/excel", methods={"GET"})
+     * 
      * Download excel hasil ujian peserta
      * 
-     * @param int $jadwal_id
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @param string $jadwal_id
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function examExcel($jadwal_id)
     {
@@ -180,12 +189,14 @@ class ResultController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa", methods={"GET"})
+     * 
      * Ambil data capaian siswa hasil ujian
      * 
-     * @param int $jadwal_id
-     * @param int $banksoal_id
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @param string $jadwal_id
+     * @param string $banksoal_id
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function capaianSiswa($jadwal_id, $banksoal_id)
     {
@@ -246,13 +257,15 @@ class ResultController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/link", methods={"GET"})
+     * 
      * Buat link untuk download excel capaian 
      * siswa pada hasil ujian
      * 
-     * @param int $jadwal_id
-     * @param int $banksoal_id
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @param string $jadwal_id
+     * @param string $banksoal_id
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function capaianSiswaExcelLink($jadwal_id, $banksoal_id)
     {
@@ -286,13 +299,15 @@ class ResultController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel", methods={"GET"})
+     * 
      * Download excel capaian
      * siswa pada hasil ujian
      * 
-     * @param int $jadwal_id
-     * @param int $banksoal_id
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @param string $jadwal_id
+     * @param string $banksoal_id
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function capaianSiswaExcel($jadwal_id, $banksoal_id)
     {
@@ -397,12 +412,14 @@ class ResultController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/ujians/hasil/{hasil}", methods={"GET"})
+     * 
      * Abmil data hasil ujian peserta detail
      * dengan jawabannya
      * 
-     * @param int $hasil_id
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmial.com>
+     * @param string $hasil_id
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmial.com>
      */
     public function hasilUjianDetail($hasil_id)
     {

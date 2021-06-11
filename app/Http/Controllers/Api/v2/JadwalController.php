@@ -10,9 +10,15 @@ use App\Group;
 use ShellreanDev\Cache\CacheHandler;
 use ShellreanDev\Services\Jadwal\JadwalService;
 
+/**
+ * JadwalController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class JadwalController extends Controller
 {
     /**
+     * @Route(path="api/v2/jadwals/peserta", methods={"GET"})
+     * 
      * Ambil data jadwal yang dapat diikuti oleh peserta
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>

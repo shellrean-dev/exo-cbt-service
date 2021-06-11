@@ -8,13 +8,19 @@ use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
+/**
+ * GroupController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class GroupController extends Controller
 {
     /**
+     * @Route(path="api/v1/groups", methods={"GET"})
+     * 
      * Ambil data seluruh data grupping
      *
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function index()
     {
@@ -45,11 +51,13 @@ class GroupController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/groups", methods={"POST"})
+     * 
      * Buat data baru grup
      *
-     * @param \Illuminate\Http\Request $request
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @param Illuminate\Http\Request $request
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function store(Request $request)
     {
@@ -82,11 +90,13 @@ class GroupController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/groups/{group_id}", methods={"GET"})
+     * 
      * Ambil single data grup
      *
-     * @param int $group_id
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @param string $group_id
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function show($group_id)
     {
@@ -106,12 +116,14 @@ class GroupController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/groups/{group_id}", methods={"PUT", "PATCH"})
+     * 
      * Edit data gorup
      *
-     * @param \Illuminate\Http\Request $request
-     * @param int $group_id
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @param Illuminate\Http\Request $request
+     * @param string $group_id
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function update(Request $request, $group_id)
     {
@@ -153,11 +165,13 @@ class GroupController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/groups/{group_id}", methods={"DELETE"})
+     * 
      * Remove data group
      *
-     * @param int $group_id
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @param string $group_id
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function destroy($group_id)
     {

@@ -39,10 +39,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::post('users/delete-multiple', 'UserController@destroyMultiple');
         Route::apiResource('users', 'UserController');
 
-        Route::get('agamas', 'AgamaController@index'); //migrated
+        Route::get('agamas', 'AgamaController@index');
 
-        Route::get('jurusans/all', 'JurusanController@allData'); // migrated
-        Route::post('jurusans/delete-multiple', 'JurusanController@destroyMultiple'); // migrated
+        Route::get('jurusans/all', 'JurusanController@allData');
+        Route::post('jurusans/delete-multiple', 'JurusanController@destroyMultiple');
         Route::apiResource('jurusans', 'JurusanController');
 
         Route::get('pesertas/login', 'PesertaController@getPesertaLogin');
@@ -83,7 +83,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::apiResource('directory', 'DirectoryController');
 
         Route::post('ujians/{jadwal}/sesi-change', 'UjianAktifController@changeSesi');
-        Route::get('ujians/active', 'UjianAktifController@index');
         Route::get('ujians/sesi', 'UjianAktifController@sesi');
         Route::post('ujians/token-release', 'UjianAktifController@releaseToken');
         Route::post('ujians/token-change', 'UjianAktifController@changeToken');

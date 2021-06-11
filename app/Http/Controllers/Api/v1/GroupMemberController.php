@@ -10,13 +10,19 @@ use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
+/**
+ * GroupMemberController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class GroupMemberController extends Controller
 {
     /**
+     * @Route(path="api/v1/group_members", methods={"GET"})
+     * 
      * Ambil data member grup
      * 
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function index()
     {
@@ -59,11 +65,13 @@ class GroupMemberController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/group_members", methods={"POST"})
+     * 
      * Buat data member baru
      * 
-     * @param \Illuminate\Http\Request $request
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @param Illuminate\Http\Request $request
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function store(Request $request)
     {
@@ -87,11 +95,13 @@ class GroupMemberController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/group_members/multiple", methods={"POST})
+     * 
      * Buat multi-data member baru
      * 
-     * @param \Illuminate\Http\Request $request
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @param Illuminate\Http\Request $request
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function multiStore(Request $request)
     {
@@ -122,12 +132,14 @@ class GroupMemberController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/group_members/import", methods={"POST"})
+     * 
      * Import multi-data member 
      * dari excel
      * 
-     * @param \Illuminate\Http\Request $request
-     * @return \App\Actions\SendResponse;
-     * @author <wandinak17@gmail.com>
+     * @param Illuminate\Http\Request $request
+     * @return App\Actions\SendResponse;
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function multiStoreImport(Request $request)
     {
@@ -144,11 +156,13 @@ class GroupMemberController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/group_members/{member_id}", methods={"DELETE"})
+     * 
      * Hapus data member
      * 
-     * @param int $member_id
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @param string $member_id
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function destroy($member_id)
     {
@@ -171,10 +185,12 @@ class GroupMemberController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/group_members/multiple", methods={"DELETE"})
+     * 
      * Hapus multi-data member
      * 
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @return  App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function multiDestroy()
     {

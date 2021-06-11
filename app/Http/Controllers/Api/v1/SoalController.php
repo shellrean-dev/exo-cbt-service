@@ -17,14 +17,20 @@ use App\Directory;
 use App\Banksoal;
 use App\Soal;
 
+/**
+ * SoalController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class SoalController extends Controller
 {
     /**
+     * @Route(path="api/v1/soals", methods={"POST"})
+     * 
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Illuminate\Http\Request  $request
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return  \App\Actions\SendResponse
      */
     public function store(Request $request)
     {
@@ -96,7 +102,9 @@ class SoalController extends Controller
     }
 
     /**
-     *
+     * @Route(path="api/v1/soals/paste", methods={"POST"})
+     * 
+     * @param Illuminate\Http\Request $request
      */
     public function storePaste(Request $request)
     {
@@ -175,11 +183,13 @@ class SoalController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/soals/{soal}", methods={"GET"})
+     * 
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param App\Soal $soal
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return  \App\Actions\SendResponse
      */
     public function show(Soal $soal)
     {
@@ -188,11 +198,13 @@ class SoalController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/soals/{soal}", methods={"PUT", "PATCH"})
+     * 
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param Illuminate\Http\Request  $request
+     * @param App\Soal $soal
+     * @return Illuminate\Http\Response
      */
     public function update(Request $request, Soal $soal)
     {
@@ -263,10 +275,12 @@ class SoalController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/soals/{soal}", methods={"DELETE"})
+     * 
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  App\Soal $soal
+     * @return Illuminate\Http\Response
      */
     public function destroy(Soal $soal)
     {
@@ -284,7 +298,10 @@ class SoalController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/soals/delete/multiple", methods={"GET"})
+     * 
      * Delete multiple question
+     * 
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
@@ -310,11 +327,13 @@ class SoalController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/soals/banksoal/{banksoal}", methods={"GET"})
+     * 
      * Get soal by banksoal
      *
-     * @param int $id
+     * @param App\Banksoal $banksoal
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return  \App\Actions\SendResponse
      */
     public function getSoalByBanksoal(Banksoal $banksoal)
     {
@@ -336,11 +355,13 @@ class SoalController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/soals/banksoal/{banksoal}/all", methods={"GET"})
+     * 
      * Get soal by banksoal
      *
-     * @param int $id
+     * @param App\Banksoal $banksoal
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return  \App\Actions\SendResponse
      */
     public function getSoalByBanksoalAll(Banksoal $banksoal)
     {
@@ -349,11 +370,13 @@ class SoalController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/soals/banksoal/{banksoal}/analys", methods={"GET"})
+     * 
      * Get soal by banksoal analys
      *
-     * @param int $id
+     * @param App\Banksoal $banksoal
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return  \App\Actions\SendResponse
      */
     public function getSoalByBanksoalAnalys(Banksoal $banksoal)
     {
@@ -364,9 +387,11 @@ class SoalController extends Controller
     }
 
     /**
-     * [import description]
-     * @param  Request $request [description]
-     * @return [type]           [description]
+     * @Route(path="api/v1/soals/banksoal/{banksoal}/upload", methods={"POST"})
+     * 
+     * @param Illuminate\Http\Request $request
+     * @param App\Banksoal $banksoal
+     * @return App\Actions\SendResponse
      */
     public function import(Request $request, Banksoal $banksoal)
     {
@@ -389,10 +414,10 @@ class SoalController extends Controller
     /**
      * Import soal from docx
      *
+     * @param Illuminate\http\Request $request
+     * @param App\Services\WordService $wordService
+     * @return App\Actions\SendResponse;
      * @author shellrean <wandinak17@gmail.com>
-     * @param \Illuminate\http\Request $request
-     * @param \App\Services\WordService $wordService
-     * @return \App\Actions\SendResponse;
      */
     private function _formatStandart($request, $banksoal)
     {
@@ -423,9 +448,9 @@ class SoalController extends Controller
     /**
      * Import soal from docx
      *
+     * @param Illuminate\http\Request $request
+     * @return App\Actions\SendResponse;
      * @author shellrean <wandinak17@gmail.com>
-     * @param \Illuminate\http\Request $request
-     * @return \App\Actions\SendResponse;
      */
     private function _formatTabled($request, $banksoal)
     {
@@ -491,11 +516,13 @@ class SoalController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/soals/import-word/{banksoal}", methods={"POST"})
+     * 
      * Import soal from docx
      *
+     * @param Illuminate\http\Request $request
+     * @return App\Actions\SendResponse;
      * @author shellrean <wandinak17@gmail.com>
-     * @param \Illuminate\http\Request $request
-     * @return \App\Actions\SendResponse;
      */
     public function wordImport(Request $request, $banksoal_id)
     {

@@ -21,9 +21,15 @@ use ShellreanDev\Cache\CacheHandler;
 use ShellreanDev\Services\Jadwal\JadwalService;
 use ShellreanDev\Services\Ujian\UjianService as DevUjianService;
 
+/**
+ * UjianAktifController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class UjianAktifController extends Controller
 {
     /**
+     * @Route(path="api/v2/ujians/uncomplete", methods={"GET"})
+     * 
      * Ambil data ujian siswa yang belum diselesaikan pada hari ini
      * 
      * @param ShellreanDev\Services\Ujian\UjianService $ujianService
@@ -52,6 +58,8 @@ class UjianAktifController extends Controller
     }
     
     /**
+     * @Route(path="api/v2/ujians/start", methods={"POST"})
+     * 
      * Memulai ujian masuk kedalam mode standby
      * 
      * @param  Illuminate\Http\Request $request
@@ -207,6 +215,8 @@ class UjianAktifController extends Controller
     }
 
     /**
+     * @Route(path="api/v2/ujians/peserta", methods={"GET"})
+     * 
      * Ambil ujian peserta yang sedang dikerjakan
      * 
      * @param ShellreanDev\Services\Ujian\UjianService $ujianService
@@ -236,6 +246,8 @@ class UjianAktifController extends Controller
     }
 
     /**
+     * @Route(path="api/v2/ujians/start/time", methods={"POST"})
+     * 
      * Mulai penghitungan waktu ujian
      * 
      * @return App\Actions\SendResponse
@@ -277,6 +289,8 @@ class UjianAktifController extends Controller
     }
 
     /**
+     * @Route(path="api/v2/ujians/filled", methods={"GET"})
+     * 
      * Ambil soal dan jawaban siswa
      * 
      * @param ShellreanDev\Services\Ujian\UjianService $ujianService
@@ -700,7 +714,13 @@ class UjianAktifController extends Controller
     }
 
     /**
+     * @Route(path="api/v2/ujian/hasils", methods={"GET"})
+     * 
      * Hasil ujian siswa
+     * 
+     * @param ShellreanDev\Services\JadwalService $jadwalService
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function getHasilUjian(JadwalService $jadwalService)
     {

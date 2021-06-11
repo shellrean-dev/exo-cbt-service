@@ -13,13 +13,20 @@ use App\Directory;
 use App\Banksoal;
 use App\Soal;
 
+/**
+ * BanksoalController
+ * 
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class BanksoalController extends Controller
 {
     /**
+     * @Route(path="api/v1/banksoals", methods={"GET"})
+     * 
      * Display a listing of the resource.
      *
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return /App/Actions/SendResponse
      */
     public function index()
     {
@@ -42,11 +49,13 @@ class BanksoalController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/banksoals", methods={"POST"})
+     * 
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Illuminate\Http\Request  $request
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return /App/Actions/SendResponse
      */
     public function store(Request $request)
     {
@@ -107,11 +116,13 @@ class BanksoalController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/banksoal/{id}", methods={"GET"})
+     * 
      * Display the specified resource.
      *
      * @param  int  $id
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return /App/Actions/SendResponse
      */
     public function show(Banksoal $banksoal)
     {
@@ -120,12 +131,14 @@ class BanksoalController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/banksoals/{id}", methods={"PUT","PATCH"})
+     * 
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  Illuminate\Http\Request  $request
+     * @param  App\Banksoal  $banksoal
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return /App/Actions/SendResponse
      */
     public function update(Request $request, Banksoal $banksoal)
     {
@@ -161,11 +174,13 @@ class BanksoalController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/banksoals/{id}", methods={"DELETE"})
+     * 
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  App\Banksoal  $banksoal
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return /App/Actions/SendResponse
      */
     public function destroy(Banksoal $banksoal)
     {
@@ -184,10 +199,12 @@ class BanksoalController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/banksoals/all", methods={"GET"})
+     * 
      * Display all data.
      *
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return /App/Actions/SendResponse
      */
     public function allData()
     {
@@ -201,9 +218,12 @@ class BanksoalController extends Controller
     }
 
     /**
-     * [getAnalys description]
-     * @param  Banksoal $banksoal [description]
-     * @return [type]             [description]
+     * @Route(path="api/v1/banksoals/{id}/analys", methods={"GET"})
+     * 
+     * Get analys banksoal
+     * 
+     * @param  Banksoal $banksoal
+     * @return App\Actions\SendResponse
      */
     public function getAnalys(Banksoal $banksoal)
     {
@@ -241,10 +261,12 @@ class BanksoalController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/banksoals/{id}/duplikat, methods={"GET"})
+     * 
      * Duplikat banksoal
      *
      * @param Banksoal $banksoal
-     * @return \App\Actions\SendResponse
+     * @return App\Actions\SendResponse
      * @since 2.0.0
      */
     public function duplikat(Banksoal $banksoal)

@@ -2,20 +2,28 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\DB;
+
 use App\Actions\SendResponse;
 use App\Imports\UserImport;
-use Illuminate\Http\Request;
 use App\User;
+use App\Http\Controllers\Controller;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+/**
+ * UserController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class UserController extends Controller
 {
     /**
+     * @Route(path="api/v1/user-authenticated", methods={"GET"})
+     * 
      * Get current user login
      *
-     * @return /Illuminate/Http/Response
+     * @return App\Actions\SendResponse
      **/
     public function getUserLogin()
     {
@@ -24,9 +32,11 @@ class UserController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/user-lists", methods={"GET"})
+     * 
      *  Get all users 
      *  
-     * @return \App\Actions\SendResponse
+     * @return App\Actions\SendResponse
      */
     public function userLists()
     {
@@ -35,9 +45,10 @@ class UserController extends Controller
     }
 
     /**
-     * [changePassword description]
-     * @param  Request $request [description]
-     * @return [type]           [description]
+     * @Route(path="api/v1/user/change-password", methods={"POST"})
+     * 
+     * @param  Illuminate\Http\Request $request
+     * @return App\Actions\SendResponse
      */
     public function changePassword(Request $request)
     {
@@ -52,8 +63,9 @@ class UserController extends Controller
     }
 
     /**
-     * [index description]
-     * @return [type] [description]
+     * @Route(path="api/v1/users", methods={"GET"})
+     * 
+     * @return App\Actions\SendResponse
      */
     public function index()
     {
@@ -68,9 +80,10 @@ class UserController extends Controller
     }
 
     /**
-     * [store description]
-     * @param  Request $request [description]
-     * @return [type]           [description]
+     * @Route(path="api/v1/users", methods={"POST"})
+     * 
+     * @param  Illuminate\Http\Request $request
+     * @return App\Actions\SendResponse
      */
     public function store(Request $request) 
     {
@@ -96,9 +109,10 @@ class UserController extends Controller
     }
 
     /**
-     * [show description]
-     * @param  User   $user [description]
-     * @return [type]       [description]
+     * @Route(path="api/v1/users/{user}", methods={"GET"})
+     * 
+     * @param  App\User   $user
+     * @return App\Actions\SendResponse
      */
     public function show(User $user)
     {
@@ -106,10 +120,11 @@ class UserController extends Controller
     }
 
     /**
-     * [update description]
-     * @param  Request $request [description]
-     * @param  User    $user    [description]
-     * @return [type]           [description]
+     * @Route(path="api/v1/users/{user}, methods={"PUT", "PATCH"})
+     * 
+     * @param  Illuminate\Http\Request $request
+     * @param  App\User    $user
+     * @return App\Actions\SendResponse
      */
     public function update(Request $request, User $user)
     {
@@ -135,9 +150,10 @@ class UserController extends Controller
     }
 
     /**
-     * [destroy description]
-     * @param  User   $user [description]
-     * @return [type]       [description]
+     * @Route(path="api/v1/users/{user}", methods={"DELETE"})
+     * 
+     * @param  App\User   $user
+     * @return App\Actions\SendResponse
      */
     public function destroy(User $user)
     {
@@ -146,9 +162,10 @@ class UserController extends Controller
     }
 
     /**
-     * [import description]
-     * @param  Request $request [description]
-     * @return [type]           [description]
+     * @Route(path="api/v1/users/upload", methods={"POST"})
+     * 
+     * @param  Illuminate\Http\Request $request]
+     * @return App\Actions\SendResponse
      */
     public function import(Request $request)
     {
@@ -169,11 +186,13 @@ class UserController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/users/delete-multiple", methods={"POST"})
+     * 
      * Delete user multiple
      *
+     * @param Illuminate\Http\Request $request
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @param \Illuminate\Http\Request $request
-     * @return \App\Actions\SendResponse
      */
     public function destroyMultiple(Request $request)
     {

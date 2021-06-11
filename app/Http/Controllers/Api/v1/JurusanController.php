@@ -8,13 +8,19 @@ use Illuminate\Http\Request;
 use App\Jurusan;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * JurusanController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class JurusanController extends Controller
 {
     /**
+     * @Route(path="api/v1/jurusans", methods={"GET"})
+     * 
      *  Display list of the source
      *  
+     *  @return  App\Actions\SendResponse
      *  @author shellrean <wandinak17@gmail.com>
-     *  @return  \App\Actions\SendResponse
      */
     public function index()
     {
@@ -32,10 +38,12 @@ class JurusanController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/jurusans", methods={"POST"})
+     * 
      * Store jurusan new
      *
+     *  @return App\Actions\SendResponse
      *  @author shellrean <wandinak17@gmail.com>
-     *  @return  \App\Actions\SendResponse
      */
     public function store(Request $request)
     {
@@ -50,10 +58,13 @@ class JurusanController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/jurusans/{jurusan}", methods={"GET"})
+     * 
      * Get jurusan by id
      *
-     *  @author shellrean <wandinak17@gmail.com>
-     *  @return  \App\Actions\SendResponse
+     * @param App\Jurusan $jurusan
+     * @return  App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function show(Jurusan $jurusan)
     {
@@ -61,10 +72,14 @@ class JurusanController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/jurusans/{jurusan}", methods={"PUT", "PATCH"})
+     * 
      * Update jurusan by id
      *
-     *  @author shellrean <wandinak17@gmail.com>
-     *  @return  \App\Actions\SendResponse
+     * @param Illuminate\Http\Request $request
+     * @param App\Jurusan $jurusan
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      * 
      */
     public function update(Request $request, Jurusan $jurusan)
@@ -80,10 +95,13 @@ class JurusanController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/jurusans/{jurusan}", methods={"DELETE"})
+     * 
      * Delete Jurusan by id
      *
-     *  @author shellrean <wandinak17@gmail.com>
-     *  @return  \App\Actions\SendResponse
+     * @param App\Jurusan $jurusan
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function destroy(Jurusan $jurusan)
     {
@@ -92,10 +110,12 @@ class JurusanController extends Controller
     }
 
     /**
-     *  Get all jurusan 
+     * @Route(path="api/v1/jurusans/all", methods={"GET"})
+     * 
+     * Get all jurusan 
      *
-     *  @author shellrean <wandinak17@gmail.com>
-     *  @return  \App\Actions\SendResponse
+     * @return  \App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function allData()
     {
@@ -104,11 +124,13 @@ class JurusanController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/jurusans/delete-multiple", methods={"GET"})
+     * 
      * Multiple destroy jurusan
      *
+     * @param Iluminate\Http\Request
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @param \Iluminate\Http\Request
-     * @return \App\Actions\SendResponse
      */
     public function destroyMultiple(Request $request)
     {

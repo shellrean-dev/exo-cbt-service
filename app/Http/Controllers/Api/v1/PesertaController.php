@@ -10,13 +10,19 @@ use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use App\Peserta;
 
+/**
+ * PesertaController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class PesertaController extends Controller
 {
     /**
+     * @Route(path="api/v1/pesertas", methods={"GET"})
+     * 
      * Display a listing of the resource.
      *
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return  \App\Actions\SendResponse
      */
     public function index()
     {
@@ -33,11 +39,13 @@ class PesertaController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/pesertas", methods={"POST"})
+     * 
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Illuminate\Http\Request  $request
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return  \App\Actions\SendResponse
      */
     public function store(Request $request)
     {
@@ -64,10 +72,13 @@ class PesertaController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/pesertas/{peserta}", methods={"GET"})
+     * 
      * Display the specified resource.
      *
+     * @param App\Peserta $peserta
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return  \App\Actions\SendResponse
      */
     public function show(Peserta $peserta)
     {
@@ -75,11 +86,14 @@ class PesertaController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/pesertas/{peserta}, methods={"PUT", "PATCH"})
+     * 
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Illuminate\Http\Request  $request
+     * @param App\Peserta $pesertas
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return  \App\Actions\SendResponse
      */
     public function update(Request $request, Peserta $peserta)
     {
@@ -106,10 +120,12 @@ class PesertaController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/pesertas/{peserta}", methods={"DELETE"})
+     * 
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param App\Peserta $peserta
+     * @return Illuminate\Http\Response
      */
     public function destroy(Peserta $peserta)
     {
@@ -118,11 +134,13 @@ class PesertaController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/pesertas/upload", methods={"POST"})
+     * 
      * Upload peserta by excel
      *
-     * @param \Illuminate\Http\Request  $request
+     * @param Illuminate\Http\Request  $request
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * @return  \App\Actions\SendResponse
      */
     public function import(Request $request)
     {
@@ -144,8 +162,9 @@ class PesertaController extends Controller
     }
 
     /**
-     * [getPesertaLogin description]
-     * @return [type] [description]
+     * @Route(path="api/v1/pesertas/login", methods={"GET"})
+     * 
+     * @return App\Actions\SendResponse
      */
     public function getPesertaLogin()
     {
@@ -163,9 +182,10 @@ class PesertaController extends Controller
     }
 
     /**
-     * [resetPesertaLogin description]
-     * @param  Peserta $peserta [description]
-     * @return [type]           [description]
+     * @Route(path="api/v1/pesertas/{peserta}/login", methods={"DELETE"})
+     * 
+     * @param  App\Peserta $peserta
+     * @return App\Actions\SendResponse
      */
     public function resetPesertaLogin(Peserta $peserta)
     {
@@ -176,8 +196,11 @@ class PesertaController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/pesertas/multi-reset-login", methods={"GET"})
+     * 
      * Multiple reset api-token peserta
-     * @return \App\Actions\SendResponse
+     * 
+     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
     public function multiResetPeserta()
@@ -196,6 +219,12 @@ class PesertaController extends Controller
         }
     }
 
+    /**
+     * @Route(path="api/v1/pesertas/delete-multiple", methods={"POST"})
+     * 
+     * @param Illuminate\Http\Request $request
+     * @return App\Actions\SendResponse
+     */
     public function destroyMultiple(Request $request)
     {
         $request->validate([    

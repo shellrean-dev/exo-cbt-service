@@ -10,15 +10,17 @@ use App\Setting;
 use App\User;
 use Auth;
 
+/**
+ * AuthController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class AuthController extends Controller
 {
     /**
-     * Login to Api
-     *
-     * @author shellrean <wandinak17@gmail.com>
-     * @param /ILluminate/Http/Request $request
-     * @return /App/Actions/SendResponse
-     **/
+     * @Route(path="api/v1/login", methods={"POST"})
+     * 
+     * Get api token
+     */
     public function login(Request $request)
     {
         $request->validate([
@@ -39,14 +41,13 @@ class AuthController extends Controller
     }
 
     /**
-     * [oauth description]
-     * @return [type] [description]
+     * @Route(path="api/v1/login/oauth", methods={"GET"})
      */
     public function oauth()
     {
         if(isset(request()->token) && ! empty(request()->token)) {
             $token = request()->token;
-            $server_url = 'http://localhost:82/api/user';
+            $server_url = config('exo.oauth_server_url');
             $response = Http::withToken($token)->get($server_url);
 
             if($response->json() != '') {
@@ -66,8 +67,7 @@ class AuthController extends Controller
     }
 
     /**
-     * [sso description]
-     * @return [type] [description]
+     * @Route(path="api/v1/login/sso", methods={"GET"})
      */
     public function sso()
     {
@@ -89,8 +89,7 @@ class AuthController extends Controller
     }
 
     /**
-     * [callback description]
-     * @return function [description]
+     * @Route(path="api/v1/login/callback", methods={"GET"})
      */
     public function callback()
     {

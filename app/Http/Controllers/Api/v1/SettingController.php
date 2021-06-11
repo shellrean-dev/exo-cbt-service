@@ -9,9 +9,15 @@ use Illuminate\Http\Request;
 use App\Setting;
 use ShellreanDev\Cache\CacheHandler;
 
+/**
+ * SettingController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class SettingController extends Controller
 {
     /**
+     * @Route(path="api/v1/settings/sekolah", methods={"GET"})
+     * 
      * Get setting sekolah
      * 
      * @param ShellreanDev\Cache\CacheHandler $cache
@@ -40,6 +46,8 @@ class SettingController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/settings-public-sekolah", methods={"GET"})
+     * 
      * Get setting sekolah public
      * 
      * @param ShellreanDev\Cache\CacheHandler $cache
@@ -72,6 +80,8 @@ class SettingController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/settings/sekolah", methods={"POST"})
+     * 
      * Store setting sekolah
      * 
      * @param Illuminate\Http\Request $request
@@ -135,6 +145,8 @@ class SettingController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/settings/sekolah/logo", methods={"POST"})
+     * 
      * Change logo sekolah
      * 
      * @param  Illuminate\Httpp\Request $request
@@ -166,6 +178,8 @@ class SettingController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/settings", methods={"GET"})
+     * 
      * Get data setting
      * 
      * @return App\Actions\SendResponse
@@ -194,6 +208,8 @@ class SettingController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/settings", methods={"POST"})
+     * 
      * Store data setting
      * 
      * @param Illuminate\Http\Request $request
@@ -222,6 +238,8 @@ class SettingController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/settings/auth", methods={"GET"})
+     * 
      * Get setting authentication method
      * 
      * @return App\Actions\SendResponse
@@ -242,6 +260,8 @@ class SettingController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/info-app", methods={"GET"})
+     * 
      * Get app info
      * 
      * @return App\Actions\SendResponse
@@ -251,8 +271,8 @@ class SettingController extends Controller
     {
         return response()->json([
             'name'      => 'Extraordinary CBT',
-            'version' => '3.0.0',
-            'code' => 'ristretto',
+            'version' => config('exo.version.code'),
+            'code' => config('exo.version.name'),
             'author'    => 'shellrean',
             'email'     => 'wandinak17@gmail.com'
         ]);

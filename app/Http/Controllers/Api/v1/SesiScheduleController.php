@@ -12,15 +12,21 @@ use Illuminate\Support\Str;
 use App\SesiSchedule;
 use App\Peserta;
 
+/**
+ * SesiScheduleController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class SesiScheduleController extends Controller
 {
     /**
+     * @Route(path="api/v1/sesi", methods={"GET"})
+     * 
      * Get student on sesi
      *
-     * @param \Illuminate\Http\Request
-     * @return \App\Actions\SendResponse
+     * @param Illuminate\Http\Request
+     * @return App\Actions\SendResponse
      * @since 2.0.0
-     * @author <wandinak17@gmail.com>
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function studentBySesi()
     {
@@ -48,12 +54,14 @@ class SesiScheduleController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/sesi", methods={"POST"})
+     * 
      * Push student to sesi
      *
-     * @param \Illuminate\Http\Request
-     * @return \App\Actions\SendResponse
+     * @param Illuminate\Http\Request
+     * @return App\Actions\SendResponse
      * @since 2.0.0
-     * @author <wandinak17@gmail.com>
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function pushToSesi(Request $request)
     {
@@ -97,12 +105,14 @@ class SesiScheduleController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/sesi", methods={"DELETE"})
+     * 
      * Remove siswa from sesi
      *
-     * @param \Illuminate\Http\Request
-     * @return \App\Actions\SendResponse
+     * @param Illuminate\Http\Request
+     * @return App\Actions\SendResponse
      * @since 2.0.0
-     * @author <wandinak17@gmail.com>
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function removeFromSesi(Request $request)
     {
@@ -134,11 +144,13 @@ class SesiScheduleController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/import", methods={"POST"})
+     * 
      * Import sesi schedule from sesi
      *
-     * @param \Illuminate\Http\Request
+     * @param Illuminate\Http\Request
      * @since 2.0.0
-     * @author <wandinak17@gmail.com>
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function importToSesi(Request $request)
     {
@@ -161,11 +173,13 @@ class SesiScheduleController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/sesi/copy", methods={"POST"})
+     * 
      * Copy sesi dari default siswa
      * 
-     * @param \Illuminate\Http\Request
+     * @param Illuminate\Http\Request
      * @since 2.0.0
-     * @author <wandinak17@gmail.com>
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function copyFromDefault(Request $request)
     {

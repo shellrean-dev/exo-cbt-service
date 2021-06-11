@@ -10,12 +10,18 @@ use Illuminate\Support\Str;
 use App\Directory;
 use App\File;
 
+/**
+ * DirectoryController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class DirectoryController extends Controller
 {
     /**
+     * @Route(path="api/v1/directory", methods={"GET"})
+     * 
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Illuminate\Http\Response
      */
     public function index()
     {
@@ -24,10 +30,12 @@ class DirectoryController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/directory", methods={"POST"})
+     * 
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param  Illuminate\Http\Request  $request
+     * @return Illuminate\Http\Response
      */
     public function store(Request $request)
     {
@@ -43,10 +51,12 @@ class DirectoryController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/directory/{id}", methods={"GET"})
+     * 
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  App\Directory $directory
+     * @return Illuminate\Http\Response
      */
     public function show(Directory $directory)
     {
@@ -56,11 +66,12 @@ class DirectoryController extends Controller
     }
     
     /**
+     * @Route(path="api/v1/upload/file-audio", methods={"POST"})
+     * 
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  Illuminate\Http\Request  $request
+     * @return Illuminate\Http\Response
      */
     public function uploadAudio(Request $request)
     {
@@ -72,11 +83,12 @@ class DirectoryController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/directory/filemedia", methods={"POST"})
+     * 
      * Insert filemedia.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  Illuminate\Http\Request  $request
+     * @return Illuminate\Http\Response
      */
     public function storeFilemedia(Request $request)
     {
@@ -102,9 +114,12 @@ class DirectoryController extends Controller
     }
 
     /**
-     * [uploadFile description]
-     * @param  Request $request [description]
-     * @return [type]           [description]
+     * @Route(path="api/v1/file/upload", methods={"POST"})
+     * 
+     * Upload file
+     * 
+     * @param  Illuminate\Http\Request $request
+     * @return Illuminate\Http\Response
      */
     public function uploadFile(Request $request)
     {
@@ -139,9 +154,10 @@ class DirectoryController extends Controller
     }
     
     /**
-     * [deleteFilemedia description]
-     * @param  [type] $id [description]
-     * @return [type]     [description]
+     * @Route(path="api/v1/directory/filemedia/{id}", methods={"DELETE"})
+     * 
+     * @param  string $id
+     * @return Illuminate\Http\Response
      */
     public function deleteFilemedia($id)
     {
@@ -154,7 +170,10 @@ class DirectoryController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/directory/filemedia/multiple-delete", methods={"GET"})
+     * 
      * Delete filemedia multiple
+     * 
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
@@ -183,9 +202,12 @@ class DirectoryController extends Controller
     }
 
     /**
-     * [getDirectoryBanksoal description]
-     * @param  [type] $id [description]
-     * @return [type]     [description]
+     * @Route(path="api/v1/directory/banksoal/{id}", methods={"GET"})
+     * 
+     * Get directory banksoal
+     * 
+     * @param  string $id
+     * @return Illuminate\Http\Response
      */
     public function getDirectoryBanksoal($id)
     {

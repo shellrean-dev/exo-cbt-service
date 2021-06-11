@@ -8,14 +8,20 @@ use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
+/**
+ * PenilaianController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class PenilaianController extends Controller
 {
     /**
+     * @Route(path="api/v1/ujians/esay/exists", methods={"GET"})
+     * 
      * Ambil data jawaban esay peserta 
      * yang belum dikoreksi
      * 
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function getExistEsay()
     {
@@ -59,12 +65,14 @@ class PenilaianController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/ujians/esay/{banksoal}/koreksi", methods={"GET"})
+     * 
      * Ambil data jawaban esay peserta
      * dari banksoal yang diminta
      * 
-     * @param int $banksoal_id
-     * @return \App\Actions\Sendresponse
-     * @author <wandinak17@gmail.com>
+     * @param string $banksoal_id
+     * @return App\Actions\Sendresponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function getExistEsayByBanksoal($banksoal_id)
     {
@@ -100,11 +108,13 @@ class PenilaianController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/ujians/esay/input", methods={"POST"})
+     * 
      * Simpan nilai esay
      * 
-     * @param \Illuminate\Http\Request
-     * @return \App\Actions\SendResponse
-     * @author <wandinak17@gmail.com>
+     * @param Illuminate\Http\Request $request
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
      */
     public function storeNilaiEsay(Request $request)
     {

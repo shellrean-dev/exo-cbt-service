@@ -11,9 +11,15 @@ use App\Peserta;
 use Illuminate\Support\Facades\DB;
 use ShellreanDev\Cache\CacheHandler;
 
+/**
+ * PesertaLoginControler
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class PesertaLoginController extends Controller
 {
     /**
+     * @Route(path="api/v2/logedin", methods={"POST"})
+     * 
      * Login to system
      * 
      * @param  Illuminate\Http\Request $request
@@ -56,6 +62,8 @@ class PesertaLoginController extends Controller
     }
 
     /**
+     * @Route(path="api/v2/peserta/logout", methods={"GET"})
+     * 
      * Logout from system
      * 
      * @return Illuminate\Http\Response
@@ -73,7 +81,10 @@ class PesertaLoginController extends Controller
     }
 
     /**
+     * @Route(path="api/v2/peserta-authenticated", methods={"GET"})
+     * 
      * Get peserta's authenticated
+     * 
      * @return Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
@@ -84,8 +95,10 @@ class PesertaLoginController extends Controller
     }
 
     /**
-     * Get setting needed by peserta
+     * @Route(path="api/v2/setting", methods={"GET"})
      * 
+     * Get setting needed by peserta
+     * s
      * @param ShellreanDev\Cache\CacheHandler $cache
      * @return Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>

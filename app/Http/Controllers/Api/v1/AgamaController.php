@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Actions\SendResponse;
 use App\Agama;
 
+/**
+ * Agama controller
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class AgamaController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @author shellrean <wandinak17@gmail.com>
-     * @return  \App\Actions\SendResponse
+     * @Route(path="api/v1/agamas", method={"GET"})
      */
     public function index()
     {
