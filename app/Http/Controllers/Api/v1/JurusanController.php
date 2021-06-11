@@ -119,7 +119,7 @@ class JurusanController extends Controller
      */
     public function allData()
     {
-        $jurusans = Jurusan::orderBy('id')->get();
+        $jurusans = Jurusan::orderBy('created_at')->get();
         return SendResponse::acceptData($jurusans);
     }
 

@@ -30,17 +30,20 @@ class GroupController extends Controller
             switch ($q) {
                 case 'all':
                     $data = DB::table('groups')
+                        ->orderBy('created_at')
                         ->get();
                 break;
                 case 'parent':
                     $data = DB::table('groups')
                         ->where('parent_id', 0)
+                        ->orderBy('created_at')
                         ->get();
                 break;
                 default:
                     if(intval($q)) {
                         $data = DB::table('groups')
                             ->where('parent_id', intval($q))
+                            ->orderBy('created_at')
                             ->get();
                     }
             }

@@ -112,7 +112,7 @@ class EventController extends Controller
      */
     public function allData()
     {
-        $events = EventUjian::orderBy('id','DESC')->get();
+        $events = EventUjian::orderBy('created_at','DESC')->get();
         return SendResponse::acceptData($events);
     }
 

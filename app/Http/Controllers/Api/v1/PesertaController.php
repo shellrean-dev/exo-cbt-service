@@ -34,7 +34,9 @@ class PesertaController extends Controller
             $peserta = $peserta->where('pesertas.nama', 'LIKE', '%'.request()->q.'%');
         }
         
-        $peserta = $peserta->paginate(40);
+        $peserta = $peserta
+            ->orderBy('pesertas.created_at')
+            ->paginate(40);
         return SendResponse::acceptData($peserta);
     }
 

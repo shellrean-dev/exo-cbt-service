@@ -33,7 +33,7 @@ class BanksoalController extends Controller
         $user = request()->user('api');
         $perPage = request()->perPage ?: '';
 
-        $banksoal = Banksoal::with(['matpel','user'])->orderBy('id', 'DESC');
+        $banksoal = Banksoal::with(['matpel','user'])->orderBy('created_at', 'DESC');
         if (request()->q != '') {
             $banksoal = $banksoal->where('kode_banksoal', 'LIKE', '%'. request()->q.'%');
         }
@@ -209,7 +209,7 @@ class BanksoalController extends Controller
     public function allData()
     {
         $user = request()->user('api');
-        $banksoal = Banksoal::with(['matpel'])->orderBy('id', 'DESC');
+        $banksoal = Banksoal::with(['matpel'])->orderBy('created_at', 'DESC');
         if ($user->role != 'admin') {
             $banksoal = $banksoal->where('author',$user->id);
         }
@@ -230,7 +230,9 @@ class BanksoalController extends Controller
         $soal = Soal::with('jawabans')->where(function($query) use ($banksoal) {
             $query->where('banksoal_id', $banksoal->id)
             ->where('tipe_soal','!=','2');
-        })->get();
+        })
+        ->orderBy('created_at','ASC')
+        ->get();
 
         $fill = $soal->map(function($val, $key) {
             $jawab = JawabanPeserta::where('soal_id', $val->id)->get();
@@ -273,7 +275,9 @@ class BanksoalController extends Controller
     {
         DB::beginTransaction();
         try {
-            $soals = Soal::with(['jawabans'])->get();
+            $soals = Soal::with(['jawabans'])
+                ->orderBy('created_at','ASC')
+                ->get();
             $direk = Directory::create([
                 'name'      => $banksoal->kode_banksoal.' (Copy)',
                 'slug'      => Str::slug($banksoal->kode_banksoal.' (Copy)', '-')
