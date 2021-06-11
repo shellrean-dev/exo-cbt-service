@@ -4,29 +4,29 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
-use App\Services\UjianService;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use App\JawabanPeserta;
-use App\UjianAktif;
-use App\SiswaUjian;
-use App\HasilUjian;
+
 use Carbon\Carbon;
-use App\Banksoal;
 use App\Peserta;
 use App\Jadwal;
 use App\Token;
+
 use ShellreanDev\Cache\CacheHandler;
-use ShellreanDev\Services\Jadwal\JadwalService;
 use ShellreanDev\Services\Ujian\UjianService as DevUjianService;
 
+/**
+ * UjianAktifController
+ * @author shellrean <wandinak17@gmail.com>
+ */
 class UjianAktifController extends Controller
 {
 
     /**
-     * [sesi description]
-     * @return [type] [description]
+     * @Route(path="api/v1/ujians/sesi", methods={"GET"})
+     * 
+     * @return App\Actions\SendResponse
      */
     public function sesi()
     {
@@ -35,11 +35,11 @@ class UjianAktifController extends Controller
     }
 
     /**
-     * [releaseToken description]
-     * @param  Request $request [description]
-     * @return [type]           [description]
+     * @Route(path="api/v1/ujians/token-release", methods={"POST"})
+     * 
+     * @return App\Actions\SendResponse
      */
-    public function releaseToken(Request $request) 
+    public function releaseToken() 
     {
         $token = Token::orderBy('id')->first();
         if($token) {
@@ -51,8 +51,9 @@ class UjianAktifController extends Controller
     }
 
     /**
-     * [getPesertas description]
-     * @return [type] [description]
+     * @Route(path="api/v1/ujians/{jadwal_id}/peserta", methods={"GET"})
+     * 
+     * @return App\Actions\SendResponse
      */
     public function getPesertas($jadwal_id)
     {
@@ -62,37 +63,32 @@ class UjianAktifController extends Controller
         if ($jadwal < 1) {
             return SendResponse::badRequest('kesalahan, jadwal tidak ditemukan');
         }
-        // $siswa = SiswaUjian::with(['peserta' => function($query) {
-        //     $query->select('id', 'nama', 'no_ujian');
-        // }])
-        // ->select('id','jadwal_id','mulai_ujian','mulai_ujian_shadow','sisa_waktu','status_ujian','peserta_id')
-        // ->where(['jadwal_id' => $jadwal->id])->get();
+        
         $siswa = DB::table('siswa_ujians')
             ->join('pesertas', 'siswa_ujians.peserta_id', '=', 'pesertas.id')
-            ->select('siswa_ujians.id', 'siswa_ujians.jadwal_id','siswa_ujians.mulai_ujian','siswa_ujians.mulai_ujian_shadow','siswa_ujians.sisa_waktu','siswa_ujians.status_ujian','siswa_ujians.peserta_id','pesertas.nama','pesertas.no_ujian')
+            ->select(
+                'siswa_ujians.id', 
+                'siswa_ujians.jadwal_id',
+                'siswa_ujians.mulai_ujian',
+                'siswa_ujians.mulai_ujian_shadow',
+                'siswa_ujians.sisa_waktu',
+                'siswa_ujians.status_ujian',
+                'siswa_ujians.peserta_id',
+                'pesertas.nama',
+                'pesertas.no_ujian'
+            )
             ->where(['siswa_ujians.jadwal_id' => $jadwal_id])
             ->get();
         return SendResponse::acceptData($siswa);
     }
 
     /**
-     * [resetPeserta description]
-     * @param  Request $request [description]
-     * @return [type]           [description]
-     */
-    public function resetPeserta(Request $request, Peserta $peserta)
-    {
-        $peserta->api_token = '';
-        $peserta->save();
-
-        return SendResponse::accept();
-    }   
-
-    /**
-     * [resetUjianPeserta description]
-     * @param  Request $request [description]
-     * @param  Peserta $peserta [description]
-     * @return [type]           [description]
+     * @Route(path="api/v1/ujians/{jadwal}/peserta/{peserta}/reset", methods={"GET"})
+     * 
+     * @param App\Jadwal $jadwal
+     * @param App\Peserta $peserta
+     * @param ShellreanDev\Cache\CacheHandler $cache
+     * @return App\Actions\SendResponses
      */
     public function resetUjianPeserta(Jadwal $jadwal, Peserta $peserta, CacheHandler $cache)
     {
@@ -131,6 +127,8 @@ class UjianAktifController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/ujians/{jadwal}/multi-reset", methods={"GET"})
+     * 
      * Multiple reset peserta ujian
      * 
      * @param App\Jadwal $jadwal
@@ -143,6 +141,10 @@ class UjianAktifController extends Controller
         DB::beginTransaction();
 
         $pesertas = explode(',', request()->q);
+
+        if (count($pesertas) < 1) {
+            return SendResponse::badRequest('pilih peserta yang akan direset');
+        }
 
         try {
             DB::table('siswa_ujians')
@@ -181,6 +183,8 @@ class UjianAktifController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/ujians/{jadwal}/peserta/{peserta}/close", methods={"GET"})
+     * 
      * Paksa selesaikan ujian peserta
      * 
      * @param string $jadwal_id
@@ -234,6 +238,8 @@ class UjianAktifController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/ujians/{jadwal}/multi-close", methods={"GET"})
+     * 
      * Multi paksa selesaikan ujian peserta
      * 
      * @param string $jadwal_id
@@ -307,10 +313,11 @@ class UjianAktifController extends Controller
     }
 
     /**
-     * [changeSesi description]
-     * @param  Request $request [description]
-     * @param  Jadwal  $jadwal  [description]
-     * @return [type]           [description]
+     * @Route(path="api/v1/ujians/{jadwal}/sesi-change", methods={"POST"})
+     * 
+     * @param  Illuminate\Http\Request $request
+     * @param  App\Jadwal  $jadwal
+     * @return App\Actions\SendResponse
      */
     public function changeSesi(Request $request, Jadwal $jadwal )
     {
@@ -325,8 +332,9 @@ class UjianAktifController extends Controller
     }
 
     /**
-     * [getToken description]
-     * @return [type] [description]
+     * @Route(path="api/v1/ujians/token-get", methods={"GET"})
+     * 
+     * @return App\Actions\SendResponse
      */
     public function getToken()
     {
@@ -352,9 +360,12 @@ class UjianAktifController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/ujians/peserta/add-more-time", methods={"POST"})
+     * 
      * Tambah waktu ujian untuk siswa
-     * @param int $peserta_id
-     * @param int $jadwal_id
+     * 
+     * @param Illuminate\Http\Request $request
+     * @return App\Actions\SendResponse
      */
     public function addMoreTime(Request $request)
     {

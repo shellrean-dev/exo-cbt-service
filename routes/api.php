@@ -85,7 +85,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::post('ujians/{jadwal}/sesi-change', 'UjianAktifController@changeSesi');
         Route::get('ujians/sesi', 'UjianAktifController@sesi');
         Route::post('ujians/token-release', 'UjianAktifController@releaseToken');
-        Route::post('ujians/token-change', 'UjianAktifController@changeToken');
         Route::get('ujians/token-get', 'UjianAktifController@getToken');
         Route::get('ujians/{jadwal}/peserta', 'UjianAktifController@getPesertas');
         Route::get('ujians/{jadwal}/peserta/{peserta}/reset', 'UjianAktifController@resetUjianPeserta');
