@@ -137,7 +137,7 @@ class UjianAktifController extends Controller
         $peserta = request()->get('peserta-auth');
 
         // cek pengaturan sesi
-        if($ujian->event_id != '0') {
+        if($ujian->event_id != '0' && $ujian->event_id != null) {
             // ambil data sesi schedule
             $key = md5(sprintf('sesi_schedules:jadwal:%s:sesi:%s', $ujian->id, $ujian->sesi));
             if ($cache->isCached($key)) {
