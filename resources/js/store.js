@@ -5,6 +5,7 @@ import siswa_auth from './stores/siswa/auth.js'
 import siswa_user from './stores/siswa/user.js'
 import siswa_ujian from './stores/siswa/ujian.js'
 import siswa_jadwal from './stores/siswa/jadwal.js'
+import siswa_channel from './stores/siswa/channel.js'
 
 Vue.use(Vuex)
 
@@ -13,7 +14,8 @@ const store = new Vuex.Store({
 		siswa_auth,
 		siswa_user,
 		siswa_ujian,
-		siswa_jadwal
+		siswa_jadwal,
+		siswa_channel
 	},
 	state: {
 		token: localStorage.getItem('token'),

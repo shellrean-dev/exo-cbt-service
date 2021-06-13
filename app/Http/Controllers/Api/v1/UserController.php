@@ -12,6 +12,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use Browser;
+
 /**
  * UserController
  * @author shellrean <wandinak17@gmail.com>
@@ -27,7 +29,10 @@ class UserController extends Controller
      **/
     public function getUserLogin()
     {
-        $user = request()->user('api'); 
+        $user = request()->user('api');
+        $user->ip = request()->ip();
+        $user->browser = Browser::browserName();
+        $user->flatform = Browser::platformName();
         return SendResponse::acceptData($user);
     }
 

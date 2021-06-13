@@ -10,6 +10,7 @@ use App\Setting;
 use App\Peserta;
 use Illuminate\Support\Facades\DB;
 use ShellreanDev\Cache\CacheHandler;
+use Browser;
 
 /**
  * PesertaLoginControler
@@ -50,10 +51,17 @@ class PesertaLoginController extends Controller
             }
             $token = Str::random(128);
             $peserta->update(['api_token' => $token]);
+
+            $peserta->only('nama','no_ujian','sesi');
+            $send_peserta = $peserta;
+            $peserta['ip'] = request()->ip();
+            $peserta['browser'] = Browser::browserName();
+            $peserta['flatform'] = Browser::platformName();
+
             return response()
             ->json([
                 'status'    => 'success',
-                'data'      => $peserta->only('nama','no_ujian','sesi'),
+                'data'      => $send_peserta,
                 'token'     => $token
             ],200);
         }
@@ -91,6 +99,10 @@ class PesertaLoginController extends Controller
     public function authenticated()
     {
         $peserta = request()->get('peserta-auth')->only('nama','no_ujian','sesi');
+        $peserta['ip'] = request()->ip();
+        $peserta['browser'] = Browser::browserName();
+        $peserta['flatform'] = Browser::platformName();
+
         return ['data' => $peserta];
     }
 

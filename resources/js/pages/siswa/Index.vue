@@ -8,6 +8,15 @@
       :active.sync="isLoading"
       :is-full-page="true"
     ></loading>
+    <loading
+      color="#007bff"
+      :opacity="0.8"
+      loader="dots"
+      :height="45"
+      :width="45"
+      :active.sync="connection"
+      :is-full-page="true"
+    ><div class="text-xl text-center">Kamu terputus dengan server<br /> silakan cek koneksi internet kamu</div></loading>
     <div class="pt-6 pb-24 shadow-sm border-gray-300 px-4 bg-gradient-to-r from-blue-500 to-blue-400 text-white">
       <div class="flex justify-between flex-col sm:flex-row">
         <div class="flex items-center space-x-1"
@@ -58,6 +67,12 @@ export default {
   components: {
     Loading,
   },
+  data() {
+    return {
+      channel: '',
+      connection: false
+    }
+  },
   computed: {
     ...mapGetters(['isLoading', 'setting']),
     ...mapState('siswa_user', {
@@ -65,7 +80,8 @@ export default {
     }),
     ...mapState('siswa_ujian', {
       uncomplete: state => state.uncomplete
-    })
+    }),
+    ...mapState('siswa_channel', ['socket'])
   },
   methods: {
     ...mapActions('siswa_jadwal',['ujianAktif']),
@@ -93,6 +109,20 @@ export default {
         await this.getPesertaUjian()
         await this.getUncompleteUjian()
       }
+
+      this.channel = 'student_connect_channel'
+      this.socket.open();
+      this.socket.emit('getin_student', {
+          user: this.peserta,
+          channel: this.channel
+      });
+
+      this.socket.on('connect', () => { 
+        this.connection = false
+        this.socket.on('disconnect',() =>{
+          this.connection = true
+        })
+      });
     } catch (error) {
       this.showError(error)
     }
@@ -111,6 +141,10 @@ export default {
         }
       }
     }
+  },
+  destroyed() {
+    this.socket.emit('exit', { channel: this.channel })
+    this.socket.close()
   }
 }
 </script>

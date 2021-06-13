@@ -72,7 +72,7 @@ class UjianController extends Controller
             'tanggal'           => date('Y-m-d',strtotime($request->tanggal)),
             'status_ujian'      => 0,
             'alias'             => $request->alias,
-            'event_id'          => $request->event_id == '' ? 0 : $request->event_id,
+            'event_id'          => $request->event_id == '' ? null : $request->event_id,
             'setting'           => $request->setting,
             'mulai_sesi'        => array_map(function($item) {
                 return date('H:i:s', strtotime($item));
@@ -162,7 +162,7 @@ class UjianController extends Controller
             'lama'          => $request->lama*60,
             'tanggal'       => date('Y-m-d', strtotime($request->tanggal)),
             'alias'         => $request->alias,
-            'event_id'      => $request->event_id == '' ? 0 : $request->event_id,
+            'event_id'      => $request->event_id == '' ? null : $request->event_id,
             'setting'       => $request->setting,
             'mulai_sesi'    => array_map(function($item) {
                 return date('H:i:s', strtotime($item));

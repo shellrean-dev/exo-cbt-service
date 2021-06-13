@@ -27,6 +27,7 @@
     "dependencies": {
         "@panzoom/panzoom": "^4.3.2",
         "node-sass": "^4.14.1",
+        "socket.io-client": "2.3.0",
         "vue": "^2.6.11",
         "vue-image-zoomer": "^1.2.1",
         "vue-loading-overlay": "^3.3.2",
