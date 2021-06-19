@@ -178,6 +178,8 @@ class SettingController extends Controller
         return response()->json([
             'name'      => 'Extraordinary CBT',
             'author'    => 'shellrean',
+            'version'   => 'v2.0.1',
+            'code'      => 'latte',
             'email'     => 'wandinak17@gmail.com'
         ]);
     }
