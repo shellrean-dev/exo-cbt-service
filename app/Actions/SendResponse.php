@@ -1,14 +1,20 @@
 <?php
 namespace App\Actions;
 
+/**
+ * SendResponse to client
+ * @author shellrean <wandinak17@gmail.com>
+ * @since 1.0.0
+ */
 class SendResponse
 {
     /**
-     * 403 Forbidden
+     * Status 403 Forbidden
      *
+     * @param string $message
      * @return \Illuminate\Http\Response
      */
-    public static function forbidden($message = '')
+    public static function forbidden(string $message = '')
     {
         return response()->json([
             'error' => true,
@@ -17,11 +23,12 @@ class SendResponse
     }
 
     /**
-     * 404 Not Found
+     * Status 404 Not Found
      *
+     * @param string $message
      * @return \Illuminate\Http\Response
      */
-    public static function notFound($message = '')
+    public static function notFound(string $message = '')
     {
         return response()->json([
             'error' => true,
@@ -30,11 +37,12 @@ class SendResponse
     }
 
     /**
-     * 400 Bad Request
+     * Status 400 Bad Request
      *
+     * @param string $message
      * @return \Illuminate\Http\Response
      */
-    public static function badRequest($message = '')
+    public static function badRequest(string $message = '')
     {
         return response()->json([
             'error' => true,
@@ -43,11 +51,12 @@ class SendResponse
     }
 
     /**
-     * 200 Accept
+     * Status 200 Accept
      *
+     * @param string $message
      * @return \Illuminate\Http\Response
      */
-    public static function accept($message = '')
+    public static function accept(string $message = '')
     {
         return response()->json([
             'error' => false,
@@ -56,8 +65,9 @@ class SendResponse
     }
 
     /**
-     * 200 Accept data
+     * Status 200 Accept data
      *
+     * @param mixed $data
      * @return \Illuminate\Http\Response
      */
     public static function acceptData($data)
@@ -69,8 +79,9 @@ class SendResponse
     }
 
     /**
-     * 200 Accept data custom
+     * Status 200 Accept data custom
      *
+     * @param mixed $data
      * @return  \Illuminate\Http\Response
      */
     public static function acceptCustom($data)
@@ -79,11 +90,12 @@ class SendResponse
     }
 
     /**
-     * 500 Internal server error
+     * Status 500 Internal server error
      *
+     * @param string $message
      * @return \Illuminate\Http\Response
      */
-    public static function internalServerError($message = '')
+    public static function internalServerError(string $message = '')
     {
         return response()->json([
             'error' => true,
