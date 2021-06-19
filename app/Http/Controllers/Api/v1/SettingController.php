@@ -274,7 +274,7 @@ class SettingController extends Controller
             'version' => config('exo.version.code'),
             'code' => config('exo.version.name'),
             'author'    => 'shellrean',
-            'email'     => 'wandinak17@gmail.com'
+            'email'     => '<wandinak17@gmail.com>'
         ]);
     }
 }
