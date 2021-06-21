@@ -251,7 +251,9 @@ class BanksoalController extends Controller
     {
         DB::beginTransaction();
         try {
-            $soals = Soal::with(['jawabans'])->get();
+            $soals = Soal::with(['jawabans'])
+                ->where(['banksoal_id' => $banksoal->id])
+                ->get();
             $direk = Directory::create([
                 'name'      => $banksoal->kode_banksoal.' (Copy)',
                 'slug'      => Str::slug($banksoal->kode_banksoal.' (Copy)', '-')
