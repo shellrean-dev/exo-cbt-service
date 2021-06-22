@@ -52,7 +52,7 @@ class PesertaLoginController extends Controller
             $token = Str::random(128);
             $peserta->update(['api_token' => $token]);
 
-            $peserta->only('nama','no_ujian','sesi');
+            $peserta->only('id','nama','no_ujian','sesi');
             $send_peserta = $peserta;
             $peserta['ip'] = request()->ip();
             $peserta['browser'] = Browser::browserName();
@@ -98,7 +98,7 @@ class PesertaLoginController extends Controller
      */
     public function authenticated()
     {
-        $peserta = request()->get('peserta-auth')->only('nama','no_ujian','sesi');
+        $peserta = request()->get('peserta-auth')->only('id','nama','no_ujian','sesi');
         $peserta['ip'] = request()->ip();
         $peserta['browser'] = Browser::browserName();
         $peserta['flatform'] = Browser::platformName();
