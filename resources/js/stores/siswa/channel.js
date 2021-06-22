@@ -5,7 +5,7 @@ const state = () => ({
 		autoConnect: false, 
 		forceNew:true,  
 		pingInterval: 2000,
-		pingTimeout: 10000
+		pingTimeout: 5000,
   	}),
 })
 

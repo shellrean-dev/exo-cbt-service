@@ -112,16 +112,25 @@ export default {
 
       this.channel = 'student_connect_channel'
       this.socket.open();
-      this.socket.emit('getin_student', {
-          user: this.peserta,
-          channel: this.channel
-      });
 
       this.socket.on('connect', () => { 
         this.connection = false
+        this.socket.emit('getin_student', {
+          user: this.peserta,
+          channel: this.channel
+        });
+
         this.socket.on('disconnect',() =>{
           this.connection = true
         })
+      });
+      
+      this.socket.on('connect_failed', () => {
+        this.connection = true
+      });
+
+      this.socket.on('disconnect', () => {
+        this.connection = true
       });
     } catch (error) {
       this.showError(error)
