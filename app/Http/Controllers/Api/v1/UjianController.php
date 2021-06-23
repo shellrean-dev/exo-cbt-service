@@ -30,7 +30,10 @@ class UjianController extends Controller
      */
     public function index()
     {
-        $ujian = Jadwal::with('event')->orderBy('created_at', 'DESC');
+        $ujian = Jadwal::with('event')
+            ->orderBy('tanggal','DESC')
+            ->orderBy('mulai','DESC');
+            
         if (request()->q != '') {
             $ujian = $ujian->where('alias', 'LIKE', '%'. request()->q.'%');
         }
@@ -241,7 +244,7 @@ class UjianController extends Controller
                 'status_ujian'  => 1,
                 'tanggal'       => now()->format('Y-m-d')
             ])
-            ->select('id','alias','banksoal_id','lama','mulai','tanggal','setting','group_ids')
+            ->select('id','alias','banksoal_id','lama','mulai','tanggal','setting','group_ids','view_result')
             ->get();
 
             $cache->cache($key, $jadwals);
@@ -275,7 +278,11 @@ class UjianController extends Controller
      */
     public function getActive()
     {
-        $ujian = Jadwal::with('event')->where('status_ujian',1)->get();
+        $ujian = Jadwal::with('event')
+            ->where('status_ujian',1)
+            ->orderBy('tanggal','DESC')
+            ->orderBy('mulai','DESC')
+            ->get();
         return SendResponse::acceptData($ujian);
     }
 
