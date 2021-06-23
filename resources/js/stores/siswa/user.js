@@ -22,7 +22,8 @@ const state = () => ({
  * @type {Object}
  */
 const mutations = {
-	ASSIGN_PESERTA_DETAIL
+	ASSIGN_PESERTA_DETAIL,
+    REMOTE_PESERTA_DETAIL
 }
 
 /**
@@ -65,6 +66,15 @@ function getError(error) {
  */
 function ASSIGN_PESERTA_DETAIL(state, payload) {
     state.pesertaDetail = payload
+}
+
+/**
+ * remove peserta detail
+ * @param {*} state
+ * @param {*} payload
+ */
+function REMOTE_PESERTA_DETAIL(state, payload) {
+    state.pesertaDetail = []
 }
 
 /**
