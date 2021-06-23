@@ -52,11 +52,11 @@ class PesertaLoginController extends Controller
             $token = Str::random(128);
             $peserta->update(['api_token' => $token]);
 
-            $peserta->only('id','nama','no_ujian','sesi');
+            $peserta = $peserta->only('id','nama','no_ujian','sesi');
             $send_peserta = $peserta;
-            $peserta['ip'] = request()->ip();
-            $peserta['browser'] = Browser::browserName();
-            $peserta['flatform'] = Browser::platformName();
+            $send_peserta['ip'] = request()->ip();
+            $send_peserta['browser'] = Browser::browserName();
+            $send_peserta['flatform'] = Browser::platformName();
 
             return response()
             ->json([
