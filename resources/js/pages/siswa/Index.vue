@@ -70,7 +70,8 @@ export default {
   data() {
     return {
       channel: '',
-      connection: false
+      connection: false,
+      is_getted: false
     }
   },
   computed: {
@@ -109,32 +110,40 @@ export default {
         await this.getPesertaUjian()
         await this.getUncompleteUjian()
       }
-
       this.channel = 'student_connect_channel'
-      this.socket.open();
 
-      this.socket.on('connect', () => { 
-        this.connection = false
-        this.socket.emit('getin_student', {
-          user: this.peserta,
-          channel: this.channel
+        if (!this.socket.connected) {
+        this.socket.open();
+
+        this.socket.on('connect', () => { 
+          this.connection = false
+          if (!this.is_getted) {
+            this.socket.emit('getin_student', {
+              user: this.peserta,
+              channel: this.channel
+            });
+            this.is_getted = true
+          }
+
+          this.socket.on('disconnect',() =>{
+            this.connection = true
+          })
+        });
+        
+        this.socket.on('connect_failed', () => {
+          this.connection = true
         });
 
-        this.socket.on('disconnect',() =>{
+        this.socket.on('disconnect', () => {
           this.connection = true
-        })
-      });
-      
-      this.socket.on('connect_failed', () => {
-        this.connection = true
-      });
-
-      this.socket.on('disconnect', () => {
-        this.connection = true
-      });
+        });
+      }
     } catch (error) {
       this.showError(error)
     }
+  },
+  mounted() {
+      
   },
   watch: {
     uncomplete(val) {
@@ -143,7 +152,7 @@ export default {
           this.$router.replace({
             name: 'ujian.while'
           })
-        } else if (val.status_ujian == 0) {
+        } else if (val.status_ujian == 0 && this.$route.name != 'ujian.prepare') {
           this.$router.replace({
             name: 'ujian.prepare'
           })
@@ -152,6 +161,7 @@ export default {
     }
   },
   destroyed() {
+    this.$store.commit('siswa_user/REMOTE_PESERTA_DETAIL')
     this.socket.emit('exit', { channel: this.channel })
     this.socket.close()
   }
