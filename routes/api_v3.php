@@ -35,5 +35,8 @@ Route::namespace('Api\v3')->group(function() {
         Route::get('users/{id}', 'UserController@show');
         Route::put('users/{id}' ,'UserController@update');
         Route::delete('users/{id}', 'UserController@destroy');
+
+        Route::get('banksoal-adaptif', 'BanksoalAdaptifController@index'); // DRUNKEY
+        Route::post('banksoal-adaptif', 'BanksoalAdaptifController@store'); // DRUNKEY
     });
 });
