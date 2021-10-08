@@ -22,7 +22,7 @@ class UjianController extends Controller
 {
     /**
      * @Route(path="api/v1/ujians", methods={"GET"})
-     * 
+     *
      * Display a listing of the resource.
      *
      * @return App\Actions\SendResponse
@@ -33,7 +33,7 @@ class UjianController extends Controller
         $ujian = Jadwal::with('event')
             ->orderBy('tanggal','DESC')
             ->orderBy('mulai','DESC');
-            
+
         if (request()->q != '') {
             $ujian = $ujian->where('alias', 'LIKE', '%'. request()->q.'%');
         }
@@ -49,7 +49,7 @@ class UjianController extends Controller
 
     /**
      * @Route(path="api/v1/ujians", methods={"POST"})
-     * 
+     *
      * Store a newly created resource in storage.
      *
      * @param  Illuminate\Http\Request  $request
@@ -125,7 +125,7 @@ class UjianController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/{ujian}", methods={"GET"})
-     * 
+     *
      * Display the specified resource.
      *
      * @param  App\Jadwal $ujian
@@ -139,7 +139,7 @@ class UjianController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/{ujian}", methods={"PUT","PATCH"})
-     * 
+     *
      * Update the specified resource in storage.
      *
      * @param  Illuminate\Http\Request  $request
@@ -209,7 +209,7 @@ class UjianController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/{ujian}", methods={"DELETE"})
-     * 
+     *
      * Remove the specified resource from storage.
      *
      * @param  App\Jadwal  $ujian
@@ -224,7 +224,7 @@ class UjianController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/set-status", methods={"POST"})
-     * 
+     *
      * Set status ujian.
      *
      * @param  Illuminate\Http\Request  $request
@@ -256,7 +256,7 @@ class UjianController extends Controller
 
     /**
      * @Route(path="api/v1/ujian/all", methods={"GET"})
-     * 
+     *
      * Get all ujian without pagination
      *
      * @return App\Actions\SendResponse
@@ -270,9 +270,9 @@ class UjianController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/active-status", methods={"GET"})
-     * 
+     *
      * Get data with status active
-     * 
+     *
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
@@ -288,9 +288,9 @@ class UjianController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/{jadwal}/result/banksoal", methods={"GET"})
-     * 
+     *
      * Get banksoal by jadwal
-     * 
+     *
      * @param  App\Jadwal $jadwal
      * @return App\Actions\SendResponse
      */

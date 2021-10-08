@@ -100,17 +100,6 @@ return [
 
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
-        ],
-
-        'mongolog' => [
-            'driver' => 'monolog',
-            'handler' => MongoDBHandler::class,
-            'formatter' => 'default',
-            'with' => [
-                'mongodb' => new MongoDB\Client(sprintf('mongodb://%s:%s', env('MONGODB_HOST'), env('MONGODB_PORT'))),
-                'database' => 'exo_cbt',
-                'collection' => 'core_exo_cbt_logging'
-            ]
         ]
     ],
 ];

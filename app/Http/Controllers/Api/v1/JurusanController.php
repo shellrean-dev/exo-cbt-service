@@ -16,9 +16,9 @@ class JurusanController extends Controller
 {
     /**
      * @Route(path="api/v1/jurusans", methods={"GET"})
-     * 
+     *
      *  Display list of the source
-     *  
+     *
      *  @return  App\Actions\SendResponse
      *  @author shellrean <wandinak17@gmail.com>
      */
@@ -39,7 +39,7 @@ class JurusanController extends Controller
 
     /**
      * @Route(path="api/v1/jurusans", methods={"POST"})
-     * 
+     *
      * Store jurusan new
      *
      *  @return App\Actions\SendResponse
@@ -52,6 +52,7 @@ class JurusanController extends Controller
         ]);
 
         Jurusan::create([
+            'kode' => uniqid(),
             'nama' => $request->nama
         ]);
         return SendResponse::accept();
@@ -59,7 +60,7 @@ class JurusanController extends Controller
 
     /**
      * @Route(path="api/v1/jurusans/{jurusan}", methods={"GET"})
-     * 
+     *
      * Get jurusan by id
      *
      * @param App\Jurusan $jurusan
@@ -73,14 +74,14 @@ class JurusanController extends Controller
 
     /**
      * @Route(path="api/v1/jurusans/{jurusan}", methods={"PUT", "PATCH"})
-     * 
+     *
      * Update jurusan by id
      *
      * @param Illuminate\Http\Request $request
      * @param App\Jurusan $jurusan
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
-     * 
+     *
      */
     public function update(Request $request, Jurusan $jurusan)
     {
@@ -96,7 +97,7 @@ class JurusanController extends Controller
 
     /**
      * @Route(path="api/v1/jurusans/{jurusan}", methods={"DELETE"})
-     * 
+     *
      * Delete Jurusan by id
      *
      * @param App\Jurusan $jurusan
@@ -111,8 +112,8 @@ class JurusanController extends Controller
 
     /**
      * @Route(path="api/v1/jurusans/all", methods={"GET"})
-     * 
-     * Get all jurusan 
+     *
+     * Get all jurusan
      *
      * @return  \App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
@@ -125,7 +126,7 @@ class JurusanController extends Controller
 
     /**
      * @Route(path="api/v1/jurusans/delete-multiple", methods={"GET"})
-     * 
+     *
      * Multiple destroy jurusan
      *
      * @param Iluminate\Http\Request
@@ -147,8 +148,8 @@ class JurusanController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
-            return SendResponse::badRequest('Error: '.$e->getMessage());    
+            return SendResponse::badRequest('Error: '.$e->getMessage());
         }
         return SendResponse::accept();
     }
-}   
+}

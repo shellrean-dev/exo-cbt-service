@@ -25,7 +25,7 @@ class SoalController extends Controller
 {
     /**
      * @Route(path="api/v1/soals", methods={"POST"})
-     * 
+     *
      * Store a newly created resource in storage.
      *
      * @param Illuminate\Http\Request  $request
@@ -46,6 +46,7 @@ class SoalController extends Controller
 
         try {
             $soal = Soal::create([
+                'id'            => Str::uuid()->toString(),
                 'banksoal_id'   => $request->banksoal_id,
                 'pertanyaan'    => $request->pertanyaan,
                 'tipe_soal'     => $request->tipe_soal,
@@ -84,6 +85,7 @@ class SoalController extends Controller
                     }
 
                     array_push($data, [
+                        'id'            => Str::uuid()->toString(),
                         'soal_id'       => $soal->id,
                         'text_jawaban'  => $pilihan,
                         'correct'       => $correct,
@@ -103,7 +105,7 @@ class SoalController extends Controller
 
     /**
      * @Route(path="api/v1/soals/paste", methods={"POST"})
-     * 
+     *
      * @param Illuminate\Http\Request $request
      */
     public function storePaste(Request $request)
@@ -184,7 +186,7 @@ class SoalController extends Controller
 
     /**
      * @Route(path="api/v1/soals/{soal}", methods={"GET"})
-     * 
+     *
      * Display the specified resource.
      *
      * @param App\Soal $soal
@@ -199,7 +201,7 @@ class SoalController extends Controller
 
     /**
      * @Route(path="api/v1/soals/{soal}", methods={"PUT", "PATCH"})
-     * 
+     *
      * Update the specified resource in storage.
      *
      * @param Illuminate\Http\Request  $request
@@ -276,7 +278,7 @@ class SoalController extends Controller
 
     /**
      * @Route(path="api/v1/soals/{soal}", methods={"DELETE"})
-     * 
+     *
      * Remove the specified resource from storage.
      *
      * @param  App\Soal $soal
@@ -299,9 +301,9 @@ class SoalController extends Controller
 
     /**
      * @Route(path="api/v1/soals/delete/multiple", methods={"GET"})
-     * 
+     *
      * Delete multiple question
-     * 
+     *
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
@@ -328,7 +330,7 @@ class SoalController extends Controller
 
     /**
      * @Route(path="api/v1/soals/banksoal/{banksoal}", methods={"GET"})
-     * 
+     *
      * Get soal by banksoal
      *
      * @param App\Banksoal $banksoal
@@ -356,7 +358,7 @@ class SoalController extends Controller
 
     /**
      * @Route(path="api/v1/soals/banksoal/{banksoal}/all", methods={"GET"})
-     * 
+     *
      * Get soal by banksoal
      *
      * @param App\Banksoal $banksoal
@@ -371,7 +373,7 @@ class SoalController extends Controller
 
     /**
      * @Route(path="api/v1/soals/banksoal/{banksoal}/analys", methods={"GET"})
-     * 
+     *
      * Get soal by banksoal analys
      *
      * @param App\Banksoal $banksoal
@@ -388,7 +390,7 @@ class SoalController extends Controller
 
     /**
      * @Route(path="api/v1/soals/banksoal/{banksoal}/upload", methods={"POST"})
-     * 
+     *
      * @param Illuminate\Http\Request $request
      * @param App\Banksoal $banksoal
      * @return App\Actions\SendResponse
@@ -473,11 +475,11 @@ class SoalController extends Controller
             $data = $exoProc->render();
             $questions = $data['data'];
             $files = $data['files'];
-            
+
             $options = [];
             foreach($questions as $key => $question) {
                 $soal_id = Str::uuid()->toString();
-                
+
                 $soal = [
                     'id'            => $soal_id,
                     'banksoal_id'   => $banksoal->id,
@@ -517,7 +519,7 @@ class SoalController extends Controller
 
     /**
      * @Route(path="api/v1/soals/import-word/{banksoal}", methods={"POST"})
-     * 
+     *
      * Import soal from docx
      *
      * @param Illuminate\http\Request $request

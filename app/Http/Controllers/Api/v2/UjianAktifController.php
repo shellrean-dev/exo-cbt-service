@@ -29,9 +29,9 @@ class UjianAktifController extends Controller
 {
     /**
      * @Route(path="api/v2/ujians/uncomplete", methods={"GET"})
-     * 
+     *
      * Ambil data ujian siswa yang belum diselesaikan pada hari ini
-     * 
+     *
      * @param ShellreanDev\Services\Ujian\UjianService $ujianService
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
@@ -48,7 +48,7 @@ class UjianAktifController extends Controller
         if(!$data) {
             return SendResponse::acceptData([]);
         }
-        
+
         $res = [
             'jadwal_id'     => $data->jadwal_id,
             'status_ujian'  => $data->status_ujian
@@ -56,12 +56,12 @@ class UjianAktifController extends Controller
 
         return SendResponse::acceptData($res);
     }
-    
+
     /**
      * @Route(path="api/v2/ujians/start", methods={"POST"})
-     * 
+     *
      * Memulai ujian masuk kedalam mode standby
-     * 
+     *
      * @param  Illuminate\Http\Request $request
      * @param ShellreanDev\Cache\CacheHandler $cache
      * @return App\Actions\SendResponse
@@ -107,7 +107,7 @@ class UjianAktifController extends Controller
                     $cache->cache($key, $setting_token);
                 }
                 if (!$setting_token) {
-                    return SendResponse::badRequest('Kesalahan dalam installasi token, hubungi administrator'); 
+                    return SendResponse::badRequest('Kesalahan dalam installasi token, hubungi administrator');
                 }
 
                 $token_expired = intval($setting_token->value);
@@ -200,25 +200,25 @@ class UjianAktifController extends Controller
                 'created_at'        => now(),
                 'updated_at'        => now(),
             ]);
-            
+
             $data = DB::table('siswa_ujians')
                 ->where('id', $siswa_ujian_id)
                 ->first();
-    
+
             $cache->cache($key, $data);
 
         } catch (\Exception $e) {
             return SendResponse::internalServerError("Terjadi kesalahan 500. ".$e->getMessage());
         }
-            
+
         return SendResponse::accept('mata ujian diambil dengan mulai ujian baru');
     }
 
     /**
      * @Route(path="api/v2/ujians/peserta", methods={"GET"})
-     * 
+     *
      * Ambil ujian peserta yang sedang dikerjakan
-     * 
+     *
      * @param ShellreanDev\Services\Ujian\UjianService $ujianService
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
@@ -247,9 +247,9 @@ class UjianAktifController extends Controller
 
     /**
      * @Route(path="api/v2/ujians/start/time", methods={"POST"})
-     * 
+     *
      * Mulai penghitungan waktu ujian
-     * 
+     *
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
@@ -268,7 +268,7 @@ class UjianAktifController extends Controller
             return SendResponse::badRequest('Kami tidak dapat mengambil ujian untuk kamu, kamu tidak sedang mengikuti ujian apapun. silakan logout lalu login kembali');
         }
 
-        // Jika ini adalah pertama kali peserta 
+        // Jika ini adalah pertama kali peserta
         // Melakukan mulai ujian
         // 3 <= sedang mengerjakan
         if ($data->status_ujian != 3) {
@@ -290,9 +290,9 @@ class UjianAktifController extends Controller
 
     /**
      * @Route(path="api/v2/ujians/filled", methods={"GET"})
-     * 
+     *
      * Ambil soal dan jawaban siswa
-     * 
+     *
      * @param ShellreanDev\Services\Ujian\UjianService $ujianService
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
@@ -325,7 +325,7 @@ class UjianAktifController extends Controller
         }
 
         $banksoal_ids = array_column(json_decode($jadwal->banksoal_id, true), 'id');
-        
+
         // ambil data banksoal yang diujikan pada jadwal
         $key = md5(sprintf('banksoals:diujikan:ids:%s', implode(',', $banksoal_ids)));
         if ($cache->isCached($key)) {
@@ -339,7 +339,7 @@ class UjianAktifController extends Controller
 
             $cache->cache($key, $banksoal_diujikan);
         }
-        
+
         $banksoal_id = '';
 
         // Cari id banksoal yang dapat dipakai oleh siswwa
@@ -389,7 +389,7 @@ class UjianAktifController extends Controller
             $setting = json_decode($jadwal->setting, true);
 
             // Ambil soal tipe : ganda
-            // $key = md5(sprintf('soals:data:banksoal:%s:ganda:acak:%s:max:%d', 
+            // $key = md5(sprintf('soals:data:banksoal:%s:ganda:acak:%s:max:%d',
             //     $banksoal->id, $setting['acak_soal'], $max_pg
             // ));
             // if ($cache->isCached($key)) {
@@ -404,14 +404,14 @@ class UjianAktifController extends Controller
                 if($setting['acak_soal'] == "1") {
                     $pg = $pg->inRandomOrder();
                 }
-    
+
                 // Ambil soal sebanyak maximum
                 $pg = $pg->take($max_pg)->get();
-                
+
             //     $cache->cache($key, $pg);
             // }
 
-            
+
             // Buat collection untuk jawaban siswa
             $soal_pg = [];
             foreach($pg as $item) {
@@ -431,7 +431,7 @@ class UjianAktifController extends Controller
             }
 
             // Ambil soal tipe :esay
-            // $key = md5(sprintf('soals:data:banksoal:%s:esay:acak:%s:max:%d', 
+            // $key = md5(sprintf('soals:data:banksoal:%s:esay:acak:%s:max:%d',
             //     $banksoal->id, $setting['acak_soal'], $max_esay
             // ));
 
@@ -450,7 +450,7 @@ class UjianAktifController extends Controller
 
                 // Ambil soal sebanyak maximum
                 $esay = $esay->take($max_esay)->get();
-                
+
             //     $cache->cache($key, $esay);
             // }
 
@@ -473,7 +473,7 @@ class UjianAktifController extends Controller
             }
 
             // Ambil soal: Listening
-            // $key = md5(sprintf('soals:data:banksoal:%s:listening:acak:%s:max:%d', 
+            // $key = md5(sprintf('soals:data:banksoal:%s:listening:acak:%s:max:%d',
             //     $banksoal->id, $setting['acak_soal'], $max_listening
             // ));
             // if ($cache->isCached($key)) {
@@ -483,12 +483,12 @@ class UjianAktifController extends Controller
                     'banksoal_id'   => $banksoal->id,
                     'tipe_soal'     => 3
                 ]);
-    
+
                 // Acak soal bila di set
                 if($setting['acak_soal'] == "1") {
                     $listening = $listening->inRandomOrder();
                 }
-    
+
                 // Ambil soal sebanyak maximum
                 $listening = $listening->take($max_listening)->get();
 
@@ -514,7 +514,7 @@ class UjianAktifController extends Controller
             }
 
             // Ambil soal: Multichoice complex
-            // $key = md5(sprintf('soals:data:banksoal:%s:multichoice-complex:acak:%s:max:%d', 
+            // $key = md5(sprintf('soals:data:banksoal:%s:multichoice-complex:acak:%s:max:%d',
             //     $banksoal->id, $setting['acak_soal'], $max_complex
             // ));
             // if ($cache->isCached($key)) {
@@ -524,12 +524,12 @@ class UjianAktifController extends Controller
                     'banksoal_id'   => $banksoal->id,
                     'tipe_soal'     => 4
                 ]);
-    
+
                 // Acak soal bila di set
                 if($setting['acak_soal'] == "1") {
                     $complex = $complex->inRandomOrder();
                 }
-    
+
                 // Ambil soal sebanyak maximum
                 $complex = $complex->take($max_complex)->get();
 
@@ -555,30 +555,32 @@ class UjianAktifController extends Controller
             }
 
             // Soal  menjodohkan
-            // $menjodohkan = Soal::where([
-            //     'banksoal_id'   => $banksoal->id,
-            //     'tipe_soal'     => 5
-            // ]);
-            // if($setting['acak_soal'] == "1") {
-            //     $menjodohkan = $menjodohkan->inRandomOrder();
-            // }
-            // $menjodohkan = $menjodohkan->take($max_menjodohkan)->get();
+             $menjodohkan = DB::table('soals')->where([
+                 'banksoal_id'   => $banksoal->id,
+                 'tipe_soal'     => 5
+             ]);
+             if($setting['acak_soal'] == "1") {
+                 $menjodohkan = $menjodohkan->inRandomOrder();
+             }
+             $menjodohkan = $menjodohkan->take($max_menjodohkan)->get();
 
-            // $soal_menjodohkan = $menjodohkan->map(function($item) use($peserta, $banksoal, $jadwal) {
-            //     return [
-            //         'peserta_id'    => $peserta->id,
-            //         'banksoal_id'   => $banksoal->id,
-            //         'soal_id'       => $item->id,
-            //         'jawab'         => 0,
-            //         'iscorrect'     => 0,
-            //         'jadwal_id'     => $jadwal->id,
-            //         'ragu_ragu'     => 0,
-            //         'esay'          => ''
-            //     ];
-            // });
+             $soal_menjodohkan = [];
+             foreach ($menjodohkan as $item) {
+                 array_push($soal_menjodohkan, [
+                     'id'            => Str::uuid()->toString(),
+                     'peserta_id'    => $peserta->id,
+                     'banksoal_id'   => $banksoal->id,
+                     'soal_id'       => $item->id,
+                     'jawab'         => 0,
+                     'iscorrect'     => 0,
+                     'jadwal_id'     => $jadwal->id,
+                     'ragu_ragu'     => 0,
+                     'esay'          => ''
+                 ]);
+             }
 
             // Ambil soal:  isian singkat
-            // $key = md5(sprintf('soals:data:banksoal:%s:isian-singkat:acak:%s:max:%d', 
+            // $key = md5(sprintf('soals:data:banksoal:%s:isian-singkat:acak:%s:max:%d',
             //     $banksoal->id, $setting['acak_soal'], $max_isian_singkat
             // ));
             // if ($cache->isCached($key)) {
@@ -588,12 +590,12 @@ class UjianAktifController extends Controller
                     'banksoal_id'   => $banksoal->id,
                     'tipe_soal'     => 6
                 ]);
-    
+
                 // Acak soal bila di set
                 if($setting['acak_soal'] == "1") {
                     $isian_singkat = $isian_singkat->inRandomOrder();
                 }
-    
+
                 // Ambil soal sebanyak maximum
                 $isian_singkat = $isian_singkat->take($max_isian_singkat)->get();
 
@@ -625,7 +627,7 @@ class UjianAktifController extends Controller
                 '2' => $soal_esay,
                 '3' => $soal_listening,
                 '4' => $soal_complex,
-                // '5' => $soal_menjodohkan,
+                 '5' => $soal_menjodohkan,
                 '6' => $soal_isian_singkat,
             ]);
             foreach ($setting['list'] as $value) {
@@ -673,14 +675,14 @@ class UjianAktifController extends Controller
         $now = Carbon::createFromFormat('H:i:s', Carbon::now()->format('H:i:s'));
         $diff_in_minutes = $start->diffInSeconds($now);
 
-        // Jika perbedaan waktu telah melebihi 
+        // Jika perbedaan waktu telah melebihi
         // waktu pengerjaan ujian
         if($diff_in_minutes > $jadwal->lama) {
             try {
                 DB::beginTransaction();
                 $ujian->status_ujian = 1;
                 $ujian->save();
-    
+
                 // $finished = UjianService::finishingUjian($banksoal_id, $jadwal->id, $peserta->id);
 
                 // if(!$finished['success']) {
@@ -715,9 +717,9 @@ class UjianAktifController extends Controller
 
     /**
      * @Route(path="api/v2/ujian/hasils", methods={"GET"})
-     * 
+     *
      * Hasil ujian siswa
-     * 
+     *
      * @param ShellreanDev\Services\JadwalService $jadwalService
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
