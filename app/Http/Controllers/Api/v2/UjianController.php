@@ -103,14 +103,23 @@ class UjianController extends Controller
 //            } else {
                 $jwb_soals = DB::table('jawaban_soals')
                     ->where('soal_id', $find->soal_id)
+                    ->select(['id', 'text_jawaban'])
                     ->get();
-
+                $soal = DB::table('soals')
+                    ->where('id', $find->soal_id)
+                    ->select('id', 'case_sensitive')
+                    ->first();
 //                $cache->cache($key, $jwb_soals);
 //            }
 
             foreach($jwb_soals as $jwb) {
                 $jwb_strip = strip_tags($jwb->text_jawaban);
-                if (trim($jwb_strip) == trim($request->isian)) {
+                $isian_siswa = $request->isian;
+                if ($soal->case_sensitive == '0') {
+                    $jwb_strip = strtoupper($jwb_strip);
+                    $isian_siswa = strtoupper($isian_siswa);
+                }
+                if (trim($jwb_strip) == trim($isian_siswa)) {
                     $find->iscorrect = 1;
                     break;
                 }

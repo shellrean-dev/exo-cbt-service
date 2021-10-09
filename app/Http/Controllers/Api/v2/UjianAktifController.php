@@ -704,7 +704,7 @@ class UjianAktifController extends Controller
                 DB::commit();
 
                 // Buat cache ujian
-                $key = md5(sprintf('siswa_ujians:jadwal:%s:peserta:%s', $jadwal->id, $peserta->id));
+//                $key = md5(sprintf('siswa_ujians:jadwal:%s:peserta:%s', $jadwal->id, $peserta->id));
 //                $cache->cache($key, $ujian);
             } catch (\Exception $e) {
                 DB::rollBack();

@@ -13,7 +13,7 @@ use stdClass;
 
 /**
  * Jadwal Service
- * 
+ *
  * @since 3.0.0 <ristretto>
  * @author shellrean <wandinak17@gmail.com>
  */
@@ -21,7 +21,7 @@ final class JadwalService extends AbstractService
 {
     /**
      * Inject dependency
-     * 
+     *
      * @since 3.0.0 <ristretto>
      * @param ShellreanDev\Cache\CacheHandler $cache
      */
@@ -32,16 +32,16 @@ final class JadwalService extends AbstractService
 
     /**
      * Get ujian active today
-     * 
+     *
      * @return Illuminate\Support\Collection
      * @since 3.0.0 <ristretto>
      */
     public function activeToday(): ?Collection
     {
-        $key = md5(sprintf('jadwal:data:active:today'));
-        if ($this->cache->isCached($key)) {
-            $jadwals = $this->cache->getItem($key);
-        } else {
+//        $key = md5(sprintf('jadwal:data:active:today'));
+//        if ($this->cache->isCached($key)) {
+//            $jadwals = $this->cache->getItem($key);
+//        } else {
             $jadwals = DB::table('jadwals')->where([
                 'status_ujian'  => 1,
                 'tanggal'       => now()->format('Y-m-d')
@@ -59,25 +59,25 @@ final class JadwalService extends AbstractService
             )
             ->get();
 
-            $this->cache->cache($key, $jadwals);
-        }
+//            $this->cache->cache($key, $jadwals);
+//        }
 
         return $jadwals;
     }
 
     /**
      * Get ujian has finished by student
-     * 
+     *
      * @param string $student_id
      * @return Illuminate\Support\Collection
      * @since 3.0.0 <ristretto>
      */
     public function hasCompletedBy(string $student_id): ?Collection
     {
-        $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $student_id));
-        if ($this->cache->isCached($key)) {
-            $hascomplete = $this->cache->getItem($key);
-        } else {
+//        $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $student_id));
+//        if ($this->cache->isCached($key)) {
+//            $hascomplete = $this->cache->getItem($key);
+//        } else {
             $hascomplete = DB::table('siswa_ujians')->where([
                 'peserta_id'        => $student_id,
                 'status_ujian'      => 1
@@ -86,8 +86,8 @@ final class JadwalService extends AbstractService
             ->get()
             ->pluck('jadwal_id');
 
-            $this->cache->cache($key, $hascomplete);
-        }
+//            $this->cache->cache($key, $hascomplete);
+//        }
 
         return $hascomplete;
     }

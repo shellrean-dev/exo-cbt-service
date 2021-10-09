@@ -17,28 +17,28 @@ class SettingController extends Controller
 {
     /**
      * @Route(path="api/v1/settings/sekolah", methods={"GET"})
-     * 
+     *
      * Get setting sekolah
-     * 
+     *
      * @param ShellreanDev\Cache\CacheHandler $cache
-     * @return App\Actions\SendResponse
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function getSettingSekolah(CacheHandler $cache)
     {
         // ambil data setting sekolah
-        $key = md5(sprintf('setting:data:set_sekolah'));
-        if ($cache->isCached($key)) {
-            $setting = $cache->getItem($key);
-        } else {
+//        $key = md5(sprintf('setting:data:set_sekolah'));
+//        if ($cache->isCached($key)) {
+//            $setting = $cache->getItem($key);
+//        } else {
             $setting = DB::table('settings')
                 ->where('name', 'set_sekolah')
                 ->select('id','name','value')
                 ->first();
 
-            $cache->cache($key, $setting);
-        }
-        
+//            $cache->cache($key, $setting);
+//        }
+
         return SendResponse::acceptData([
             'name'  => $setting->name,
             'value' => json_decode($setting->value, true)
@@ -47,27 +47,27 @@ class SettingController extends Controller
 
     /**
      * @Route(path="api/v1/settings-public-sekolah", methods={"GET"})
-     * 
+     *
      * Get setting sekolah public
-     * 
+     *
      * @param ShellreanDev\Cache\CacheHandler $cache
-     * @return App\Actions\SendResponse
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function getSettingPublicSekolah(CacheHandler $cache)
     {
         // ambil data setting sekolah
-        $key = md5(sprintf('setting:data:set_sekolah'));
-        if ($cache->isCached($key)) {
-            $setting = $cache->getItem($key);
-        } else {
+//        $key = md5(sprintf('setting:data:set_sekolah'));
+//        if ($cache->isCached($key)) {
+//            $setting = $cache->getItem($key);
+//        } else {
             $setting = DB::table('settings')
                 ->where('name', 'set_sekolah')
                 ->select('id','name','value')
                 ->first();
 
-            $cache->cache($key, $setting);
-        }
+//            $cache->cache($key, $setting);
+//        }
 
         $value = json_decode($setting->value, true);
         $sekolah_name = isset($value['nama_sekolah']) ? $value['nama_sekolah'] : '';
@@ -81,9 +81,9 @@ class SettingController extends Controller
 
     /**
      * @Route(path="api/v1/settings/sekolah", methods={"POST"})
-     * 
+     *
      * Store setting sekolah
-     * 
+     *
      * @param Illuminate\Http\Request $request
      * @param ShellreanDev\Cache\CacheHandler $cache
      * @return App\Actions\SendResponse
@@ -100,7 +100,7 @@ class SettingController extends Controller
         ]);
 
         $sekolah = Setting::where('name', 'set_sekolah')->first();
-        
+
         if($sekolah) {
             if(isset($sekolah->value['logo']) && $sekolah->value['logo'] != '') {
                 $logo = $sekolah->value['logo'];
@@ -130,25 +130,25 @@ class SettingController extends Controller
                     'tingkat' => $request->tingkat,
                 ],
                 'type' => 'sekolah'
-            ]); 
+            ]);
         }
 
         // set cache setting sekolah
-        $key = md5(sprintf('setting:data:set_sekolah'));
+//        $key = md5(sprintf('setting:data:set_sekolah'));
         $setting = DB::table('settings')
                 ->where('name', 'set_sekolah')
                 ->select('id','name','value')
                 ->first();
-        $cache->cache($key, $setting);
+//        $cache->cache($key, $setting);
 
         return SendResponse::accept();
     }
 
     /**
      * @Route(path="api/v1/settings/sekolah/logo", methods={"POST"})
-     * 
+     *
      * Change logo sekolah
-     * 
+     *
      * @param  Illuminate\Httpp\Request $request
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
@@ -179,9 +179,9 @@ class SettingController extends Controller
 
     /**
      * @Route(path="api/v1/settings", methods={"GET"})
-     * 
+     *
      * Get data setting
-     * 
+     *
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
@@ -209,9 +209,9 @@ class SettingController extends Controller
 
     /**
      * @Route(path="api/v1/settings", methods={"POST"})
-     * 
+     *
      * Store data setting
-     * 
+     *
      * @param Illuminate\Http\Request $request
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
@@ -239,9 +239,9 @@ class SettingController extends Controller
 
     /**
      * @Route(path="api/v1/settings/auth", methods={"GET"})
-     * 
+     *
      * Get setting authentication method
-     * 
+     *
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
@@ -261,9 +261,9 @@ class SettingController extends Controller
 
     /**
      * @Route(path="api/v1/info-app", methods={"GET"})
-     * 
+     *
      * Get app info
-     * 
+     *
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
