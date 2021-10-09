@@ -16,7 +16,7 @@ class GroupController extends Controller
 {
     /**
      * @Route(path="api/v1/groups", methods={"GET"})
-     * 
+     *
      * Ambil data seluruh data grupping
      *
      * @return App\Actions\SendResponse
@@ -55,7 +55,7 @@ class GroupController extends Controller
 
     /**
      * @Route(path="api/v1/groups", methods={"POST"})
-     * 
+     *
      * Buat data baru grup
      *
      * @param Illuminate\Http\Request $request
@@ -75,7 +75,7 @@ class GroupController extends Controller
                 'created_at' => now(),
                 'updated_at' => now()
             ];
-            if (isset($request->parent_id) && $request->parent_id != '' && $request->parent_id != 0) {
+            if (isset($request->parent_id) && $request->parent_id != '') {
                 $exist = DB::table('groups')
                     ->where('id', $request->parent_id)
                     ->count();
@@ -94,7 +94,7 @@ class GroupController extends Controller
 
     /**
      * @Route(path="api/v1/groups/{group_id}", methods={"GET"})
-     * 
+     *
      * Ambil single data grup
      *
      * @param string $group_id
@@ -120,7 +120,7 @@ class GroupController extends Controller
 
     /**
      * @Route(path="api/v1/groups/{group_id}", methods={"PUT", "PATCH"})
-     * 
+     *
      * Edit data gorup
      *
      * @param Illuminate\Http\Request $request
@@ -158,9 +158,7 @@ class GroupController extends Controller
 
             DB::table('groups')
                 ->where('id', $group_id)
-                ->update([
-                    'name'  => $request->name,
-                ]);
+                ->update($data);
             return SendResponse::accept();
         } catch (\Exception $e) {
             return SendResponse::internalServerError('Kesalahan 500.'.$e->getMessage());
@@ -169,7 +167,7 @@ class GroupController extends Controller
 
     /**
      * @Route(path="api/v1/groups/{group_id}", methods={"DELETE"})
-     * 
+     *
      * Remove data group
      *
      * @param string $group_id
