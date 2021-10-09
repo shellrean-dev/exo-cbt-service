@@ -18,9 +18,9 @@ class GroupMemberController extends Controller
 {
     /**
      * @Route(path="api/v1/group_members", methods={"GET"})
-     * 
+     *
      * Ambil data member grup
-     * 
+     *
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
@@ -56,7 +56,7 @@ class GroupMemberController extends Controller
             }
             $data = $data->join('pesertas', 'group_members.student_id', '=', 'pesertas.id')
                 ->select('group_members.id', 'pesertas.nama','pesertas.no_ujian')
-                ->get();
+                ->paginate(50);
 
             return SendResponse::acceptData($data);
         } catch (\Exception $e) {
@@ -66,9 +66,9 @@ class GroupMemberController extends Controller
 
     /**
      * @Route(path="api/v1/group_members", methods={"POST"})
-     * 
+     *
      * Buat data member baru
-     * 
+     *
      * @param Illuminate\Http\Request $request
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
@@ -90,15 +90,15 @@ class GroupMemberController extends Controller
             ]);
             return SendResponse::accept();
         } catch (\Exception $e) {
-            return SendResponse::internalServerError('Kesalahan 500.'.$e->getMessage()); 
+            return SendResponse::internalServerError('Kesalahan 500.'.$e->getMessage());
         }
     }
 
     /**
      * @Route(path="api/v1/group_members/multiple", methods={"POST})
-     * 
+     *
      * Buat multi-data member baru
-     * 
+     *
      * @param Illuminate\Http\Request $request
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
@@ -133,10 +133,10 @@ class GroupMemberController extends Controller
 
     /**
      * @Route(path="api/v1/group_members/import", methods={"POST"})
-     * 
-     * Import multi-data member 
+     *
+     * Import multi-data member
      * dari excel
-     * 
+     *
      * @param Illuminate\Http\Request $request
      * @return App\Actions\SendResponse;
      * @author shellrean <wandinak17@gmail.com>
@@ -157,9 +157,9 @@ class GroupMemberController extends Controller
 
     /**
      * @Route(path="api/v1/group_members/{member_id}", methods={"DELETE"})
-     * 
+     *
      * Hapus data member
-     * 
+     *
      * @param string $member_id
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
@@ -186,9 +186,9 @@ class GroupMemberController extends Controller
 
     /**
      * @Route(path="api/v1/group_members/multiple", methods={"DELETE"})
-     * 
+     *
      * Hapus multi-data member
-     * 
+     *
      * @return  App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
