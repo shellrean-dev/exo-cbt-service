@@ -24,6 +24,7 @@ class CreateBanksoalsTable extends Migration
             $table->integer('jumlah_soal_ganda_kompleks')->default(0)->comment('jumlah soal pilihan ganda kompleks');
             $table->integer('jumlah_isian_singkat')->default(0)->comment('jumlah isian singkat');
             $table->integer('jumlah_menjodohkan')->default(0)->comment('jumlah menjodohkan');
+            $table->integer('jumlah_mengurutkan')->default(0)->comment('jumlah mengurutkan');
 
             $table->string('persen');
             $table->uuid('matpel_id');

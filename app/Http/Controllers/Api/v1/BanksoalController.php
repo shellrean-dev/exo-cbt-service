@@ -15,14 +15,14 @@ use App\Soal;
 
 /**
  * BanksoalController
- * 
+ *
  * @author shellrean <wandinak17@gmail.com>
  */
 class BanksoalController extends Controller
 {
     /**
      * @Route(path="api/v1/banksoals", methods={"GET"})
-     * 
+     *
      * Display a listing of the resource.
      *
      * @return App\Actions\SendResponse
@@ -50,7 +50,7 @@ class BanksoalController extends Controller
 
     /**
      * @Route(path="api/v1/banksoals", methods={"POST"})
-     * 
+     *
      * Store a newly created resource in storage.
      *
      * @param  Illuminate\Http\Request  $request
@@ -70,6 +70,7 @@ class BanksoalController extends Controller
             'jumlah_soal_ganda_kompleks' => 'required|int',
             'jumlah_isian_singkat' => 'required|int',
             'jumlah_menjodohkan' => 'required|int',
+            'jumlah_mengurutkan' => 'required|int',
             'persen'            => 'required|array'
         ]);
 
@@ -101,6 +102,7 @@ class BanksoalController extends Controller
                 'jumlah_soal_ganda_kompleks' => $request->jumlah_soal_ganda_kompleks,
                 'jumlah_isian_singkat' => $request->jumlah_isian_singkat,
                 'jumlah_menjodohkan' => $request->jumlah_menjodohkan,
+                'jumlah_mengurutkan' => $request->jumlah_mengurutkan,
                 'persen'            => $request->persen,
                 'directory_id'      => $direk->id
             ];
@@ -117,7 +119,7 @@ class BanksoalController extends Controller
 
     /**
      * @Route(path="api/v1/banksoal/{id}", methods={"GET"})
-     * 
+     *
      * Display the specified resource.
      *
      * @param  int  $id
@@ -132,7 +134,7 @@ class BanksoalController extends Controller
 
     /**
      * @Route(path="api/v1/banksoals/{id}", methods={"PUT","PATCH"})
-     * 
+     *
      * Update the specified resource in storage.
      *
      * @param  Illuminate\Http\Request  $request
@@ -151,6 +153,7 @@ class BanksoalController extends Controller
             'jumlah_soal_ganda_kompleks' => 'required|int',
             'jumlah_isian_singkat' => 'required|int',
             'jumlah_menjodohkan' => 'required|int',
+            'jumlah_mengurutkan' => 'required|int',
             'persen'            => 'required|array'
         ]);
 
@@ -167,6 +170,7 @@ class BanksoalController extends Controller
         $banksoal->jumlah_soal_ganda_kompleks = $request->jumlah_soal_ganda_kompleks;
         $banksoal->jumlah_isian_singkat = $request->jumlah_isian_singkat;
         $banksoal->jumlah_menjodohkan = $request->jumlah_menjodohkan;
+        $banksoal->jumlah_mengurutkan = $request->jumlah_mengurutkan;
         $banksoal->persen = $request->persen;
         $banksoal->save();
 
@@ -175,7 +179,7 @@ class BanksoalController extends Controller
 
     /**
      * @Route(path="api/v1/banksoals/{id}", methods={"DELETE"})
-     * 
+     *
      * Remove the specified resource from storage.
      *
      * @param  App\Banksoal  $banksoal
@@ -200,7 +204,7 @@ class BanksoalController extends Controller
 
     /**
      * @Route(path="api/v1/banksoals/all", methods={"GET"})
-     * 
+     *
      * Display all data.
      *
      * @return App\Actions\SendResponse
@@ -219,9 +223,9 @@ class BanksoalController extends Controller
 
     /**
      * @Route(path="api/v1/banksoals/{id}/analys", methods={"GET"})
-     * 
+     *
      * Get analys banksoal
-     * 
+     *
      * @param  Banksoal $banksoal
      * @return App\Actions\SendResponse
      */
@@ -264,7 +268,7 @@ class BanksoalController extends Controller
 
     /**
      * @Route(path="api/v1/banksoals/{id}/duplikat, methods={"GET"})
-     * 
+     *
      * Duplikat banksoal
      *
      * @param Banksoal $banksoal
@@ -291,6 +295,10 @@ class BanksoalController extends Controller
                 'jumlah_soal_esay'  => $banksoal->jumlah_soal_esay,
                 'jumlah_soal_listening' => $banksoal->jumlah_soal_listening,
                 'jumlah_pilihan_listening' => $banksoal->jumlah_pilihan_listening,
+                'jumlah_soal_ganda_kompleks' => $banksoal->jumlah_soal_ganda_kompleks,
+                'jumlah_isian_singkat' => $banksoal->jumlah_isian_singkat,
+                'jumlah_menjodohkan' => $banksoal->jumlah_menjodohkan,
+                'jumlah_mengurutkan' => $banksoal->jumlah_mengurutkan,
                 'persen'            => $banksoal->persen,
                 'directory_id'      => $direk->id
             ];
