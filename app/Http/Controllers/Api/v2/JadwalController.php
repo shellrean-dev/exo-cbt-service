@@ -66,7 +66,7 @@ class JadwalController extends Controller
             foreach($bks as $bk) {
                 // cek apakah matpel tersebut adalah matpel agama
                 // agama_id != 0
-                if($bk->agama_id != 0) {
+                if($bk->agama_id != 0 && $bk->agama_id != '0') {
                     // cek apakah agama di matpel sama dengan agama di peserta
                     // jika iya maka ambil banksoal
                     if($bk->agama_id == $peserta['agama_id']) {
@@ -77,7 +77,7 @@ class JadwalController extends Controller
                     // jika jurusan_id adalah array
                     // artinya ini adalah matpel khusus
                     $jurusans = $bk->jurusan_id == '0' || $bk->jurusan_id == '' ? 0 : json_decode($bk->jurusan_id, true);
-                    if(is_array($jurusans)) {
+                    if(is_array($jurusans) && $jurusans != null) {
                         // loop jurusan tersebut
                         foreach($jurusans as $d) {
                             // cek apakah jurusan dari matpel
@@ -88,7 +88,7 @@ class JadwalController extends Controller
                             }
                         }
                     } else {
-                        // jika jurusan id == 0
+                        // jika jurusan id == 0 dan tidak null
                         if ($bk->jurusan_id == 0) {
                             $jadwal_id = $jadwal->id;
                             break;
