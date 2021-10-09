@@ -169,7 +169,7 @@ final class UjianService extends AbstractService
                 $jurusans = ($banksoal->jurusan_id == '0' || $banksoal->jurusan_id == '')
                     ? 0
                     : json_decode($banksoal->jurusan_id, true);
-                if(is_array($jurusans)) {
+                if(is_array($jurusans) && $jurusans != null) {
                     foreach ($jurusans as $d) {
                         if($d == $peserta['jurusan_id']) {
                             $banksoal_id = $banksoal->id;
