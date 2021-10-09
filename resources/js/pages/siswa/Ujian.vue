@@ -18,7 +18,7 @@
             <input type="range" id="vol" name="vol" min="0" max="3" value="1" @change="onChangeRange">
           </div>
 			    <div class="flex space-x-1">
-				    <button class="py-1 px-1 rounded-md bg-gray-100 text-gray-600 border border-gray-300 hover:shadow-lg" 
+				    <button class="py-1 px-1 rounded-md bg-gray-100 text-gray-600 border border-gray-300 hover:shadow-lg"
             @click="modalQuestion = true"
             v-show="!focus"
             :disabled="!listening">
@@ -98,7 +98,7 @@
                     v-if="filleds[questionIndex].soal.tipe_soal == 6"
                     v-model="filleds[questionIndex].esay"
                     @keyup="onInput"/>
-                    <textarea 
+                    <textarea
                     class="border w-full h-24 border-gray-300 rounded-md text-gray-700 py-1 px-4"
                     v-if="filleds[questionIndex].soal.tipe_soal == 2"
                     v-model="filleds[questionIndex].esay"
@@ -112,37 +112,65 @@
 			    <div class="flex flex-col space-y-3 mt-5"
           v-if="filleds[questionIndex].soal.layout == 1"
           >
-				    <div class="flex space-x-1"
-            v-for="(jawab,index) in filleds[questionIndex].soal.jawabans"
-            :key="index">
-					    <div
-              v-if="[1,3].includes(parseInt(filleds[questionIndex].soal.tipe_soal))">
-					      <div class="flex items-center mr-4 mb-4">
-						      <input :id="'radio1'+index"
-                  v-model="selected" type="radio" name="jwb"
-                  :value="jawab.id" class="hidden"
-                  :disabled="isLoadinger || isLoading"
-                  @change="selectOption(index)"/>
-						      <label :for="'radio1'+index" class="flex items-center cursor-pointer text-xl">
-						        <span class="w-6 h-6 text-sm inline-block mr-2 rounded-full border border-gray-400 flex-no-shrink flex items-center justify-center uppercase">{{ charIndex(index) }}</span>
-						      </label>
-					      </div>
-					    </div>
-              <div
-              v-if="4 == parseInt(filleds[questionIndex].soal.tipe_soal)"
+            <template
+            v-if="[5].includes(filleds[questionIndex].soal.tipe_soal)"
+            >
+              <div class="flex space-x-4"
+                   v-for="(jawab, index) in filleds[questionIndex].soal.jawabans"
+                   :key="'jawaban_menjodohkan_index_'+index"
               >
-						    <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
-				          <input
-                  :checked="filleds[questionIndex].jawab_complex.includes(jawab.id)"
-                  :value="jawab.id"
-                  :disabled="isLoadinger || isLoading"
-                  @change="changeCheckbox($event, index)"
-                  type="checkbox" class="opacity-0 absolute">
-				          <svg class="fill-current hidden w-4 h-4 text-green-500 pointer-events-none" viewBox="0 0 20 20"><path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>
-			          </div>
+                <div class="py-4 px-4 rounded-xl border-2 flex-1 cursor-pointer"
+                     :class="menjodohkan.left == index ? 'border-green-400' : 'border-gray-200'"
+                v-html="jawab.a.text"
+                     v-on:click="menjodohkanLeftClick(index)"
+                >
+                </div>
+                <div class="px-4 flex items-center text-gray-400">
+                  <next-line-icon></next-line-icon>
+                </div>
+                <div class="py-4 px-4 rounded-xl border-2 flex-1 cursor-pointer"
+                     :class="menjodohkan.right == index ? 'border-green-400' : 'border-gray-200'"
+                v-html="jawab.b.text"
+                     v-on:click="menjodohkanRightClick(index)"
+                >
+                </div>
               </div>
-					    <div v-html="jawab.text_jawaban"></div>
-            </div>
+            </template>
+            <template
+            v-if="[1,3,4].includes(filleds[questionIndex].soal.tipe_soal)"
+            >
+              <div class="flex space-x-1"
+                   v-for="(jawab,index) in filleds[questionIndex].soal.jawabans"
+                   :key="index">
+                <div
+                  v-if="[1,3].includes(parseInt(filleds[questionIndex].soal.tipe_soal))">
+                  <div class="flex items-center mr-4 mb-4">
+                    <input :id="'radio1'+index"
+                           v-model="selected" type="radio" name="jwb"
+                           :value="jawab.id" class="hidden"
+                           :disabled="isLoadinger || isLoading"
+                           @change="selectOption(index)"/>
+                    <label :for="'radio1'+index" class="flex items-center cursor-pointer text-xl">
+                      <span class="w-6 h-6 text-sm inline-block mr-2 rounded-full border border-gray-400 flex-no-shrink flex items-center justify-center uppercase">{{ charIndex(index) }}</span>
+                    </label>
+                  </div>
+                </div>
+                <div
+                  v-if="4 == parseInt(filleds[questionIndex].soal.tipe_soal)"
+                >
+                  <div class="bg-white border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
+                    <input
+                      :checked="filleds[questionIndex].jawab_complex.includes(jawab.id)"
+                      :value="jawab.id"
+                      :disabled="isLoadinger || isLoading"
+                      @change="changeCheckbox($event, index)"
+                      type="checkbox" class="opacity-0 absolute">
+                    <svg class="fill-current hidden w-4 h-4 text-green-500 pointer-events-none" viewBox="0 0 20 20"><path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>
+                  </div>
+                </div>
+                <div v-html="jawab.text_jawaban"></div>
+              </div>
+            </template>
             <div
             v-if="[2,6].includes(filleds[questionIndex].soal.tipe_soal)"
             >
@@ -151,7 +179,7 @@
               v-if="filleds[questionIndex].soal.tipe_soal == 6"
               v-model="filleds[questionIndex].esay"
               @keyup="onInput"/>
-              <textarea 
+              <textarea
               class="border w-full h-24 border-gray-300 rounded-md text-gray-700 py-1 px-4"
               v-if="filleds[questionIndex].soal.tipe_soal == 2"
               v-model="filleds[questionIndex].esay"
@@ -205,7 +233,7 @@
               v-if="filleds[questionIndex].soal.tipe_soal == 6"
               v-model="filleds[questionIndex].esay"
               @keyup="onInput"/>
-              <textarea 
+              <textarea
               class="border w-full h-24 border-gray-300 rounded-md text-gray-700 py-1 px-4"
               v-if="filleds[questionIndex].soal.tipe_soal == 2"
               v-model="filleds[questionIndex].esay"
@@ -261,7 +289,7 @@
                   v-if="filleds[questionIndex].soal.tipe_soal == 6"
                   v-model="filleds[questionIndex].esay"
                   @keyup="onInput"/>
-                  <textarea 
+                  <textarea
                   class="border w-full h-24 border-gray-300 rounded-md text-gray-700 py-1 px-4"
                   v-if="filleds[questionIndex].soal.tipe_soal == 2"
                   v-model="filleds[questionIndex].esay"
@@ -377,6 +405,40 @@ export default {
     },
     finishExamAlert() {
 
+    },
+    menjodohkanLeftClick(index) {
+      this.menjodohkan.left = index
+      if (this.menjodohkan.right == null) {
+        return;
+      }
+      let tmp = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans));
+      tmp[this.menjodohkan.right].a = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[index].a));
+      tmp[index].a = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[this.menjodohkan.right].a));
+
+      this.filleds[this.questionIndex].soal.jawabans = tmp;
+      this.menjodohkan.left = null
+      this.menjodohkan.right = null
+    },
+    menjodohkanRightClick(index) {
+      this.menjodohkan.right = index
+      if (this.menjodohkan.left == null) {
+        return;
+      }
+      let tmp = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans));
+      tmp[this.menjodohkan.left].b = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[index].b));
+      tmp[index].b = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[this.menjodohkan.left].b));
+
+      this.filleds[this.questionIndex].soal.jawabans = tmp;
+      this.menjodohkan.left = null
+      this.menjodohkan.right = null
+
+      this.submitJawabanMenjodohkan({
+        jawaban_id : this.filleds[this.questionIndex].id,
+        menjodohkan: tmp.map(item => [item.a.id, item.b.id]),
+        index : this.questionIndex
+      }).catch((error) => {
+        this.showError(error)
+      })
     }
   },
   async created() {

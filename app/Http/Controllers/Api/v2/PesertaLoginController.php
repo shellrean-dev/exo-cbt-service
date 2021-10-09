@@ -20,9 +20,9 @@ class PesertaLoginController extends Controller
 {
     /**
      * @Route(path="api/v2/logedin", methods={"POST"})
-     * 
+     *
      * Login to system
-     * 
+     *
      * @param  Illuminate\Http\Request $request
      * @return Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
@@ -71,9 +71,9 @@ class PesertaLoginController extends Controller
 
     /**
      * @Route(path="api/v2/peserta/logout", methods={"GET"})
-     * 
+     *
      * Logout from system
-     * 
+     *
      * @return Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
@@ -90,9 +90,9 @@ class PesertaLoginController extends Controller
 
     /**
      * @Route(path="api/v2/peserta-authenticated", methods={"GET"})
-     * 
+     *
      * Get peserta's authenticated
-     * 
+     *
      * @return Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
@@ -108,7 +108,7 @@ class PesertaLoginController extends Controller
 
     /**
      * @Route(path="api/v2/setting", methods={"GET"})
-     * 
+     *
      * Get setting needed by peserta
      * s
      * @param ShellreanDev\Cache\CacheHandler $cache
@@ -118,28 +118,28 @@ class PesertaLoginController extends Controller
     public function getSetting(CacheHandler $cache)
     {
         // ambil setting sekolah
-        $key = md5(sprintf('setting:data:set_sekolah'));
-        if ($cache->isCached($key)) {
-            $sekolah = $cache->getItem($key);
-        } else {
+//        $key = md5(sprintf('setting:data:set_sekolah'));
+//        if ($cache->isCached($key)) {
+//            $sekolah = $cache->getItem($key);
+//        } else {
             $sekolah = DB::table('settings')
                 ->where('name', 'set_sekolah')
                 ->first();
 
-            $cache->cache($key, $sekolah);
-        }
+//            $cache->cache($key, $sekolah);
+//        }
 
         // ambil setting ujian
-        $key = md5(sprintf('setting:data:ujian'));
-        if ($cache->isCached($key)) {
-            $ujian = $cache->getItem($key);
-        } else {
+//        $key = md5(sprintf('setting:data:ujian'));
+//        if ($cache->isCached($key)) {
+//            $ujian = $cache->getItem($key);
+//        } else {
             $ujian = DB::table('settings')
                 ->where('name', 'ujian')
                 ->first();
 
-            $cache->cache($key, $ujian);
-        }
+//            $cache->cache($key, $ujian);
+//        }
 
         if ($sekolah){
             $sekolah->value = json_decode($sekolah->value, true);

@@ -70,16 +70,16 @@ class UjianAktifController extends Controller
     public function startUjian(Request $request, CacheHandler $cache)
     {
         // cari jadwal ujian yang diminta
-        $key = md5(sprintf('jadwal:data:%s:single', $request->jadwal_id));
-        if ($cache->isCached($key)) {
-            $ujian = $cache->getItem($key);
-        } else {
+//        $key = md5(sprintf('jadwal:data:%s:single', $request->jadwal_id));
+//        if ($cache->isCached($key)) {
+//            $ujian = $cache->getItem($key);
+//        } else {
             $ujian = DB::table('jadwals')
                 ->where('id', $request->jadwal_id)
                 ->first();
 
-            $cache->cache($key, $ujian);
-        }
+//            $cache->cache($key, $ujian);
+//        }
 
         // Jika ujian tidak ditemukan
         if (!$ujian) {
@@ -98,14 +98,14 @@ class UjianAktifController extends Controller
                 $differ = $to->diffInSeconds($from);
 
                 // ambil setting token
-                $key = md5(sprintf('setting:token:single'));
-                if ($cache->isCached($key)) {
-                    $setting_token = $cache->getItem($key);
-                } else {
+//                $key = md5(sprintf('setting:token:single'));
+//                if ($cache->isCached($key)) {
+//                    $setting_token = $cache->getItem($key);
+//                } else {
                     $setting_token = DB::table('settings')->where('name', 'token')->first();
 
-                    $cache->cache($key, $setting_token);
-                }
+//                    $cache->cache($key, $setting_token);
+//                }
                 if (!$setting_token) {
                     return SendResponse::badRequest('Kesalahan dalam installasi token, hubungi administrator');
                 }
@@ -139,10 +139,10 @@ class UjianAktifController extends Controller
         // cek pengaturan sesi
         if($ujian->event_id != '0' && $ujian->event_id != null) {
             // ambil data sesi schedule
-            $key = md5(sprintf('sesi_schedules:jadwal:%s:sesi:%s', $ujian->id, $ujian->sesi));
-            if ($cache->isCached($key)) {
-                $schedule = $cache->getItem($key);
-            } else {
+//            $key = md5(sprintf('sesi_schedules:jadwal:%s:sesi:%s', $ujian->id, $ujian->sesi));
+//            if ($cache->isCached($key)) {
+//                $schedule = $cache->getItem($key);
+//            } else {
                 $schedule = DB::table('sesi_schedules')
                     ->where([
                         'jadwal_id' => $ujian->id,
@@ -150,8 +150,8 @@ class UjianAktifController extends Controller
                     ])
                     ->first();
 
-                $cache->cache($key, $schedule);
-            }
+//                $cache->cache($key, $schedule);
+//            }
 
             if($schedule) {
                 if(!in_array($peserta->id, json_decode($schedule->peserta_ids, true))){
@@ -168,18 +168,18 @@ class UjianAktifController extends Controller
 
         // ambil data siswa ujian
         // yang masih dalam mode standby
-        $key = md5(sprintf('siswa_ujians:peserta:%s:jadwal:%s:standby', $peserta->id, $request->jadwal_id));
-        if ($cache->isCached($key)) {
-            $data = $cache->getItem($key);
-        } else {
+//        $key = md5(sprintf('siswa_ujians:peserta:%s:jadwal:%s:standby', $peserta->id, $request->jadwal_id));
+//        if ($cache->isCached($key)) {
+//            $data = $cache->getItem($key);
+//        } else {
             $data = DB::table('siswa_ujians')
                 ->where('peserta_id', $peserta->id)
                 ->where('jadwal_id', $request->jadwal_id)
                 ->where('status_ujian', 0)
                 ->first();
 
-            $cache->cache($key, $data);
-        }
+//            $cache->cache($key, $data);
+//        }
 
         if($data) {
             return SendResponse::accept('mata ujian diambil dari data sebelumnya');
@@ -205,7 +205,7 @@ class UjianAktifController extends Controller
                 ->where('id', $siswa_ujian_id)
                 ->first();
 
-            $cache->cache($key, $data);
+//            $cache->cache($key, $data);
 
         } catch (\Exception $e) {
             return SendResponse::internalServerError("Terjadi kesalahan 500. ".$e->getMessage());
@@ -308,16 +308,16 @@ class UjianAktifController extends Controller
         }
 
         // Ambil id banksoal yang terkait dalam jadwal
-        $key = md5(sprintf('jadwals:data:%s:single', $ujian_siswa->jadwal_id));
-        if ($cache->isCached($key)) {
-            $jadwal = $cache->getItem($key);
-        } else {
+//        $key = md5(sprintf('jadwals:data:%s:single', $ujian_siswa->jadwal_id));
+//        if ($cache->isCached($key)) {
+//            $jadwal = $cache->getItem($key);
+//        } else {
             $jadwal = DB::table('jadwals')
                 ->where('id', $ujian_siswa->jadwal_id)
                 ->first();
 
-            $cache->cache($key, $jadwal);
-        }
+//            $cache->cache($key, $jadwal);
+//        }
 
         // Jika jadwal yang dikerjakan siswa tidak ditemukan
         if(!$jadwal) {
@@ -327,18 +327,18 @@ class UjianAktifController extends Controller
         $banksoal_ids = array_column(json_decode($jadwal->banksoal_id, true), 'id');
 
         // ambil data banksoal yang diujikan pada jadwal
-        $key = md5(sprintf('banksoals:diujikan:ids:%s', implode(',', $banksoal_ids)));
-        if ($cache->isCached($key)) {
-            $banksoal_diujikan = $cache->getItem($key);
-        } else {
+//        $key = md5(sprintf('banksoals:diujikan:ids:%s', implode(',', $banksoal_ids)));
+//        if ($cache->isCached($key)) {
+//            $banksoal_diujikan = $cache->getItem($key);
+//        } else {
             $banksoal_diujikan = DB::table('banksoals')
                 ->join('matpels','banksoals.matpel_id','=','matpels.id')
                 ->whereIn('banksoals.id', $banksoal_ids)
                 ->select('banksoals.id','matpels.agama_id','matpels.jurusan_id')
                 ->get();
 
-            $cache->cache($key, $banksoal_diujikan);
-        }
+//            $cache->cache($key, $banksoal_diujikan);
+//        }
 
         $banksoal_id = '';
 
@@ -367,15 +367,15 @@ class UjianAktifController extends Controller
         // Jika jawaban siswa belum ada di database
         if ($jawaban_peserta->count() < 1 ) {
             //------------------------------------------------------------------
-            $key = md5(sprintf('banksoals:data:%s:single', $banksoal_id));
-            if ($cache->isCached($key)) {
-                $banksoal = $cache->getItem($key);
-            } else {
+//            $key = md5(sprintf('banksoals:data:%s:single', $banksoal_id));
+//            if ($cache->isCached($key)) {
+//                $banksoal = $cache->getItem($key);
+//            } else {
                 $banksoal = DB::table('banksoals')
                     ->where('id', $banksoal_id)
                     ->first();
-                $cache->cache($key, $banksoal);
-            }
+//                $cache->cache($key, $banksoal);
+//            }
 
             // Ambil maximal dari tiap tiap tipe soal
             $max_pg = $banksoal->jumlah_soal;
@@ -658,17 +658,17 @@ class UjianAktifController extends Controller
         }
 
         // Get siswa ujian detail
-        $key = md5(sprintf('siswa_ujians:jadwal:%s:peserta:%s', $jadwal->id, $peserta->id));
-        if ($cache->isCached($key)) {
-            $ujian = $cache->getItem($key);
-        } else {
+//        $key = md5(sprintf('siswa_ujians:jadwal:%s:peserta:%s', $jadwal->id, $peserta->id));
+//        if ($cache->isCached($key)) {
+//            $ujian = $cache->getItem($key);
+//        } else {
             $ujian = SiswaUjian::where([
                 'jadwal_id'     => $jadwal->id,
                 'peserta_id'    => $peserta->id
             ])->first();
 
-            $cache->cache($key, $ujian);
-        }
+//            $cache->cache($key, $ujian);
+//        }
 
         // Check perbedaan waktu
         $start = Carbon::createFromFormat('H:i:s', $ujian->mulai_ujian_shadow);
@@ -705,7 +705,7 @@ class UjianAktifController extends Controller
 
                 // Buat cache ujian
                 $key = md5(sprintf('siswa_ujians:jadwal:%s:peserta:%s', $jadwal->id, $peserta->id));
-                $cache->cache($key, $ujian);
+//                $cache->cache($key, $ujian);
             } catch (\Exception $e) {
                 DB::rollBack();
                 return SendResponse::internalServerError($e->getMessage());

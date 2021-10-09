@@ -6,13 +6,16 @@
       <change beforePath="$PROJECT_DIR$/.idea/exo-cbt-service.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/exo-cbt-service.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/v1/JurusanController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/v1/JurusanController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/v1/SoalController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/v1/SoalController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/v1/UjianController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/v1/UjianController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/v2/UjianAktifController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/v2/UjianAktifController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/v2/UjianController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/v2/UjianController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Services/Ujian/UjianService.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Services/Ujian/UjianService.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/logging.php" beforeDir="false" afterPath="$PROJECT_DIR$/config/logging.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_10_011609_create_jadwals_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_10_011609_create_jadwals_table.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/migrations/2020_07_10_011852_create_jawaban_pesertas_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2020_07_10_011852_create_jawaban_pesertas_table.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/js/entities/ujian.js" beforeDir="false" afterPath="$PROJECT_DIR$/resources/js/entities/ujian.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/js/pages/siswa/Ujian.vue" beforeDir="false" afterPath="$PROJECT_DIR$/resources/js/pages/siswa/Ujian.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/js/stores/siswa/ujian.js" beforeDir="false" afterPath="$PROJECT_DIR$/resources/js/stores/siswa/ujian.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,6 +28,14 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
   </component>
   <component name="PhpWorkspaceProjectConfiguration">
     <include_path>

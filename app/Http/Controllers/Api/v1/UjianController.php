@@ -201,8 +201,8 @@ class UjianController extends Controller
 
         $ujian->update($data);
 
-        $key = md5(sprintf('jadwal:data:active:today'));
-        $cache->cache($key, [], 0);
+//        $key = md5(sprintf('jadwal:data:active:today'));
+//        $cache->cache($key, [], 0);
 
         return SendResponse::accept();
     }
@@ -239,15 +239,15 @@ class UjianController extends Controller
             $jadwal->save();
 
             // set cache ujian 'aktif' hari ini
-            $key = md5(sprintf('jadwal:data:active:today'));
-            $jadwals = DB::table('jadwals')->where([
-                'status_ujian'  => 1,
-                'tanggal'       => now()->format('Y-m-d')
-            ])
-            ->select('id','alias','banksoal_id','lama','mulai','tanggal','setting','group_ids','view_result')
-            ->get();
+//            $key = md5(sprintf('jadwal:data:active:today'));
+//            $jadwals = DB::table('jadwals')->where([
+//                'status_ujian'  => 1,
+//                'tanggal'       => now()->format('Y-m-d')
+//            ])
+//            ->select('id','alias','banksoal_id','lama','mulai','tanggal','setting','group_ids','view_result')
+//            ->get();
 
-            $cache->cache($key, $jadwals);
+//            $cache->cache($key, $jadwals);
 
             return SendResponse::accept();
         }

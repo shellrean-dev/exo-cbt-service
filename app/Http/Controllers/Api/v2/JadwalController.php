@@ -18,7 +18,7 @@ class JadwalController extends Controller
 {
     /**
      * @Route(path="api/v2/jadwals/peserta", methods={"GET"})
-     * 
+     *
      * Ambil data jadwal yang dapat diikuti oleh peserta
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
@@ -45,18 +45,18 @@ class JadwalController extends Controller
             $ids = array_column(json_decode($jadwal->banksoal_id, true), 'id');
 
             // cari banksoal yang digunakan oleh jadwal
-            $key = md5(sprintf('banksoal:data:ids:%s', implode(",", $ids)));
-            if ($cache->isCached($key)) {
-                $bks = $cache->getItem($key);
-            } else {
+//            $key = md5(sprintf('banksoal:data:ids:%s', implode(",", $ids)));
+//            if ($cache->isCached($key)) {
+//                $bks = $cache->getItem($key);
+//            } else {
                 $bks = DB::table('banksoals')
                     ->join('matpels','banksoals.matpel_id','=','matpels.id')
                     ->select('banksoals.id','matpels.agama_id','matpels.jurusan_id')
                     ->whereIn('banksoals.id', $ids)
                     ->get();
-                
-                $cache->cache($key, $bks);
-            }
+
+//                $cache->cache($key, $bks);
+//            }
 
             $jadwal_id = '';
 
@@ -105,7 +105,7 @@ class JadwalController extends Controller
             if ($jadwal->group_ids != '') {
                 $groups = json_decode($jadwal->group_ids, true);
                 if (is_array($groups)) {
-                    
+
                     // peserta tidak memiliki group
                     if ($peserta->group == null) {
                         continue;
@@ -114,22 +114,22 @@ class JadwalController extends Controller
                     // mengecek apakah group didapaat
                     $isGet = false;
                     $ids = array_column($groups, 'id');
-                    
-                    // ambil data grup pada setting 
+
+                    // ambil data grup pada setting
                     // dengan childrennya
-                    $key = md5(sprintf('groups:datas:%s', implode(',', $ids)));
-                    if ($cache->isCached($key)) {
-                        $groups = $cache->getItem($key);
-                    } else {
+//                    $key = md5(sprintf('groups:datas:%s', implode(',', $ids)));
+//                    if ($cache->isCached($key)) {
+//                        $groups = $cache->getItem($key);
+//                    } else {
                         $groups = Group::with('childs')->whereIn('id', $ids)->get();
 
-                        $cache->cache($key, $groups);
-                    }
+//                        $cache->cache($key, $groups);
+//                    }
 
                     // dd($groups);
                     // loop group
                     foreach ($groups as $group) {
-                        
+
                         // jika group memiliki children
                         // cek childrennya
                         if (count($group->childs) > 0) {
@@ -145,14 +145,14 @@ class JadwalController extends Controller
                         }
                     }
 
-                    // jika tidak sama antara grup jadwal 
+                    // jika tidak sama antara grup jadwal
                     // dengan grup peserta
                     if (!$isGet) {
                         continue;
                     }
                 }
             }
-            
+
             array_push($jadwal_ids, $jadwal_id);
         }
 

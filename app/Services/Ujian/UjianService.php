@@ -23,7 +23,7 @@ use ShellreanDev\Services\Jadwal\JadwalService;
 
 /**
  * Ujian Service
- * 
+ *
  * @since 3.0.0 <ristretto>
  * @author shellrean <wandinak17@gmail.com>
  */
@@ -34,10 +34,10 @@ final class UjianService extends AbstractService
      * @var JadwalService
      */
     protected $jadwalService;
-    
+
     /**
      * Inject dependency
-     * 
+     *
      * @param ShellreanDev\Cache\CacheHandler $cache
      * @param ShellreanDev\Services\Jadwal\JadwalService $jadwalService
      * @since 3.0.0 <ristretto>
@@ -50,7 +50,7 @@ final class UjianService extends AbstractService
 
     /**
      * Get ujian on working today
-     * 
+     *
      * @param string $student_id
      * @since 3.0.0 <ristretto>
      */
@@ -84,7 +84,7 @@ final class UjianService extends AbstractService
 
     /**
      * Get ujian on standby today
-     * 
+     *
      * @param string $student_id
      * @since 3.0.0 <ristretto>
      */
@@ -118,7 +118,7 @@ final class UjianService extends AbstractService
 
     /**
      * Get ujian on progress today
-     * 
+     *
      * @param string $student_id
      * @since 3.0.0 <ristretto>
      */
@@ -151,7 +151,7 @@ final class UjianService extends AbstractService
 
     /**
      * Is peserta's banksoal
-     * 
+     *
      * @param App\Banksoal $banksoal
      * @param App\Peserta $peserta
      * @return string
@@ -166,8 +166,8 @@ final class UjianService extends AbstractService
                     $banksoal_id = $banksoal->id;
                 }
             } else {
-                $jurusans = ($banksoal->jurusan_id == '0' || $banksoal->jurusan_id == '') 
-                    ? 0 
+                $jurusans = ($banksoal->jurusan_id == '0' || $banksoal->jurusan_id == '')
+                    ? 0
                     : json_decode($banksoal->jurusan_id, true);
                 if(is_array($jurusans)) {
                     foreach ($jurusans as $d) {
@@ -189,7 +189,7 @@ final class UjianService extends AbstractService
 
     /**
      * Get peserta's answer
-     * 
+     *
      * @param string $jadwal_id
      * @param string $peserta_id
      * @param string $acak_opsi
@@ -199,10 +199,10 @@ final class UjianService extends AbstractService
     public function pesertaAnswers(string $jadwal_id, string $peserta_id, string $acak_opsi)
     {
         // ambil jawaban peserta
-        $key = md5(sprintf('jawaban_pesertas:jadwal:%s:peserta:%s:acak:%s', $jadwal_id, $peserta_id, $acak_opsi));
-        if ($this->cache->isCached($key)) {
-            $find = $this->cache->getItem($key);
-        } else {
+//        $key = md5(sprintf('jawaban_pesertas:jadwal:%s:peserta:%s:acak:%s', $jadwal_id, $peserta_id, $acak_opsi));
+//        if ($this->cache->isCached($key)) {
+//            $find = $this->cache->getItem($key);
+//        } else {
             $find = JawabanPeserta::with([
                 'soal' => function ($q) {
                     $q->select('id','banksoal_id','pertanyaan','tipe_soal','audio','direction','layout');
@@ -218,34 +218,57 @@ final class UjianService extends AbstractService
                 'peserta_id'    => $peserta_id,
                 'jadwal_id'     => $jadwal_id,
             ])
-            ->select('id','banksoal_id','soal_id','jawab','esay','jawab_complex','ragu_ragu')
+            ->select('id','banksoal_id','soal_id','jawab','esay','jawab_complex','ragu_ragu', 'menjodohkan')
             ->orderBy('created_at')
             ->get()
             ->makeHidden('similiar');
 
-            if ($find->count() > 0) {
-                $this->cache->cache($key, $find);
-            }
-        }
+//            if ($find->count() > 0) {
+//                $this->cache->cache($key, $find);
+//            }
+//        }
 
         $data = $find->map(function($item) {
+            # Jik tipe soal adalah menjodohkan
             if ($item->soal->tipe_soal == 5) {
                 $jwra = [];
                 $jwrb = [];
-                foreach($item->soal->jawabans as $key => $jwb) {
-                    $jwb_arr = json_decode($jwb->text_jawaban, true);
-                    array_push($jwra, [
-                        'id' => $jwb_arr['a']['id'],
-                        'text' => $jwb_arr['a']['text'],
-                    ]);
-                    array_push($jwrb, [
-                        'id' => $jwb_arr['b']['id'],
-                        'text' => $jwb_arr['b']['text'],
-                    ]);
-                }
 
-                $jwra = Arr::shuffle($jwra);
-                $jwrb = Arr::shuffle($jwrb);
+                $objMenjodohkan = json_decode($item->menjodohkan, true);
+                if ($objMenjodohkan != null) {
+                    foreach ($objMenjodohkan as $key => $val) {
+                        foreach($item->soal->jawabans as $jwb) {
+                            $jwb_arr = json_decode($jwb->text_jawaban, true);
+                            if ($val[0] == $jwb_arr['a']['id']) {
+                                $jwra[$key] = [
+                                    'id' => $jwb_arr['a']['id'],
+                                    'text' => $jwb_arr['a']['text']
+                                ];
+                            }
+                            if ($val[1] == $jwb_arr['b']['id']) {
+                                $jwrb[$key] = [
+                                    'id' => $jwb_arr['b']['id'],
+                                    'text' => $jwb_arr['b']['text']
+                                ];
+                            }
+                        }
+                    }
+                } else {
+                    foreach($item->soal->jawabans as $key => $jwb) {
+                        $jwb_arr = json_decode($jwb->text_jawaban, true);
+                        array_push($jwra, [
+                            'id' => $jwb_arr['a']['id'],
+                            'text' => $jwb_arr['a']['text'],
+                        ]);
+                        array_push($jwrb, [
+                            'id' => $jwb_arr['b']['id'],
+                            'text' => $jwb_arr['b']['text'],
+                        ]);
+                    }
+
+                    $jwra = Arr::shuffle($jwra);
+                    $jwrb = Arr::shuffle($jwrb);
+                }
             }
 
 
@@ -286,7 +309,7 @@ final class UjianService extends AbstractService
 
     /**
      * Finishing ujian
-     * 
+     *
      * @param string $banksoal_id
      * @param string $jadwal_id
      * @param string $peserta_id
@@ -414,7 +437,7 @@ final class UjianService extends AbstractService
             // remove completed jadwal cache
             $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta_id));
             $this->cache->cache($key, '', 0);
-            
+
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
@@ -424,14 +447,14 @@ final class UjianService extends AbstractService
 
     /**
      * Count wrong answer
-     * 
+     *
      * @param string $jadwal_id
      * @param string $peserta_id
      * @param string $type
      * @return int
      * @since 3.0.0 <ristretto>
      */
-    private function _countWrongAnswer(string $jadwal_id, string $peserta_id, string $type) 
+    private function _countWrongAnswer(string $jadwal_id, string $peserta_id, string $type)
     {
         $salah = JawabanPeserta::where([
             'iscorrect'     => 0,
@@ -448,14 +471,14 @@ final class UjianService extends AbstractService
 
     /**
      * Count correct answer
-     * 
+     *
      * @param string $jadwal_id
      * @param string $peserta_id
      * @param string $type
      * @return int
      * @since 3.0.0 <ristretto>
      */
-    private function _countCorrectAnswer(string $jadwal_id, string $peserta_id, string $type) 
+    private function _countCorrectAnswer(string $jadwal_id, string $peserta_id, string $type)
     {
         $benar = JawabanPeserta::where([
             'iscorrect'     => 1,
@@ -472,7 +495,7 @@ final class UjianService extends AbstractService
 
     /**
      * Decrease ujian reminning
-     * 
+     *
      * @param object $siswa_ujian
      * @return void
      * @since 3.0.0 <ristretto>
@@ -486,7 +509,7 @@ final class UjianService extends AbstractService
             $deUjian = DB::table('jadwals')
                 ->where('id', $siswa_ujian->jadwal_id)
                 ->first();
-            
+
             $this->cache->cache($key, $deUjian);
         }
 

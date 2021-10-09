@@ -33,7 +33,8 @@ const vuex_methods = {
         'submitJawaban',
         'submitJawabanEssy',
         'selesaiUjianPeserta',
-        'updateRaguJawaban'
+        'updateRaguJawaban',
+        'submitJawabanMenjodohkan'
     ]),
 }
 
@@ -67,7 +68,11 @@ const vue_data = {
         ]
     },
     focus: false,
-    textSize: 'text-base'
+    textSize: 'text-base',
+    menjodohkan: {
+        left: null,
+        right: null
+    }
 }
 
 /**

@@ -25,7 +25,7 @@ class UjianAktifController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/sesi", methods={"GET"})
-     * 
+     *
      * @return App\Actions\SendResponse
      */
     public function sesi()
@@ -36,23 +36,23 @@ class UjianAktifController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/token-release", methods={"POST"})
-     * 
+     *
      * @return App\Actions\SendResponse
      */
-    public function releaseToken() 
+    public function releaseToken()
     {
         $token = Token::orderBy('id')->first();
         if($token) {
             $token->status = '1';
             $token->save();
-            
+
             return SendResponse::accept();
         }
     }
 
     /**
      * @Route(path="api/v1/ujians/{jadwal_id}/peserta", methods={"GET"})
-     * 
+     *
      * @return App\Actions\SendResponse
      */
     public function getPesertas($jadwal_id)
@@ -63,11 +63,11 @@ class UjianAktifController extends Controller
         if ($jadwal < 1) {
             return SendResponse::badRequest('kesalahan, jadwal tidak ditemukan');
         }
-        
+
         $siswa = DB::table('siswa_ujians')
             ->join('pesertas', 'siswa_ujians.peserta_id', '=', 'pesertas.id')
             ->select(
-                'siswa_ujians.id', 
+                'siswa_ujians.id',
                 'siswa_ujians.jadwal_id',
                 'siswa_ujians.mulai_ujian',
                 'siswa_ujians.mulai_ujian_shadow',
@@ -84,7 +84,7 @@ class UjianAktifController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/{jadwal}/peserta/{peserta}/reset", methods={"GET"})
-     * 
+     *
      * @param App\Jadwal $jadwal
      * @param App\Peserta $peserta
      * @param ShellreanDev\Cache\CacheHandler $cache
@@ -110,13 +110,13 @@ class UjianAktifController extends Controller
                 'peserta_id'        => $peserta->id,
                 'jadwal_id'         => $aktif
             ])->delete();
-        
+
             $peserta->api_token = '';
             $peserta->save();
 
             // remove completed jadwal cache
-            $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta->id));
-            $cache->cache($key, '', 0);
+//            $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta->id));
+//            $cache->cache($key, '', 0);
 
             DB::commit();
         } catch (\Exception $e) {
@@ -128,9 +128,9 @@ class UjianAktifController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/{jadwal}/multi-reset", methods={"GET"})
-     * 
+     *
      * Multiple reset peserta ujian
-     * 
+     *
      * @param App\Jadwal $jadwal
      * @param ShellreanDev\Cache\CacheHandler $cache
      * @return App\Actions\SendResponse
@@ -168,11 +168,11 @@ class UjianAktifController extends Controller
                     'api_token' => ''
                 ]);
 
-            foreach ($pesertas as $peserta) {
+//            foreach ($pesertas as $peserta) {
                 // remove completed jadwal cache
                 $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta));
-                $cache->cache($key, '', 0);
-            }
+//                $cache->cache($key, '', 0);
+//            }
 
             DB::commit();
         } catch (\Exception $e) {
@@ -184,9 +184,9 @@ class UjianAktifController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/{jadwal}/peserta/{peserta}/close", methods={"GET"})
-     * 
+     *
      * Paksa selesaikan ujian peserta
-     * 
+     *
      * @param string $jadwal_id
      * @param string $peserta_id
      * @param ShellreanDev\Services\UjianService $ujianService
@@ -200,12 +200,12 @@ class UjianAktifController extends Controller
                 'jadwal_id'     => $jadwal_id,
             ])->count();
 
-            if($hasilUjian > 0) { 
+            if($hasilUjian > 0) {
                 return SendResponse::accept('hasil ujian peserta sudah digenerate');
             }
 
             $jawaban = DB::table('jawaban_pesertas')->where([
-                'jadwal_id'     => $jadwal_id, 
+                'jadwal_id'     => $jadwal_id,
                 'peserta_id'    => $peserta_id
             ])
             ->select('banksoal_id')
@@ -216,7 +216,7 @@ class UjianAktifController extends Controller
             $ujianService->finishing($jawaban->banksoal_id, $jadwal_id, $peserta_id);
 
             DB::table('siswa_ujians')->where([
-                'jadwal_id'     => $jadwal_id, 
+                'jadwal_id'     => $jadwal_id,
                 'peserta_id'    => $peserta_id
             ])->update([
                 'status_ujian'  => 1
@@ -225,9 +225,9 @@ class UjianAktifController extends Controller
             DB::table('pesertas')->where('id', $peserta_id)->update([
                 'api_token' => ''
             ]);
-                
-            $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta_id));
-            $cache->cache($key, '', 0);
+
+//            $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta_id));
+//            $cache->cache($key, '', 0);
 
             DB::commit();
         } catch (\Exception $e) {
@@ -239,9 +239,9 @@ class UjianAktifController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/{jadwal}/multi-close", methods={"GET"})
-     * 
+     *
      * Multi paksa selesaikan ujian peserta
-     * 
+     *
      * @param string $jadwal_id
      * @param string $peserta_id
      * @param ShellreanDev\Services\UjianService $ujianService
@@ -262,7 +262,7 @@ class UjianAktifController extends Controller
                 ->select('peserta_id')
                 ->get();
             $finishedPeserta = $hasilUjian->pluck('peserta_id')->toArray();
-            
+
             $unfinishPeserta = [];
             foreach ($pesertas as $peserta) {
                 if (!in_array($peserta, $finishedPeserta)) {
@@ -276,7 +276,7 @@ class UjianAktifController extends Controller
 
             foreach ($unfinishPeserta as $peserta) {
                 $jawaban = DB::table('jawaban_pesertas')->where([
-                    'jadwal_id'     => $jadwal_id, 
+                    'jadwal_id'     => $jadwal_id,
                     'peserta_id'    => $peserta
                 ])
                 ->select('banksoal_id')
@@ -298,12 +298,12 @@ class UjianAktifController extends Controller
                     'api_token' => ''
                 ]);
 
-            foreach ($unfinishPeserta as $peserta) {
+//            foreach ($unfinishPeserta as $peserta) {
                 // remove completed jadwal cache
-                $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta));
-                $cache->cache($key, '', 0);
-            }
-                
+//                $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta));
+//                $cache->cache($key, '', 0);
+//            }
+
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
@@ -314,7 +314,7 @@ class UjianAktifController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/{jadwal}/sesi-change", methods={"POST"})
-     * 
+     *
      * @param  Illuminate\Http\Request $request
      * @param  App\Jadwal  $jadwal
      * @return App\Actions\SendResponse
@@ -333,7 +333,7 @@ class UjianAktifController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/token-get", methods={"GET"})
-     * 
+     *
      * @param ShellreanDev\Cache\CacheHandler $cache
      * @return App\Actions\SendResponse
      */
@@ -347,16 +347,16 @@ class UjianAktifController extends Controller
             $differ = $to->diffInSeconds($from);
 
             // ambil setting token
-            $key = md5(sprintf('setting:token:single'));
-            if ($cache->isCached($key)) {
-                $setting_token = $cache->getItem($key);
-            } else {
+//            $key = md5(sprintf('setting:token:single'));
+//            if ($cache->isCached($key)) {
+//                $setting_token = $cache->getItem($key);
+//            } else {
                 $setting_token = DB::table('settings')->where('name', 'token')->first();
 
-                $cache->cache($key, $setting_token);
-            }
+//                $cache->cache($key, $setting_token);
+//            }
             if (!$setting_token) {
-                return SendResponse::badRequest('Kesalahan dalam installasi token'); 
+                return SendResponse::badRequest('Kesalahan dalam installasi token');
             }
 
             $token_expired = intval($setting_token->value);
@@ -379,9 +379,9 @@ class UjianAktifController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/peserta/add-more-time", methods={"POST"})
-     * 
+     *
      * Tambah waktu ujian untuk siswa
-     * 
+     *
      * @param Illuminate\Http\Request $request
      * @return App\Actions\SendResponse
      */
@@ -390,14 +390,14 @@ class UjianAktifController extends Controller
         $jadwal_id = $request->jadwal_id;
         $peserta_id = $request->peserta_id;
 
-        
+
         $jadwal = DB::table('jadwals')->where('id', $jadwal_id)
             ->select('id','lama')
             ->first();
         if (!$jadwal) {
             return SendResponse::badRequest('Kami tidak dapat menemukan jadwal yang diminta');
         }
-        
+
         if (intval($request->minutes) > ($jadwal->lama/60)) {
             return SendResponse::badRequest('Penambahan waktu tidak boleh melebihi lamanya ujian');
         }

@@ -63,7 +63,8 @@ const actions = {
     startUjian,
     getPesertaUjian,
     getUncompleteUjian,
-    getHasilUjian
+    getHasilUjian,
+    submitJawabanMenjodohkan
 }
 
 /**
@@ -140,7 +141,7 @@ function ASSIGN_PESERTA_UNCOMPLETE_UJIAN(state, payload) {
 
 /**
  * Assig hasil ujian to state
- * @param {*} state 
+ * @param {*} state
  * @param {*} payload
  */
 function ASSIGN_HASIL_UJIAN(state, payload) {
@@ -178,6 +179,31 @@ function submitJawaban({ commit, state }, payload) {
  * @param {*} payload
  */
 function submitJawabanEssy({ commit, state }, payload) {
+    return new Promise(async(resolve, reject) => {
+        try {
+            commit('SET_LOADINGER',true, { root: true })
+            const network = await $axios.post(endpoint.test, payload)
+            commit('SET_LOADINGER',false, { root: true })
+            commit('SLICE_DATA_RESP', network.data)
+            resolve(network.data)
+        } catch (error) {
+            if (typeof error.response != 'undefined') {
+                if (error.response.status == 422) {
+                    commit('SET_ERRORS', error.response.data.errors, { root: true })
+                }
+            }
+            reject(getError(error))
+            commit('SET_LOADINGER',false, { root: true })
+        }
+    })
+}
+
+/**
+ * Submit student menjodohkan
+ * @param {*} store
+ * @param {*} payload
+ */
+function submitJawabanMenjodohkan({ commit, state }, payload) {
     return new Promise(async(resolve, reject) => {
         try {
             commit('SET_LOADINGER',true, { root: true })
