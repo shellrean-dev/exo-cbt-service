@@ -17,6 +17,7 @@ class CreateSoalsTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('banksoal_id');
             $table->integer('tipe_soal')->comment('1: Pilihan Ganda | 2: Esay | 3: Listening');
+            $table->integer('case_sensitive')->default(1);
             $table->longText('pertanyaan');
             $table->longText('rujukan')->nullable();
             $table->string('audio')->nullable();

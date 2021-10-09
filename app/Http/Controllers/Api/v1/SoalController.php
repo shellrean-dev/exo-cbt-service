@@ -39,13 +39,14 @@ class SoalController extends Controller
             'correct'       => 'required_if:tipe_soal,1',
             'selected'      => 'required_if:tipe_soal,4|array',
             'pertanyaan'    => 'required',
-            'layout'        => 'required'
+            'layout'        => 'required',
+            'case_sensitive' => 'required_if:tipe_soal,6'
         ]);
 
         DB::beginTransaction();
 
         try {
-            $soal = Soal::create([
+            $data = [
                 'id'            => Str::uuid()->toString(),
                 'banksoal_id'   => $request->banksoal_id,
                 'pertanyaan'    => $request->pertanyaan,
@@ -54,7 +55,13 @@ class SoalController extends Controller
                 'audio'         => $request->audio,
                 'direction'     => $request->direction,
                 'layout'        => $request->layout
-            ]);
+            ];
+
+            if (isset($request->case_sensitive)) {
+                $data['case_sensitive'] = $request->case_sensitive;
+            }
+
+            $soal = Soal::create($data);
 
             if(in_array($request->tipe_soal, [1,3,4,5,6])) {
                 $data = [];
@@ -215,7 +222,8 @@ class SoalController extends Controller
             'correct'       => 'required_if:tipe_soal,1',
             'selected'      => 'required_if:tipe_soal,4|array',
             'pertanyaan'    => 'required',
-            'layout'        => 'required'
+            'layout'        => 'required',
+            'case_sensitive' => 'required_if:tipe_soal,6'
         ]);
 
         DB::beginTransaction();
@@ -227,7 +235,13 @@ class SoalController extends Controller
             $soal->tipe_soal = $request->tipe_soal;
             $soal->rujukan = $request->rujukan;
             $soal->layout = $request->layout;
+
+            if (isset($request->case_sensitive)) {
+                $soal->case_sensitive = $request->case_sensitive;
+            }
+
             $soal->save();
+
 
             if(in_array($request->tipe_soal, [1,3,4,5,6])) {
                 DB::table('jawaban_soals')->where('soal_id',$request->soal_id)->delete();
