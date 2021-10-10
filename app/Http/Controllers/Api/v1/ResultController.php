@@ -21,9 +21,9 @@ class ResultController extends Controller
 {
     /**
      * @Route(path="api/v1/ujians/{jadwal}/result", methods={"GET"})
-     * 
+     *
      * Ambil data hasil ujian peserta
-     * 
+     *
      * @param string $jadwal_id
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
@@ -37,7 +37,7 @@ class ResultController extends Controller
         if (!$jadwal_id) {
             return SendResponse::badRequest('Kesalahan, data yang diminta tidak ditemukan');
         }
-        
+
         $res = HasilUjian::with(['peserta' => function ($query) {
             $query->select('id','nama','no_ujian');
         }]);
@@ -87,10 +87,10 @@ class ResultController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/{jadwal}/result/link", methods={"GET"})
-     * 
-     * Buat link untuk download excel hasil ujian 
+     *
+     * Buat link untuk download excel hasil ujian
      * peserta
-     * 
+     *
      * @param string $jadwal_id
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
@@ -107,7 +107,7 @@ class ResultController extends Controller
         $jurusan = request()->q;
         $group = request()->group;
         $url = URL::temporarySignedRoute(
-            'hasilujian.download.excel', 
+            'hasilujian.download.excel',
             now()->addMinutes(5),
             ['jadwal' => $jadwal_id, 'jurusan' => $jurusan, "group" => $group]
         );
@@ -117,9 +117,9 @@ class ResultController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/{jadwal}/result/excel", methods={"GET"})
-     * 
+     *
      * Download excel hasil ujian peserta
-     * 
+     *
      * @param string $jadwal_id
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
@@ -174,7 +174,7 @@ class ResultController extends Controller
                 });
             }
         }
-        
+
         $res = $res->where('jadwal_id', $jadwal->id)
             ->orderBy('peserta_id')
             ->get();
@@ -190,9 +190,9 @@ class ResultController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa", methods={"GET"})
-     * 
+     *
      * Ambil data capaian siswa hasil ujian
-     * 
+     *
      * @param string $jadwal_id
      * @param string $banksoal_id
      * @return App\Actions\SendResponse
@@ -258,10 +258,10 @@ class ResultController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/link", methods={"GET"})
-     * 
-     * Buat link untuk download excel capaian 
+     *
+     * Buat link untuk download excel capaian
      * siswa pada hasil ujian
-     * 
+     *
      * @param string $jadwal_id
      * @param string $banksoal_id
      * @return App\Actions\SendResponse
@@ -286,11 +286,11 @@ class ResultController extends Controller
         if (!$banksoal) {
             return SendResponse::badRequest('kesalahan, banksoal yang diminta tidak ditemukan');
         }
-        
+
         $jurusan = request()->q;
         $group = request()->group;
         $url = URL::temporarySignedRoute(
-            'capaian.download.excel', 
+            'capaian.download.excel',
             now()->addMinutes(5),
             ['jadwal' => $jadwal->id, 'banksoal' => $banksoal->id,'jurusan' => $jurusan, 'group' => $group]
         );
@@ -300,10 +300,10 @@ class ResultController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel", methods={"GET"})
-     * 
+     *
      * Download excel capaian
      * siswa pada hasil ujian
-     * 
+     *
      * @param string $jadwal_id
      * @param string $banksoal_id
      * @return App\Actions\SendResponse
@@ -374,7 +374,7 @@ class ResultController extends Controller
             });
         }
 
-        
+
         $sss = $sss->whereHas('pertanyaan', function($query) {
             $query->where('tipe_soal','!=','2');
         })
@@ -413,10 +413,10 @@ class ResultController extends Controller
 
     /**
      * @Route(path="api/v1/ujians/hasil/{hasil}", methods={"GET"})
-     * 
+     *
      * Abmil data hasil ujian peserta detail
      * dengan jawabannya
-     * 
+     *
      * @param string $hasil_id
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmial.com>
@@ -427,7 +427,7 @@ class ResultController extends Controller
             ->where('id', $hasil_id)
             ->select('peserta_id', 'jadwal_id')
             ->first();
-            
+
         if (!$hasil) {
             return SendResponse::badRequest('kesalahan, data yang diminta tidak dapat ditemukan');
         }
@@ -449,6 +449,7 @@ class ResultController extends Controller
                 'id' => $item->id,
                 'iscorrect' => $item->iscorrect,
                 'jadwal_id' => $item->jawab_id,
+                'mengurutkan' => json_decode($item->mengurutkan, true),
                 'jawab' => $item->jawab,
                 'jawab_complex' => $item->jawab_complex,
                 'peserta_nama'  => $item->peserta->nama,

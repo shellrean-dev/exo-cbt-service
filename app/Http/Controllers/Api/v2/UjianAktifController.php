@@ -576,7 +576,9 @@ class UjianAktifController extends Controller
                      'iscorrect'     => 0,
                      'jadwal_id'     => $jadwal->id,
                      'ragu_ragu'     => 0,
-                     'esay'          => ''
+                     'esay'          => '',
+                     'created_at'    => now(),
+                     'updated_at'    => now()
                  ]);
              }
 
@@ -617,7 +619,7 @@ class UjianAktifController extends Controller
                     'ragu_ragu'     => 0,
                     'esay'          => '',
                     'created_at'    => now(),
-                    'updated_at'    => now()
+                    'updated_at'    => now(),
                 ]);
             }
 
@@ -642,7 +644,9 @@ class UjianAktifController extends Controller
                     'iscorrect'     => 0,
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
-                    'esay'          => ''
+                    'esay'          => '',
+                    'created_at'    => now(),
+                    'updated_at'    => now()
                 ]);
             }
 
