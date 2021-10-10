@@ -60,6 +60,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('banksoals/{banksoal}/analys', 'BanksoalController@getAnalys');
         Route::get('banksoals/all', 'BanksoalController@allData');
         Route::get('banksoals/{banksoal}/duplikat', 'BanksoalController@duplikat');
+        Route::post('banksoals/{banksoal}/lock', 'BanksoalController@lock');
+        Route::post('banksoals/{banksoal}/unlock', 'BanksoalController@unlock');
         Route::apiResource('banksoals', 'BanksoalController');
 
         Route::post('soals/import-word/{banksoal}', 'SoalController@wordImport');

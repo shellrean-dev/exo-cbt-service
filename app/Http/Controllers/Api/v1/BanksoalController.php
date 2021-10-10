@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\JawabanPeserta;
 use App\JawabanSoal;
@@ -157,6 +158,10 @@ class BanksoalController extends Controller
             'persen'            => 'required|array'
         ]);
 
+        if ($banksoal->is_locked) {
+            return SendResponse::badRequest('Banksoal sedang dikunci');
+        }
+
         $banksoal->kode_banksoal = $request->kode_banksoal;
         if(gettype($request->matpel_id) == 'array') {
             $banksoal->matpel_id = $request->matpel_id['id'];
@@ -188,6 +193,10 @@ class BanksoalController extends Controller
      */
     public function destroy(Banksoal $banksoal)
     {
+        if ($banksoal->is_locked) {
+            return SendResponse::badRequest('Banksoal sedang dikunci');
+        }
+
         DB::beginTransaction();
 
         try {
@@ -277,6 +286,10 @@ class BanksoalController extends Controller
      */
     public function duplikat(Banksoal $banksoal)
     {
+        if ($banksoal->is_locked) {
+            return SendResponse::badRequest('Banksoal sedang dikunci');
+        }
+
         DB::beginTransaction();
         try {
             $soals = Soal::with(['jawabans'])
@@ -331,5 +344,62 @@ class BanksoalController extends Controller
         }
 
         return SendResponse::accept('Banksoal berhasil digandakan');
+    }
+
+    /**
+     * @Route(path="api/v1/banksols/{id}/lock", methods={"POST"})
+     *
+     * Lock banksoal
+     *
+     * @param Banksoal $banksoal
+     * @return App\Actions\SendResponse
+     * @since 3.0.0
+     */
+    public function lock(Banksoal $banksoal, Request  $request) {
+        $user = request()->user('api');
+        $request->validate([
+            'key_lock' => 'required'
+        ]);
+
+        if ($banksoal->is_locked) {
+            return SendResponse::badRequest('Banksoal dikunci');
+        }
+
+        $banksoal->is_locked = 1;
+        $banksoal->key_lock = bcrypt($request->key_lock);
+        $banksoal->lock_by = $user->id;
+        $banksoal->save();
+
+        return SendResponse::accept('Banksoal berhasil dikunci');
+    }
+
+    /**
+     * @Route(path="api/v1/banksols/{id}/unlock", methods={"POST"})
+     *
+     * Lock banksoal
+     *
+     * @param Banksoal $banksoal
+     * @return App\Actions\SendResponse
+     * @since 3.0.0
+     */
+    public function unlock(Banksoal $banksoal, Request  $request) {
+        $request->validate([
+            'key_lock' => 'required'
+        ]);
+
+        if ($banksoal->is_locked == 0) {
+            return SendResponse::accept('Bansoal tidak dikunci');
+        }
+
+        if (Hash::check($request->key_lock, $banksoal->key_lock)) {
+            $banksoal->is_locked = 0;
+            $banksoal->key_lock = null;
+            $banksoal->lock_by = null;
+            $banksoal->save();
+
+            return SendResponse::accept('Banksoal berhasil dibuka');
+        }
+
+        return SendResponse::badRequest('Kata sandi banksoal salah');
     }
 }

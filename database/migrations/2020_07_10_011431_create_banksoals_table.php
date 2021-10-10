@@ -26,6 +26,9 @@ class CreateBanksoalsTable extends Migration
             $table->integer('jumlah_menjodohkan')->default(0)->comment('jumlah menjodohkan');
             $table->integer('jumlah_mengurutkan')->default(0)->comment('jumlah mengurutkan');
 
+            $table->integer('is_locked')->default(0);
+            $table->string('key_lock')->nullable();
+            $table->string('lock_by')->nullable();
             $table->string('persen');
             $table->uuid('matpel_id');
             $table->uuid('author');

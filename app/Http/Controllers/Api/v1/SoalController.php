@@ -43,6 +43,18 @@ class SoalController extends Controller
             'case_sensitive' => 'required_if:tipe_soal,6'
         ]);
 
+        $banksoal = DB::table('banksoals')
+            ->where('id', $request->banksoal_id)
+            ->select(['id','is_locked'])
+            ->first();
+        if (!$banksoal) {
+            return SendResponse::badRequest('Banksoal tidak ditemukan');
+        }
+
+        if ($banksoal->is_locked) {
+            return SendResponse::badRequest('Banksoal sedang dikunci');
+        }
+
         DB::beginTransaction();
 
         try {
@@ -117,6 +129,17 @@ class SoalController extends Controller
      */
     public function storePaste(Request $request)
     {
+        $banksoal = DB::table('banksoals')
+            ->where('id', $request->banksoal_id)
+            ->select(['id','is_locked'])
+            ->first();
+        if (!$banksoal) {
+            return SendResponse::badRequest('Banksoal tidak ditemukan');
+        }
+
+        if ($banksoal->is_locked) {
+            return SendResponse::badRequest('Banksoal sedang dikunci');
+        }
         switch ($request->tipe_soal) {
             case '1':
                 $collection = collect(explode("***", $request->soal));
@@ -202,6 +225,17 @@ class SoalController extends Controller
      */
     public function show(Soal $soal)
     {
+        $banksoal = DB::table('banksoals')
+            ->where('id', $soal->banksoal_id)
+            ->select(['id','is_locked'])
+            ->first();
+        if (!$banksoal) {
+            return SendResponse::badRequest('Banksoal tidak ditemukan');
+        }
+
+        if ($banksoal->is_locked) {
+            return SendResponse::badRequest('Banksoal sedang dikunci');
+        }
         $soal = Soal::with('jawabans')->find($soal->id);
         return SendResponse::acceptData($soal);
     }
@@ -225,6 +259,18 @@ class SoalController extends Controller
             'layout'        => 'required',
             'case_sensitive' => 'required_if:tipe_soal,6'
         ]);
+
+        $banksoal = DB::table('banksoals')
+            ->where('id', $request->banksoal_id)
+            ->select(['id','is_locked'])
+            ->first();
+        if (!$banksoal) {
+            return SendResponse::badRequest('Banksoal tidak ditemukan');
+        }
+
+        if ($banksoal->is_locked) {
+            return SendResponse::badRequest('Banksoal sedang dikunci');
+        }
 
         DB::beginTransaction();
 
@@ -299,6 +345,14 @@ class SoalController extends Controller
      */
     public function destroy(Soal $soal)
     {
+        $banksoal = DB::table('banksoals')
+            ->where('id', $soal->banksoal_id)
+            ->select(['id','is_locked'])
+            ->first();
+
+        if ($banksoal->is_locked) {
+            return SendResponse::badRequest('Banksoal sedang dikunci');
+        }
         DB::beginTransaction();
 
         try {
@@ -352,6 +406,10 @@ class SoalController extends Controller
      */
     public function getSoalByBanksoal(Banksoal $banksoal)
     {
+        if ($banksoal->is_locked) {
+            return SendResponse::badRequest('Banksoal sedang dikunci');
+        }
+
         $soal = Soal::with('jawabans')->where('banksoal_id',$banksoal->id);
         if (request()->q != '') {
             $soal = $soal->where('pertanyaan', 'LIKE', '%'. request()->q.'%');
@@ -380,6 +438,9 @@ class SoalController extends Controller
      */
     public function getSoalByBanksoalAll(Banksoal $banksoal)
     {
+        if ($banksoal->is_locked) {
+            return SendResponse::badRequest('Banksoal sedang dikunci');
+        }
         $soal = Soal::with('jawabans')->where('banksoal_id',$banksoal->id)->get();
         return SendResponse::acceptData($soal);
     }
@@ -410,6 +471,10 @@ class SoalController extends Controller
      */
     public function import(Request $request, Banksoal $banksoal)
     {
+        if ($banksoal->is_locked) {
+            return SendResponse::badRequest('Banksoal sedang dikunci');
+        }
+
         $request->validate([
             'file' => 'required|mimes:xlsx,xls'
         ]);
@@ -548,11 +613,15 @@ class SoalController extends Controller
 
         $banksoal = DB::table('banksoals')
             ->where('id', $banksoal_id)
-            ->select('id','directory_id')
+            ->select('id','directory_id', 'is_locked')
             ->first();
 
         if (!$banksoal) {
             return SendResponse::badRequest('kesalahan, banksoal tidak ditemukan');
+        }
+
+        if ($banksoal->is_locked) {
+            return SendResponse::badRequest('Banksoal sedang dikunci');
         }
 
         if($request->format == '1') {
