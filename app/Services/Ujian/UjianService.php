@@ -436,7 +436,7 @@ final class UjianService extends AbstractService
                 'peserta_id'    => $peserta_id,
             ])
             ->whereHas('soal', function($query) {
-                $query->whereIn('tipe_soal',['1','3','4','5','6','7']);
+                $query->whereIn('tipe_soal',['1']);
             })
             ->count();
 

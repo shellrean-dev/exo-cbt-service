@@ -243,7 +243,7 @@ class BanksoalController extends Controller
         $soal = Soal::with('jawabans')->where(function($query) use ($banksoal) {
             $query->where('banksoal_id', $banksoal->id)
             ->where('tipe_soal','!=','2');
-        })
+        })->orderBy('tipe_soal')
         ->orderBy('created_at','ASC')
         ->get();
 
@@ -254,6 +254,7 @@ class BanksoalController extends Controller
             $benar = $jawab->where('iscorrect','1')->count();
             return [
                 'soal'  => $val->pertanyaan,
+                'tipe_soal' => $val->tipe_soal,
                 'penjawab' => $penjawab,
                 'salah'     => $salah,
                 'benar' => $benar,
