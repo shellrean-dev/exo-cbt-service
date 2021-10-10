@@ -218,7 +218,7 @@ final class UjianService extends AbstractService
                 'peserta_id'    => $peserta_id,
                 'jadwal_id'     => $jadwal_id,
             ])
-            ->select('id','banksoal_id','soal_id','jawab','esay','jawab_complex','ragu_ragu', 'menjodohkan')
+            ->select('id','banksoal_id','soal_id','jawab','esay','jawab_complex','ragu_ragu', 'menjodohkan', 'mengurutkan')
             ->orderBy('created_at')
             ->get()
             ->makeHidden('similiar');
@@ -271,10 +271,27 @@ final class UjianService extends AbstractService
                 }
             }
 
+            if ($item->soal->tipe_soal == 7) {
+                $objMengurutkan = json_decode($item->mengurutkan, true);
+                if ($objMengurutkan == null) {
+                    $item->soal->jawabans = Arr::shuffle($item->soal->jawabans->toArray());
+                } else {
+                    $new_jwbns = [];
+                    foreach ($objMengurutkan as $urut) {
+                        foreach($item->soal->jawabans as $key => $jwb) {
+                            if ($urut == $jwb->id) {
+                                array_push($new_jwbns, $jwb);
+                                break;
+                            }
+                        }
+                    }
+                    $item->soal->jawabans = $new_jwbns;
+                }
+            }
 
             $jawabans = [];
-            if (in_array($item->soal->tipe_soal, [1,2,3,4,5])) {
-                $jawabans = in_array($item->soal->tipe_soal, [1,2,3,4])
+            if (in_array($item->soal->tipe_soal, [1,2,3,4,5,6,7])) {
+                $jawabans = in_array($item->soal->tipe_soal, [1,2,3,4,6,7])
                     ? $item->soal->jawabans
                     : $item->soal->jawabans->map(function($jw, $index) use ($jwra, $jwrb){
                     return [

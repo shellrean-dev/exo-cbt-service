@@ -24,8 +24,8 @@ class CreateJadwalsTable extends Migration
             $table->char('status_ujian',1);
             $table->uuid('event_id')->nullable()->default(null);
             $table->integer('sesi')->default(1);
-            $table->string('setting');
-            $table->string('mulai_sesi')->default('{}');
+            $table->text('setting');
+            $table->text('mulai_sesi')->default('{}');
             $table->integer('view_result')->default(0);
             $table->timestamps();
         });

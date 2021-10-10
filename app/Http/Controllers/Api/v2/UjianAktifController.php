@@ -384,6 +384,7 @@ class UjianAktifController extends Controller
             $max_complex = $banksoal->jumlah_soal_ganda_kompleks;
             $max_menjodohkan = $banksoal->jumlah_menjodohkan;
             $max_isian_singkat = $banksoal->jumlah_isian_singkat;
+            $max_mengurutkan = $banksoal->jumlah_mengurutkan;
 
             // Ambil setting dari jadwal
             $setting = json_decode($jadwal->setting, true);
@@ -620,15 +621,41 @@ class UjianAktifController extends Controller
                 ]);
             }
 
-            // Gabungkan semua collection dari tipe soal
+            # Soal mengurutkan
+            $mengurutkan = DB::table('soals')->where([
+                'banksoal_id'   => $banksoal->id,
+                'tipe_soal'     => 7
+            ]);
+            if($setting['acak_soal'] == "1") {
+                $mengurutkan = $mengurutkan->inRandomOrder();
+            }
+            $mengurutkan = $mengurutkan->take($max_mengurutkan)->get();
+
+            $soal_mengurutkan = [];
+            foreach ($mengurutkan as $item) {
+                array_push($soal_mengurutkan, [
+                    'id'            => Str::uuid()->toString(),
+                    'peserta_id'    => $peserta->id,
+                    'banksoal_id'   => $banksoal->id,
+                    'soal_id'       => $item->id,
+                    'jawab'         => 0,
+                    'iscorrect'     => 0,
+                    'jadwal_id'     => $jadwal->id,
+                    'ragu_ragu'     => 0,
+                    'esay'          => ''
+                ]);
+            }
+
+            # Gabungkan semua collection dari tipe soal
             $soals = [];
             $list = collect([
                 '1' => $soal_pg,
                 '2' => $soal_esay,
                 '3' => $soal_listening,
                 '4' => $soal_complex,
-                 '5' => $soal_menjodohkan,
+                '5' => $soal_menjodohkan,
                 '6' => $soal_isian_singkat,
+                '7' => $soal_mengurutkan,
             ]);
             foreach ($setting['list'] as $value) {
                 $soal = $list->get($value['id']);
@@ -637,7 +664,7 @@ class UjianAktifController extends Controller
                 }
             }
 
-            // Insert ke database sebagai jawaban siswa
+            # Insert ke database sebagai jawaban siswa
             try {
                 DB::beginTransaction();
                 DB::table('jawaban_pesertas')->insert($soals);
@@ -647,7 +674,7 @@ class UjianAktifController extends Controller
                 return SendResponse::internalServerError($e->getMessage());
             }
 
-            // Ambil jawaban siswa
+            # Ambil jawaban siswa
             $jawaban_peserta = $devUjianService->pesertaAnswers(
                 $jadwal->id,
                 $peserta->id,

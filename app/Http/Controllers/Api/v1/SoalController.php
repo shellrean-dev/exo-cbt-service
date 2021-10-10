@@ -608,7 +608,7 @@ class SoalController extends Controller
     {
         $request->validate([
             'file' => 'required|mimes:docx',
-            'format' => 'required'
+            'fmt' => 'required'
         ]);
 
         $banksoal = DB::table('banksoals')
@@ -624,10 +624,10 @@ class SoalController extends Controller
             return SendResponse::badRequest('Banksoal sedang dikunci');
         }
 
-        if($request->format == '1') {
+        if($request->fmt == '1') {
             return $this->_formatStandart($request, $banksoal);
         }
-        if ($request->format == '2') {
+        if ($request->fmt == '2') {
             return $this->_formatTabled($request, $banksoal);
         }
 

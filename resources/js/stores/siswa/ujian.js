@@ -64,7 +64,8 @@ const actions = {
     getPesertaUjian,
     getUncompleteUjian,
     getHasilUjian,
-    submitJawabanMenjodohkan
+    submitJawabanMenjodohkan,
+    submitJawabanMengurutkan,
 }
 
 /**
@@ -204,6 +205,31 @@ function submitJawabanEssy({ commit, state }, payload) {
  * @param {*} payload
  */
 function submitJawabanMenjodohkan({ commit, state }, payload) {
+    return new Promise(async(resolve, reject) => {
+        try {
+            commit('SET_LOADINGER',true, { root: true })
+            const network = await $axios.post(endpoint.test, payload)
+            commit('SET_LOADINGER',false, { root: true })
+            commit('SLICE_DATA_RESP', network.data)
+            resolve(network.data)
+        } catch (error) {
+            if (typeof error.response != 'undefined') {
+                if (error.response.status == 422) {
+                    commit('SET_ERRORS', error.response.data.errors, { root: true })
+                }
+            }
+            reject(getError(error))
+            commit('SET_LOADINGER',false, { root: true })
+        }
+    })
+}
+
+/**
+ * Submit student mengurutkan
+ * @param {*} store
+ * @param {*} payload
+ */
+function submitJawabanMengurutkan({ commit, state }, payload) {
     return new Promise(async(resolve, reject) => {
         try {
             commit('SET_LOADINGER',true, { root: true })

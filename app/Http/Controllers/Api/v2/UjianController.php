@@ -7,6 +7,7 @@ use App\Actions\SendResponse;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 use ShellreanDev\Cache\CacheHandler;
@@ -244,6 +245,48 @@ class UjianController extends Controller
                 'jawab'         => $find->jawab,
                 'jawab_complex' => json_decode($find->jawab_complex, true),
                 'menjodohkan'   => json_decode($find->menjodohkan, true),
+                'esay'          => $find->esay,
+                'ragu_ragu'     => $find->ragu_ragu,
+            ];
+
+            return response()->json(['data' => $send,'index' => $request->index]);
+        }
+
+        // Jika yang dikirimkan adalah mengurutkan
+        if(isset($request->mengurutkan)) {
+            $jwb_soals = DB::table('jawaban_soals')
+                ->where('soal_id', $find->soal_id)
+                ->orderBy('created_at')
+                ->get();
+            $mengurutkan_correct = $jwb_soals->map(function($item) {
+                return $item->id;
+            });
+
+            $result_mengurutkan_correct = 1;
+            for ($i = 0; $i < count($mengurutkan_correct); $i++) {
+                if ($mengurutkan_correct[$i] != $request->mengurutkan[$i]) {
+                    $result_mengurutkan_correct = 0;
+                    break;
+                }
+            }
+            try {
+                DB::table('jawaban_pesertas')
+                    ->where('id', $find->id)
+                    ->update([
+                        'iscorrect' => $result_mengurutkan_correct,
+                        'mengurutkan' => json_encode($request->mengurutkan)
+                    ]);
+            } catch (\Exception $e) {
+                return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
+            }
+
+            $send = [
+                'id'            => $find->id,
+                'banksoal_id'   => $find->banksoal_id,
+                'soal_id'       => $find->soal_id,
+                'jawab'         => $find->jawab,
+                'jawab_complex' => json_decode($find->jawab_complex, true),
+                'mengurutkan'   => json_decode($find->mengurutkan, true),
                 'esay'          => $find->esay,
                 'ragu_ragu'     => $find->ragu_ragu,
             ];

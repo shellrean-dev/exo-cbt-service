@@ -186,6 +186,19 @@
               @input="onInput"
               ></textarea>
             </div>
+            <template
+              v-if="[7].includes(filleds[questionIndex].soal.tipe_soal)"
+            >
+              <div class="flex space-x-1"
+                   v-for="(jawab,index) in filleds[questionIndex].soal.jawabans"
+                   :key="'optional_mengurutkan_index'+index">
+                <div class="py-4 px-4 rounded-xl border-2 flex-1 cursor-pointer"
+                     :class="mengurutkan == index ? 'border-green-400' : 'border-gray-200'"
+                     v-html="jawab.text_jawaban"
+                     v-on:click="mengurutkanClick(index)">
+                </div>
+              </div>
+            </template>
 				  </div>
           <div class="grid grid-rows-none sm:grid-rows-3 sm:grid-flow-col gap-4 mt-4"
           v-if="filleds[questionIndex].soal.layout == 2"
@@ -406,6 +419,31 @@ export default {
     finishExamAlert() {
 
     },
+    mengurutkanClick(index) {
+      if (this.mengurutkan == null) {
+        this.mengurutkan = index;
+        return;
+      }
+
+      if (this.mengurutkan == index) {
+        this.mengurutkan = null;
+        return;
+      }
+      let tmp = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans));
+      tmp[this.mengurutkan] = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[index]));
+      tmp[index] = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[this.mengurutkan]));
+
+      this.filleds[this.questionIndex].soal.jawabans = tmp;
+      this.mengurutkan = null;
+
+      this.submitJawabanMengurutkan({
+        jawaban_id : this.filleds[this.questionIndex].id,
+        mengurutkan: tmp.map(item => item.id),
+        index : this.questionIndex
+      }).catch((error) => {
+        this.showError(error)
+      })
+    },
     menjodohkanLeftClick(index) {
       this.menjodohkan.left = index
       if (this.menjodohkan.right == null) {
@@ -418,6 +456,14 @@ export default {
       this.filleds[this.questionIndex].soal.jawabans = tmp;
       this.menjodohkan.left = null
       this.menjodohkan.right = null
+
+      this.submitJawabanMenjodohkan({
+        jawaban_id : this.filleds[this.questionIndex].id,
+        menjodohkan: tmp.map(item => [item.a.id, item.b.id]),
+        index : this.questionIndex
+      }).catch((error) => {
+        this.showError(error)
+      })
     },
     menjodohkanRightClick(index) {
       this.menjodohkan.right = index

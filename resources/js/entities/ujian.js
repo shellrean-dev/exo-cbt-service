@@ -34,7 +34,8 @@ const vuex_methods = {
         'submitJawabanEssy',
         'selesaiUjianPeserta',
         'updateRaguJawaban',
-        'submitJawabanMenjodohkan'
+        'submitJawabanMenjodohkan',
+        'submitJawabanMengurutkan'
     ]),
 }
 
@@ -72,7 +73,8 @@ const vue_data = {
     menjodohkan: {
         left: null,
         right: null
-    }
+    },
+    mengurutkan: null
 }
 
 /**
@@ -422,7 +424,8 @@ function tipeSoalText() {
         'Listening',
         'Pilihan Ganda Kompleks',
         'Menjodohkan',
-        'Isian Singkat'
+        'Isian Singkat',
+        'Mengurutkan'
     ]
 
 
