@@ -335,22 +335,22 @@ final class UjianService extends AbstractService
      */
     public function finishing(string $banksoal_id, string $jadwal_id, string $peserta_id)
     {
-        // Ambil banksoal
-        $key = md5(sprintf('banksoal:data:%s:single', $banksoal_id));
-        if ($this->cache->isCached($key)) {
-            $banksoal = $this->cache->getItem($key);
-        } else {
+        # Ambil banksoal
+//        $key = md5(sprintf('banksoal:data:%s:single', $banksoal_id));
+//        if ($this->cache->isCached($key)) {
+//            $banksoal = $this->cache->getItem($key);
+//        } else {
             $banksoal = Banksoal::find($banksoal_id);
 
-            $this->cache->cache($key, $banksoal);
-        }
+//            $this->cache->cache($key, $banksoal);
+//        }
 
         if (!$banksoal) {
             throw new Exception('banksoal tidak ditemukan');
         }
 
         try {
-            // Tipe soal: pilihan ganda
+            # Tipe soal: pilihan ganda
             $hasil_pg = 0;
             $pg_benar = 0;
             $pg_salah = 0;
@@ -364,7 +364,7 @@ final class UjianService extends AbstractService
             }
 
 
-            // Tipe soal: pilihan ganda komplex
+            # Tipe soal: pilihan ganda komplex
             $hasil_mpg = 0;
             $mpg_salah = 0;
             $mpg_benar = 0;
@@ -377,7 +377,7 @@ final class UjianService extends AbstractService
                 }
             }
 
-            // Tipe soal: listening
+            # Tipe soal: listening
             $hasil_listening = 0;
             $listening_benar = 0;
             $listening_salah = 0;
@@ -390,7 +390,7 @@ final class UjianService extends AbstractService
                 }
             }
 
-            // Tipe soal: isian singkat
+            # Tipe soal: isian singkat
             $hasil_isiang_singkat = 0;
             $isian_singkat_benar = 0;
             $isian_singkat_salah = 0;
@@ -403,7 +403,7 @@ final class UjianService extends AbstractService
                 }
             }
 
-            // Tipe soal: menjodohkan
+            # Tipe soal: menjodohkan
             $hasil_menjodohkan = 0;
             $jumlah_menjodohkan_benar = 0;
             $jumlah_menjodohkan_salah = 0;
@@ -416,14 +416,27 @@ final class UjianService extends AbstractService
                 }
             }
 
-            // Resulting Score
+            # Tipe soal: mengurutkan
+            $hasil_mengurutkan = 0;
+            $jumlah_mengurutkan_benar = 0;
+            $jumlah_mengurutkan_salah = 0;
+            if($banksoal->jumlah_mengurutkan > 0) {
+                $jumlah_mengurutkan_benar = $this->_countCorrectAnswer($jadwal_id, $peserta_id, '7');
+                $jumlah_mengurutkan_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, '7');
+
+                if($jumlah_mengurutkan_benar > 0) {
+                    $hasil_isiang_singkat = ($jumlah_mengurutkan_benar/$banksoal->jumlah_mengurutkan)*$banksoal->persen['mengurutkan'];
+                }
+            }
+
+            # Resulting Score
             $null = JawabanPeserta::where([
                 'jawab'         => 0,
                 'jadwal_id'     => $jadwal_id,
                 'peserta_id'    => $peserta_id,
             ])
             ->whereHas('soal', function($query) {
-                $query->whereIn('tipe_soal',['1','3','4','5','6']);
+                $query->whereIn('tipe_soal',['1','3','4','5','6','7']);
             })
             ->count();
 
@@ -444,6 +457,8 @@ final class UjianService extends AbstractService
                 'jumlah_salah_isian_singkat'    => $isian_singkat_salah,
                 'jumlah_benar_menjodohkan'      => $jumlah_menjodohkan_benar,
                 'jumlah_salah_menjodohkan'      => $jumlah_menjodohkan_salah,
+                'jumlah_benar_mengurutkan'      => $jumlah_mengurutkan_benar,
+                'jumlah_salah_mengurutkan'      => $jumlah_mengurutkan_salah,
                 'tidak_diisi'                   => $null,
                 'hasil'                         => $hasil,
                 'point_esay'                    => 0,
@@ -452,8 +467,8 @@ final class UjianService extends AbstractService
             ]);
 
             // remove completed jadwal cache
-            $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta_id));
-            $this->cache->cache($key, '', 0);
+//            $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta_id));
+//            $this->cache->cache($key, '', 0);
 
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
@@ -519,16 +534,16 @@ final class UjianService extends AbstractService
      */
     public function updateReminingTime(object $siswa_ujian)
     {
-        $key = md5(sprintf('jadwals:data:%s:single', $siswa_ujian->jadwal_id));
-        if ($this->cache->isCached($key)) {
-            $deUjian = $this->cache->getItem($key);
-        } else {
+//        $key = md5(sprintf('jadwals:data:%s:single', $siswa_ujian->jadwal_id));
+//        if ($this->cache->isCached($key)) {
+//            $deUjian = $this->cache->getItem($key);
+//        } else {
             $deUjian = DB::table('jadwals')
                 ->where('id', $siswa_ujian->jadwal_id)
                 ->first();
 
-            $this->cache->cache($key, $deUjian);
-        }
+//            $this->cache->cache($key, $deUjian);
+//        }
 
         // hitung perbedaan waktu
         // shadow dan waktu sekarang

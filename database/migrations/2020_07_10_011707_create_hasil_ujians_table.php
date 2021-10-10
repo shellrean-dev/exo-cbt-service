@@ -28,6 +28,8 @@ class CreateHasilUjiansTable extends Migration
             $table->integer('jumlah_salah_isian_singkat')->default(0);
             $table->integer('jumlah_benar_menjodohkan')->default(0);
             $table->integer('jumlah_salah_menjodohkan')->default(0);
+            $table->integer('jumlah_benar_mengurutkan')->default(0);
+            $table->integer('jumlah_salah_mengurutkan')->default(0);
             $table->float('point_esay');
             $table->integer('tidak_diisi');
             $table->float('hasil');
