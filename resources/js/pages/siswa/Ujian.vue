@@ -115,20 +115,25 @@
             <template
             v-if="[5].includes(filleds[questionIndex].soal.tipe_soal)"
             >
-              <div class="flex space-x-4"
+              <div class="flex"
                    v-for="(jawab, index) in filleds[questionIndex].soal.jawabans"
                    :key="'jawaban_menjodohkan_index_'+index"
               >
-                <div class="py-4 px-4 rounded-xl border-2 flex-1 cursor-pointer"
+                <div class="py-4 px-4 rounded-xl border-2 flex-1 cursor-pointer hover:shadow-lg"
                      :class="menjodohkan.left == index ? 'border-green-400' : 'border-gray-200'"
                 v-html="jawab.a.text"
                      v-on:click="menjodohkanLeftClick(index)"
                 >
                 </div>
-                <div class="px-4 flex items-center text-gray-400">
-                  <next-line-icon></next-line-icon>
+                <div class="flex items-center text-gray-400">
+                  <div class="flex items-center">
+                    <div class="h-3 w-3 bg-green-500 rounded-2xl"></div>
+                    <div class="h-1 w-10 bg-green-500">
+                    </div>
+                    <div class="h-3 w-3 bg-green-500 rounded-2xl"></div>
+                  </div>
                 </div>
-                <div class="py-4 px-4 rounded-xl border-2 flex-1 cursor-pointer"
+                <div class="py-4 px-4 rounded-xl border-2 flex-1 cursor-pointer hover:shadow-lg"
                      :class="menjodohkan.right == index ? 'border-green-400' : 'border-gray-200'"
                 v-html="jawab.b.text"
                      v-on:click="menjodohkanRightClick(index)"
@@ -187,12 +192,11 @@
               ></textarea>
             </div>
             <template
-              v-if="[7].includes(filleds[questionIndex].soal.tipe_soal)"
-            >
+              v-if="[7].includes(filleds[questionIndex].soal.tipe_soal)">
               <div class="flex space-x-1"
                    v-for="(jawab,index) in filleds[questionIndex].soal.jawabans"
                    :key="'optional_mengurutkan_index'+index">
-                <div class="py-4 px-4 rounded-xl border-2 flex-1 cursor-pointer"
+                <div class="py-4 px-4 rounded-xl border-2 flex-1 cursor-pointer hover:shadow-lg"
                      :class="mengurutkan == index ? 'border-green-400' : 'border-gray-200'"
                      v-html="jawab.text_jawaban"
                      v-on:click="mengurutkanClick(index)">
@@ -258,6 +262,11 @@
           v-if="filleds[questionIndex].soal.layout == 3"
           >
             <table class="border-collapse border border-gray-400  w-full">
+              <tr v-if="[8].includes(parseInt(filleds[questionIndex].soal.tipe_soal))">
+                <th>Pernyataan</th>
+                <th>Benar</th>
+                <th>Salah</th>
+              </tr>
               <tr
               v-for="(jawab,index) in filleds[questionIndex].soal.jawabans"
               :key="index"
@@ -292,6 +301,37 @@
                 <td class="border border-gray-400 pl-2"
                 v-html="jawab.text_jawaban"
                 ></td>
+                <template
+                  v-if="[8].includes(parseInt(filleds[questionIndex].soal.tipe_soal))">
+                  <td class="border border-gray-400" width="80px">
+                    <div class="flex items-center m-2">
+                      <input :id="'radio1'+index"
+                             :name="'radio1'+index"
+                             :checked="filleds[questionIndex].benar_salah[jawab.id] == 1"
+                             type="radio"
+                             value="1" class="hidden"
+                             :disabled="isLoadinger || isLoading"
+                             @change="changeRadioBenarSalah($event, jawab.id)"/>
+                      <label :for="'radio1'+index" class="flex items-center cursor-pointer text-xl">
+                        <span class="w-6 h-6 text-sm inline-block mr-2 rounded-full border border-gray-400 flex-no-shrink flex items-center justify-center uppercase"></span>
+                      </label>
+                    </div>
+                  </td>
+                  <td class="border border-gray-400" width="80px">
+                    <div class="flex items-center m-2">
+                      <input :id="'radio2'+index"
+                             :name="'radio2'+index"
+                             :checked="filleds[questionIndex].benar_salah[jawab.id] == 0"
+                             type="radio"
+                             value="0" class="hidden"
+                             :disabled="isLoadinger || isLoading"
+                             @change="changeRadioBenarSalah($event, jawab.id)"/>
+                      <label :for="'radio2'+index" class="flex items-center cursor-pointer text-xl">
+                        <span class="w-6 h-6 text-sm inline-block mr-2 rounded-full border border-gray-400 flex-no-shrink flex items-center justify-center uppercase"></span>
+                      </label>
+                    </div>
+                  </td>
+                </template>
               </tr>
               <tr
               v-if="[2,6].includes(filleds[questionIndex].soal.tipe_soal)"
@@ -445,6 +485,10 @@ export default {
       })
     },
     menjodohkanLeftClick(index) {
+      if (this.menjodohkan.left == index) {
+        this.menjodohkan.left = null;
+        return;
+      }
       this.menjodohkan.left = index
       if (this.menjodohkan.right == null) {
         return;
@@ -466,6 +510,10 @@ export default {
       })
     },
     menjodohkanRightClick(index) {
+      if (this.menjodohkan.right == index) {
+        this.menjodohkan.right = null;
+        return;
+      }
       this.menjodohkan.right = index
       if (this.menjodohkan.left == null) {
         return;

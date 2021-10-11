@@ -2,6 +2,7 @@
 
 namespace ShellreanDev\Services\Ujian;
 
+use App\Actions\SendResponse;
 use stdClass;
 use Exception;
 use Carbon\Carbon;
@@ -218,7 +219,18 @@ final class UjianService extends AbstractService
                 'peserta_id'    => $peserta_id,
                 'jadwal_id'     => $jadwal_id,
             ])
-            ->select('id','banksoal_id','soal_id','jawab','esay','jawab_complex','ragu_ragu', 'menjodohkan', 'mengurutkan', 'benar_salah', 'setuju_tidak')
+            ->select(
+                'id',
+                'banksoal_id',
+                'soal_id',
+                'jawab',
+                'esay',
+                'jawab_complex',
+                'ragu_ragu',
+                'menjodohkan',
+                'mengurutkan',
+                'benar_salah',
+                'setuju_tidak')
             ->orderBy('created_at')
             ->get()
             ->makeHidden('similiar');
@@ -271,6 +283,7 @@ final class UjianService extends AbstractService
                 }
             }
 
+            # Jika tipe soal adalah mengurutkan
             if ($item->soal->tipe_soal == 7) {
                 $objMengurutkan = json_decode($item->mengurutkan, true);
                 if ($objMengurutkan == null) {
@@ -286,6 +299,22 @@ final class UjianService extends AbstractService
                         }
                     }
                     $item->soal->jawabans = $new_jwbns;
+                }
+            }
+
+            # Jika tipe soal adalah benar salah
+            if ($item->soal->tipe_soal == 8) {
+                $objBenarSalah = json_decode($item->benar_salah, true);
+
+                if ($objBenarSalah == null) {
+                    $new_jwb_benar_salah = [];
+
+                    foreach ($item->soal->jawabans as $v) {
+                        $new_jwb_benar_salah[$v->id] = 0;
+                    }
+                    $item->benar_salah = $new_jwb_benar_salah;
+                } else {
+                    $item->benar_salah = $objBenarSalah;
                 }
             }
 
@@ -308,6 +337,7 @@ final class UjianService extends AbstractService
                 'jawab' => $item->jawab,
                 'esay' => $item->esay,
                 'jawab_complex' => $item->jawab_complex,
+                'benar_salah' => $item->benar_salah,
                 'soal' => [
                     'audio' => $item->soal->audio,
                     'banksoal_id' => $item->soal->banksoal_id,
@@ -470,6 +500,7 @@ final class UjianService extends AbstractService
                 'tidak_diisi'                   => $null,
                 'hasil'                         => $hasil,
                 'point_esay'                    => 0,
+                'point_setuju_tidak'            => 0,
                 'created_at'                    => now(),
                 'updated_at'                    => now()
             ]);

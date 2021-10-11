@@ -50,6 +50,10 @@ const vue_data = {
     questionIndex: '',
     selected: '',
     selected_complex: [],
+    selected_benar_salah: {
+        0: 0,
+        1: 1
+    },
     patt: 17,
     sidebar: false,
     ragu: '',
@@ -108,7 +112,8 @@ const vue_methods = {
     changeToZoomer,
     tipeSoalText,
     showError,
-    onChangeRange
+    onChangeRange,
+    changeRadioBenarSalah
 }
 
 /**
@@ -394,6 +399,15 @@ function changeCheckbox(e, val) {
     })
 }
 
+function changeRadioBenarSalah(e, val) {
+    this.filleds[this.questionIndex].benar_salah[val] = parseInt(e.target.value);
+    this.submitJawaban({
+        jawaban_id : this.filleds[this.questionIndex].id,
+        benar_salah : this.filleds[this.questionIndex].benar_salah,
+        index : this.questionIndex
+    }).catch(error => this.showError(error))
+}
+
 /**
  * Change to zoomer data
  * @type vue method
@@ -425,7 +439,9 @@ function tipeSoalText() {
         'Pilihan Ganda Kompleks',
         'Menjodohkan',
         'Isian Singkat',
-        'Mengurutkan'
+        'Mengurutkan',
+        'Benar/Salah',
+        'Setuju/Tidak setuju'
     ]
 
 

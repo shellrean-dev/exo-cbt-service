@@ -296,20 +296,23 @@ class UjianController extends Controller
 
         # jia yang dikirimkan adalah salah/benar
         if(is_array($request->benar_salah)) {
-            $soal_benar_salah = Soal::with(['jawabans' => function($query) {
-                $query->where('correct', 1);
-            }])->where("id", $find->soal_id)->first();
+            $soal_benar_salah = DB::table('soals as s')
+                ->join('jawaban_soals as j', 'j.soal_id', '=','s.id')
+                ->select('j.id as jawaban_id', 'correct')
+                ->where('s.id', $find->soal_id)
+                ->get();
 
-            if ($soal_benar_salah) {
-                $array = $soal_benar_salah->jawabans->map(function($item){
-                    return $item->id;
-                })->toArray();
-                $correct = 0;
-                $benar_salah = array_diff( $request->benar_salah, [0]);
-                if (array_diff($array,$benar_salah) == array_diff($benar_salah,$array)) {
-                    $correct = 1;
+            $count_corect = 0;
+            foreach ($request->benar_salah as $k => $v) {
+                $seachSoal = $soal_benar_salah->where('jawaban_id', $k)->first();
+                if ($seachSoal && ($seachSoal->correct == $v)) {
+                    $count_corect += 1;
                 }
-                $find->iscorrect = $correct;
+            }
+
+            $find->iscorrect = 0;
+            if (count($soal_benar_salah) == $count_corect) {
+                $find->iscorrect = 1;
             }
 
             try {
