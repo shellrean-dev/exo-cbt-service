@@ -456,12 +456,12 @@ final class UjianService extends AbstractService
             $hasil_benar_salah = 0;
             $jumlah_benar_salah_benar = 0;
             $jumlah_benar_salah_salah = 0;
-            if($banksoal->jumlah_mengurutkan > 0) {
+            if($banksoal->jumlah_benar_salah > 0) {
                 $jumlah_benar_salah_benar = $this->_countCorrectAnswer($jadwal_id, $peserta_id, '8');
                 $jumlah_benar_salah_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, '8');
 
                 if($jumlah_benar_salah_benar > 0) {
-                    $hasil_benar_salah = ($jumlah_benar_salah_salah/$banksoal->jumlah_mengurutkan)*$banksoal->persen['benar_salah'];
+                    $hasil_benar_salah = ($jumlah_benar_salah_benar/$banksoal->jumlah_benar_salah)*$banksoal->persen['benar_salah'];
                 }
             }
 
