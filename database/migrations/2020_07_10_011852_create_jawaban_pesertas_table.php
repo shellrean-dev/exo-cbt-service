@@ -23,6 +23,8 @@ class CreateJawabanPesertasTable extends Migration
             $table->string('jawab_complex')->nullable()->default("[]");
             $table->text('menjodohkan')->nullable()->default("[]");
             $table->text('mengurutkan')->nullable()->default("[]");
+            $table->text('benar_salah')->nullable()->default("[]");
+            $table->longText('setuju_tidak')->nullable()->default("[]");
             $table->longText('esay')->nullable();
             $table->char('ragu_ragu',1)->default(0);
             $table->char('iscorrect',1)->default(0);

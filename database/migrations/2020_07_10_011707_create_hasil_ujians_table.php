@@ -30,7 +30,10 @@ class CreateHasilUjiansTable extends Migration
             $table->integer('jumlah_salah_menjodohkan')->default(0);
             $table->integer('jumlah_benar_mengurutkan')->default(0);
             $table->integer('jumlah_salah_mengurutkan')->default(0);
+            $table->integer('jumlah_benar_benar_salah')->default(0);
+            $table->integer('jumlah_salah_benar_salah')->default(0);
             $table->float('point_esay');
+            $table->float('point_setuju_tidak');
             $table->integer('tidak_diisi');
             $table->float('hasil');
             $table->timestamps();

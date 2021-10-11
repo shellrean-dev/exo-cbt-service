@@ -25,6 +25,8 @@ class CreateBanksoalsTable extends Migration
             $table->integer('jumlah_isian_singkat')->default(0)->comment('jumlah isian singkat');
             $table->integer('jumlah_menjodohkan')->default(0)->comment('jumlah menjodohkan');
             $table->integer('jumlah_mengurutkan')->default(0)->comment('jumlah mengurutkan');
+            $table->integer('jumlah_benar_salah')->default(0)->comment('jumlah benar-salah');
+            $table->integer('jumlah_setuju_tidak')->default(0)->comment('jumlah setuju-tidak');
 
             $table->integer('is_locked')->default(0);
             $table->string('key_lock')->nullable();

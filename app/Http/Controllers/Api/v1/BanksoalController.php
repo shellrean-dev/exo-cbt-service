@@ -72,6 +72,8 @@ class BanksoalController extends Controller
             'jumlah_isian_singkat' => 'required|int',
             'jumlah_menjodohkan' => 'required|int',
             'jumlah_mengurutkan' => 'required|int',
+            'jumlah_benar_salah' => 'required|int',
+            'jumlah_setuju_tidak' => 'required|int',
             'persen'            => 'required|array'
         ]);
 
@@ -104,6 +106,8 @@ class BanksoalController extends Controller
                 'jumlah_isian_singkat' => $request->jumlah_isian_singkat,
                 'jumlah_menjodohkan' => $request->jumlah_menjodohkan,
                 'jumlah_mengurutkan' => $request->jumlah_mengurutkan,
+                'jumlah_benar_salah' => $request->jumlah_benar_salah,
+                'jumlah_setuju_tidak' => $request->jumlah_setuju_tidak,
                 'persen'            => $request->persen,
                 'directory_id'      => $direk->id
             ];
@@ -155,6 +159,7 @@ class BanksoalController extends Controller
             'jumlah_isian_singkat' => 'required|int',
             'jumlah_menjodohkan' => 'required|int',
             'jumlah_mengurutkan' => 'required|int',
+            'jumlah_benar_salah' => 'required|int',
             'persen'            => 'required|array'
         ]);
 
@@ -176,6 +181,8 @@ class BanksoalController extends Controller
         $banksoal->jumlah_isian_singkat = $request->jumlah_isian_singkat;
         $banksoal->jumlah_menjodohkan = $request->jumlah_menjodohkan;
         $banksoal->jumlah_mengurutkan = $request->jumlah_mengurutkan;
+        $banksoal->jumlah_benar_salah = $request->jumlah_benar_salah;
+        $banksoal->jumlah_setuju_tidak = $request->jumlah_setuju_tidak;
         $banksoal->persen = $request->persen;
         $banksoal->save();
 
@@ -313,6 +320,8 @@ class BanksoalController extends Controller
                 'jumlah_isian_singkat' => $banksoal->jumlah_isian_singkat,
                 'jumlah_menjodohkan' => $banksoal->jumlah_menjodohkan,
                 'jumlah_mengurutkan' => $banksoal->jumlah_mengurutkan,
+                'jumlah_benar_salah' => $banksoal->jumlah_benar_salah,
+                'jumlah_setuju_tidak' => $banksoal->jumlah_setuju_tidak,
                 'persen'            => $banksoal->persen,
                 'directory_id'      => $direk->id
             ];
