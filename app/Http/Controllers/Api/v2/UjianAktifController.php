@@ -385,6 +385,8 @@ class UjianAktifController extends Controller
             $max_menjodohkan = $banksoal->jumlah_menjodohkan;
             $max_isian_singkat = $banksoal->jumlah_isian_singkat;
             $max_mengurutkan = $banksoal->jumlah_mengurutkan;
+            $max_benar_salah = $banksoal->jumlah_benar_salah;
+            $max_setuju_tidak = $banksoal->jumlah_setuju_tidak;
 
             // Ambil setting dari jadwal
             $setting = json_decode($jadwal->setting, true);
@@ -650,6 +652,60 @@ class UjianAktifController extends Controller
                 ]);
             }
 
+            # Soal benar-salah
+            $benar_salah = DB::table('soals')->where([
+                'banksoal_id'   => $banksoal->id,
+                'tipe_soal'     => 8
+            ]);
+            if($setting['acak_soal'] == "1") {
+                $benar_salah = $benar_salah->inRandomOrder();
+            }
+            $benar_salah = $benar_salah->take($max_benar_salah)->get();
+
+            $soal_benar_salah= [];
+            foreach ($benar_salah as $item) {
+                array_push($soal_benar_salah, [
+                    'id'            => Str::uuid()->toString(),
+                    'peserta_id'    => $peserta->id,
+                    'banksoal_id'   => $banksoal->id,
+                    'soal_id'       => $item->id,
+                    'jawab'         => 0,
+                    'iscorrect'     => 0,
+                    'jadwal_id'     => $jadwal->id,
+                    'ragu_ragu'     => 0,
+                    'esay'          => '',
+                    'created_at'    => now(),
+                    'updated_at'    => now()
+                ]);
+            }
+
+            # Soal setuju-tidak
+            $setuju_tidak = DB::table('soals')->where([
+                'banksoal_id'   => $banksoal->id,
+                'tipe_soal'     => 9
+            ]);
+            if($setting['acak_soal'] == "1") {
+                $setuju_tidak = $setuju_tidak->inRandomOrder();
+            }
+            $setuju_tidak = $setuju_tidak->take($max_setuju_tidak)->get();
+
+            $soal_setuju_tidak= [];
+            foreach ($setuju_tidak as $item) {
+                array_push($soal_setuju_tidak, [
+                    'id'            => Str::uuid()->toString(),
+                    'peserta_id'    => $peserta->id,
+                    'banksoal_id'   => $banksoal->id,
+                    'soal_id'       => $item->id,
+                    'jawab'         => 0,
+                    'iscorrect'     => 0,
+                    'jadwal_id'     => $jadwal->id,
+                    'ragu_ragu'     => 0,
+                    'esay'          => '',
+                    'created_at'    => now(),
+                    'updated_at'    => now()
+                ]);
+            }
+
             # Gabungkan semua collection dari tipe soal
             $soals = [];
             $list = collect([
@@ -660,6 +716,8 @@ class UjianAktifController extends Controller
                 '5' => $soal_menjodohkan,
                 '6' => $soal_isian_singkat,
                 '7' => $soal_mengurutkan,
+                '8' => $soal_benar_salah,
+                '9' => $soal_setuju_tidak,
             ]);
             foreach ($setting['list'] as $value) {
                 $soal = $list->get($value['id']);

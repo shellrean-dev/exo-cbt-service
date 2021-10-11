@@ -218,7 +218,7 @@ final class UjianService extends AbstractService
                 'peserta_id'    => $peserta_id,
                 'jadwal_id'     => $jadwal_id,
             ])
-            ->select('id','banksoal_id','soal_id','jawab','esay','jawab_complex','ragu_ragu', 'menjodohkan', 'mengurutkan')
+            ->select('id','banksoal_id','soal_id','jawab','esay','jawab_complex','ragu_ragu', 'menjodohkan', 'mengurutkan', 'benar_salah', 'setuju_tidak')
             ->orderBy('created_at')
             ->get()
             ->makeHidden('similiar');
@@ -290,8 +290,8 @@ final class UjianService extends AbstractService
             }
 
             $jawabans = [];
-            if (in_array($item->soal->tipe_soal, [1,2,3,4,5,6,7])) {
-                $jawabans = in_array($item->soal->tipe_soal, [1,2,3,4,6,7])
+            if (in_array($item->soal->tipe_soal, [1,2,3,4,5,6,7,8])) {
+                $jawabans = in_array($item->soal->tipe_soal, [1,2,3,4,6,7,8])
                     ? $item->soal->jawabans
                     : $item->soal->jawabans->map(function($jw, $index) use ($jwra, $jwrb){
                     return [
@@ -336,14 +336,7 @@ final class UjianService extends AbstractService
     public function finishing(string $banksoal_id, string $jadwal_id, string $peserta_id)
     {
         # Ambil banksoal
-//        $key = md5(sprintf('banksoal:data:%s:single', $banksoal_id));
-//        if ($this->cache->isCached($key)) {
-//            $banksoal = $this->cache->getItem($key);
-//        } else {
-            $banksoal = Banksoal::find($banksoal_id);
-
-//            $this->cache->cache($key, $banksoal);
-//        }
+        $banksoal = Banksoal::find($banksoal_id);
 
         if (!$banksoal) {
             throw new Exception('banksoal tidak ditemukan');
@@ -425,7 +418,20 @@ final class UjianService extends AbstractService
                 $jumlah_mengurutkan_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, '7');
 
                 if($jumlah_mengurutkan_benar > 0) {
-                    $hasil_isiang_singkat = ($jumlah_mengurutkan_benar/$banksoal->jumlah_mengurutkan)*$banksoal->persen['mengurutkan'];
+                    $hasil_mengurutkan = ($jumlah_mengurutkan_benar/$banksoal->jumlah_mengurutkan)*$banksoal->persen['mengurutkan'];
+                }
+            }
+
+            # Tipe soal: benar/salah
+            $hasil_benar_salah = 0;
+            $jumlah_benar_salah_benar = 0;
+            $jumlah_benar_salah_salah = 0;
+            if($banksoal->jumlah_mengurutkan > 0) {
+                $jumlah_benar_salah_benar = $this->_countCorrectAnswer($jadwal_id, $peserta_id, '7');
+                $jumlah_benar_salah_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, '7');
+
+                if($jumlah_benar_salah_benar > 0) {
+                    $hasil_benar_salah = ($jumlah_benar_salah_salah/$banksoal->jumlah_mengurutkan)*$banksoal->persen['benar_salah'];
                 }
             }
 
@@ -440,7 +446,7 @@ final class UjianService extends AbstractService
             })
             ->count();
 
-            $hasil = $hasil_pg+$hasil_listening+$hasil_mpg+$hasil_isiang_singkat+$hasil_menjodohkan;
+            $hasil = $hasil_pg+$hasil_listening+$hasil_mpg+$hasil_isiang_singkat+$hasil_menjodohkan+$hasil_mengurutkan+$hasil_benar_salah;
 
             DB::table('hasil_ujians')->insert([
                 'id'                            => Str::uuid()->toString(),
@@ -459,16 +465,14 @@ final class UjianService extends AbstractService
                 'jumlah_salah_menjodohkan'      => $jumlah_menjodohkan_salah,
                 'jumlah_benar_mengurutkan'      => $jumlah_mengurutkan_benar,
                 'jumlah_salah_mengurutkan'      => $jumlah_mengurutkan_salah,
+                'jumlah_benar_benar_salah'      => $jumlah_benar_salah_benar,
+                'jumlah_salah_benar_salah'      => $jumlah_benar_salah_salah,
                 'tidak_diisi'                   => $null,
                 'hasil'                         => $hasil,
                 'point_esay'                    => 0,
                 'created_at'                    => now(),
                 'updated_at'                    => now()
             ]);
-
-            // remove completed jadwal cache
-//            $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta_id));
-//            $this->cache->cache($key, '', 0);
 
         } catch (Exception $e) {
             throw new Exception($e->getMessage());

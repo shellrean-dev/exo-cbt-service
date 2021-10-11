@@ -294,6 +294,48 @@ class UjianController extends Controller
             return response()->json(['data' => $send,'index' => $request->index]);
         }
 
+        # jia yang dikirimkan adalah salah/benar
+        if(is_array($request->benar_salah)) {
+            $soal_benar_salah = Soal::with(['jawabans' => function($query) {
+                $query->where('correct', 1);
+            }])->where("id", $find->soal_id)->first();
+
+            if ($soal_benar_salah) {
+                $array = $soal_benar_salah->jawabans->map(function($item){
+                    return $item->id;
+                })->toArray();
+                $correct = 0;
+                $benar_salah = array_diff( $request->benar_salah, [0]);
+                if (array_diff($array,$benar_salah) == array_diff($benar_salah,$array)) {
+                    $correct = 1;
+                }
+                $find->iscorrect = $correct;
+            }
+
+            try {
+                DB::table('jawaban_pesertas')
+                    ->where('id', $find->id)
+                    ->update([
+                        'benar_salah' => json_encode($request->benar_salah),
+                        'iscorrect'     => $find->iscorrect,
+                    ]);
+                $find->benar_salah = json_encode($request->benar_salah);
+            } catch (\Exception $e) {
+                return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
+            }
+
+            $send = [
+                'id'            => $find->id,
+                'banksoal_id'   => $find->banksoal_id,
+                'soal_id'       => $find->soal_id,
+                'jawab'         => $find->jawab,
+                'benar_salah' => json_decode($find->benar_salah, true),
+                'esay'          => $find->esay,
+                'ragu_ragu'     => $find->ragu_ragu,
+            ];
+            return response()->json(['data' => $send,'index' => $request->index]);
+        }
+
         // Jika yang dikirimkan adalah pilihan ganda
 //        $key = md5(sprintf('jawaban_soals:data:%s:only:correct', $request->jawab));
 //        if ($cache->isCached($key)) {
