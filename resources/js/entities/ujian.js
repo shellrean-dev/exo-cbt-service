@@ -113,7 +113,8 @@ const vue_methods = {
     tipeSoalText,
     showError,
     onChangeRange,
-    changeRadioBenarSalah
+    changeRadioBenarSalah,
+    mengurutkanClick
 }
 
 /**
@@ -399,6 +400,11 @@ function changeCheckbox(e, val) {
     })
 }
 
+/**
+ * Change radio button benar salah
+ * @param e
+ * @param val
+ */
 function changeRadioBenarSalah(e, val) {
     this.filleds[this.questionIndex].benar_salah[val] = parseInt(e.target.value);
     this.submitJawaban({
@@ -451,4 +457,93 @@ function tipeSoalText() {
         return type[idx]
     }
     return 'Unknown'
+}
+
+/**
+ * Mengurutkan klik
+ * @param index
+ */
+function mengurutkanClick(index) {
+    if (this.mengurutkan == null) {
+        this.mengurutkan = index;
+        return;
+    }
+
+    if (this.mengurutkan == index) {
+        this.mengurutkan = null;
+        return;
+    }
+    let tmp = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans));
+    tmp[this.mengurutkan] = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[index]));
+    tmp[index] = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[this.mengurutkan]));
+
+    this.filleds[this.questionIndex].soal.jawabans = tmp;
+    this.mengurutkan = null;
+
+    this.submitJawabanMengurutkan({
+        jawaban_id : this.filleds[this.questionIndex].id,
+        mengurutkan: tmp.map(item => item.id),
+        index : this.questionIndex
+    }).catch((error) => {
+        this.showError(error)
+    })
+}
+
+/**
+ * Click left area menjodohkan
+ * @param index
+ */
+function menjodohkanLeftClick(index) {
+    if (this.menjodohkan.left == index) {
+        this.menjodohkan.left = null;
+        return;
+    }
+    this.menjodohkan.left = index
+    if (this.menjodohkan.right == null) {
+        return;
+    }
+    let tmp = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans));
+    tmp[this.menjodohkan.right].a = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[index].a));
+    tmp[index].a = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[this.menjodohkan.right].a));
+
+    this.filleds[this.questionIndex].soal.jawabans = tmp;
+    this.menjodohkan.left = null
+    this.menjodohkan.right = null
+
+    this.submitJawabanMenjodohkan({
+        jawaban_id : this.filleds[this.questionIndex].id,
+        menjodohkan: tmp.map(item => [item.a.id, item.b.id]),
+        index : this.questionIndex
+    }).catch((error) => {
+        this.showError(error)
+    })
+}
+
+/**
+ * Click right area menjodohkan
+ */
+function menjodohkanRightClick(index) {
+    if (this.menjodohkan.right == index) {
+        this.menjodohkan.right = null;
+        return;
+    }
+    this.menjodohkan.right = index
+    if (this.menjodohkan.left == null) {
+        return;
+    }
+    let tmp = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans));
+    tmp[this.menjodohkan.left].b = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[index].b));
+    tmp[index].b = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[this.menjodohkan.left].b));
+
+    this.filleds[this.questionIndex].soal.jawabans = tmp;
+    this.menjodohkan.left = null
+    this.menjodohkan.right = null
+
+    this.submitJawabanMenjodohkan({
+        jawaban_id : this.filleds[this.questionIndex].id,
+        menjodohkan: tmp.map(item => [item.a.id, item.b.id]),
+        index : this.questionIndex
+    }).catch((error) => {
+        this.showError(error)
+    })
 }
