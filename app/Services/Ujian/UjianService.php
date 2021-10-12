@@ -65,10 +65,10 @@ final class UjianService extends AbstractService
         // ambil data siswa ujian
         // yang sedang dikerjakan pada hari ini
         // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
-        $key = md5(sprintf('ujian:onwork:today:student:%s:jadwal:%s', $student_id, implode(',', $jadwal_ids)));
-        if ($this->cache->isCached($key)) {
-            $data = $this->cache->getItem($key);
-        } else {
+//        $key = md5(sprintf('ujian:onwork:today:student:%s:jadwal:%s', $student_id, implode(',', $jadwal_ids)));
+//        if ($this->cache->isCached($key)) {
+//            $data = $this->cache->getItem($key);
+//        } else {
             $data = DB::table('siswa_ujians')
                 ->where('peserta_id', $student_id)
                 ->whereIn('status_ujian', [0,3])
@@ -76,9 +76,9 @@ final class UjianService extends AbstractService
                 ->whereDate('created_at', now()->format('Y-m-d'))
                 ->select('jadwal_id', 'status_ujian')
                 ->first();
-
-            $this->cache->cache($key, $data);
-        }
+//
+//            $this->cache->cache($key, $data);
+//        }
 
         return $data;
     }
@@ -100,10 +100,10 @@ final class UjianService extends AbstractService
         // yang sudah dijalankan pada hari ini
         // tetapi belum dimulai
         // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
-        $key = md5(sprintf('ujian:onstandby:today:student:%s:jadwal:%s', $student_id, implode(',', $jadwal_ids)));
-        if ($this->cache->isCached($key)) {
-            $data = $this->cache->getItem($key);
-        } else {
+//        $key = md5(sprintf('ujian:onstandby:today:student:%s:jadwal:%s', $student_id, implode(',', $jadwal_ids)));
+//        if ($this->cache->isCached($key)) {
+//            $data = $this->cache->getItem($key);
+//        } else {
             $data = DB::table('siswa_ujians')
                 ->where('peserta_id', $student_id)
                 ->where('status_ujian', 0)
@@ -111,8 +111,8 @@ final class UjianService extends AbstractService
                 ->whereDate('created_at', now()->format('Y-m-d'))
                 ->first();
 
-            $this->cache->cache($key, $data);
-        }
+//            $this->cache->cache($key, $data);
+//        }
 
         return $data;
     }
@@ -133,10 +133,10 @@ final class UjianService extends AbstractService
         // ambil data siswa ujian
         // yang sedang dikerjakan pada hari ini
         // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
-        $key = md5(sprintf('ujian:onprogress:today:student:%s:jadwal:%s', $student_id, implode(',', $jadwal_ids)));
-        if ($this->cache->isCached($key)) {
-            $data = $this->cache->getItem($key);
-        } else {
+//        $key = md5(sprintf('ujian:onprogress:today:student:%s:jadwal:%s', $student_id, implode(',', $jadwal_ids)));
+//        if ($this->cache->isCached($key)) {
+//            $data = $this->cache->getItem($key);
+//        } else {
             $data = DB::table('siswa_ujians')
                 ->where('peserta_id', $student_id)
                 ->where('status_ujian', 3)
@@ -144,8 +144,8 @@ final class UjianService extends AbstractService
                 ->whereDate('created_at', now()->format('Y-m-d'))
                 ->first();
 
-            $this->cache->cache($key, $data);
-        }
+//            $this->cache->cache($key, $data);
+//        }
 
         return $data;
     }

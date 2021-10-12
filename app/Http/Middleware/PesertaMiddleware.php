@@ -24,16 +24,16 @@ class PesertaMiddleware
      */
     public function handle($request, Closure $next)
     {
-        $key = sprintf('peserta:data:token:%s', $request->bearerToken());
-        if ($this->cache->isCached($key)) {
-            $user = $this->cache->getItem($key);
-        } else {
+//        $key = sprintf('peserta:data:token:%s', $request->bearerToken());
+//        if ($this->cache->isCached($key)) {
+//            $user = $this->cache->getItem($key);
+//        } else {
             $user = Peserta::with('group')
                 ->where(['api_token' => $request->bearerToken()])
                 ->first();
-
-            $this->cache->cache($key, $user);
-        }
+//
+//            $this->cache->cache($key, $user);
+//        }
 
         if($user) {
             $request->attributes->add(['peserta-auth' => $user]);

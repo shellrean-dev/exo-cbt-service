@@ -76,8 +76,10 @@ const vue_data = {
     textSize: 'text-base',
     menjodohkan: {
         left: null,
-        right: null
+        right: null,
+        matchIndex: 0
     },
+    showOptionMenjodohkan: true,
     mengurutkan: null
 }
 
@@ -114,7 +116,9 @@ const vue_methods = {
     showError,
     onChangeRange,
     changeRadioBenarSalah,
-    mengurutkanClick
+    mengurutkanClick,
+    menjodohkanLeftClick,
+    menjodohkanRightClick
 }
 
 /**
@@ -503,10 +507,19 @@ function menjodohkanLeftClick(index) {
         return;
     }
     let tmp = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans));
-    tmp[this.menjodohkan.right].a = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[index].a));
-    tmp[index].a = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[this.menjodohkan.right].a));
+    // tmp[this.menjodohkan.right].a = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[index].a));
+    // tmp[index].a = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[this.menjodohkan.right].a));
+
+    tmp[this.menjodohkan.right].b = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[index].b));
+    tmp[index].b = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[this.menjodohkan.right].b));
 
     this.filleds[this.questionIndex].soal.jawabans = tmp;
+
+    this.menjodohkan.matchIndex = index
+    setTimeout(() => {
+        this.menjodohkan.matchIndex = null
+    }, 500)
+
     this.menjodohkan.left = null
     this.menjodohkan.right = null
 
@@ -532,10 +545,19 @@ function menjodohkanRightClick(index) {
         return;
     }
     let tmp = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans));
-    tmp[this.menjodohkan.left].b = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[index].b));
-    tmp[index].b = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[this.menjodohkan.left].b));
+    // tmp[this.menjodohkan.left].b = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[index].b));
+    // tmp[index].b = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[this.menjodohkan.left].b));
+
+    tmp[this.menjodohkan.left].a = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[index].a));
+    tmp[index].a = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[this.menjodohkan.left].a));
 
     this.filleds[this.questionIndex].soal.jawabans = tmp;
+
+    this.menjodohkan.matchIndex = index
+    setTimeout(() => {
+       this.menjodohkan.matchIndex = null
+    }, 500)
+
     this.menjodohkan.left = null
     this.menjodohkan.right = null
 
