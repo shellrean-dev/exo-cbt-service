@@ -25,6 +25,10 @@ return [
 
     'log' => env('EXO_ALLOW_LOG_ERROR', true),
 
+    'enable_cache' => env('EXO_ENABLE_CACHING', false),
+
+    'enable_socket' => env('EXO_ENABLE_SOCKET', false),
+
     /*
     |--------------------------------------------------------------------------
     | Konfigurasi oauth
