@@ -123,7 +123,7 @@
                      :class="{
                         'border-green-400' : menjodohkan.left == index,
                         'border-gray-200' : menjodohkan.left != index,
-                        'border-yellow-500 shadow-xl' : menjodohkan.matchIndex == index
+                        'border-green-500 shadow-xl' : menjodohkan.matchIndex == index
                      }"
                 v-html="jawab.a.text"
                      v-on:click="menjodohkanLeftClick(index)"
@@ -132,24 +132,24 @@
                 <div class="flex items-center text-gray-400">
                   <div class="flex items-center"
                        v-if="menjodohkan.matchIndex == index">
-                    <div class="h-4 w-2 bg-yellow-500 rounded-r-2xl"></div>
-                    <div class="h-1 w-10 bg-yellow-500">
-                    </div>
-                    <div class="h-4 w-2 bg-yellow-500 rounded-l-2xl"></div>
-                  </div>
-                  <div class="flex items-center"
-                       v-else>
                     <div class="h-4 w-2 bg-green-500 rounded-r-2xl"></div>
                     <div class="h-1 w-10 bg-green-500">
                     </div>
                     <div class="h-4 w-2 bg-green-500 rounded-l-2xl"></div>
+                  </div>
+                  <div class="flex items-center"
+                       v-else>
+                    <div class="h-4 w-2 bg-gray-400 rounded-r-2xl"></div>
+                    <div class="h-1 w-10 bg-gray-400">
+                    </div>
+                    <div class="h-4 w-2 bg-gray-400 rounded-l-2xl"></div>
                   </div>
                 </div>
                 <div class="py-4 px-4 rounded-xl border-2 flex-1 cursor-pointer hover:shadow-lg"
                      :class="{
                         'border-green-400' : menjodohkan.right == index,
                         'border-gray-200' : menjodohkan.right != index,
-                        'border-yellow-500 shadow-xl' : menjodohkan.matchIndex == index
+                        'border-green-500 shadow-xl' : menjodohkan.matchIndex == index
                      }"
                 v-html="jawab.b.text"
                      v-on:click="menjodohkanRightClick(index)"

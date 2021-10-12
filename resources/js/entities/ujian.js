@@ -77,9 +77,8 @@ const vue_data = {
     menjodohkan: {
         left: null,
         right: null,
-        matchIndex: 0
+        matchIndex: null
     },
-    showOptionMenjodohkan: true,
     mengurutkan: null
 }
 
@@ -498,6 +497,7 @@ function mengurutkanClick(index) {
  * @param index
  */
 function menjodohkanLeftClick(index) {
+    this.menjodohkan.matchIndex = null
     if (this.menjodohkan.left == index) {
         this.menjodohkan.left = null;
         return;
@@ -507,8 +507,6 @@ function menjodohkanLeftClick(index) {
         return;
     }
     let tmp = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans));
-    // tmp[this.menjodohkan.right].a = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[index].a));
-    // tmp[index].a = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[this.menjodohkan.right].a));
 
     tmp[this.menjodohkan.right].b = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[index].b));
     tmp[index].b = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[this.menjodohkan.right].b));
@@ -518,7 +516,7 @@ function menjodohkanLeftClick(index) {
     this.menjodohkan.matchIndex = index
     setTimeout(() => {
         this.menjodohkan.matchIndex = null
-    }, 500)
+    }, 700)
 
     this.menjodohkan.left = null
     this.menjodohkan.right = null
@@ -536,6 +534,7 @@ function menjodohkanLeftClick(index) {
  * Click right area menjodohkan
  */
 function menjodohkanRightClick(index) {
+    this.menjodohkan.matchIndex = null
     if (this.menjodohkan.right == index) {
         this.menjodohkan.right = null;
         return;
@@ -545,8 +544,6 @@ function menjodohkanRightClick(index) {
         return;
     }
     let tmp = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans));
-    // tmp[this.menjodohkan.left].b = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[index].b));
-    // tmp[index].b = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[this.menjodohkan.left].b));
 
     tmp[this.menjodohkan.left].a = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[index].a));
     tmp[index].a = JSON.parse(JSON.stringify(this.filleds[this.questionIndex].soal.jawabans[this.menjodohkan.left].a));
@@ -556,7 +553,7 @@ function menjodohkanRightClick(index) {
     this.menjodohkan.matchIndex = index
     setTimeout(() => {
        this.menjodohkan.matchIndex = null
-    }, 500)
+    }, 700)
 
     this.menjodohkan.left = null
     this.menjodohkan.right = null
