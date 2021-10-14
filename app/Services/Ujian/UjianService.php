@@ -206,7 +206,15 @@ final class UjianService extends AbstractService
 //        } else {
             $find = JawabanPeserta::with([
                 'soal' => function ($q) {
-                    $q->select('id','banksoal_id','pertanyaan','tipe_soal','audio','direction','layout');
+                    $q->select(
+                        'id',
+                        'banksoal_id',
+                        'pertanyaan',
+                        'tipe_soal',
+                        'audio',
+                        'direction',
+                        'layout'
+                    );
                 },
                 'soal.jawabans' => function ($q) use ($acak_opsi) {
                     $q->select('id','soal_id','text_jawaban');

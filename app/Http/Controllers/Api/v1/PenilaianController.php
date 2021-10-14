@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
@@ -16,11 +17,11 @@ class PenilaianController extends Controller
 {
     /**
      * @Route(path="api/v1/ujians/esay/exists", methods={"GET"})
-     * 
-     * Ambil data jawaban esay peserta 
+     *
+     * Ambil data jawaban esay peserta
      * yang belum dikoreksi
-     * 
-     * @return App\Actions\SendResponse
+     *
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function getExistEsay()
@@ -52,12 +53,12 @@ class PenilaianController extends Controller
                 ->select('banksoals.id', 'banksoals.kode_banksoal','matpels.nama as nama_matpel','matpels.correctors')
                 ->get();
 
-            // Filter banksoal untuk mencegah 
+            // Filter banksoal untuk mencegah
             // dari selsain pengoreksi
             $filtered = $banksoal->reject(function ($value, $key) use($user) {
                 return !in_array($user->id, json_decode($value->correctors, true));
             });
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return SendResponse::internalServerError('Kesalahan 500. '.$e->getMessage());
         }
 
@@ -65,13 +66,61 @@ class PenilaianController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/ujians/argument/exists", methods={"GET"})
+     *
+     * Ambil data jawaban setuju/tidak peserta
+     * yang belum dikoreksi
+     *
+     * @return \Illuminate\Http\Response
+     * @author shellrean <wandinak17@gmail.com>
+     */
+    public function getBanksoalExistArgument()
+    {
+        try {
+            # Ambil semua jawaban yang telah dikoreksi
+            $has = DB::table('penilaian_argument')
+                ->select('jawab_id')
+                ->get()
+                ->pluck('jawab_id')
+                ->unique();
+
+            # Ambil banksoal yang digunakan oleh peserta tipe argumen
+            $exists = DB::table('jawaban_pesertas')
+                ->whereNotIn('jawaban_pesertas.id', $has)
+                ->join('soals', 'jawaban_pesertas.soal_id','=','soals.id')
+                ->where('soals.tipe_soal', '9')
+                ->where('jawaban_pesertas.setuju_tidak', '!=', '[]')
+                ->select('soals.banksoal_id')
+                ->get()
+                ->pluck('banksoal_id')
+                ->unique();
+
+            # Ambil banksoal yang ada
+            $banksoal = DB::table('banksoals')
+                ->whereIn('banksoals.id', $exists)
+                ->join('matpels', 'banksoals.matpel_id', '=', 'matpels.id')
+                ->select('banksoals.id', 'banksoals.kode_banksoal','matpels.nama as nama_matpel','matpels.correctors')
+                ->get();
+
+            # Hanya pengoreksi yang dapat data ini
+            $filtered = $banksoal->reject(function ($value, $key) use($user) {
+                return !in_array($user->id, json_decode($value->correctors, true));
+            });
+
+            return SendResponse::acceptData($filtered);
+        } catch (Exception $e) {
+            return SendResponse::internalServerError('Kesalahan 500. ['.$e->getMessage().']');
+        }
+    }
+
+    /**
      * @Route(path="api/v1/ujians/esay/{banksoal}/koreksi", methods={"GET"})
-     * 
+     *
      * Ambil data jawaban esay peserta
      * dari banksoal yang diminta
-     * 
+     *
      * @param string $banksoal_id
-     * @return App\Actions\Sendresponse
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function getExistEsayByBanksoal($banksoal_id)
@@ -100,7 +149,7 @@ class PenilaianController extends Controller
                 ->where('soals.banksoal_id', $banksoal->id)
                 ->select('jawaban_pesertas.id','soals.banksoal_id','soals.audio','jawaban_pesertas.esay','soals.pertanyaan','soals.rujukan')
                 ->paginate(30);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return SendResponse::internalServerError('Kesalahan 500. '.$e->getMessage());
         }
 
@@ -108,10 +157,59 @@ class PenilaianController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/ujians/argument/{banksoal}/koreksi", methods={"GET"})
+     *
+     * Ambil data jawaban argument peserta
+     * dari banksoal yang diminta
+     *
+     * @param string $banksoal_id
+     * @return \Illuminate\Http\Response
+     * @author shellrean <wandinak17@gmail.com>
+     */
+    public function getExistArgumentByBanksoal($banksoal_id)
+    {
+        try {
+            $banksoal = DB::table('banksoals')
+                ->where('id', $banksoal_id)
+                ->first();
+            if (!$banksoal) {
+                return SendResponse::badRequest('Tidak dapat menemukan banksoal yang diminta');
+            }
+
+            # Ambil jawaban yang telah dikoreksi
+            $has = DB::table('penilaian_argument')
+                ->where('banksoal_id', $banksoal->id)
+                ->select('jawab_id')
+                ->get()
+                ->pluck('jawab_id');
+
+            # Jawaban peserta yang belum dikoreksi
+            $exists = DB::table('jawaban_pesertas')
+                ->whereNotIn('jawaban_pesertas.id', $has)
+                ->join('soals', 'jawaban_pesertas.soal_id','=','soals.id')
+                ->where('soals.tipe_soal', '9')
+                ->where('jawaban_pesertas.setuju_tidak', '!=', '[]')
+                ->where('soals.banksoal_id', $banksoal->id)
+                ->select(
+                    'jawaban_pesertas.id',
+                    'soals.banksoal_id',
+                    'soals.audio',
+                    'jawaban_pesertas.setuju_tidak',
+                    'soals.pertanyaan'
+                )
+                ->paginate(30);
+
+            return SendResponse::acceptData($exists);
+        } catch (Exception $e) {
+            return SendResponse::internalServerError('Kesalahan 500. ['.$e->getMessage().']');
+        }
+    }
+
+    /**
      * @Route(path="api/v1/ujians/esay/input", methods={"POST"})
-     * 
+     *
      * Simpan nilai esay
-     * 
+     *
      * @param Illuminate\Http\Request $request
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
@@ -165,7 +263,7 @@ class PenilaianController extends Controller
                 $jml_esay =  $same->jumlah_soal_esay;
 
                 $persen = json_decode($same->persen,true);
-                
+
                 // Hitung hasil listening
                 $hasil_listening = 0;
                 if($hasil->jumlah_benar_listening > 0) {
@@ -219,10 +317,10 @@ class PenilaianController extends Controller
                         'created_at'    => now(),
                         'updated_at'    => now(),
                     ]);
-                    
+
                     DB::commit();
                     return SendResponse::accept();
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     DB::rollBack();
                     return SendResponse::internalServerError('Kesalahan 500.'.$e->getMessage());
                 }
@@ -243,7 +341,7 @@ class PenilaianController extends Controller
         $jml_esay =  $jawab->jumlah_soal_esay;
 
         $persen = json_decode($jawab->persen,true);
-        
+
         // Hitung hasil listening
         $hasil_listening = 0;
         if($hasil->jumlah_benar_listening > 0) {
@@ -296,12 +394,26 @@ class PenilaianController extends Controller
                 'created_at'    => now(),
                 'updated_at'    => now()
             ]);
-            
+
             DB::commit();
             return SendResponse::accept();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return SendResponse::internalServerError('Kesalahan 500.'.$e->getMessage());
         }
+    }
+
+    /**
+     * @Route(path="api/v1/ujians/argument/input", methods={"POST"})
+     *
+     * Simpan nilai argument
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     * @author shellrean <wandinak17@gmail.com>
+     */
+    public function storeNilaiArgument(Request $request)
+    {
+
     }
 }
