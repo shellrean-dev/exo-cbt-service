@@ -318,16 +318,33 @@ final class UjianService extends AbstractService
                 }
             }
 
+            # Jika tipe soal adalah setuju tidak
+            if ($item->soal->tipe_soal == 9) {
+                $objSetujuTidak = json_decode($item->setuju_tidak, true);
+
+                if ($objSetujuTidak == null) {
+                    $new_jwb_setuju_tidak = [];
+
+                    foreach ($item->soal->jawabans as $v) {
+                        $new_jwb_setuju_tidak[$v->id]['val'] = 0;
+                        $new_jwb_setuju_tidak['argument'] = "";
+                    }
+                    $item->setuju_tidak = $new_jwb_setuju_tidak;
+                } else {
+                    $item->setuju_tidak = $objSetujuTidak;
+                }
+            }
+
             $jawabans = [];
-            if (in_array($item->soal->tipe_soal, [1,2,3,4,5,6,7,8])) {
-                $jawabans = in_array($item->soal->tipe_soal, [1,2,3,4,6,7,8])
-                    ? $item->soal->jawabans
-                    : $item->soal->jawabans->map(function($jw, $index) use ($jwra, $jwrb){
+            if ($item->soal->tipe_soal == 5) {
+                $jawabans = $item->soal->jawabans->map(function($jw, $index) use ($jwra, $jwrb) {
                     return [
                         'a' => $jwra[$index],
                         'b' => $jwrb[$index],
                     ];
                 });
+            } else {
+                $jawabans = $item->soal->jawabans;
             }
 
             return [
@@ -338,6 +355,7 @@ final class UjianService extends AbstractService
                 'esay' => $item->esay,
                 'jawab_complex' => $item->jawab_complex,
                 'benar_salah' => $item->benar_salah,
+                'setuju_tidak' => $item->setuju_tidak,
                 'soal' => [
                     'audio' => $item->soal->audio,
                     'banksoal_id' => $item->soal->banksoal_id,

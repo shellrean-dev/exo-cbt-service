@@ -115,9 +115,11 @@ const vue_methods = {
     showError,
     onChangeRange,
     changeRadioBenarSalah,
+    changeRadioSetujuTidak,
     mengurutkanClick,
     menjodohkanLeftClick,
-    menjodohkanRightClick
+    menjodohkanRightClick,
+    sendAnswerSetujuTidak
 }
 
 /**
@@ -413,6 +415,27 @@ function changeRadioBenarSalah(e, val) {
     this.submitJawaban({
         jawaban_id : this.filleds[this.questionIndex].id,
         benar_salah : this.filleds[this.questionIndex].benar_salah,
+        index : this.questionIndex
+    }).catch(error => this.showError(error))
+}
+
+/**
+ * Change radio button setuju tidak
+ * @param e
+ * @param val
+ */
+function changeRadioSetujuTidak(e, val) {
+    this.filleds[this.questionIndex].setuju_tidak[val]['val'] = parseInt(e.target.value);
+    this.sendAnswerSetujuTidak();
+}
+
+/**
+ * Send data to server for submit setuju tidak
+ */
+function sendAnswerSetujuTidak() {
+    this.submitJawaban({
+        jawaban_id : this.filleds[this.questionIndex].id,
+        setuju_tidak : this.filleds[this.questionIndex].setuju_tidak,
         index : this.questionIndex
     }).catch(error => this.showError(error))
 }

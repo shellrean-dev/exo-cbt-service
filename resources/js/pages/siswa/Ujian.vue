@@ -283,6 +283,12 @@
                 <th>Benar</th>
                 <th>Salah</th>
               </tr>
+              <tr v-if="[9].includes(parseInt(filleds[questionIndex].soal.tipe_soal))">
+                <th>Pernyataan</th>
+                <th>Setuju</th>
+                <th>Tidak</th>
+                <th>Argument mu</th>
+              </tr>
               <tr
               v-for="(jawab,index) in filleds[questionIndex].soal.jawabans"
               :key="index"
@@ -346,6 +352,44 @@
                         <span class="w-6 h-6 text-sm inline-block mr-2 rounded-full border border-gray-400 flex-no-shrink flex items-center justify-center uppercase"></span>
                       </label>
                     </div>
+                  </td>
+                </template>
+                <template
+                  v-if="[9].includes(parseInt(filleds[questionIndex].soal.tipe_soal))">
+                  <td class="border border-gray-400" width="80px">
+                    <div class="flex items-center m-2">
+                      <input :id="'radio1'+index"
+                             :name="'radio1'+index"
+                             :checked="filleds[questionIndex].setuju_tidak[jawab.id]['val'] == 1"
+                             type="radio"
+                             value="1" class="hidden"
+                             :disabled="isLoadinger || isLoading"
+                             @change="changeRadioSetujuTidak($event, jawab.id)"/>
+                      <label :for="'radio1'+index" class="flex items-center cursor-pointer text-xl">
+                        <span class="w-6 h-6 text-sm inline-block mr-2 rounded-full border border-gray-400 flex-no-shrink flex items-center justify-center uppercase"></span>
+                      </label>
+                    </div>
+                  </td>
+                  <td class="border border-gray-400" width="80px">
+                    <div class="flex items-center m-2">
+                      <input :id="'radio2'+index"
+                             :name="'radio2'+index"
+                             :checked="filleds[questionIndex].setuju_tidak[jawab.id]['val'] == 0"
+                             type="radio"
+                             value="0" class="hidden"
+                             :disabled="isLoadinger || isLoading"
+                             @change="changeRadioSetujuTidak($event, jawab.id)"/>
+                      <label :for="'radio2'+index" class="flex items-center cursor-pointer text-xl">
+                        <span class="w-6 h-6 text-sm inline-block mr-2 rounded-full border border-gray-400 flex-no-shrink flex items-center justify-center uppercase"></span>
+                      </label>
+                    </div>
+                  </td>
+                  <td class="border border-gray-400" width="250px">
+                    <textarea
+                      class="border w-full h-24 border-gray-300 rounded-md text-gray-700 py-1 px-4"
+                      v-model="filleds[questionIndex].setuju_tidak[jawab.id]['argument']"
+                      @input="onInputSetujuTidak"
+                    ></textarea>
                   </td>
                 </template>
               </tr>
@@ -468,6 +512,9 @@ export default {
     ...vue_methods,
     onInput: _.debounce(function (value) {
       this.inputJawabEssy(value)
+    }, 300),
+    onInputSetujuTidak: _.debounce(function (value) {
+      this.sendAnswerSetujuTidak(value)
     }, 300),
     doubtExistAlert() {
       this.$swal('Hei..', 'Jawabanmu masih ada yang ragu-ragu','error')
