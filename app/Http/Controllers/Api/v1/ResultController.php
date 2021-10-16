@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use Illuminate\Http\Response;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\URL;
@@ -25,7 +26,7 @@ class ResultController extends Controller
      * Ambil data hasil ujian peserta
      *
      * @param string $jadwal_id
-     * @return App\Actions\SendResponse
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function exam($jadwal_id)
@@ -92,7 +93,7 @@ class ResultController extends Controller
      * peserta
      *
      * @param string $jadwal_id
-     * @return App\Actions\SendResponse
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function examExcelLink($jadwal_id)
@@ -121,7 +122,7 @@ class ResultController extends Controller
      * Download excel hasil ujian peserta
      *
      * @param string $jadwal_id
-     * @return App\Actions\SendResponse
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function examExcel($jadwal_id)
@@ -195,7 +196,7 @@ class ResultController extends Controller
      *
      * @param string $jadwal_id
      * @param string $banksoal_id
-     * @return App\Actions\SendResponse
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function capaianSiswa($jadwal_id, $banksoal_id)
@@ -264,7 +265,7 @@ class ResultController extends Controller
      *
      * @param string $jadwal_id
      * @param string $banksoal_id
-     * @return App\Actions\SendResponse
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function capaianSiswaExcelLink($jadwal_id, $banksoal_id)
@@ -306,7 +307,7 @@ class ResultController extends Controller
      *
      * @param string $jadwal_id
      * @param string $banksoal_id
-     * @return App\Actions\SendResponse
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function capaianSiswaExcel($jadwal_id, $banksoal_id)
@@ -418,7 +419,7 @@ class ResultController extends Controller
      * dengan jawabannya
      *
      * @param string $hasil_id
-     * @return App\Actions\SendResponse
+     * @return Response
      * @author shellrean <wandinak17@gmial.com>
      */
     public function hasilUjianDetail($hasil_id)
