@@ -388,12 +388,12 @@ function sendRagu(e) {
  */
 function changeCheckbox(e, val) {
     if (e.target.checked === false) {
-        let index = this.filleds[this.questionIndex].jawab_complex.indexOf(parseInt(e.target.value))
+        let index = this.filleds[this.questionIndex].jawab_complex.indexOf(e.target.value)
         if (index !== -1) {
             this.filleds[this.questionIndex].jawab_complex.splice(index, 1)
         }
     } else {
-        this.filleds[this.questionIndex].jawab_complex.push(parseInt(e.target.value))
+        this.filleds[this.questionIndex].jawab_complex.push(e.target.value)
     }
     this.submitJawaban({
         jawaban_id : this.filleds[this.questionIndex].id,

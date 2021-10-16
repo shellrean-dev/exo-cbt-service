@@ -3,6 +3,7 @@
 namespace ShellreanDev\Services\Ujian;
 
 use App\Actions\SendResponse;
+use App\Models\SoalConstant;
 use stdClass;
 use Exception;
 use Carbon\Carbon;
@@ -194,40 +195,17 @@ final class UjianService extends AbstractService
      * @param string $jadwal_id
      * @param string $peserta_id
      * @param string $acak_opsi
-     * @return object
+     * @return array
      * @since 3.0.0 <ristretto>
      */
     public function pesertaAnswers(string $jadwal_id, string $peserta_id, string $acak_opsi)
     {
-        // ambil jawaban peserta
-//        $key = md5(sprintf('jawaban_pesertas:jadwal:%s:peserta:%s:acak:%s', $jadwal_id, $peserta_id, $acak_opsi));
-//        if ($this->cache->isCached($key)) {
-//            $find = $this->cache->getItem($key);
-//        } else {
-            $find = JawabanPeserta::with([
-                'soal' => function ($q) {
-                    $q->select(
-                        'id',
-                        'banksoal_id',
-                        'pertanyaan',
-                        'tipe_soal',
-                        'audio',
-                        'direction',
-                        'layout'
-                    );
-                },
-                'soal.jawabans' => function ($q) use ($acak_opsi) {
-                    $q->select('id','soal_id','text_jawaban');
-                    if($acak_opsi == "1") {
-                        $q->inRandomOrder();
-                    }
-                }
-            ])
+        $find = DB::table('jawaban_pesertas')
             ->where([
                 'peserta_id'    => $peserta_id,
                 'jadwal_id'     => $jadwal_id,
             ])
-            ->select(
+            ->select([
                 'id',
                 'banksoal_id',
                 'soal_id',
@@ -238,19 +216,41 @@ final class UjianService extends AbstractService
                 'menjodohkan',
                 'mengurutkan',
                 'benar_salah',
-                'setuju_tidak')
-            ->orderBy('created_at')
-            ->get()
-            ->makeHidden('similiar');
+                'setuju_tidak',
+                'answered'])
+            ->orderBy('created_at', 'ASC')
+            ->get();
 
-//            if ($find->count() > 0) {
-//                $this->cache->cache($key, $find);
-//            }
-//        }
+        $soals = DB::table('soals')
+            ->whereIn('id', $find->pluck('soal_id')->toArray())
+            ->select([
+                'id',
+                'banksoal_id',
+                'pertanyaan',
+                'tipe_soal',
+                'audio',
+                'direction',
+                'layout'
+            ])
+            ->get();
+        $soal_jawabans = DB::table('jawaban_soals')
+            ->whereIn('soal_id', $soals->pluck('id')->toArray())
+            ->get();
 
-        $data = $find->map(function($item) {
+        $soals = $soals->map(function ($item) use ($soal_jawabans) {
+            $item->jawabans = $soal_jawabans->where('soal_id', $item->id)->values();
+            return $item;
+        });
+
+        $find = $find->map(function ($item) use ($soals) {
+            $item->soal = $soals->where('id', $item->soal_id)->first();
+            return $item;
+        });
+
+        $result = [];
+        foreach ($find as $item) {
             # Jik tipe soal adalah menjodohkan
-            if ($item->soal->tipe_soal == 5) {
+            if ($item->soal->tipe_soal == SoalConstant::TIPE_MENJODOHKAN) {
                 $jwra = [];
                 $jwrb = [];
 
@@ -292,7 +292,7 @@ final class UjianService extends AbstractService
             }
 
             # Jika tipe soal adalah mengurutkan
-            if ($item->soal->tipe_soal == 7) {
+            if ($item->soal->tipe_soal == SoalConstant::TIPE_MENGURUTKAN) {
                 $objMengurutkan = json_decode($item->mengurutkan, true);
                 if ($objMengurutkan == null) {
                     $item->soal->jawabans = Arr::shuffle($item->soal->jawabans->toArray());
@@ -311,7 +311,7 @@ final class UjianService extends AbstractService
             }
 
             # Jika tipe soal adalah benar salah
-            if ($item->soal->tipe_soal == 8) {
+            if ($item->soal->tipe_soal == SoalConstant::TIPE_BENAR_SALAH) {
                 $objBenarSalah = json_decode($item->benar_salah, true);
 
                 if ($objBenarSalah == null) {
@@ -327,7 +327,7 @@ final class UjianService extends AbstractService
             }
 
             # Jika tipe soal adalah setuju tidak
-            if ($item->soal->tipe_soal == 9) {
+            if ($item->soal->tipe_soal == SoalConstant::TIPE_SETUJU_TIDAK) {
                 $objSetujuTidak = json_decode($item->setuju_tidak, true);
 
                 if ($objSetujuTidak == null) {
@@ -343,8 +343,7 @@ final class UjianService extends AbstractService
                 }
             }
 
-            $jawabans = [];
-            if ($item->soal->tipe_soal == 5) {
+            if ($item->soal->tipe_soal == SoalConstant::TIPE_MENJODOHKAN) {
                 $jawabans = $item->soal->jawabans->map(function($jw, $index) use ($jwra, $jwrb) {
                     return [
                         'a' => $jwra[$index],
@@ -355,15 +354,16 @@ final class UjianService extends AbstractService
                 $jawabans = $item->soal->jawabans;
             }
 
-            return [
+            $result[] = [
                 'id'    => $item->id,
                 'banksoal_id' => $item->banksoal_id,
                 'soal_id' => $item->soal_id,
                 'jawab' => $item->jawab,
                 'esay' => $item->esay,
-                'jawab_complex' => $item->jawab_complex,
+                'jawab_complex' => json_decode($item->jawab_complex),
                 'benar_salah' => $item->benar_salah,
                 'setuju_tidak' => $item->setuju_tidak,
+                'answered'  => $item->answered,
                 'soal' => [
                     'audio' => $item->soal->audio,
                     'banksoal_id' => $item->soal->banksoal_id,
@@ -376,8 +376,9 @@ final class UjianService extends AbstractService
                 ],
                 'ragu_ragu' => $item->ragu_ragu,
             ];
-        });
-        return $data;
+        }
+
+        return $result;
     }
 
     /**

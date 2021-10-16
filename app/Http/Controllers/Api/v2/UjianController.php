@@ -6,6 +6,7 @@ use App\Soal;
 use App\Actions\SendResponse;
 use App\Http\Controllers\Controller;
 
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -72,12 +73,17 @@ class UjianController extends Controller
         // Jika yang dikirimkan adalah esay
         if(isset($request->essy)) {
             try {
+                $data_update = [
+                    'esay' => $request->essy
+                ];
+                if (!$find->answered) {
+                    $data_update['answered'] = true;
+                }
+
                 DB::table('jawaban_pesertas')
                     ->where('id', $find->id)
-                    ->update([
-                        'esay'  => $request->essy
-                    ]);
-            } catch (\Exception $e) {
+                    ->update($data_update);
+            } catch (Exception $e) {
                 return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
             }
 
@@ -92,7 +98,7 @@ class UjianController extends Controller
                 'ragu_ragu'     => $find->ragu_ragu,
             ];
 
-            return response()->json(['data' => $send,'index' => $request->index]);
+            return SendResponse::acceptCustom(['data' => $send, 'index' => $request->index]);
         }
 
         // Jika yang dikirimkan adalah isian singkat
@@ -128,13 +134,17 @@ class UjianController extends Controller
             }
 
             try {
+                $data_update = [
+                    'iscorrect' => $find->iscorrect,
+                    'esay'      => $request->isian
+                ];
+                if (!$find->answered) {
+                    $data_update['answered'] = true;
+                }
                 DB::table('jawaban_pesertas')
                     ->where('id', $find->id)
-                    ->update([
-                        'iscorrect' => $find->iscorrect,
-                        'esay'      => $request->isian,
-                    ]);
-            } catch (\Exception $e) {
+                    ->update($data_update);
+            } catch (Exception $e) {
                 return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
             }
 
@@ -149,7 +159,7 @@ class UjianController extends Controller
                 'ragu_ragu'     => $find->ragu_ragu,
             ];
 
-            return response()->json(['data' => $send,'index' => $request->index]);
+            return SendResponse::acceptCustom(['data' => $send,'index' => $request->index]);
         }
 
         // Jika yang dikirimkan adalah jawaban komleks
@@ -181,14 +191,18 @@ class UjianController extends Controller
             }
 
             try {
+                $data_update = [
+                    'jawab_complex' => json_encode($request->jawab_complex),
+                    'iscorrect'     => $find->iscorrect
+                ];
+                if (!$find->answered) {
+                    $data_update['answered'] = true;
+                }
                 DB::table('jawaban_pesertas')
                     ->where('id', $find->id)
-                    ->update([
-                        'jawab_complex' => json_encode($request->jawab_complex),
-                        'iscorrect'     => $find->iscorrect,
-                    ]);
+                    ->update($data_update);
                 $find->jawab_complex = json_encode($request->jawab_complex);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
             }
 
@@ -202,7 +216,7 @@ class UjianController extends Controller
                 'esay'          => $find->esay,
                 'ragu_ragu'     => $find->ragu_ragu,
             ];
-            return response()->json(['data' => $send,'index' => $request->index]);
+            return SendResponse::acceptCustom(['data' => $send,'index' => $request->index]);
         }
 
         // Jika yang dikirimkan adalah menjodohkan
@@ -228,13 +242,17 @@ class UjianController extends Controller
                 $result_menjodohkan_correct = 1;
             }
             try {
+                $data_update = [
+                    'iscorrect' => $result_menjodohkan_correct,
+                    'menjodohkan' => json_encode($request->menjodohkan)
+                ];
+                if (!$find->answered) {
+                    $data_update['answered'] = true;
+                }
                 DB::table('jawaban_pesertas')
                     ->where('id', $find->id)
-                    ->update([
-                        'iscorrect' => $result_menjodohkan_correct,
-                        'menjodohkan' => json_encode($request->menjodohkan)
-                    ]);
-            } catch (\Exception $e) {
+                    ->update($data_update);
+            } catch (Exception $e) {
                 return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
             }
 
@@ -249,7 +267,7 @@ class UjianController extends Controller
                 'ragu_ragu'     => $find->ragu_ragu,
             ];
 
-            return response()->json(['data' => $send,'index' => $request->index]);
+            return SendResponse::acceptCustom(['data' => $send,'index' => $request->index]);
         }
 
         // Jika yang dikirimkan adalah mengurutkan
@@ -270,13 +288,17 @@ class UjianController extends Controller
                 }
             }
             try {
+                $data_update = [
+                    'iscorrect' => $result_mengurutkan_correct,
+                    'mengurutkan' => json_encode($request->mengurutkan)
+                ];
+                if (!$find->answered) {
+                    $data_update['answered'] = true;
+                }
                 DB::table('jawaban_pesertas')
                     ->where('id', $find->id)
-                    ->update([
-                        'iscorrect' => $result_mengurutkan_correct,
-                        'mengurutkan' => json_encode($request->mengurutkan)
-                    ]);
-            } catch (\Exception $e) {
+                    ->update($data_update);
+            } catch (Exception $e) {
                 return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
             }
 
@@ -291,7 +313,7 @@ class UjianController extends Controller
                 'ragu_ragu'     => $find->ragu_ragu,
             ];
 
-            return response()->json(['data' => $send,'index' => $request->index]);
+            return SendResponse::acceptCustom(['data' => $send,'index' => $request->index]);
         }
 
         # jika yang dikirimkan adalah salah/benar
@@ -316,14 +338,18 @@ class UjianController extends Controller
             }
 
             try {
+                $data_update = [
+                    'benar_salah' => json_encode($request->benar_salah),
+                    'iscorrect'     => $find->iscorrect,
+                ];
+                if (!$find->answered) {
+                    $data_update['answered'] = true;
+                }
                 DB::table('jawaban_pesertas')
                     ->where('id', $find->id)
-                    ->update([
-                        'benar_salah' => json_encode($request->benar_salah),
-                        'iscorrect'     => $find->iscorrect,
-                    ]);
+                    ->update($data_update);
                 $find->benar_salah = json_encode($request->benar_salah);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
             }
 
@@ -336,18 +362,22 @@ class UjianController extends Controller
                 'esay'          => $find->esay,
                 'ragu_ragu'     => $find->ragu_ragu,
             ];
-            return response()->json(['data' => $send,'index' => $request->index]);
+            return SendResponse::acceptCustom(['data' => $send,'index' => $request->index]);
         }
 
         # Jika yang dikirimkan adalah setuju/tidak
         if(isset($request->setuju_tidak)) {
             try {
+                $data_update = [
+                    'setuju_tidak'  => $request->setuju_tidak
+                ];
+                if (!$find->answered) {
+                    $data_update['answered'] = true;
+                }
                 DB::table('jawaban_pesertas')
                     ->where('id', $find->id)
-                    ->update([
-                        'setuju_tidak'  => $request->setuju_tidak
-                    ]);
-            } catch (\Exception $e) {
+                    ->update($data_update);
+            } catch (Exception $e) {
                 return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
             }
 
@@ -382,18 +412,22 @@ class UjianController extends Controller
                 'esay'          => $find->esay,
                 'ragu_ragu'     => $find->ragu_ragu,
             ];
-            return response()->json(['data' => $send,'index' => $request->index]);
+            return SendResponse::acceptCustom(['data' => $send,'index' => $request->index]);
         }
 
         try {
+            $data_update = [
+                'jawab'         => $request->jawab,
+                'iscorrect'     => $kj->correct,
+            ];
+            if (!$find->answered) {
+                $data_update['answered'] = true;
+            }
             DB::table('jawaban_pesertas')
                 ->where('id', $find->id)
-                ->update([
-                    'jawab'         => $request->jawab,
-                    'iscorrect'     => $kj->correct,
-                ]);
+                ->update($data_update);
             $find->jawab = $request->jawab;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
         }
 
@@ -406,7 +440,7 @@ class UjianController extends Controller
             'esay'          => $find->esay,
             'ragu_ragu'     => $find->ragu_ragu,
         ];
-    	return response()->json(['data' => $send,'index' => $request->index]);
+    	return SendResponse::acceptCustom(['data' => $send,'index' => $request->index]);
 
     }
 
@@ -464,7 +498,7 @@ class UjianController extends Controller
                 ->update([
                     'ragu_ragu' => $request->ragu_ragu
                 ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
         }
 
@@ -509,7 +543,7 @@ class UjianController extends Controller
                         'status_ujian'  => 1
                     ]);
 
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
             }
             return SendResponse::badRequest('Ujian ini telah diselesaikan. silakan logout, laporkan perihal ini kepada andministrator');
@@ -540,7 +574,7 @@ class UjianController extends Controller
                     'status_ujian'  => 1,
                 ]);
             DB::commit();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollback();
             return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
         }

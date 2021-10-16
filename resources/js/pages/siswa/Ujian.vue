@@ -517,7 +517,7 @@ export default {
       this.sendAnswerSetujuTidak(value)
     }, 300),
     doubtExistAlert() {
-      this.$swal('Hei..', 'Jawabanmu masih ada yang ragu-ragu','error')
+      this.$swal('Hei..', 'Jawabanmu masih ada yang ragu-ragu','warning')
     }
   },
   async created() {

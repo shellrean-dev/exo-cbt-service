@@ -364,8 +364,10 @@ class UjianAktifController extends Controller
             json_decode($jadwal->setting, true)['acak_opsi']
         );
 
+//        return SendResponse::acceptData($jawaban_peserta);
+
         // Jika jawaban siswa belum ada di database
-        if ($jawaban_peserta->count() < 1 ) {
+        if (count($jawaban_peserta) < 1 ) {
             //------------------------------------------------------------------
 //            $key = md5(sprintf('banksoals:data:%s:single', $banksoal_id));
 //            if ($cache->isCached($key)) {
@@ -390,6 +392,9 @@ class UjianAktifController extends Controller
 
             // Ambil setting dari jadwal
             $setting = json_decode($jadwal->setting, true);
+
+            # iterate number
+            $uniq = 1;
 
             // Ambil soal tipe : ganda
             // $key = md5(sprintf('soals:data:banksoal:%s:ganda:acak:%s:max:%d',
@@ -417,7 +422,7 @@ class UjianAktifController extends Controller
 
             // Buat collection untuk jawaban siswa
             $soal_pg = [];
-            foreach($pg as $item) {
+            foreach($pg as $k => $item) {
                 array_push($soal_pg, [
                     'id'            => Str::uuid()->toString(),
                     'peserta_id'    => $peserta->id,
@@ -428,10 +433,11 @@ class UjianAktifController extends Controller
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
                     'esay'          => '',
-                    'created_at'    => now(),
-                    'updated_at'    => now()
+                    'created_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
+                    'updated_at'    => now()->addSeconds($uniq)->addMicroseconds($k)
                 ]);
             }
+            $uniq ++;
 
             // Ambil soal tipe :esay
             // $key = md5(sprintf('soals:data:banksoal:%s:esay:acak:%s:max:%d',
@@ -459,7 +465,7 @@ class UjianAktifController extends Controller
 
             // Buat collection untuk jawaban siswa
             $soal_esay = [];
-            foreach($esay as $item) {
+            foreach($esay as $k => $item) {
                 array_push($soal_esay, [
                     'id'            => Str::uuid()->toString(),
                     'peserta_id'    => $peserta->id,
@@ -470,10 +476,11 @@ class UjianAktifController extends Controller
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
                     'esay'          => '',
-                    'created_at'    => now(),
-                    'updated_at'    => now()
+                    'created_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
+                    'updated_at'    => now()->addSeconds($uniq)->addMicroseconds($k)
                 ]);
             }
+            $uniq ++;
 
             // Ambil soal: Listening
             // $key = md5(sprintf('soals:data:banksoal:%s:listening:acak:%s:max:%d',
@@ -500,7 +507,7 @@ class UjianAktifController extends Controller
 
             // Buat collection untuk jawaban siswa
             $soal_listening = [];
-            foreach($listening as $item) {
+            foreach($listening as $k => $item) {
                 array_push($soal_listening, [
                     'id'            => Str::uuid()->toString(),
                     'peserta_id'    => $peserta->id,
@@ -511,10 +518,11 @@ class UjianAktifController extends Controller
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
                     'esay'          => '',
-                    'created_at'    => now(),
-                    'updated_at'    => now()
+                    'created_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
+                    'updated_at'    => now()->addSeconds($uniq)->addMicroseconds($k)
                 ]);
             }
+            $uniq ++;
 
             // Ambil soal: Multichoice complex
             // $key = md5(sprintf('soals:data:banksoal:%s:multichoice-complex:acak:%s:max:%d',
@@ -541,7 +549,7 @@ class UjianAktifController extends Controller
 
             // Buat collection untuk jawaban siswa
             $soal_complex = [];
-            foreach($complex as $item) {
+            foreach($complex as $k => $item) {
                 array_push($soal_complex, [
                     'id'            => Str::uuid()->toString(),
                     'peserta_id'    => $peserta->id,
@@ -552,10 +560,11 @@ class UjianAktifController extends Controller
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
                     'esay'          => '',
-                    'created_at'    => now(),
-                    'updated_at'    => now()
+                    'created_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
+                    'updated_at'    => now()->addSeconds($uniq)->addMicroseconds($k)
                 ]);
             }
+            $uniq ++;
 
             // Soal  menjodohkan
              $menjodohkan = DB::table('soals')->where([
@@ -568,7 +577,7 @@ class UjianAktifController extends Controller
              $menjodohkan = $menjodohkan->take($max_menjodohkan)->get();
 
              $soal_menjodohkan = [];
-             foreach ($menjodohkan as $item) {
+             foreach ($menjodohkan as $k => $item) {
                  array_push($soal_menjodohkan, [
                      'id'            => Str::uuid()->toString(),
                      'peserta_id'    => $peserta->id,
@@ -579,10 +588,11 @@ class UjianAktifController extends Controller
                      'jadwal_id'     => $jadwal->id,
                      'ragu_ragu'     => 0,
                      'esay'          => '',
-                     'created_at'    => now(),
-                     'updated_at'    => now()
+                     'created_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
+                     'updated_at'    => now()->addSeconds($uniq)->addMicroseconds($k)
                  ]);
              }
+             $uniq ++;
 
             // Ambil soal:  isian singkat
             // $key = md5(sprintf('soals:data:banksoal:%s:isian-singkat:acak:%s:max:%d',
@@ -609,7 +619,7 @@ class UjianAktifController extends Controller
 
             // Buat collection untuk jawaban siswa
             $soal_isian_singkat = [];
-            foreach($isian_singkat as $item) {
+            foreach($isian_singkat as $k => $item) {
                 array_push($soal_isian_singkat, [
                     'id'            => Str::uuid()->toString(),
                     'peserta_id'    => $peserta->id,
@@ -620,10 +630,11 @@ class UjianAktifController extends Controller
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
                     'esay'          => '',
-                    'created_at'    => now(),
-                    'updated_at'    => now(),
+                    'created_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
+                    'updated_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
                 ]);
             }
+            $uniq ++;
 
             # Soal mengurutkan
             $mengurutkan = DB::table('soals')->where([
@@ -636,7 +647,7 @@ class UjianAktifController extends Controller
             $mengurutkan = $mengurutkan->take($max_mengurutkan)->get();
 
             $soal_mengurutkan = [];
-            foreach ($mengurutkan as $item) {
+            foreach ($mengurutkan as $k => $item) {
                 array_push($soal_mengurutkan, [
                     'id'            => Str::uuid()->toString(),
                     'peserta_id'    => $peserta->id,
@@ -647,10 +658,11 @@ class UjianAktifController extends Controller
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
                     'esay'          => '',
-                    'created_at'    => now(),
-                    'updated_at'    => now()
+                    'created_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
+                    'updated_at'    => now()->addSeconds($uniq)->addMicroseconds($k)
                 ]);
             }
+            $uniq ++;
 
             # Soal benar-salah
             $benar_salah = DB::table('soals')->where([
@@ -663,7 +675,7 @@ class UjianAktifController extends Controller
             $benar_salah = $benar_salah->take($max_benar_salah)->get();
 
             $soal_benar_salah= [];
-            foreach ($benar_salah as $item) {
+            foreach ($benar_salah as $k => $item) {
                 array_push($soal_benar_salah, [
                     'id'            => Str::uuid()->toString(),
                     'peserta_id'    => $peserta->id,
@@ -674,10 +686,11 @@ class UjianAktifController extends Controller
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
                     'esay'          => '',
-                    'created_at'    => now(),
-                    'updated_at'    => now()
+                    'created_at'    => now()->addSeconds($k)->addMicroseconds($k),
+                    'updated_at'    => now()->addSeconds($k)->addMicroseconds($k)
                 ]);
             }
+            $uniq ++;
 
             # Soal setuju-tidak
             $setuju_tidak = DB::table('soals')->where([
@@ -690,7 +703,7 @@ class UjianAktifController extends Controller
             $setuju_tidak = $setuju_tidak->take($max_setuju_tidak)->get();
 
             $soal_setuju_tidak= [];
-            foreach ($setuju_tidak as $item) {
+            foreach ($setuju_tidak as $k => $item) {
                 array_push($soal_setuju_tidak, [
                     'id'            => Str::uuid()->toString(),
                     'peserta_id'    => $peserta->id,
@@ -701,8 +714,8 @@ class UjianAktifController extends Controller
                     'jadwal_id'     => $jadwal->id,
                     'ragu_ragu'     => 0,
                     'esay'          => '',
-                    'created_at'    => now(),
-                    'updated_at'    => now()
+                    'created_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
+                    'updated_at'    => now()->addSeconds($uniq)->addMicroseconds($k)
                 ]);
             }
 

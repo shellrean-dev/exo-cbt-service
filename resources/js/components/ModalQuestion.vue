@@ -16,16 +16,16 @@
             @click="$emit('toland', index)" :disabled="isLoadinger"
             class="w-full h-12 flex items-center justify-center rounded-md border-2 font-semibold relative hover:shadow-lg"
             :class="{
-              'border-gray-300 text-gray-700': (fiel.jawab == 0 && fiel.esay == '' && fiel.jawab_complex.length == 0 && fiel.ragu_ragu != 1),
-              'border-green-300 text-green-700': ((fiel.jawab != 0 || fiel.esay != '' || fiel.jawab_complex.length != 0) && fiel.ragu_ragu != 1),
-              'border-yellow-300 text-yellow-700': (fiel.ragu_ragu == 1)
+              'border-gray-300 text-gray-700': (!fiel.answered && fiel.ragu_ragu != 1),
+              'border-green-400 bg-green-100 text-green-700': (fiel.answered && fiel.ragu_ragu != 1),
+              'border-yellow-400 bg-yellow-100 text-yellow-700': (fiel.ragu_ragu == 1)
             }"
             >
 				      <div class="h-4 w-4 rounded-full absolute -top-2 -right-2 bg-gray-100 border-2 border-gray-400"
-              v-show="(fiel.jawab == 0 && fiel.esay == '' && fiel.jawab_complex.length == 0 && fiel.ragu_ragu != 1)"
+              v-show="(!fiel.answered && fiel.ragu_ragu != 1)"
               ></div>
               <div class="h-4 w-4 rounded-full absolute -top-2 -right-2 bg-green-100 border-2 border-green-400"
-              v-show="(fiel.jawab != 0 || fiel.esay != '' || fiel.jawab_complex.length != 0 && fiel.ragu_ragu != 1)"
+              v-show="(fiel.answered && fiel.ragu_ragu != 1)"
               ></div>
               <div class="h-4 w-4 rounded-full absolute -top-2 -right-2 bg-yellow-100 border-2 border-yellow-400"
               v-show="(fiel.ragu_ragu == 1)"
