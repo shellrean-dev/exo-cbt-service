@@ -2,8 +2,9 @@
 
 namespace App\Services\Ujian;
 
+use App\Actions\SendResponse;
 use App\Models\SoalConstant;
-use Illuminate\Http\Resources\Json\JsonResource;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -12,7 +13,7 @@ class SetujuTidakService
     public static function getSoal($peserta, $banksoal, $jadwal)
     {
         # Setup
-        $settiing = json_decode($jadwal, true);
+        $setting = json_decode($jadwal->setting, true);
         $max_setuju_tidak = $banksoal->jumlah_setuju_tidak;
 
         if ($max_setuju_tidak > 0) {
@@ -42,5 +43,29 @@ class SetujuTidakService
             return $soal_setuju_tidak;
         }
         return [];
+    }
+
+    public static function setJawab($request, $jawaban_peserta)
+    {
+        try {
+            $data_update = [
+                'setuju_tidak'  => $request->setuju_tidak
+            ];
+            if (!$jawaban_peserta->answered) {
+                $data_update['answered'] = true;
+            }
+            DB::table('jawaban_pesertas')
+                ->where('id', $jawaban_peserta->id)
+                ->update($data_update);
+
+            return SendResponse::acceptCustom([
+                'data' => [
+                    'jawab' => $jawaban_peserta->jawab
+                ],
+                'index' => $request->index
+            ]);
+        } catch (Exception $e) {
+            return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
+        }
     }
 }

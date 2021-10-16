@@ -2,7 +2,10 @@
 
 namespace App\Services\Ujian;
 
+use App\Actions\SendResponse;
 use App\Models\SoalConstant;
+use App\Soal;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -46,5 +49,48 @@ class PilihanGandaKomplekService
             return $soal_complex;
         }
         return [];
+    }
+
+    public static function setJawab($request, $jawaban_peserta)
+    {
+        $soal_complex = Soal::with(['jawabans' => function($query) {
+            $query->where('correct', 1);
+        }])->where("id", $jawaban_peserta->soal_id)->first();
+        if ($soal_complex) {
+            $array = $soal_complex->jawabans->map(function($item){
+                return $item->id;
+            })->toArray();
+
+            $correct = 0;
+            $complex = array_diff( $request->jawab_complex, [0] );
+            if (array_diff($array,$complex) == array_diff($complex,$array)) {
+                $correct = 1;
+            }
+            $jawaban_peserta->iscorrect = $correct;
+        }
+
+        try {
+            $data_update = [
+                'jawab_complex' => json_encode($request->jawab_complex),
+                'iscorrect'     => $jawaban_peserta->iscorrect
+            ];
+            if (!$jawaban_peserta->answered) {
+                $data_update['answered'] = true;
+            }
+            DB::table('jawaban_pesertas')
+                ->where('id', $jawaban_peserta->id)
+                ->update($data_update);
+
+            $jawaban_peserta->jawab_complex = json_encode($request->jawab_complex);
+
+            return SendResponse::acceptCustom([
+                'data' => [
+                    'jawab' => $jawaban_peserta->jawab,
+                ],
+                'index' => $request->index
+            ]);
+        } catch (Exception $e) {
+            return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
+        }
     }
 }

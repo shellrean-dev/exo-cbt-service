@@ -2,7 +2,9 @@
 
 namespace App\Services\Ujian;
 
+use App\Actions\SendResponse;
 use App\Models\SoalConstant;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -42,5 +44,50 @@ class MenjodohkanService
             return $soal_menjodohkan;
         }
         return [];
+    }
+
+    public static function setJawab($request, $jawaban_peserta)
+    {
+        $jwb_soals = DB::table('jawaban_soals')
+            ->where('soal_id', $jawaban_peserta->soal_id)
+            ->get();
+        $menjodohkan_correct = $jwb_soals->map(function($item) {
+            $obj = json_decode($item->text_jawaban, true);
+            return [$obj['a']['id'], $obj['b']['id']];
+        });
+        $count_corect = 0;
+        foreach ($request->menjodohkan as $result) {
+            foreach ($menjodohkan_correct as $item) {
+                if ($result == $item) {
+                    $count_corect += 1;
+                    break;
+                }
+            }
+        }
+        $result_menjodohkan_correct = 0;
+        if ($count_corect == $menjodohkan_correct->count()) {
+            $result_menjodohkan_correct = 1;
+        }
+        try {
+            $data_update = [
+                'iscorrect' => $result_menjodohkan_correct,
+                'menjodohkan' => json_encode($request->menjodohkan)
+            ];
+            if (!$jawaban_peserta->answered) {
+                $data_update['answered'] = true;
+            }
+            DB::table('jawaban_pesertas')
+                ->where('id', $jawaban_peserta->id)
+                ->update($data_update);
+
+            return SendResponse::acceptCustom([
+                'data' => [
+                    'jawab' => $jawaban_peserta->jawab,
+                ],
+                'index' => $request->index
+            ]);
+        } catch (Exception $e) {
+            return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
+        }
     }
 }

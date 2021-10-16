@@ -2,7 +2,9 @@
 
 namespace App\Services\Ujian;
 
+use App\Actions\SendResponse;
 use App\Models\SoalConstant;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -46,5 +48,31 @@ class EsayService
             return $soal_esay;
         }
         return [];
+    }
+
+    public static function setJawab($request, $jawaban_peserta)
+    {
+        try {
+            $data_update = [
+                'esay' => $request->essy
+            ];
+
+            if (!$jawaban_peserta->answered) {
+                $data_update['answered'] = true;
+            }
+
+            DB::table('jawaban_pesertas')
+                ->where('id', $jawaban_peserta->id)
+                ->update($data_update);
+
+            return SendResponse::acceptCustom([
+                'data' => [
+                    'jawab' => $jawaban_peserta->jawab
+                ],
+                'index' => $request->index
+            ]);
+        } catch (Exception $e) {
+            return SendResponse::internalServerError('Terjadi kesalahan 500. ['.$e->getMessage().']');
+        }
     }
 }

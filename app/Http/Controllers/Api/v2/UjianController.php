@@ -2,6 +2,15 @@
 
 namespace App\Http\Controllers\Api\v2;
 
+use App\Models\UjianConstant;
+use App\Services\Ujian\BenarSalahService;
+use App\Services\Ujian\EsayService;
+use App\Services\Ujian\IsianSingkatService;
+use App\Services\Ujian\MengurutkanService;
+use App\Services\Ujian\MenjodohkanService;
+use App\Services\Ujian\PilihanGandaKomplekService;
+use App\Services\Ujian\PilihanGandaService;
+use App\Services\Ujian\SetujuTidakService;
 use App\Soal;
 use App\Actions\SendResponse;
 use App\Http\Controllers\Controller;
@@ -40,408 +49,63 @@ class UjianController extends Controller
 
         $peserta = request()->get('peserta-auth');
 
-        // Ambil jawaban peserta
-//        $key = md5(sprintf('jawaban_pesertas:jawab:%s:single', $request->jawaban_id));
-//        if ($cache->isCached($key)) {
-//            $find = $cache->getItem($key);
-//        } else {
-            $find = DB::table('jawaban_pesertas')
-                ->where('id', $request->jawaban_id)
-                ->first();
-
-//            $cache->cache($key, $find);
-//        }
+        $find = DB::table('jawaban_pesertas')
+            ->where('id', $request->jawaban_id)
+            ->first();
 
         if (!$find) {
-            return SendResponse::badRequest('Kami tidak dapat menemukan data dari jawaban kamu.');
+            return SendResponse::badRequest(UjianConstant::NO_WORKING_ANSWER_FOUND);
         }
 
-        // ambil ujian yang aktif hari ini
-        // $ujian = $this->_getUjianCurrent($peserta);
-        // ambil data siswa ujian
-        // yang sedang dikerjakan pada hari ini
-        // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
+        # ambil data siswa ujian
+        # yang sedang dikerjakan pada hari ini
+        # yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
         $ujian = $ujianService->onProgressToday($peserta->id);
 
         if (!$ujian) {
-            return SendResponse::badRequest('Kami tidak dapat menemukan ujian yang sedang kamu kerjakan, mungkin jadawal ini sedang tidak aktif. silakan logout lalu hubungi administrator.');
+            return SendResponse::badRequest(UjianConstant::NO_WORKING_UJIAN_FOUND);
         }
 
-        // kurangi waktu ujian
+        # kurangi waktu ujian
         $ujianService->updateReminingTime($ujian);
 
-        // Jika yang dikirimkan adalah esay
+        # Jika yang dikirimkan adalah esay
         if(isset($request->essy)) {
-            try {
-                $data_update = [
-                    'esay' => $request->essy
-                ];
-                if (!$find->answered) {
-                    $data_update['answered'] = true;
-                }
-
-                DB::table('jawaban_pesertas')
-                    ->where('id', $find->id)
-                    ->update($data_update);
-            } catch (Exception $e) {
-                return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
-            }
-
-            $send = [
-                'id'            => $find->id,
-                'banksoal_id'   => $find->banksoal_id,
-                'soal_id'       => $find->soal_id,
-                'jawab'         => $find->jawab,
-                'jawab_complex' => json_decode($find->jawab_complex, true),
-                'menjodohkan'   => json_decode($find->menjodohkan, true),
-                'esay'          => $request->esay,
-                'ragu_ragu'     => $find->ragu_ragu,
-            ];
-
-            return SendResponse::acceptCustom(['data' => $send, 'index' => $request->index]);
+            return EsayService::setJawab($request, $find);
         }
 
-        // Jika yang dikirimkan adalah isian singkat
+        # Jika yang dikirimkan adalah isian singkat
         if(isset($request->isian)) {
-            // ambil jawaban soal
-//            $key = md5(sprintf('jawaban_soals:datas:soal:%s', $find->soal_id));
-//            if ($cache->isCached($key)) {
-//                $jwb_soals = $cache->getItem($key);
-//            } else {
-                $jwb_soals = DB::table('jawaban_soals')
-                    ->where('soal_id', $find->soal_id)
-                    ->select(['id', 'text_jawaban'])
-                    ->get();
-                $soal = DB::table('soals')
-                    ->where('id', $find->soal_id)
-                    ->select('id', 'case_sensitive')
-                    ->first();
-//                $cache->cache($key, $jwb_soals);
-//            }
-
-            foreach($jwb_soals as $jwb) {
-                $jwb_strip = strip_tags($jwb->text_jawaban);
-                $isian_siswa = $request->isian;
-                if ($soal->case_sensitive == '0') {
-                    $jwb_strip = strtoupper($jwb_strip);
-                    $isian_siswa = strtoupper($isian_siswa);
-                }
-                if (trim($jwb_strip) == trim($isian_siswa)) {
-                    $find->iscorrect = 1;
-                    break;
-                }
-                $find->iscorrect = 0;
-            }
-
-            try {
-                $data_update = [
-                    'iscorrect' => $find->iscorrect,
-                    'esay'      => $request->isian
-                ];
-                if (!$find->answered) {
-                    $data_update['answered'] = true;
-                }
-                DB::table('jawaban_pesertas')
-                    ->where('id', $find->id)
-                    ->update($data_update);
-            } catch (Exception $e) {
-                return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
-            }
-
-            $send = [
-                'id'            => $find->id,
-                'banksoal_id'   => $find->banksoal_id,
-                'soal_id'       => $find->soal_id,
-                'jawab'         => $find->jawab,
-                'jawab_complex' => json_decode($find->jawab_complex, true),
-                'menjodohkan'   => json_decode($find->menjodohkan, true),
-                'esay'          => $find->esay,
-                'ragu_ragu'     => $find->ragu_ragu,
-            ];
-
-            return SendResponse::acceptCustom(['data' => $send,'index' => $request->index]);
+            return IsianSingkatService::setJawab($request, $find);
         }
 
-        // Jika yang dikirimkan adalah jawaban komleks
+        # Jika yang dikirimkan adalah jawaban komleks
         if(is_array($request->jawab_complex)) {
-            // ambil soal complex
-//            $key = md5(sprintf('jawabans:data:%s:relation:jawabans', $find->soal_id));
-//            if ($cache->isCached($key)) {
-//                $soal_complex = $cache->getItem($key);
-//            } else {
-                $soal_complex = Soal::with(['jawabans' => function($query) {
-                    $query->where('correct', 1);
-                }])
-                ->where("id", $find->soal_id)
-                ->first();
-
-//                $cache->cache($key, $soal_complex);
-//            }
-
-            if ($soal_complex) {
-                $array = $soal_complex->jawabans->map(function($item){
-                    return $item->id;
-                })->toArray();
-                $correct = 0;
-                $complex = array_diff( $request->jawab_complex, [0] );
-                if (array_diff($array,$complex) == array_diff($complex,$array)) {
-                    $correct = 1;
-                }
-                $find->iscorrect = $correct;
-            }
-
-            try {
-                $data_update = [
-                    'jawab_complex' => json_encode($request->jawab_complex),
-                    'iscorrect'     => $find->iscorrect
-                ];
-                if (!$find->answered) {
-                    $data_update['answered'] = true;
-                }
-                DB::table('jawaban_pesertas')
-                    ->where('id', $find->id)
-                    ->update($data_update);
-                $find->jawab_complex = json_encode($request->jawab_complex);
-            } catch (Exception $e) {
-                return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
-            }
-
-            $send = [
-                'id'            => $find->id,
-                'banksoal_id'   => $find->banksoal_id,
-                'soal_id'       => $find->soal_id,
-                'jawab'         => $find->jawab,
-                'jawab_complex' => json_decode($find->jawab_complex, true),
-                'menjodohkan'   => json_decode($find->menjodohkan, true),
-                'esay'          => $find->esay,
-                'ragu_ragu'     => $find->ragu_ragu,
-            ];
-            return SendResponse::acceptCustom(['data' => $send,'index' => $request->index]);
+            return PilihanGandaKomplekService::setJawab($request, $find);
         }
 
-        // Jika yang dikirimkan adalah menjodohkan
+        # Jika yang dikirimkan adalah menjodohkan
         if(isset($request->menjodohkan)) {
-            $jwb_soals = DB::table('jawaban_soals')
-                ->where('soal_id', $find->soal_id)
-                ->get();
-            $menjodohkan_correct = $jwb_soals->map(function($item) {
-                $obj = json_decode($item->text_jawaban, true);
-                return [$obj['a']['id'], $obj['b']['id']];
-            });
-            $count_corect = 0;
-            foreach ($request->menjodohkan as $result) {
-                foreach ($menjodohkan_correct as $item) {
-                    if ($result == $item) {
-                        $count_corect += 1;
-                        break;
-                    }
-                }
-            }
-            $result_menjodohkan_correct = 0;
-            if ($count_corect == $menjodohkan_correct->count()) {
-                $result_menjodohkan_correct = 1;
-            }
-            try {
-                $data_update = [
-                    'iscorrect' => $result_menjodohkan_correct,
-                    'menjodohkan' => json_encode($request->menjodohkan)
-                ];
-                if (!$find->answered) {
-                    $data_update['answered'] = true;
-                }
-                DB::table('jawaban_pesertas')
-                    ->where('id', $find->id)
-                    ->update($data_update);
-            } catch (Exception $e) {
-                return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
-            }
-
-            $send = [
-                'id'            => $find->id,
-                'banksoal_id'   => $find->banksoal_id,
-                'soal_id'       => $find->soal_id,
-                'jawab'         => $find->jawab,
-                'jawab_complex' => json_decode($find->jawab_complex, true),
-                'menjodohkan'   => json_decode($find->menjodohkan, true),
-                'esay'          => $find->esay,
-                'ragu_ragu'     => $find->ragu_ragu,
-            ];
-
-            return SendResponse::acceptCustom(['data' => $send,'index' => $request->index]);
+            return MenjodohkanService::setJawab($request, $find);
         }
 
-        // Jika yang dikirimkan adalah mengurutkan
+        # Jika yang dikirimkan adalah mengurutkan
         if(isset($request->mengurutkan)) {
-            $jwb_soals = DB::table('jawaban_soals')
-                ->where('soal_id', $find->soal_id)
-                ->orderBy('created_at')
-                ->get();
-            $mengurutkan_correct = $jwb_soals->map(function($item) {
-                return $item->id;
-            });
-
-            $result_mengurutkan_correct = 1;
-            for ($i = 0; $i < count($mengurutkan_correct); $i++) {
-                if ($mengurutkan_correct[$i] != $request->mengurutkan[$i]) {
-                    $result_mengurutkan_correct = 0;
-                    break;
-                }
-            }
-            try {
-                $data_update = [
-                    'iscorrect' => $result_mengurutkan_correct,
-                    'mengurutkan' => json_encode($request->mengurutkan)
-                ];
-                if (!$find->answered) {
-                    $data_update['answered'] = true;
-                }
-                DB::table('jawaban_pesertas')
-                    ->where('id', $find->id)
-                    ->update($data_update);
-            } catch (Exception $e) {
-                return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
-            }
-
-            $send = [
-                'id'            => $find->id,
-                'banksoal_id'   => $find->banksoal_id,
-                'soal_id'       => $find->soal_id,
-                'jawab'         => $find->jawab,
-                'jawab_complex' => json_decode($find->jawab_complex, true),
-                'mengurutkan'   => json_decode($find->mengurutkan, true),
-                'esay'          => $find->esay,
-                'ragu_ragu'     => $find->ragu_ragu,
-            ];
-
-            return SendResponse::acceptCustom(['data' => $send,'index' => $request->index]);
+            return MengurutkanService::setJawab($request, $find);
         }
 
         # jika yang dikirimkan adalah salah/benar
         if(is_array($request->benar_salah)) {
-            $soal_benar_salah = DB::table('soals as s')
-                ->join('jawaban_soals as j', 'j.soal_id', '=','s.id')
-                ->select('j.id as jawaban_id', 'correct')
-                ->where('s.id', $find->soal_id)
-                ->get();
-
-            $count_corect = 0;
-            foreach ($request->benar_salah as $k => $v) {
-                $seachSoal = $soal_benar_salah->where('jawaban_id', $k)->first();
-                if ($seachSoal && ($seachSoal->correct == $v)) {
-                    $count_corect += 1;
-                }
-            }
-
-            $find->iscorrect = 0;
-            if (count($soal_benar_salah) == $count_corect) {
-                $find->iscorrect = 1;
-            }
-
-            try {
-                $data_update = [
-                    'benar_salah' => json_encode($request->benar_salah),
-                    'iscorrect'     => $find->iscorrect,
-                ];
-                if (!$find->answered) {
-                    $data_update['answered'] = true;
-                }
-                DB::table('jawaban_pesertas')
-                    ->where('id', $find->id)
-                    ->update($data_update);
-                $find->benar_salah = json_encode($request->benar_salah);
-            } catch (Exception $e) {
-                return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
-            }
-
-            $send = [
-                'id'            => $find->id,
-                'banksoal_id'   => $find->banksoal_id,
-                'soal_id'       => $find->soal_id,
-                'jawab'         => $find->jawab,
-                'benar_salah' => json_decode($find->benar_salah, true),
-                'esay'          => $find->esay,
-                'ragu_ragu'     => $find->ragu_ragu,
-            ];
-            return SendResponse::acceptCustom(['data' => $send,'index' => $request->index]);
+            return BenarSalahService::setJawab($request, $find);
         }
 
         # Jika yang dikirimkan adalah setuju/tidak
         if(isset($request->setuju_tidak)) {
-            try {
-                $data_update = [
-                    'setuju_tidak'  => $request->setuju_tidak
-                ];
-                if (!$find->answered) {
-                    $data_update['answered'] = true;
-                }
-                DB::table('jawaban_pesertas')
-                    ->where('id', $find->id)
-                    ->update($data_update);
-            } catch (Exception $e) {
-                return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
-            }
-
-            $send = [
-                'id'            => $find->id,
-                'banksoal_id'   => $find->banksoal_id,
-                'soal_id'       => $find->soal_id
-            ];
-
-            return SendResponse::acceptCustom(['data' => $send, 'index' => $request->index]);
+            return SetujuTidakService::setJawab($request, $find);
         }
 
-        // Jika yang dikirimkan adalah pilihan ganda
-//        $key = md5(sprintf('jawaban_soals:data:%s:only:correct', $request->jawab));
-//        if ($cache->isCached($key)) {
-//            $kj = $cache->getItem($key);
-//        } else {
-            $kj = DB::table('jawaban_soals')
-                ->where('id', $request->jawab)
-                ->select('correct')
-                ->first();
-
-//            $cache->cache($key, $kj);
-//        }
-        if(!$kj) {
-            $send = [
-                'id'            => $find->id,
-                'banksoal_id'   => $find->banksoal_id,
-                'soal_id'       => $find->soal_id,
-                'jawab'         => $find->jawab,
-                'jawab_complex' => json_decode($find->jawab_complex, true),
-                'esay'          => $find->esay,
-                'ragu_ragu'     => $find->ragu_ragu,
-            ];
-            return SendResponse::acceptCustom(['data' => $send,'index' => $request->index]);
-        }
-
-        try {
-            $data_update = [
-                'jawab'         => $request->jawab,
-                'iscorrect'     => $kj->correct,
-            ];
-            if (!$find->answered) {
-                $data_update['answered'] = true;
-            }
-            DB::table('jawaban_pesertas')
-                ->where('id', $find->id)
-                ->update($data_update);
-            $find->jawab = $request->jawab;
-        } catch (Exception $e) {
-            return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
-        }
-
-        $send = [
-            'id'            => $find->id,
-            'banksoal_id'   => $find->banksoal_id,
-            'soal_id'       => $find->soal_id,
-            'jawab'         => $find->jawab,
-            'jawab_complex' => json_decode($find->jawab_complex, true),
-            'esay'          => $find->esay,
-            'ragu_ragu'     => $find->ragu_ragu,
-        ];
-    	return SendResponse::acceptCustom(['data' => $send,'index' => $request->index]);
-
+        # Jika yang dikirimkan adalah pilihan ganda
+        return PilihanGandaService::setJawab($request, $find);
     }
 
     /**

@@ -2,7 +2,9 @@
 
 namespace App\Services\Ujian;
 
+use App\Actions\SendResponse;
 use App\Models\SoalConstant;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -47,5 +49,53 @@ class IsianSingkatService
         }
 
         return [];
+    }
+
+    public static function setJawab($request, $jawaban_peserta)
+    {
+        $jwb_soals = DB::table('jawaban_soals')
+            ->where('soal_id', $jawaban_peserta->soal_id)
+            ->select(['id', 'text_jawaban'])
+            ->get();
+        $soal = DB::table('soals')
+            ->where('id', $jawaban_peserta->soal_id)
+            ->select('id', 'case_sensitive')
+            ->first();
+
+        foreach($jwb_soals as $jwb) {
+            $jwb_strip = strip_tags($jwb->text_jawaban);
+            $isian_siswa = $request->isian;
+            if ($soal->case_sensitive == '0') {
+                $jwb_strip = strtoupper($jwb_strip);
+                $isian_siswa = strtoupper($isian_siswa);
+            }
+            if (trim($jwb_strip) == trim($isian_siswa)) {
+                $jawaban_peserta->iscorrect = 1;
+                break;
+            }
+            $jawaban_peserta->iscorrect = 0;
+        }
+
+        try {
+            $data_update = [
+                'iscorrect' => $jawaban_peserta->iscorrect,
+                'esay'      => $request->isian
+            ];
+            if (!$jawaban_peserta->answered) {
+                $data_update['answered'] = true;
+            }
+            DB::table('jawaban_pesertas')
+                ->where('id', $jawaban_peserta->id)
+                ->update($data_update);
+
+            return SendResponse::acceptCustom([
+                'data' => [
+                    'jawab' => $jawaban_peserta->jawab
+                ],
+                'index' => $request->index
+            ]);
+        } catch (Exception $e) {
+            return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
+        }
     }
 }
