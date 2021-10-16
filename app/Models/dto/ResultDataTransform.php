@@ -5,7 +5,7 @@ namespace App\Models\dto;
 class ResultDataTransform
 {
     public static function resultExam($item) {
-        return [
+        return (object) [
             'id'    => $item->id,
             'jumlah_benar' => $item->jumlah_benar,
             'jumlah_benar_benar_salah' => $item->jumlah_benar_benar_salah,
@@ -25,7 +25,7 @@ class ResultDataTransform
             'point_setuju_tidak' => $item->point_setuju_tidak,
             'tidak_diisi' => $item->tidak_diisi,
             'hasil' => $item->hasil,
-            'peserta' => [
+            'peserta' => (object) [
                 'nama' => $item->peserta_nama,
                 'no_ujian' => $item->peserta_no_ujian
             ]

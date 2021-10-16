@@ -134,7 +134,7 @@ class ResultController extends Controller
      * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
-    public function examExcel($jadwal_id)
+    public function examExcel(Request $request, $jadwal_id)
     {
         if (! request()->hasValidSignature()) {
             return SendResponse::badRequest('Kesalahan, url tidak valid');
@@ -148,46 +148,47 @@ class ResultController extends Controller
             return SendResponse::badRequest('Kesalahan, jadwal yang diminta tidak valid');
         }
 
-        $jurusan = request()->jurusan;
-        $group = request()->group;
+        $res = DB::table('hasil_ujians')
+            ->join('pesertas', 'pesertas.id', '=','hasil_ujians.peserta_id')
+            ->rightJoin('group_members', 'group_members.student_id', '=', 'hasil_ujians.peserta_id');
 
-        $res = HasilUjian::with(['peserta' => function ($query) use ($jurusan) {
-            $query->select('id','nama','no_ujian');
-        }]);
+        $jurusan = strval($request->get('jurusan',''));
+        $group = strval($request->get('group',''));
 
-        if ($jurusan != 0 && $jurusan != '') {
-            $jurusan = explode(',',$jurusan);
-            $res->whereHas('peserta', function($query) use ($jurusan) {
-                $query->whereIn('jurusan_id', $jurusan);
-            });
+        if (Uuid::isValid($jurusan)) {
+            $res = $res->where('pesertas.jurusan_id', $jurusan);
         }
 
-
-        if ($group != 0 && $group != '') {
+        if (Uuid::isValid($group)) {
             $groupObj = DB::table('groups')
                 ->where('id', $group)
                 ->first();
-            if ($groupObj->parent_id == 0 || $groupObj->parent_id == null) {
+            $parent_id = strval($groupObj->id);
+
+            if (Uuid::isValid($parent_id)) {
                 $childs = DB::table('groups')
-                    ->where('parent_id', $groupObj->parent_id)
+                    ->where('parent_id', $parent_id)
                     ->select('id')
                     ->get()
                     ->pluck('id')
                     ->toArray();
                 array_push($childs, $group);
-                $res->whereHas('group', function($query) use ($childs) {
-                    $query->whereIn('group_id', $childs);
-                });
+                $res = $res->whereIn('group_members.group_id', $childs);
             } else {
-                $res->whereHas('group', function($query) use ($group) {
-                    $query->where('group_id', $group);
-                });
+                $res = $res->where('group_members.group_id', $group);
             }
         }
-
-        $res = $res->where('jadwal_id', $jadwal->id)
-            ->orderBy('peserta_id')
-            ->get();
+        $res = $res->where('hasil_ujians.jadwal_id', $jadwal->id)
+            ->select([
+                'hasil_ujians.*',
+                'pesertas.id as peserta_id',
+                'pesertas.nama as peserta_nama',
+                'pesertas.no_ujian as peserta_no_ujian',
+                'pesertas.jurusan_id as peserta_jurusan_id'
+            ])
+            ->orderBy('hasil_ujians.peserta_id')
+            ->get()
+            ->map([ResultDataTransform::class, 'resultExam']);
 
         $spreadsheet = HasilUjianExport::export($res,$jadwal->alias);
         $writer = new Xlsx($spreadsheet);
