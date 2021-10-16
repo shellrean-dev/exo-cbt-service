@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Models\SoalConstant;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
 use App\Imports\BanksoalImport;
@@ -68,6 +69,10 @@ class SoalController extends Controller
                 'direction'     => $request->direction,
                 'layout'        => $request->layout
             ];
+
+            if (in_array($request->tipe_soal, [SoalConstant::TIPE_BENAR_SALAH, SoalConstant::TIPE_SETUJU_TIDAK])) {
+                $data['layout'] = SoalConstant::LAYOUT_KEBAWAH_TABEL;
+            }
 
             if (isset($request->case_sensitive)) {
                 $data['case_sensitive'] = $request->case_sensitive;
@@ -275,12 +280,15 @@ class SoalController extends Controller
         DB::beginTransaction();
 
         try {
+            if (in_array($soal->tipe_soal, [SoalConstant::TIPE_BENAR_SALAH, SoalConstant::TIPE_SETUJU_TIDAK])) {
+                $soal->layout = SoalConstant::LAYOUT_KEBAWAH_TABEL;
+            }
+
             $soal->pertanyaan = $request->pertanyaan;
             $soal->audio = $request->audio;
             $soal->direction = $request->direction;
             $soal->tipe_soal = $request->tipe_soal;
             $soal->rujukan = $request->rujukan;
-            $soal->layout = $request->layout;
 
             if (isset($request->case_sensitive)) {
                 $soal->case_sensitive = $request->case_sensitive;

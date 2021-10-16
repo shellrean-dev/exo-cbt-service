@@ -259,12 +259,14 @@ class UjianController extends Controller
      *
      * Get all ujian without pagination
      *
-     * @return App\Actions\SendResponse
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function allData()
     {
-        $ujians = Jadwal::orderBy('id','desc')->get();
+        $ujians = Jadwal::orderBy('tanggal','DESC')
+            ->orderBy('mulai','DESC')
+            ->get();
         return SendResponse::acceptData($ujians);
     }
 
@@ -273,7 +275,7 @@ class UjianController extends Controller
      *
      * Get data with status active
      *
-     * @return App\Actions\SendResponse
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function getActive()
@@ -292,7 +294,7 @@ class UjianController extends Controller
      * Get banksoal by jadwal
      *
      * @param  App\Jadwal $jadwal
-     * @return App\Actions\SendResponse
+     * @return \Illuminate\Http\Response
      */
     public function getBanksoalByJadwal(Jadwal $jadwal)
     {
