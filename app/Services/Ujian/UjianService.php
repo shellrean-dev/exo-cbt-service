@@ -596,19 +596,12 @@ final class UjianService extends AbstractService
      */
     public function updateReminingTime(object $siswa_ujian)
     {
-//        $key = md5(sprintf('jadwals:data:%s:single', $siswa_ujian->jadwal_id));
-//        if ($this->cache->isCached($key)) {
-//            $deUjian = $this->cache->getItem($key);
-//        } else {
-            $deUjian = DB::table('jadwals')
-                ->where('id', $siswa_ujian->jadwal_id)
-                ->first();
+        $deUjian = DB::table('jadwals')
+            ->where('id', $siswa_ujian->jadwal_id)
+            ->first();
 
-//            $this->cache->cache($key, $deUjian);
-//        }
-
-        // hitung perbedaan waktu
-        // shadow dan waktu sekarang
+        # hitung perbedaan waktu
+        # shadow dan waktu sekarang
         $start = Carbon::createFromFormat('H:i:s', $siswa_ujian->mulai_ujian_shadow);
         $now = Carbon::createFromFormat('H:i:s', Carbon::now()->format('H:i:s'));
         $diff_in_minutes = $start->diffInSeconds($now);

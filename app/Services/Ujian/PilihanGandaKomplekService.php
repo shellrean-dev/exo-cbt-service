@@ -9,8 +9,21 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
+/**
+ * Pilihan ganda komplek service
+ *
+ * @author shellrean <wandinak17@gmail.com>
+ * @since 3.0.0 <ristretto>
+ * @year 2021
+ */
 class PilihanGandaKomplekService
 {
+    /**
+     * @param $peserta
+     * @param $banksoal
+     * @param $jadwal
+     * @return array
+     */
     public static function getSoal($peserta, $banksoal, $jadwal)
     {
         # Setup
@@ -51,6 +64,11 @@ class PilihanGandaKomplekService
         return [];
     }
 
+    /**
+     * @param $request
+     * @param $jawaban_peserta
+     * @return \Illuminate\Http\Response
+     */
     public static function setJawab($request, $jawaban_peserta)
     {
         $soal_complex = Soal::with(['jawabans' => function($query) {

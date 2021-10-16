@@ -6,8 +6,21 @@ use App\Models\SoalConstant;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
+/**
+ * Soal tipe listening service
+ *
+ * @author shellrean <wandinak17@gmail.com>
+ * @since 3.0.0 <ristretto>
+ * @year 2021
+ */
 class ListeningService
 {
+    /**
+     * @param $peserta
+     * @param $banksoal
+     * @param $jadwal
+     * @return array
+     */
     public static function getSoal($peserta, $banksoal, $jadwal)
     {
         # Setup

@@ -8,8 +8,21 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
+/**
+ * Soal tipe isian singkat service
+ *
+ * @author shellrean <wandinak17@gmail.com>
+ * @since 3.0.0 <ristretto>
+ * @year 2021
+ */
 class IsianSingkatService
 {
+    /**
+     * @param $peserta
+     * @param $banksoal
+     * @param $jadwal
+     * @return array
+     */
     public static function getSoal($peserta, $banksoal, $jadwal)
     {
         # Setup
@@ -51,6 +64,11 @@ class IsianSingkatService
         return [];
     }
 
+    /**
+     * @param $request
+     * @param $jawaban_peserta
+     * @return \Illuminate\Http\Response
+     */
     public static function setJawab($request, $jawaban_peserta)
     {
         $jwb_soals = DB::table('jawaban_soals')

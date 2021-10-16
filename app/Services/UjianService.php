@@ -5,6 +5,7 @@
  * Ujian Service
  * @since 1.4 Esresso
  * @author shellrean <wandinak17@gmail.com>
+ * @deprecated
  * -----------------------------------------------
  */
 namespace App\Services;
@@ -20,6 +21,7 @@ use App\HasilUjian;
 use App\JawabanPeserta;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use JetBrains\PhpStorm\Deprecated;
 
 class UjianService
 {
@@ -75,7 +77,7 @@ class UjianService
 
     /**
      * Ambil jawaban siswa
-     * @param   int $jadwal_id 
+     * @param   int $jadwal_id
      * @param   int $peserta_id
      * @param   bool $acak_opsi
      * @return  object

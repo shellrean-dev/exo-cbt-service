@@ -14,7 +14,6 @@ use App\Services\Ujian\PilihanGandaService;
 use App\Services\Ujian\SetujuTidakService;
 use Exception;
 use \Illuminate\Support\Facades\DB;
-use App\Services\UjianService;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;

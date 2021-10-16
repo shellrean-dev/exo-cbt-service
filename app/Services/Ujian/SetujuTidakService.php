@@ -8,8 +8,21 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
+/**
+ * Setuju tidak service
+ *
+ * @author shellrean <wandinak17@gmail.com>
+ * @since 3.0.0 <ristretto>
+ * @year 2021
+ */
 class SetujuTidakService
 {
+    /**
+     * @param $peserta
+     * @param $banksoal
+     * @param $jadwal
+     * @return array
+     */
     public static function getSoal($peserta, $banksoal, $jadwal)
     {
         # Setup
@@ -45,6 +58,11 @@ class SetujuTidakService
         return [];
     }
 
+    /**
+     * @param $request
+     * @param $jawaban_peserta
+     * @return \Illuminate\Http\Response
+     */
     public static function setJawab($request, $jawaban_peserta)
     {
         try {
