@@ -18,9 +18,9 @@ class ReportingController extends Controller
 {
     /**
      * @Route(path="api/v1/berita-acara/{id}", methods={"GET"})
-     * 
+     *
      * Download berita acara pdf
-     * 
+     *
      * @param $event_id
      * @return void
      * @author shellrean <wandinak17@gmail.com>
@@ -30,7 +30,7 @@ class ReportingController extends Controller
         if (! request()->hasValidSignature()) {
             return SendResponse::badRequest('Kesalahan, url tidak valid');
         }
-        
+
         try {
             $berita_acara = new BeritaAcaraService($event_id);
             $berita_acara->download();
@@ -41,11 +41,11 @@ class ReportingController extends Controller
 
     /**
      * @Route(path="api/v1/berita-acara/{id}/link", methods={"GET"})
-     * 
+     *
      * Buat berita acara pdf link
-     * 
+     *
      * @param $event_id
-     * @return void
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function berita_acara_link($event_id)
@@ -58,7 +58,7 @@ class ReportingController extends Controller
         }
 
         $url = URL::temporarySignedRoute(
-            'beritaacara.download.excel', 
+            'beritaacara.download.excel',
             now()->addMinutes(5),
             ['id' => $event_id]
         );
@@ -67,11 +67,11 @@ class ReportingController extends Controller
 
     /**
      * @Route(path="api/v1/absensi-ujian/{id}", methods={"GET"})
-     * 
+     *
      * Download absesnsi pdf
-     * 
+     *
      * @param $jadwal_id
-     * @return void
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function absensi_ujian($jadwal_id)
@@ -91,11 +91,11 @@ class ReportingController extends Controller
 
     /**
      * @Route(path="api/v1/absensi-ujian/{id}/link", methods={"GET"})
-     * 
+     *
      * Buat berita acara pdf link
-     * 
+     *
      * @param $event_id
-     * @return void
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function absensi_ujian_link($jadwal_id)
@@ -114,7 +114,7 @@ class ReportingController extends Controller
         }
 
         $url = URL::temporarySignedRoute(
-            'absensi.download.excel', 
+            'absensi.download.excel',
             now()->addMinutes(5),
             ['id' => $jadwal_id, 'q' => $sesi]
         );

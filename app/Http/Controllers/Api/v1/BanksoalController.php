@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Models\SoalConstant;
 use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
@@ -243,42 +244,120 @@ class BanksoalController extends Controller
      * Get analys banksoal
      *
      * @param  Banksoal $banksoal
-     * @return App\Actions\SendResponse
+     * @return \Illuminate\Http\Response
      */
     public function getAnalys(Banksoal $banksoal)
     {
-        $soal = Soal::with('jawabans')->where(function($query) use ($banksoal) {
-            $query->where('banksoal_id', $banksoal->id)
-            ->where('tipe_soal','!=','2');
-        })->orderBy('tipe_soal')
-        ->orderBy('created_at','ASC')
-        ->get();
+        $soal = DB::table('soals')
+            ->where('soals.banksoal_id', $banksoal->id)
+            ->orderBy('soals.tipe_soal')
+            ->orderBy('soals.created_at')
+            ->select([
+                'soals.id',
+                'soals.pertanyaan',
+                'soals.tipe_soal'
+            ])
+            ->get();
 
-        $fill = $soal->map(function($val, $key) {
-            $jawab = JawabanPeserta::where('soal_id', $val->id)->get();
-            $penjawab = $jawab->count();
-            $salah = $jawab->where('iscorrect', '0')->count();
-            $benar = $jawab->where('iscorrect','1')->count();
-            return [
-                'soal'  => $val->pertanyaan,
-                'tipe_soal' => $val->tipe_soal,
-                'penjawab' => $penjawab,
-                'salah'     => $salah,
-                'benar' => $benar,
-                'diagram' => [
-                    ['Tas','value'],
-                    ['salah', $salah],
-                    ['benar',$benar]
-                ],
-                'jawaban' => $val->jawabans->map(function($vel, $kiy) use($jawab) {
-                    return [
-                        'text' => $vel->text_jawaban,
-                        'iscorrect' => $vel->correct,
-                        'penjawab' => $jawab->where('jawab',$vel->id)->count()
-                    ];
-                }),
-            ];
+        $soal_ids = $soal->pluck('id')->toArray();
+        $jawaban_pesertas = DB::table('jawaban_pesertas')
+            ->whereIn('soal_id', $soal_ids)
+            ->get();
+        $jawaban_pesertas = $jawaban_pesertas->map(function ($item) {
+            $item->setuju_tidak = json_decode($item->setuju_tidak, true);
+            return $item;
         });
+
+        $jawaban_soals = DB::table('jawaban_soals')
+            ->whereIn('soal_id', $soal_ids)
+            ->get();
+
+        $fill = [];
+        foreach ($soal as $val) {
+            $jawaban_peserta = $jawaban_pesertas->where('soal_id', $val->id)->values();
+
+            $penjawab = $jawaban_peserta->count();
+            $salah = $jawaban_peserta->where('iscorrect', '0')->count();
+            $benar = $jawaban_peserta->where('iscorrect', '1')->count();
+
+            $jawaban_soal = $jawaban_soals
+                ->where('soal_id', $val->id)
+                ->values();
+
+            $fill[] = [
+                'soal'      => $val->pertanyaan,
+                'tipe_soal' => $val->tipe_soal,
+                'penjawab'  => $penjawab,
+                'salah'     => $salah,
+                'benar'     => $benar,
+                'jawaban'   => $jawaban_soal->map(function ($item) use($jawaban_peserta) {
+                    $argument = [
+                        'setuju' => 0,
+                        'tidak' => 0
+                    ];
+                    foreach ($jawaban_peserta as $v) {
+                        if (count($v->setuju_tidak) > 0) {
+                            if ($v->setuju_tidak[$item->id]['val'] == 1) {
+                                $argument['setuju'] += 1;
+                            } else {
+                                $argument['tidak'] += 1;
+                            }
+                        }
+                    }
+
+                    $curr_jawaban_peserta = $jawaban_peserta->where('jawab',$item->id)->values();
+
+                    return [
+                        'text'      => $item->text_jawaban,
+                        'iscorrect' => $item->correct,
+                        'penjawab'  => $curr_jawaban_peserta->count(),
+                        'argument'  => $argument
+                    ];
+                })
+            ];
+        }
+
+//        $fill = $soal->map(function($val, $key) {
+////            $jawab = JawabanPeserta::where('soal_id', $val->id)->get();
+//            $jawab = DB::table('jawaban_pesertas')->where('soal_id', $val->id)->get();
+//
+//            $penjawab = $jawab->count();
+//            $salah = $jawab->where('iscorrect', '0')->count();
+//            $benar = $jawab->where('iscorrect','1')->count();
+//            return [
+//                'soal'  => $val->pertanyaan,
+//                'tipe_soal' => $val->tipe_soal,
+//                'penjawab' => $penjawab,
+//                'salah'     => $salah,
+//                'benar' => $benar,
+//                'diagram' => [
+//                    ['Tas','value'],
+//                    ['salah', $salah],
+//                    ['benar',$benar]
+//                ],
+//                'jawaban' => $val->jawabans->map(function($vel, $kiy) use($jawab) {
+//                    $argument = [
+//                        'setuju' => 0,
+//                        'tidak' => 0
+//                    ];
+//                    foreach ($jawab as $j) {
+//                        return $j;
+//                        if ($c[$vel->id]['val'] == 1) {
+//                            $argument['setuju'] += 1;
+//                        } else {
+//                            $argument['tidak'] += 1;
+//                        }
+//                    }
+//
+//                    return [
+//                        'text' => $vel->text_jawaban,
+//                        'iscorrect' => $vel->correct,
+//                        'penjawab' => $jawab->where('jawab',$vel->id)->count(),
+//                        'argument' => $argument
+//                    ];
+//                }),
+//            ];
+//        });
 
         return SendResponse::acceptData($fill);
     }

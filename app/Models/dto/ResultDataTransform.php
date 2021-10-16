@@ -4,7 +4,8 @@ namespace App\Models\dto;
 
 class ResultDataTransform
 {
-    public static function resultExam($item) {
+    public static function resultExam($item)
+    {
         return (object) [
             'id'    => $item->id,
             'jumlah_benar' => $item->jumlah_benar,
@@ -29,6 +30,30 @@ class ResultDataTransform
                 'nama' => $item->peserta_nama,
                 'no_ujian' => $item->peserta_no_ujian
             ]
+        ];
+    }
+
+    public static function resultUjianDetail($item)
+    {
+        return (object) [
+            'banksoal_id' => $item->banksoal_id,
+            'esay' => $item->esay,
+            'esay_result' => $item->esay_result,
+            'id' => $item->id,
+            'iscorrect' => $item->iscorrect,
+            'jadwal_id' => $item->jawab_id,
+            'mengurutkan' => json_decode($item->mengurutkan),
+            'setuju_tidak' => json_decode($item->setuju_tidak),
+            'jawab' => $item->jawab,
+            'jawab_complex' => $item->jawab_complex,
+            'peserta_nama'  => $item->peserta->nama,
+            'peserta_no_ujian' => $item->peserta->no_ujian,
+            'peserta_id' => $item->peserta_id,
+            'ragu_ragu' => $item->ragu_ragu,
+            'similiar' => $item->similiar,
+            'soal' => $item->soal,
+            'soal_id' => $item->soal_id,
+            'updated_at' => $item->updated_at,
         ];
     }
 }

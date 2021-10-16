@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Models\dto\ResultDataTransform;
+use App\Models\SoalConstant;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -13,11 +14,8 @@ use Illuminate\Support\Facades\DB;
 use App\Exports\HasilUjianExport;
 use App\Actions\SendResponse;
 use App\JawabanPeserta;
-use App\HasilUjian;
 use App\Soal;
 use Ramsey\Uuid\Uuid;
-use ShellreanDev\Utils\EntityUtil;
-use function GuzzleHttp\Psr7\str;
 
 /**
  * ResultingController
@@ -349,7 +347,15 @@ class ResultController extends Controller
 
         $soals = Soal::where(function($query) use($banksoal) {
             $query->where('banksoal_id', $banksoal->id)
-            ->where('tipe_soal','!=','2');
+            ->whereIn('tipe_soal',[
+                SoalConstant::TIPE_PG,
+                SoalConstant::TIPE_LISTENING,
+                SoalConstant::TIPE_PG_KOMPLEK,
+                SoalConstant::TIPE_MENJODOHKAN,
+                SoalConstant::TIPE_ISIAN_SINGKAT,
+                SoalConstant::TIPE_MENGURUTKAN,
+                SoalConstant::TIPE_BENAR_SALAH
+            ]);
         })->get();
 
         $sss = JawabanPeserta::with(['peserta' => function($query) {
@@ -387,7 +393,15 @@ class ResultController extends Controller
 
 
         $sss = $sss->whereHas('pertanyaan', function($query) {
-            $query->where('tipe_soal','!=','2');
+            $query->whereIn('tipe_soal',[
+                SoalConstant::TIPE_PG,
+                SoalConstant::TIPE_LISTENING,
+                SoalConstant::TIPE_PG_KOMPLEK,
+                SoalConstant::TIPE_MENJODOHKAN,
+                SoalConstant::TIPE_ISIAN_SINGKAT,
+                SoalConstant::TIPE_MENGURUTKAN,
+                SoalConstant::TIPE_BENAR_SALAH
+            ]);
         })
         ->where([
             'banksoal_id' => $banksoal->id,
@@ -452,28 +466,7 @@ class ResultController extends Controller
         ])
         ->get();
 
-        $data = $jawaban->map(function($item) {
-            return [
-                'banksoal_id' => $item->banksoal_id,
-                'esay' => $item->esay,
-                'esay_result' => $item->esay_result,
-                'id' => $item->id,
-                'iscorrect' => $item->iscorrect,
-                'jadwal_id' => $item->jawab_id,
-                'mengurutkan' => json_decode($item->mengurutkan, true),
-                'jawab' => $item->jawab,
-                'jawab_complex' => $item->jawab_complex,
-                'peserta_nama'  => $item->peserta->nama,
-                'peserta_no_ujian' => $item->peserta->no_ujian,
-                'peserta_id' => $item->peserta_id,
-                'ragu_ragu' => $item->ragu_ragu,
-                'similiar' => $item->similiar,
-                'soal' => $item->soal,
-                'soal_id' => $item->soal_id,
-                'updated_at' => $item->updated_at,
-            ];
-        });
-
+        $data = $jawaban->map([ResultDataTransform::class, 'resultUjianDetail']);
         return SendResponse::acceptData($data);
     }
 }
