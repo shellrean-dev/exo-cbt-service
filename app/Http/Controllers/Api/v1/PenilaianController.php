@@ -242,11 +242,16 @@ class PenilaianController extends Controller
             'val'   => 'required|numeric|min:0|max:1',
             'id'    => 'required'
         ]);
-
-        $jawab = DB::table('jawaban_pesertas')
-            ->where('jawaban_pesertas.id', $request->id)
-            ->join('banksoals', 'jawaban_pesertas.banksoal_id', '=', 'banksoals.id')
-            ->select('jawaban_pesertas.id', 'jawaban_pesertas.esay','jawaban_pesertas.banksoal_id','jawaban_pesertas.soal_id','jawaban_pesertas.jadwal_id','banksoals.jumlah_soal','banksoals.jumlah_soal_listening','banksoals.jumlah_soal_ganda_kompleks','banksoals.jumlah_isian_singkat','banksoals.jumlah_soal_esay','banksoals.persen','jawaban_pesertas.peserta_id')
+        $jawab = DB::table('jawaban_pesertas as a')
+            ->where('a.id', $request->id)
+            ->join('banksoals as b', 'b.id', '=', 'a.banksoal_id')
+            ->select([
+                'a.id',
+                'a.banksoal_id',
+                'a.jadwal_id',
+                'a.peserta_id',
+                'b.persen',
+                'b.jumlah_soal_esay'])
             ->first();
 
         if (!$jawab) {
@@ -255,98 +260,11 @@ class PenilaianController extends Controller
 
         $user = request()->user('api');
 
-        $has = DB::table('jawaban_esays')
-            ->where('banksoal_id', $jawab->banksoal_id)
-            ->select('jawab_id')
-            ->pluck('jawab_id');
-
-        $sames = DB::table('jawaban_pesertas')
-            ->whereNotIn('jawaban_pesertas.id', $has)
-            ->where('jawaban_pesertas.esay', $jawab->esay)
-            ->where('jawaban_pesertas.banksoal_id', $jawab->banksoal_id)
-            ->where('jawaban_pesertas.soal_id', $jawab->soal_id)
-            ->join('banksoals', 'jawaban_pesertas.banksoal_id', '=', 'banksoals.id')
-            ->select('jawaban_pesertas.id', 'jawaban_pesertas.esay','jawaban_pesertas.banksoal_id','jawaban_pesertas.soal_id','jawaban_pesertas.jadwal_id','banksoals.jumlah_soal','banksoals.jumlah_soal_listening','banksoals.jumlah_soal_ganda_kompleks','banksoals.jumlah_isian_singkat','banksoals.jumlah_soal_esay','banksoals.persen', 'jawaban_pesertas.peserta_id')
-            ->get();
-
-        if ($sames->count() > 1) {
-            foreach($sames as $same) {
-                $hasil = DB::table('hasil_ujians')->where([
-                    'banksoal_id'   => $same->banksoal_id,
-                    'jadwal_id'     => $same->jadwal_id,
-                    'peserta_id'    => $same->peserta_id,
-                ])->first();
-
-                // Hitung total pertanyaan
-                $pg_jmlh = $same->jumlah_soal;
-                $listening_jmlh = $same->jumlah_soal_listening;
-                $complex_jmlh = $same->jumlah_soal_ganda_kompleks;
-                $isian_singkat_jmlh = $same->jumlah_isian_singkat;
-                $jml_esay =  $same->jumlah_soal_esay;
-
-                $persen = json_decode($same->persen,true);
-
-                // Hitung hasil listening
-                $hasil_listening = 0;
-                if($hasil->jumlah_benar_listening > 0) {
-                    $hasil_listening = ($hasil->jumlah_benar_listening/$listening_jmlh)*$persen['listening'];
-                }
-
-                // Hitung hasil pilihan ganda
-                $hasil_pg = 0;
-                if($hasil->jumlah_benar > 0) {
-                    $hasil_pg = ($hasil->jumlah_benar/$pg_jmlh)*$persen['pilihan_ganda'];
-                }
-
-                // Hitung hasil pilihan ganda complex
-                $hasil_complex = 0;
-                if($hasil->jumlah_benar_complek > 0) {
-                    $hasil_complex = ($hasil->jumlah_benar_complek/$complex_jmlh)*$persen['pilihan_ganda_komplek'];
-                }
-
-                // Hitung hasil isian singkat
-                $hasil_isian_singkat = 0;
-                if($hasil->jumlah_benar_isian_singkat > 0) {
-                    $hasil_isian_singkat = ($hasil->jumlah_benar_isian_singkat/$isian_singkat_jmlh)*$persen['isian_singkat'];
-                }
-
-                $hasil_ganda = $hasil_listening+$hasil_pg+$hasil_complex+$hasil_isian_singkat;
-
-                if($request->val != 0) {
-                    $hasil_esay = $hasil->point_esay + ($request->val/$jml_esay);
-                } else {
-                    $hasil_esay = $hasil->point_esay;
-                }
-
-                $hasil_val = ($hasil_ganda)+($hasil_esay*$persen['esay']);
-
-                try {
-                    DB::beginTransaction();
-                    DB::table('hasil_ujians')
-                        ->where('id', $hasil->id)
-                        ->update([
-                            'point_esay'    => $hasil_esay,
-                            'hasil'         => $hasil_val,
-                        ]);
-
-                    DB::table('jawaban_esays')->insert([
-                        'id'            => Str::uuid()->toString(),
-                        'banksoal_id'   => $same->banksoal_id,
-                        'peserta_id'    => $same->peserta_id,
-                        'jawab_id'      => $same->id,
-                        'corrected_by'  => $user->id,
-                        'point'         => $request->val,
-                        'created_at'    => now(),
-                        'updated_at'    => now(),
-                    ]);
-
-                    DB::commit();
-                    return SendResponse::accept();
-                } catch (Exception $e) {
-                    DB::rollBack();
-                    return SendResponse::internalServerError('Kesalahan 500.'.$e->getMessage());
-                }
-            }
+        $exists = DB::table('jawaban_esays')
+            ->where('jawab_id', $request->id)
+            ->first();
+        if ($exists) {
+            return SendResponse::badRequest('Esay telah diberi nilai sebelumnya');
         }
 
         $hasil = DB::table('hasil_ujians')->where([
@@ -355,56 +273,25 @@ class PenilaianController extends Controller
             'peserta_id'    => $jawab->peserta_id,
         ])->first();
 
-        // Hitung total pertanyaan
-        $pg_jmlh = $jawab->jumlah_soal;
-        $listening_jmlh = $jawab->jumlah_soal_listening;
-        $complex_jmlh = $jawab->jumlah_soal_ganda_kompleks;
-        $isian_singkat_jmlh = $jawab->jumlah_isian_singkat;
+        # Hitung total pertanyaan
         $jml_esay =  $jawab->jumlah_soal_esay;
 
         $persen = json_decode($jawab->persen,true);
 
-        // Hitung hasil listening
-        $hasil_listening = 0;
-        if($hasil->jumlah_benar_listening > 0) {
-            $hasil_listening = ($hasil->jumlah_benar_listening/$listening_jmlh)*$persen['listening'];
-        }
-
-        // Hitung hasil pilihan ganda
-        $hasil_pg = 0;
-        if($hasil->jumlah_benar > 0) {
-            $hasil_pg = ($hasil->jumlah_benar/$pg_jmlh)*$persen['pilihan_ganda'];
-        }
-
-        // Hitung hasil pilihan ganda complex
-        $hasil_complex = 0;
-        if($hasil->jumlah_benar_complek > 0) {
-            $hasil_complex = ($hasil->jumlah_benar_complek/$complex_jmlh)*$persen['pilihan_ganda_komplek'];
-        }
-
-        // Hitung hasil isian singkat
-        $hasil_isian_singkat = 0;
-        if($hasil->jumlah_benar_isian_singkat > 0) {
-            $hasil_isian_singkat = ($hasil->jumlah_benar_isian_singkat/$isian_singkat_jmlh)*$persen['isian_singkat'];
-        }
-
-        $hasil_ganda = $hasil_listening+$hasil_pg+$hasil_complex+$hasil_isian_singkat;
-
+        # Esay nilai argument
         if($request->val != 0) {
-            $hasil_esay = $hasil->point_esay + ($request->val/$jml_esay);
+            $point =  ($request->val/$jml_esay)*$persen['esay'];
+            $hasil_esay = $hasil->point_esay + $point;
         } else {
             $hasil_esay = $hasil->point_esay;
         }
-
-        $hasil_val = ($hasil_ganda)+($hasil_esay*$persen['esay']);
 
         try {
             DB::beginTransaction();
             DB::table('hasil_ujians')
                 ->where('id', $hasil->id)
                 ->update([
-                    'point_esay'    => $hasil_esay,
-                    'hasil'         => $hasil_val,
+                    'point_esay'    => $hasil_esay
                 ]);
             DB::table('jawaban_esays')->insert([
                 'id'            => Str::uuid()->toString(),

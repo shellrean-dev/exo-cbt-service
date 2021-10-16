@@ -127,27 +127,16 @@ final class UjianService extends AbstractService
      */
     public function onProgressToday(string $student_id)
     {
-        // ambil ujian yang aktif hari ini
+        # ambil ujian yang aktif hari ini
         $jadwals = $this->jadwalService->activeToday();
 
         $jadwal_ids = $jadwals->pluck('id')->toArray();
-
-        // ambil data siswa ujian
-        // yang sedang dikerjakan pada hari ini
-        // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
-//        $key = md5(sprintf('ujian:onprogress:today:student:%s:jadwal:%s', $student_id, implode(',', $jadwal_ids)));
-//        if ($this->cache->isCached($key)) {
-//            $data = $this->cache->getItem($key);
-//        } else {
-            $data = DB::table('siswa_ujians')
-                ->where('peserta_id', $student_id)
-                ->where('status_ujian', UjianConstant::STATUS_PROGRESS)
-                ->whereIn('jadwal_id', $jadwal_ids)
-                ->whereDate('created_at', now()->format('Y-m-d'))
-                ->first();
-
-//            $this->cache->cache($key, $data);
-//        }
+        $data = DB::table('siswa_ujians')
+            ->where('peserta_id', $student_id)
+            ->where('status_ujian', '=', UjianConstant::STATUS_PROGRESS)
+            ->whereIn('jadwal_id', $jadwal_ids)
+            ->whereDate('created_at', now()->format('Y-m-d'))
+            ->first();
 
         return $data;
     }

@@ -171,7 +171,7 @@ class UjianAktifController extends Controller
                 'mulai_ujian'       => '',
                 'mulai_ujian_shadow'=> '',
                 'sisa_waktu'        => $ujian->lama,
-                'status_ujian'      => 0,
+                'status_ujian'      => UjianConstant::STATUS_STANDBY,
                 'uploaded'          => 0,
                 'created_at'        => now(),
                 'updated_at'        => now(),
@@ -223,15 +223,20 @@ class UjianAktifController extends Controller
      * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
-    public function startUjianTime()
+    public function startUjianTime(JadwalService $jadwalService)
     {
         $peserta = request()->get('peserta-auth');
+
+        # ambil ujian yang aktif hari ini
+        $jadwals = $jadwalService->activeToday();
+        $jadwal_ids = $jadwals->pluck('id')->toArray();
 
         # Ambil data yang belum dimulai
         $data = DB::table('siswa_ujians')
             ->where('peserta_id', $peserta->id)
             ->where('status_ujian', '<>', UjianConstant::STATUS_BEFORE_START)
             ->whereDate('created_at', now()->format('Y-m-d'))
+            ->whereIn('jadwal_id', $jadwal_ids)
             ->first();
 
         if (!$data) {
@@ -241,7 +246,7 @@ class UjianAktifController extends Controller
         # Jika ini adalah pertama kali peserta
         # Melakukan mulai ujian
         # 3 <= sedang mengerjakan
-        if ($data->status_ujian != UjianConstant::STATUS_PROGRESS) {
+        if (intval($data->status_ujian) != UjianConstant::STATUS_PROGRESS) {
             try {
                 DB::table('siswa_ujians')
                     ->where('id', $data->id)
@@ -250,11 +255,11 @@ class UjianAktifController extends Controller
                         'mulai_ujian_shadow'=> now()->format('H:i:s'),
                         'status_ujian'      => UjianConstant::STATUS_PROGRESS,
                     ]);
-                return SendResponse::accept();
             } catch(Exception $e){
                 return SendResponse::internalServerError($e->getMessage());
             }
         }
+        return SendResponse::accept();
     }
 
     /**
@@ -439,13 +444,14 @@ class UjianAktifController extends Controller
                     ->update(['sisa_waktu' => $jadwal->lama-$diff_in_minutes]);
 
                 DB::commit();
+
+                $ujian->sisa_waktu = $jadwal->lama-$diff_in_minutes;
+                return SendResponse::acceptCustom(['data' => $jawaban_peserta, 'detail' => $ujian]);
             } catch (Exception $e) {
                 DB::rollBack();
                 return SendResponse::internalServerError($e->getMessage());
             }
         }
-
-        return SendResponse::acceptCustom(['data' => $jawaban_peserta, 'detail' => $ujian]);
     }
 
     /**

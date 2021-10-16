@@ -239,7 +239,7 @@ class HasilUjianExport
             $sheet->setCellValue(self::POINT_ARGUMENT_CELL.$row, $value->point_setuju_tidak);
             $sheet->getStyle(self::POINT_ARGUMENT_CELL.$row)->applyFromArray($styleArray);
 
-            $sheet->setCellValue(self::HASIL_AKHIR_CELL.$row, $value->hasil+$value->point_setuju_tidak);
+            $sheet->setCellValue(self::HASIL_AKHIR_CELL.$row, $value->hasil+$value->point_setuju_tidak+$value->point_esay);
             $sheet->getStyle(self::HASIL_AKHIR_CELL.$row)->applyFromArray($styleArray);
 
             $row++;
