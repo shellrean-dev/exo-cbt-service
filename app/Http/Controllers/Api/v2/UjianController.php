@@ -11,13 +11,11 @@ use App\Services\Ujian\MenjodohkanService;
 use App\Services\Ujian\PilihanGandaKomplekService;
 use App\Services\Ujian\PilihanGandaService;
 use App\Services\Ujian\SetujuTidakService;
-use App\Soal;
 use App\Actions\SendResponse;
 use App\Http\Controllers\Controller;
 
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 use ShellreanDev\Cache\CacheHandler;
@@ -25,7 +23,9 @@ use ShellreanDev\Services\Ujian\UjianService;
 
 /**
  * UjianController
+ *
  * @author shellrean <wandinak17@gmail.com>
+ * @since 2.0.1 <latte>
  */
 class UjianController extends Controller
 {
@@ -34,11 +34,11 @@ class UjianController extends Controller
      *
      * Simpan/Update jawaban siswa pada ujian aktif
      *
-     * @param Illuminate\Http\Request $request
-     * @param ShellreanDev\Services\UjianService $ujianService
-     * @param Shellreandev\Cache\CacheHandler $cache
+     * @param Request $request
+     * @param UjianService $ujianService
+     * @param CacheHandler $cache
      * @return \Illuminate\Http\Response
-     * @author shellrean <wandnak17@gmail.com>
+     * @throws Exception
      */
     public function store(Request $request, UjianService $ujianService, CacheHandler $cache)
     {
@@ -113,47 +113,42 @@ class UjianController extends Controller
      *
      * Set ragu ragu in siswa
      *
-     * @param Illuminate\Http\Request $request
-     * @param ShellreanDev\Services\UjianService $ujianService
-     * @param ShellreanDev\Cache\CacheHandler $cache
-     * @return Illuminate\Http\Response
-     * @author shellrean <wandnak17@gmail.com>
+     * @param Request $request
+     * @param UjianService $ujianService
+     * @param CacheHandler $cache
+     * @return \Illuminate\Http\Response
+     * @throws Exception
      */
     public function setRagu(Request $request, UjianService $ujianService, CacheHandler $cache)
     {
         $peserta = request()->get('peserta-auth');
 
-        // ambil jawaban peserta
-        $key = md5(sprintf('jawaban_pesertas:data:%s:single:%s', $request->jawaban_id, __METHOD__));
-//        if ($cache->isCached($key)) {
-//            $find = $cache->getItem($key);
-//        } else {
-            $find = DB::table('jawaban_pesertas')
-                ->where('id', $request->jawaban_id)
-                ->select('id','banksoal_id','soal_id','jawab','esay','ragu_ragu')
-                ->first();
-
-//            $cache->cache($key, $find);
-//        }
+        $find = DB::table('jawaban_pesertas')
+            ->where('id', $request->jawaban_id)
+            ->select('id','banksoal_id','soal_id','jawab','esay','ragu_ragu')
+            ->first();
 
         if (!$find) {
-            return SendResponse::badRequest('Kami tidak dapat menemukan jawaban anda');
+            return SendResponse::badRequest(UjianConstant::NO_WORKING_ANSWER_FOUND);
         }
 
         if(!isset($request->ragu_ragu)) {
-            return response()->json(['data' => $find,'index' => $request->index]);
+            return SendResponse::acceptCustom([
+                'data' => ['jawab' => $find->jawab],
+                'index' => $request->index
+            ]);
         }
 
-        // ambil data siswa ujian
-        // yang sedang dikerjakan pada hari ini
-        // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
+        # ambil data siswa ujian
+        # yang sedang dikerjakan pada hari ini
+        # yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
         $ujian = $ujianService->onProgressToday($peserta->id);
 
         if (!$ujian) {
-            return SendResponse::badRequest('Kami tidak dapat menemukan ujian yang sedang anda kamu kerjakan, mungkin jadawl ini sedang tidak aktif. silakan logout lalu hubungi administrator.');
+            return SendResponse::badRequest(UjianConstant::NO_WORKING_UJIAN_FOUND);
         }
 
-        // update sisa waktu ujian
+        # update sisa waktu ujian
         $ujianService->updateReminingTime($ujian);
 
         try {
@@ -166,7 +161,7 @@ class UjianController extends Controller
             return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
         }
 
-        return response()->json(['data' => $find,'index' => $request->index]);
+        return SendResponse::acceptCustom(['data' => ['jawab' => $find->jawab ],'index' => $request->index]);
     }
 
     /**
@@ -174,24 +169,23 @@ class UjianController extends Controller
      *
      * Selesaikan ujian
      *
-     * @param ShellreanDev\Services\UjianService $ujianService
-     * @return Illuminate\Http\Response
-     * @author shellrean <wandnak17@gmail.com>
+     * @param UjianService $ujianService
+     * @return \Illuminate\Http\Response
      */
     public function selesai(UjianService $ujianService)
     {
         $peserta = request()->get('peserta-auth');
 
-        // ambil data siswa ujian
-        // yang sedang dikerjakan pada hari ini
-        // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
+        # ambil data siswa ujian
+        # yang sedang dikerjakan pada hari ini
+        # yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
         $ujian = $ujianService->onProgressToday($peserta->id);
 
         if (!$ujian) {
-            return SendResponse::badRequest('Anda tidak sedang mengerjakan ujian apapun. silakan logout, laporkan perihal ini kepada administrator');
+            return SendResponse::badRequest(UjianConstant::NO_WORKING_UJIAN_FOUND);
         }
 
-        // Cek apakah hasil ujian pernah di generate sebelumnya
+        # Cek apakah hasil ujian pernah di generate sebelumnya
         $hasilUjian = DB::table('hasil_ujians')
             ->where([
                 'peserta_id'    => $peserta->id,
@@ -207,14 +201,13 @@ class UjianController extends Controller
                         'status_ujian'  => 1
                     ]);
 
+                return SendResponse::badRequest(UjianConstant::WARN_UJIAN_HAS_FINISHED_BEFORE);
             } catch (Exception $e) {
                 return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
             }
-            return SendResponse::badRequest('Ujian ini telah diselesaikan. silakan logout, laporkan perihal ini kepada andministrator');
         }
 
-        // ambil hanya banksoal untuk
-        // jawaban peserta pertama
+        # ambil hanya banksoal untuk jawaban peserta pertama
         $jawaban = DB::table('jawaban_pesertas')
             ->where([
                 'jadwal_id'     => $ujian->jadwal_id,
@@ -224,7 +217,7 @@ class UjianController extends Controller
             ->first();
 
         if (!$jawaban) {
-            return SendResponse::badRequest('Anda tidak sedang mengerjakan ujian apapun. silakan logout, laporkan perihal ini kepada administrator');
+            return SendResponse::badRequest(UjianConstant::NO_WORKING_UJIAN_FOUND);
         }
 
         try {
@@ -235,14 +228,15 @@ class UjianController extends Controller
             DB::table('siswa_ujians')
                 ->where('id', $ujian->id)
                 ->update([
-                    'status_ujian'  => 1,
+                    'status_ujian'  => UjianConstant::STATUS_FINISHED,
                 ]);
             DB::commit();
+
+            return SendResponse::accept('ujian berhasil diselesaikan');
         } catch (Exception $e) {
             DB::rollback();
             return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
         }
-        return SendResponse::accept('ujian berhasil diselesaikan');
     }
 }
 

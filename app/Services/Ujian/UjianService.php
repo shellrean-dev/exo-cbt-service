@@ -4,6 +4,7 @@ namespace ShellreanDev\Services\Ujian;
 
 use App\Actions\SendResponse;
 use App\Models\SoalConstant;
+use App\Models\UjianConstant;
 use stdClass;
 use Exception;
 use Carbon\Carbon;
@@ -72,7 +73,7 @@ final class UjianService extends AbstractService
 //        } else {
             $data = DB::table('siswa_ujians')
                 ->where('peserta_id', $student_id)
-                ->whereIn('status_ujian', [0,3])
+                ->whereIn('status_ujian', [UjianConstant::STATUS_STANDBY,UjianConstant::STATUS_PROGRESS])
                 ->whereIn('jadwal_id', $jadwal_ids)
                 ->whereDate('created_at', now()->format('Y-m-d'))
                 ->select('jadwal_id', 'status_ujian')
@@ -107,7 +108,7 @@ final class UjianService extends AbstractService
 //        } else {
             $data = DB::table('siswa_ujians')
                 ->where('peserta_id', $student_id)
-                ->where('status_ujian', 0)
+                ->where('status_ujian', UjianConstant::STATUS_STANDBY)
                 ->whereIn('jadwal_id', $jadwal_ids)
                 ->whereDate('created_at', now()->format('Y-m-d'))
                 ->first();
@@ -140,7 +141,7 @@ final class UjianService extends AbstractService
 //        } else {
             $data = DB::table('siswa_ujians')
                 ->where('peserta_id', $student_id)
-                ->where('status_ujian', 3)
+                ->where('status_ujian', UjianConstant::STATUS_PROGRESS)
                 ->whereIn('jadwal_id', $jadwal_ids)
                 ->whereDate('created_at', now()->format('Y-m-d'))
                 ->first();
