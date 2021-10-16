@@ -116,6 +116,15 @@ class GroupMemberController extends Controller
                 ->select('id')
                 ->get();
 
+            $exists = DB::table('group_members')
+                ->whereIn('student_id', $students->pluck('id')->toArray())
+                ->join('pesertas', 'pesertas.id', '=', 'group_members.student_id')
+                ->select(['pesertas.no_ujian'])
+                ->get();
+            if ($exists) {
+                return SendResponse::badRequest('No ujian '.$exists->pluck('no_ujian')->values().' telah terdaftar di group');
+            }
+
             $datas = [];
             foreach ($students as $student) {
                 array_push($datas, [

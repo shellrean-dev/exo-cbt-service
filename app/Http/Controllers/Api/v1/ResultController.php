@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Models\dto\ResultDataTransform;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Http\Controllers\Controller;
@@ -13,6 +15,9 @@ use App\Actions\SendResponse;
 use App\JawabanPeserta;
 use App\HasilUjian;
 use App\Soal;
+use Ramsey\Uuid\Uuid;
+use ShellreanDev\Utils\EntityUtil;
+use function GuzzleHttp\Psr7\str;
 
 /**
  * ResultingController
@@ -29,7 +34,7 @@ class ResultController extends Controller
      * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
-    public function exam($jadwal_id)
+    public function exam(Request $request, $jadwal_id)
     {
         $jadwal = DB::table('jadwals')
             ->where('id', $jadwal_id)
@@ -39,48 +44,52 @@ class ResultController extends Controller
             return SendResponse::badRequest('Kesalahan, data yang diminta tidak ditemukan');
         }
 
-        $res = HasilUjian::with(['peserta' => function ($query) {
-            $query->select('id','nama','no_ujian', 'jurusan_id');
-        }]);
+        $res = DB::table('hasil_ujians')
+            ->join('pesertas', 'pesertas.id', '=','hasil_ujians.peserta_id')
+            ->rightJoin('group_members', 'group_members.student_id', '=', 'hasil_ujians.peserta_id');
 
-        $jurusan = request()->jurusan;
-        $group = request()->group;
+        $jurusan = strval($request->get('jurusan',''));
+        $group = strval($request->get('group',''));
 
-        if ($jurusan != 0 && $jurusan != '') {
-            $res->whereHas('peserta', function($query) use ($jurusan) {
-                $query->where('jurusan_id', $jurusan);
-            });
+        if (Uuid::isValid($jurusan)) {
+            $res = $res->where('pesertas.jurusan_id', $jurusan);
         }
 
-        if ($group != 0 && $group != '') {
+        if (Uuid::isValid($group)) {
             $groupObj = DB::table('groups')
                 ->where('id', $group)
                 ->first();
-            if ($groupObj->parent_id == 0 || $groupObj->parent_id == null) {
+            $parent_id = strval($groupObj->id);
+
+            if (Uuid::isValid($parent_id)) {
                 $childs = DB::table('groups')
-                    ->where('parent_id', $groupObj->parent_id)
+                    ->where('parent_id', $parent_id)
                     ->select('id')
                     ->get()
                     ->pluck('id')
                     ->toArray();
                 array_push($childs, $group);
-                $res->whereHas('group', function($query) use ($childs) {
-                    $query->whereIn('group_id', $childs);
-                });
+                $res = $res->whereIn('group_members.group_id', $childs);
             } else {
-                $res->whereHas('group', function($query) use ($group) {
-                    $query->where('group_id', $group);
-                });
+                $res = $res->where('group_members.group_id', $group);
             }
         }
-
-        $res->where('jadwal_id', $jadwal->id)
-            ->orderBy('peserta_id');
+        $res = $res->where('hasil_ujians.jadwal_id', $jadwal->id)
+            ->select([
+                'hasil_ujians.*',
+                'pesertas.id as peserta_id',
+                'pesertas.nama as peserta_nama',
+                'pesertas.no_ujian as peserta_no_ujian',
+                'pesertas.jurusan_id as peserta_jurusan_id'
+            ])
+            ->orderBy('hasil_ujians.peserta_id');
 
         if(request()->perPage != '') {
             $res = $res->paginate(request()->perPage);
+
+            $res->getCollection()->transform([ResultDataTransform::class, 'resultExam']);
         } else {
-            $res = $res->get();
+            $res = $res->get()->map([ResultDataTransform::class, 'resultExam']);
         }
 
         return SendResponse::acceptData($res);
