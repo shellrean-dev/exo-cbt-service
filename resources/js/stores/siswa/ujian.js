@@ -109,7 +109,6 @@ function FILLED_DATA_UJIAN(state, payload) {
  */
 function SLICE_DATA_RESP(state, payload) {
     state.filledUjian.data[payload.index].jawab = payload.data.jawab
-    state.filledUjian.data[payload.index].iscorrect = payload.data.iscorrect
     state.filledUjian.data[payload.index].answered = true
 }
 

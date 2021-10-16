@@ -2,6 +2,17 @@
 namespace App\Http\Controllers\Api\v2;
 
 use App\Http\Controllers\Controller;
+use App\Models\UjianConstant;
+use App\Services\Ujian\BenarSalahService;
+use App\Services\Ujian\EsayService;
+use App\Services\Ujian\IsianSingkatService;
+use App\Services\Ujian\ListeningService;
+use App\Services\Ujian\MengurutkanService;
+use App\Services\Ujian\MenjodohkanService;
+use App\Services\Ujian\PilihanGandaKomplekService;
+use App\Services\Ujian\PilihanGandaService;
+use App\Services\Ujian\SetujuTidakService;
+use Exception;
 use \Illuminate\Support\Facades\DB;
 use App\Services\UjianService;
 use App\Actions\SendResponse;
@@ -207,7 +218,7 @@ class UjianAktifController extends Controller
 
 //            $cache->cache($key, $data);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return SendResponse::internalServerError("Terjadi kesalahan 500. ".$e->getMessage());
         }
 
@@ -280,7 +291,7 @@ class UjianAktifController extends Controller
                         'mulai_ujian_shadow'=> now()->format('H:i:s'),
                         'status_ujian'      => 3,
                     ]);
-            } catch(\Exception $e){
+            } catch(Exception $e){
                 return SendResponse::internalServerError($e->getMessage());
             }
         }
@@ -294,55 +305,40 @@ class UjianAktifController extends Controller
      * Ambil soal dan jawaban siswa
      *
      * @param ShellreanDev\Services\Ujian\UjianService $ujianService
-     * @return App\Actions\SendResponse
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function getJawabanPeserta(DevUjianService $devUjianService, CacheHandler $cache)
     {
         $peserta = request()->get('peserta-auth');
-        // $ujian_siswa = $ujianService->getUjianSiswaBelumSelesai($peserta->id);
         $ujian_siswa = $devUjianService->onProgressToday($peserta->id);
 
         if(!$ujian_siswa) {
-            return SendResponse::badRequest('Terjadi kesalahan saat mengambil ujian untuk kamu, kamu tidak sedang mengikuti ujian apapun. silakan logout lalu login kembali');
+            return SendResponse::badRequest(UjianConstant::NO_CURRENT_UJIAN_EXIST);
         }
 
-        // Ambil id banksoal yang terkait dalam jadwal
-//        $key = md5(sprintf('jadwals:data:%s:single', $ujian_siswa->jadwal_id));
-//        if ($cache->isCached($key)) {
-//            $jadwal = $cache->getItem($key);
-//        } else {
-            $jadwal = DB::table('jadwals')
-                ->where('id', $ujian_siswa->jadwal_id)
-                ->first();
+        # Ambil id banksoal yang terkait dalam jadwal
+        $jadwal = DB::table('jadwals')
+            ->where('id', $ujian_siswa->jadwal_id)
+            ->first();
 
-//            $cache->cache($key, $jadwal);
-//        }
-
-        // Jika jadwal yang dikerjakan siswa tidak ditemukan
+        # Jika jadwal yang dikerjakan siswa tidak ditemukan
         if(!$jadwal) {
-            return SendResponse::badRequest('Terjadi kesalahan saat mengambil jadwal ujian untuk kamu, silakan logout lalu hubungi administrator');
+            return SendResponse::badRequest(UjianConstant::NO_WORKING_UJIAN_FOUND);
         }
 
         $banksoal_ids = array_column(json_decode($jadwal->banksoal_id, true), 'id');
 
-        // ambil data banksoal yang diujikan pada jadwal
-//        $key = md5(sprintf('banksoals:diujikan:ids:%s', implode(',', $banksoal_ids)));
-//        if ($cache->isCached($key)) {
-//            $banksoal_diujikan = $cache->getItem($key);
-//        } else {
-            $banksoal_diujikan = DB::table('banksoals')
-                ->join('matpels','banksoals.matpel_id','=','matpels.id')
-                ->whereIn('banksoals.id', $banksoal_ids)
-                ->select('banksoals.id','matpels.agama_id','matpels.jurusan_id')
-                ->get();
-
-//            $cache->cache($key, $banksoal_diujikan);
-//        }
+        # ambil data banksoal yang diujikan pada jadwal
+        $banksoal_diujikan = DB::table('banksoals')
+            ->join('matpels','banksoals.matpel_id','=','matpels.id')
+            ->whereIn('banksoals.id', $banksoal_ids)
+            ->select('banksoals.id','matpels.agama_id','matpels.jurusan_id')
+            ->get();
 
         $banksoal_id = '';
 
-        // Cari id banksoal yang dapat dipakai oleh siswwa
+        # Cari id banksoal yang dapat dipakai oleh siswwa
         foreach($banksoal_diujikan as $bk) {
             $banksoal = $devUjianService->checkPesertaBanksoal($bk, $peserta);
             if (!$banksoal) {
@@ -352,372 +348,53 @@ class UjianAktifController extends Controller
             break;
         }
 
-        // Jika tidak dapat menemukan banksoal_id
+        # Jika tidak dapat menemukan banksoal_id
         if($banksoal_id == '') {
-            return SendResponse::badRequest('Kamu tidak mendapat banksoal yang sesuai, silakan logout lalu hubungi administrator');
+            return SendResponse::badRequest(UjianConstant::NO_BANKSOAL_FOR_YOU);
         }
 
-        // Ambil jawaban siswa yang telah digenerate
+        # Ambil jawaban siswa yang telah digenerate
         $jawaban_peserta = $devUjianService->pesertaAnswers(
             $jadwal->id,
             $peserta->id,
             json_decode($jadwal->setting, true)['acak_opsi']
         );
 
-//        return SendResponse::acceptData($jawaban_peserta);
-
-        // Jika jawaban siswa belum ada di database
+        # Jika jawaban siswa belum ada di database
         if (count($jawaban_peserta) < 1 ) {
-            //------------------------------------------------------------------
-//            $key = md5(sprintf('banksoals:data:%s:single', $banksoal_id));
-//            if ($cache->isCached($key)) {
-//                $banksoal = $cache->getItem($key);
-//            } else {
-                $banksoal = DB::table('banksoals')
-                    ->where('id', $banksoal_id)
-                    ->first();
-//                $cache->cache($key, $banksoal);
-//            }
+            $banksoal = DB::table('banksoals')
+                ->where('id', $banksoal_id)
+                ->first();
 
-            // Ambil maximal dari tiap tiap tipe soal
-            $max_pg = $banksoal->jumlah_soal;
-            $max_esay = $banksoal->jumlah_soal_esay;
-            $max_listening = $banksoal->jumlah_soal_listening;
-            $max_complex = $banksoal->jumlah_soal_ganda_kompleks;
-            $max_menjodohkan = $banksoal->jumlah_menjodohkan;
-            $max_isian_singkat = $banksoal->jumlah_isian_singkat;
-            $max_mengurutkan = $banksoal->jumlah_mengurutkan;
-            $max_benar_salah = $banksoal->jumlah_benar_salah;
-            $max_setuju_tidak = $banksoal->jumlah_setuju_tidak;
-
-            // Ambil setting dari jadwal
+            # Ambil setting dari jadwal
             $setting = json_decode($jadwal->setting, true);
 
-            # iterate number
-            $uniq = 1;
+            # Ambil soal tipe : ganda
+            $soal_pg = PilihanGandaService::getSoal($peserta, $banksoal, $jadwal);
 
-            // Ambil soal tipe : ganda
-            // $key = md5(sprintf('soals:data:banksoal:%s:ganda:acak:%s:max:%d',
-            //     $banksoal->id, $setting['acak_soal'], $max_pg
-            // ));
-            // if ($cache->isCached($key)) {
-            //     $pg = $cache->getItem($key);
-            // } else {
-                $pg = DB::table('soals')->where([
-                    'banksoal_id'   => $banksoal->id,
-                    'tipe_soal'     => 1
-                ]);
+            # Ambil soal tipe :esay
+            $soal_esay = EsayService::getSoal($peserta, $banksoal, $jadwal);
 
-                // Acak soal bila di sett
-                if($setting['acak_soal'] == "1") {
-                    $pg = $pg->inRandomOrder();
-                }
+            # Ambil soal: Listening
+            $soal_listening = ListeningService::getSoal($peserta, $banksoal, $jadwal);
 
-                // Ambil soal sebanyak maximum
-                $pg = $pg->take($max_pg)->get();
+            # Ambil soal: Multichoice complex
+            $soal_complex = PilihanGandaKomplekService::getSoal($peserta, $banksoal, $jadwal);
 
-            //     $cache->cache($key, $pg);
-            // }
+            # Ambil soal:  menjodohkan
+            $soal_menjodohkan = MenjodohkanService::getSoal($peserta, $banksoal, $jadwal);
 
-
-            // Buat collection untuk jawaban siswa
-            $soal_pg = [];
-            foreach($pg as $k => $item) {
-                array_push($soal_pg, [
-                    'id'            => Str::uuid()->toString(),
-                    'peserta_id'    => $peserta->id,
-                    'banksoal_id'   => $banksoal->id,
-                    'soal_id'       => $item->id,
-                    'jawab'         => 0,
-                    'iscorrect'     => 0,
-                    'jadwal_id'     => $jadwal->id,
-                    'ragu_ragu'     => 0,
-                    'esay'          => '',
-                    'created_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
-                    'updated_at'    => now()->addSeconds($uniq)->addMicroseconds($k)
-                ]);
-            }
-            $uniq ++;
-
-            // Ambil soal tipe :esay
-            // $key = md5(sprintf('soals:data:banksoal:%s:esay:acak:%s:max:%d',
-            //     $banksoal->id, $setting['acak_soal'], $max_esay
-            // ));
-
-            // if ($cache->isCached($key)) {
-            //     $esay = $cache->getItem($key);
-            // } else {
-                $esay = DB::table('soals')->where([
-                    'banksoal_id'   => $banksoal->id,
-                    'tipe_soal'     => 2
-                ]);
-
-                //Acak soal bila di set
-                if($setting['acak_soal'] == "1") {
-                    $esay = $esay->inRandomOrder();
-                }
-
-                // Ambil soal sebanyak maximum
-                $esay = $esay->take($max_esay)->get();
-
-            //     $cache->cache($key, $esay);
-            // }
-
-            // Buat collection untuk jawaban siswa
-            $soal_esay = [];
-            foreach($esay as $k => $item) {
-                array_push($soal_esay, [
-                    'id'            => Str::uuid()->toString(),
-                    'peserta_id'    => $peserta->id,
-                    'banksoal_id'   => $banksoal->id,
-                    'soal_id'       => $item->id,
-                    'jawab'         => 0,
-                    'iscorrect'     => 0,
-                    'jadwal_id'     => $jadwal->id,
-                    'ragu_ragu'     => 0,
-                    'esay'          => '',
-                    'created_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
-                    'updated_at'    => now()->addSeconds($uniq)->addMicroseconds($k)
-                ]);
-            }
-            $uniq ++;
-
-            // Ambil soal: Listening
-            // $key = md5(sprintf('soals:data:banksoal:%s:listening:acak:%s:max:%d',
-            //     $banksoal->id, $setting['acak_soal'], $max_listening
-            // ));
-            // if ($cache->isCached($key)) {
-            //     $listening = $cache->getItem($key);
-            // } else {
-                $listening = DB::table('soals')->where([
-                    'banksoal_id'   => $banksoal->id,
-                    'tipe_soal'     => 3
-                ]);
-
-                // Acak soal bila di set
-                if($setting['acak_soal'] == "1") {
-                    $listening = $listening->inRandomOrder();
-                }
-
-                // Ambil soal sebanyak maximum
-                $listening = $listening->take($max_listening)->get();
-
-            //     $cache->cache($key, $listening);
-            // }
-
-            // Buat collection untuk jawaban siswa
-            $soal_listening = [];
-            foreach($listening as $k => $item) {
-                array_push($soal_listening, [
-                    'id'            => Str::uuid()->toString(),
-                    'peserta_id'    => $peserta->id,
-                    'banksoal_id'   => $banksoal->id,
-                    'soal_id'       => $item->id,
-                    'jawab'         => 0,
-                    'iscorrect'     => 0,
-                    'jadwal_id'     => $jadwal->id,
-                    'ragu_ragu'     => 0,
-                    'esay'          => '',
-                    'created_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
-                    'updated_at'    => now()->addSeconds($uniq)->addMicroseconds($k)
-                ]);
-            }
-            $uniq ++;
-
-            // Ambil soal: Multichoice complex
-            // $key = md5(sprintf('soals:data:banksoal:%s:multichoice-complex:acak:%s:max:%d',
-            //     $banksoal->id, $setting['acak_soal'], $max_complex
-            // ));
-            // if ($cache->isCached($key)) {
-            //     $complex = $cache->getItem($key);
-            // } else {
-                $complex = DB::table('soals')->where([
-                    'banksoal_id'   => $banksoal->id,
-                    'tipe_soal'     => 4
-                ]);
-
-                // Acak soal bila di set
-                if($setting['acak_soal'] == "1") {
-                    $complex = $complex->inRandomOrder();
-                }
-
-                // Ambil soal sebanyak maximum
-                $complex = $complex->take($max_complex)->get();
-
-            //     $cache->cache($key, $complex);
-            // }
-
-            // Buat collection untuk jawaban siswa
-            $soal_complex = [];
-            foreach($complex as $k => $item) {
-                array_push($soal_complex, [
-                    'id'            => Str::uuid()->toString(),
-                    'peserta_id'    => $peserta->id,
-                    'banksoal_id'   => $banksoal->id,
-                    'soal_id'       => $item->id,
-                    'jawab'         => 0,
-                    'iscorrect'     => 0,
-                    'jadwal_id'     => $jadwal->id,
-                    'ragu_ragu'     => 0,
-                    'esay'          => '',
-                    'created_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
-                    'updated_at'    => now()->addSeconds($uniq)->addMicroseconds($k)
-                ]);
-            }
-            $uniq ++;
-
-            // Soal  menjodohkan
-             $menjodohkan = DB::table('soals')->where([
-                 'banksoal_id'   => $banksoal->id,
-                 'tipe_soal'     => 5
-             ]);
-             if($setting['acak_soal'] == "1") {
-                 $menjodohkan = $menjodohkan->inRandomOrder();
-             }
-             $menjodohkan = $menjodohkan->take($max_menjodohkan)->get();
-
-             $soal_menjodohkan = [];
-             foreach ($menjodohkan as $k => $item) {
-                 array_push($soal_menjodohkan, [
-                     'id'            => Str::uuid()->toString(),
-                     'peserta_id'    => $peserta->id,
-                     'banksoal_id'   => $banksoal->id,
-                     'soal_id'       => $item->id,
-                     'jawab'         => 0,
-                     'iscorrect'     => 0,
-                     'jadwal_id'     => $jadwal->id,
-                     'ragu_ragu'     => 0,
-                     'esay'          => '',
-                     'created_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
-                     'updated_at'    => now()->addSeconds($uniq)->addMicroseconds($k)
-                 ]);
-             }
-             $uniq ++;
-
-            // Ambil soal:  isian singkat
-            // $key = md5(sprintf('soals:data:banksoal:%s:isian-singkat:acak:%s:max:%d',
-            //     $banksoal->id, $setting['acak_soal'], $max_isian_singkat
-            // ));
-            // if ($cache->isCached($key)) {
-            //     $isian_singkat = $cache->getItem($key);
-            // } else {
-                $isian_singkat = DB::table('soals')->where([
-                    'banksoal_id'   => $banksoal->id,
-                    'tipe_soal'     => 6
-                ]);
-
-                // Acak soal bila di set
-                if($setting['acak_soal'] == "1") {
-                    $isian_singkat = $isian_singkat->inRandomOrder();
-                }
-
-                // Ambil soal sebanyak maximum
-                $isian_singkat = $isian_singkat->take($max_isian_singkat)->get();
-
-            //     $cache->cache($key, $isian_singkat);
-            // }
-
-            // Buat collection untuk jawaban siswa
-            $soal_isian_singkat = [];
-            foreach($isian_singkat as $k => $item) {
-                array_push($soal_isian_singkat, [
-                    'id'            => Str::uuid()->toString(),
-                    'peserta_id'    => $peserta->id,
-                    'banksoal_id'   => $banksoal->id,
-                    'soal_id'       => $item->id,
-                    'jawab'         => 0,
-                    'iscorrect'     => 0,
-                    'jadwal_id'     => $jadwal->id,
-                    'ragu_ragu'     => 0,
-                    'esay'          => '',
-                    'created_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
-                    'updated_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
-                ]);
-            }
-            $uniq ++;
+            # Ambil soal:  isian singkat
+            $soal_isian_singkat = IsianSingkatService::getSoal($peserta, $banksoal, $jadwal);
 
             # Soal mengurutkan
-            $mengurutkan = DB::table('soals')->where([
-                'banksoal_id'   => $banksoal->id,
-                'tipe_soal'     => 7
-            ]);
-            if($setting['acak_soal'] == "1") {
-                $mengurutkan = $mengurutkan->inRandomOrder();
-            }
-            $mengurutkan = $mengurutkan->take($max_mengurutkan)->get();
-
-            $soal_mengurutkan = [];
-            foreach ($mengurutkan as $k => $item) {
-                array_push($soal_mengurutkan, [
-                    'id'            => Str::uuid()->toString(),
-                    'peserta_id'    => $peserta->id,
-                    'banksoal_id'   => $banksoal->id,
-                    'soal_id'       => $item->id,
-                    'jawab'         => 0,
-                    'iscorrect'     => 0,
-                    'jadwal_id'     => $jadwal->id,
-                    'ragu_ragu'     => 0,
-                    'esay'          => '',
-                    'created_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
-                    'updated_at'    => now()->addSeconds($uniq)->addMicroseconds($k)
-                ]);
-            }
-            $uniq ++;
+            $soal_mengurutkan = MengurutkanService::getSoal($peserta, $banksoal, $jadwal);
 
             # Soal benar-salah
-            $benar_salah = DB::table('soals')->where([
-                'banksoal_id'   => $banksoal->id,
-                'tipe_soal'     => 8
-            ]);
-            if($setting['acak_soal'] == "1") {
-                $benar_salah = $benar_salah->inRandomOrder();
-            }
-            $benar_salah = $benar_salah->take($max_benar_salah)->get();
-
-            $soal_benar_salah= [];
-            foreach ($benar_salah as $k => $item) {
-                array_push($soal_benar_salah, [
-                    'id'            => Str::uuid()->toString(),
-                    'peserta_id'    => $peserta->id,
-                    'banksoal_id'   => $banksoal->id,
-                    'soal_id'       => $item->id,
-                    'jawab'         => 0,
-                    'iscorrect'     => 0,
-                    'jadwal_id'     => $jadwal->id,
-                    'ragu_ragu'     => 0,
-                    'esay'          => '',
-                    'created_at'    => now()->addSeconds($k)->addMicroseconds($k),
-                    'updated_at'    => now()->addSeconds($k)->addMicroseconds($k)
-                ]);
-            }
-            $uniq ++;
+            $soal_benar_salah = BenarSalahService::getSoal($peserta, $banksoal, $jadwal);
 
             # Soal setuju-tidak
-            $setuju_tidak = DB::table('soals')->where([
-                'banksoal_id'   => $banksoal->id,
-                'tipe_soal'     => 9
-            ]);
-            if($setting['acak_soal'] == "1") {
-                $setuju_tidak = $setuju_tidak->inRandomOrder();
-            }
-            $setuju_tidak = $setuju_tidak->take($max_setuju_tidak)->get();
-
-            $soal_setuju_tidak= [];
-            foreach ($setuju_tidak as $k => $item) {
-                array_push($soal_setuju_tidak, [
-                    'id'            => Str::uuid()->toString(),
-                    'peserta_id'    => $peserta->id,
-                    'banksoal_id'   => $banksoal->id,
-                    'soal_id'       => $item->id,
-                    'jawab'         => 0,
-                    'iscorrect'     => 0,
-                    'jadwal_id'     => $jadwal->id,
-                    'ragu_ragu'     => 0,
-                    'esay'          => '',
-                    'created_at'    => now()->addSeconds($uniq)->addMicroseconds($k),
-                    'updated_at'    => now()->addSeconds($uniq)->addMicroseconds($k)
-                ]);
-            }
+            $soal_setuju_tidak = SetujuTidakService::getSoal($peserta, $banksoal, $jadwal);
 
             # Gabungkan semua collection dari tipe soal
             $soals = [];
@@ -739,12 +416,20 @@ class UjianAktifController extends Controller
                 }
             }
 
+            $new_soals = [];
+            $unique_num = 1;
+            foreach ($soals as $soal) {
+                $soal['created_at'] = now()->addSeconds($unique_num);
+                $new_soals[] = $soal;
+                $unique_num ++;
+            }
+
             # Insert ke database sebagai jawaban siswa
             try {
                 DB::beginTransaction();
-                DB::table('jawaban_pesertas')->insert($soals);
+                DB::table('jawaban_pesertas')->insert($new_soals);
                 DB::commit();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 DB::rollBack();
                 return SendResponse::internalServerError($e->getMessage());
             }
@@ -756,44 +441,32 @@ class UjianAktifController extends Controller
                 $setting['acak_opsi']
             );
 
-            return response()->json(['data' => $jawaban_peserta, 'detail' => $ujian_siswa]);
+            return SendResponse::acceptCustom(['data' => $jawaban_peserta, 'detail' => $ujian_siswa]);
         }
 
-        // Get siswa ujian detail
-//        $key = md5(sprintf('siswa_ujians:jadwal:%s:peserta:%s', $jadwal->id, $peserta->id));
-//        if ($cache->isCached($key)) {
-//            $ujian = $cache->getItem($key);
-//        } else {
-            $ujian = SiswaUjian::where([
+        # Get siswa ujian detail
+        $ujian = DB::table('siswa_ujians')
+            ->where([
                 'jadwal_id'     => $jadwal->id,
                 'peserta_id'    => $peserta->id
-            ])->first();
+            ])
+            ->first();
 
-//            $cache->cache($key, $ujian);
-//        }
-
-        // Check perbedaan waktu
+        # Check perbedaan waktu
         $start = Carbon::createFromFormat('H:i:s', $ujian->mulai_ujian_shadow);
         $now = Carbon::createFromFormat('H:i:s', Carbon::now()->format('H:i:s'));
         $diff_in_minutes = $start->diffInSeconds($now);
 
-        // Jika perbedaan waktu telah melebihi
-        // waktu pengerjaan ujian
+        # Jika perbedaan waktu telah melebihi waktu pengerjaan ujian
         if($diff_in_minutes > $jadwal->lama) {
             try {
                 DB::beginTransaction();
                 $ujian->status_ujian = 1;
                 $ujian->save();
 
-                // $finished = UjianService::finishingUjian($banksoal_id, $jadwal->id, $peserta->id);
-
-                // if(!$finished['success']) {
-                //     DB::rollBack();
-                //     return SendResponse::badRequest($finished['message']);
-                // }
                 $devUjianService->finishing($banksoal_id, $jadwal->id, $peserta->id);
                 DB::commit();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 DB::rollBack();
                 return SendResponse::internalServerError($e->getMessage());
             }
@@ -804,17 +477,13 @@ class UjianAktifController extends Controller
                 $ujian->save();
 
                 DB::commit();
-
-                // Buat cache ujian
-//                $key = md5(sprintf('siswa_ujians:jadwal:%s:peserta:%s', $jadwal->id, $peserta->id));
-//                $cache->cache($key, $ujian);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 DB::rollBack();
                 return SendResponse::internalServerError($e->getMessage());
             }
         }
 
-        return response()->json(['data' => $jawaban_peserta, 'detail' => $ujian]);
+        return SendResponse::acceptCustom(['data' => $jawaban_peserta, 'detail' => $ujian]);
     }
 
     /**
