@@ -98,6 +98,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('ujians/esay/exists', 'PenilaianController@getExistEsay');
         Route::post('ujians/esay/input', 'PenilaianController@storeNilaiEsay');
         Route::get('ujians/esay/{banksoal}/koreksi', 'PenilaianController@getExistEsayByBanksoal');
+        Route::get('ujians/argument/exists', 'PenilaianController@getBanksoalExistArgument');
+        Route::post('ujians/argument/input', 'PenilaianController@storeNilaiArgument');
+        Route::get('ujians/argument/{banksoal}/koreksi', 'PenilaianController@getExistArgumentByBanksoal');
+
         Route::get('ujians/{jadwal}/result', 'ResultController@exam');
 
         Route::get('ujians/{jadwal}/result/link', 'ResultController@examExcelLink');

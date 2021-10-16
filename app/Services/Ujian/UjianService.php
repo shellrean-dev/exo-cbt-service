@@ -335,7 +335,7 @@ final class UjianService extends AbstractService
 
                     foreach ($item->soal->jawabans as $v) {
                         $new_jwb_setuju_tidak[$v->id]['val'] = 0;
-                        $new_jwb_setuju_tidak['argument'] = "";
+                        $new_jwb_setuju_tidak[$v->id]['argument'] = "";
                     }
                     $item->setuju_tidak = $new_jwb_setuju_tidak;
                 } else {

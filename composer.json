@@ -19,7 +19,8 @@
         "maatwebsite/excel": "^3.1",
         "predis/predis": "^1.1",
         "rachidlaasri/laravel-installer": "^4.1",
-        "tecnickcom/tcpdf": "^6.3"
+        "tecnickcom/tcpdf": "^6.3",
+        "ext-json": "*"
     },
     "require-dev": {
         "facade/ignition": "^2.0",

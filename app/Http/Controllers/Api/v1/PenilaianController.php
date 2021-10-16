@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Models\SoalConstant;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
@@ -77,6 +78,8 @@ class PenilaianController extends Controller
     public function getBanksoalExistArgument()
     {
         try {
+            $user = request()->user('api');
+
             # Ambil semua jawaban yang telah dikoreksi
             $has = DB::table('penilaian_argument')
                 ->select('jawab_id')
@@ -176,6 +179,16 @@ class PenilaianController extends Controller
                 return SendResponse::badRequest('Tidak dapat menemukan banksoal yang diminta');
             }
 
+            # Get jawabans soal
+            $jawaban_soal = DB::table('jawaban_soals as a')
+                ->join('soals as s','s.id','=','a.soal_id')
+                ->select(['a.id','a.soal_id','a.text_jawaban', 's.pertanyaan'])
+                ->where([
+                    's.banksoal_id' => $banksoal_id,
+                    's.tipe_soal' => SoalConstant::TIPE_SETUJU_TIDAK
+                ])
+                ->get();
+
             # Ambil jawaban yang telah dikoreksi
             $has = DB::table('penilaian_argument')
                 ->where('banksoal_id', $banksoal->id)
@@ -199,6 +212,15 @@ class PenilaianController extends Controller
                 )
                 ->paginate(30);
 
+            $exists->getCollection()->transform(function ($item) use ($jawaban_soal) {
+                $item->setuju_tidak = json_decode($item->setuju_tidak, true);
+
+                foreach ($item->setuju_tidak as $k => $v) {
+                    $item->setuju_tidak[$k]['detil'] = $jawaban_soal->where('id', $k)->first();
+                }
+                return $item;
+            });
+
             return SendResponse::acceptData($exists);
         } catch (Exception $e) {
             return SendResponse::internalServerError('Kesalahan 500. ['.$e->getMessage().']');
@@ -211,7 +233,7 @@ class PenilaianController extends Controller
      * Simpan nilai esay
      *
      * @param Illuminate\Http\Request $request
-     * @return App\Actions\SendResponse
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function storeNilaiEsay(Request $request)
@@ -414,6 +436,78 @@ class PenilaianController extends Controller
      */
     public function storeNilaiArgument(Request $request)
     {
+        $request->validate([
+            'val'   => 'required|numeric|min:0|max:1',
+            'id'    => 'required'
+        ]);
 
+        $jawab = DB::table('jawaban_pesertas as a')
+            ->where('a.id', $request->id)
+            ->join('banksoals as b', 'b.id', '=', 'a.banksoal_id')
+            ->select([
+                'a.id',
+                'a.banksoal_id',
+                'a.jadwal_id',
+                'a.peserta_id',
+                'b.persen',
+                'b.jumlah_setuju_tidak'])
+            ->first();
+
+        if (!$jawab) {
+            return SendResponse::badRequest('Tidak dapat menemukan data yang diminta');
+        }
+
+        $user = request()->user('api');
+
+        $exists = DB::table('penilaian_argument')
+            ->where('jawab_id', $request->id)
+            ->first();
+        if ($exists) {
+            return SendResponse::badRequest('Argument telah diberi nilai sebelumnya');
+        }
+
+        $hasil = DB::table('hasil_ujians')->where([
+            'banksoal_id'   => $jawab->banksoal_id,
+            'jadwal_id'     => $jawab->jadwal_id,
+            'peserta_id'    => $jawab->peserta_id,
+        ])->first();
+
+        # Hitung total pertanyaan
+        $jml_setuju_tidak =  $jawab->jumlah_setuju_tidak;
+
+        $persen = json_decode($jawab->persen,true);
+
+        # Penghitungan nilai argument
+        if($request->val != 0) {
+            $point =  ($request->val/$jml_setuju_tidak)*$persen['setuju_tidak'];
+            $hasil_argument = $hasil->point_setuju_tidak + $point;
+        } else {
+            $hasil_argument = $hasil->point_setuju_tidak;
+        }
+
+        try {
+            DB::beginTransaction();
+            DB::table('hasil_ujians')
+                ->where('id', $hasil->id)
+                ->update([
+                    'point_setuju_tidak'    => $hasil_argument
+                ]);
+            DB::table('penilaian_argument')->insert([
+                'id'            => Str::uuid()->toString(),
+                'banksoal_id'   => $jawab->banksoal_id,
+                'peserta_id'    => $jawab->peserta_id,
+                'jawab_id'      => $jawab->id,
+                'corrected_by'  => $user->id,
+                'point'         => $request->val,
+                'created_at'    => now(),
+                'updated_at'    => now()
+            ]);
+
+            DB::commit();
+            return SendResponse::accept();
+        } catch (Exception $e) {
+            DB::rollBack();
+            return SendResponse::internalServerError('Kesalahan 500.'.$e->getMessage());
+        }
     }
 }

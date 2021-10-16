@@ -27,7 +27,7 @@ class UjianController extends Controller
      * @param Illuminate\Http\Request $request
      * @param ShellreanDev\Services\UjianService $ujianService
      * @param Shellreandev\Cache\CacheHandler $cache
-     * @return Illuminate\Http\Response
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandnak17@gmail.com>
      */
     public function store(Request $request, UjianService $ujianService, CacheHandler $cache)
@@ -294,7 +294,7 @@ class UjianController extends Controller
             return response()->json(['data' => $send,'index' => $request->index]);
         }
 
-        # jia yang dikirimkan adalah salah/benar
+        # jika yang dikirimkan adalah salah/benar
         if(is_array($request->benar_salah)) {
             $soal_benar_salah = DB::table('soals as s')
                 ->join('jawaban_soals as j', 'j.soal_id', '=','s.id')
@@ -337,6 +337,27 @@ class UjianController extends Controller
                 'ragu_ragu'     => $find->ragu_ragu,
             ];
             return response()->json(['data' => $send,'index' => $request->index]);
+        }
+
+        # Jika yang dikirimkan adalah setuju/tidak
+        if(isset($request->setuju_tidak)) {
+            try {
+                DB::table('jawaban_pesertas')
+                    ->where('id', $find->id)
+                    ->update([
+                        'setuju_tidak'  => $request->setuju_tidak
+                    ]);
+            } catch (\Exception $e) {
+                return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
+            }
+
+            $send = [
+                'id'            => $find->id,
+                'banksoal_id'   => $find->banksoal_id,
+                'soal_id'       => $find->soal_id
+            ];
+
+            return SendResponse::acceptCustom(['data' => $send, 'index' => $request->index]);
         }
 
         // Jika yang dikirimkan adalah pilihan ganda
