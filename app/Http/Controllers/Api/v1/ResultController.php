@@ -40,7 +40,7 @@ class ResultController extends Controller
         }
 
         $res = HasilUjian::with(['peserta' => function ($query) {
-            $query->select('id','nama','no_ujian');
+            $query->select('id','nama','no_ujian', 'jurusan_id');
         }]);
 
         $jurusan = request()->jurusan;
@@ -56,9 +56,9 @@ class ResultController extends Controller
             $groupObj = DB::table('groups')
                 ->where('id', $group)
                 ->first();
-            if ($groupObj->parent_id == 0) {
+            if ($groupObj->parent_id == 0 || $groupObj->parent_id == null) {
                 $childs = DB::table('groups')
-                    ->where('parent_id', $group)
+                    ->where('parent_id', $groupObj->parent_id)
                     ->select('id')
                     ->get()
                     ->pluck('id')
@@ -158,9 +158,9 @@ class ResultController extends Controller
             $groupObj = DB::table('groups')
                 ->where('id', $group)
                 ->first();
-            if ($groupObj->parent_id == 0) {
+            if ($groupObj->parent_id == 0 || $groupObj->parent_id == null) {
                 $childs = DB::table('groups')
-                    ->where('parent_id', $group)
+                    ->where('parent_id', $groupObj->parent_id)
                     ->select('id')
                     ->get()
                     ->pluck('id')
