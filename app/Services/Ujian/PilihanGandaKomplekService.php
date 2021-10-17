@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
  * @since 3.0.0 <ristretto>
  * @year 2021
  */
-class PilihanGandaKomplekService
+class PilihanGandaKomplekService implements TipeSoalInterface
 {
     /**
      * @param $peserta

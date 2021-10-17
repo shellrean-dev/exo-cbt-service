@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
  * @since 3.0.0 <ristretto>
  * @year 2021
  */
-class ListeningService
+class ListeningService implements TipeSoalInterface
 {
     /**
      * @param $peserta
@@ -55,5 +55,14 @@ class ListeningService
         }
 
         return [];
+    }
+
+    /**
+     * @param $request
+     * @param $jawaban_peserta
+     * @return void
+     */
+    public static function setJawab($request, $jawaban_peserta)
+    {
     }
 }

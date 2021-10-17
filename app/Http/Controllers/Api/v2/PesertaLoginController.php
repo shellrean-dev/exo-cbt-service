@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api\v2;
 
+use App\Actions\SendResponse;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use App\Setting;
 use App\Peserta;
@@ -23,8 +25,8 @@ class PesertaLoginController extends Controller
      *
      * Login to system
      *
-     * @param  Illuminate\Http\Request $request
-     * @return Illuminate\Http\Response
+     * @param Request $request
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function login(Request $request)
@@ -45,9 +47,9 @@ class PesertaLoginController extends Controller
             if(isset($setting->value['reset'])
                 && $setting->value['reset']
                 && $peserta->api_token != '') {
-                    return response()->json([
+                    return SendResponse::acceptCustom([
                         'status'    => 'loggedin'
-                    ], 200);
+                    ]);
             }
             $token = Str::random(128);
             $peserta->update(['api_token' => $token]);
@@ -58,15 +60,14 @@ class PesertaLoginController extends Controller
             $send_peserta['browser'] = Browser::browserName();
             $send_peserta['flatform'] = Browser::platformName();
 
-            return response()
-            ->json([
+            return SendResponse::acceptCustom([
                 'status'    => 'success',
                 'data'      => $send_peserta,
                 'token'     => $token
-            ],200);
+            ]);
         }
 
-        return response()->json(['status' => 'error']);
+        return SendResponse::acceptCustom(['status' => 'error']);
     }
 
     /**
@@ -74,7 +75,7 @@ class PesertaLoginController extends Controller
      *
      * Logout from system
      *
-     * @return Illuminate\Http\Response
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function logout()
@@ -85,7 +86,7 @@ class PesertaLoginController extends Controller
         $peserta->api_token = '';
         $peserta->save();
 
-        return response()->json(['status' => 'success']);
+        return SendResponse::acceptCustom(['status' => 'success']);
     }
 
     /**
@@ -93,7 +94,7 @@ class PesertaLoginController extends Controller
      *
      * Get peserta's authenticated
      *
-     * @return Illuminate\Http\Response
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function authenticated()
@@ -103,7 +104,7 @@ class PesertaLoginController extends Controller
         $peserta['browser'] = Browser::browserName();
         $peserta['flatform'] = Browser::platformName();
 
-        return ['data' => $peserta];
+        return SendResponse::acceptCustom(['data' => $peserta]);
     }
 
     /**
@@ -111,35 +112,21 @@ class PesertaLoginController extends Controller
      *
      * Get setting needed by peserta
      * s
-     * @param ShellreanDev\Cache\CacheHandler $cache
-     * @return Illuminate\Http\Response
+     * @param CacheHandler $cache
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function getSetting(CacheHandler $cache)
     {
-        // ambil setting sekolah
-//        $key = md5(sprintf('setting:data:set_sekolah'));
-//        if ($cache->isCached($key)) {
-//            $sekolah = $cache->getItem($key);
-//        } else {
-            $sekolah = DB::table('settings')
-                ->where('name', 'set_sekolah')
-                ->first();
+        # ambil setting sekolah
+        $sekolah = DB::table('settings')
+            ->where('name', 'set_sekolah')
+            ->first();
 
-//            $cache->cache($key, $sekolah);
-//        }
-
-        // ambil setting ujian
-//        $key = md5(sprintf('setting:data:ujian'));
-//        if ($cache->isCached($key)) {
-//            $ujian = $cache->getItem($key);
-//        } else {
-            $ujian = DB::table('settings')
-                ->where('name', 'ujian')
-                ->first();
-
-//            $cache->cache($key, $ujian);
-//        }
+        # ambil setting ujian
+        $ujian = DB::table('settings')
+            ->where('name', 'ujian')
+            ->first();
 
         if ($sekolah){
             $sekolah->value = json_decode($sekolah->value, true);
@@ -151,14 +138,14 @@ class PesertaLoginController extends Controller
 
         $return = [
             'sekolah'   => [
-                'logo' => isset($sekolah->value['logo']) ? $sekolah->value['logo'] : '',
-                'nama' => isset($sekolah->value['nama_sekolah']) ? $sekolah->value['nama_sekolah'] : ''
+                'logo' => $sekolah->value['logo'] ?? '',
+                'nama' => $sekolah->value['nama_sekolah'] ?? ''
             ],
             'text' => [
-                'welcome' => isset($ujian->value['text_welcome']) ? $ujian->value['text_welcome'] : '',
-                'finish'  => isset($ujian->value['text_finish']) ? $ujian->value['text_finish'] : ''
+                'welcome' => $ujian->value['text_welcome'] ?? '',
+                'finish'  => $ujian->value['text_finish'] ?? ''
             ]
         ];
-        return response()->json(['data' => $return]);
+        return SendResponse::acceptData($return);
     }
 }

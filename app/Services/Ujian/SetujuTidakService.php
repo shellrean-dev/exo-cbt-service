@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
  * @since 3.0.0 <ristretto>
  * @year 2021
  */
-class SetujuTidakService
+class SetujuTidakService implements TipeSoalInterface
 {
     /**
      * @param $peserta

@@ -5,6 +5,7 @@ namespace App\Services\Ujian;
 use App\Actions\SendResponse;
 use App\Models\SoalConstant;
 use Exception;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -15,7 +16,7 @@ use Illuminate\Support\Str;
  * @since 3.0.0 <ristretto>
  * @year 2021
  */
-class BenarSalahService
+class BenarSalahService implements TipeSoalInterface
 {
     /**
      * @param $peserta
@@ -62,7 +63,7 @@ class BenarSalahService
     /**
      * @param $request
      * @param $jawaban_peserta
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public static function setJawab($request, $jawaban_peserta)
     {
