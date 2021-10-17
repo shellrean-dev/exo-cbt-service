@@ -30,6 +30,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
     Route::get('berita-acara/{id}', 'ReportingController@berita_acara')->name('beritaacara.download.excel');
     Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel', 'ResultController@capaianSiswaExcel')->name('capaian.download.excel');
     Route::get('ujians/{jadwal}/result/excel', 'ResultController@examExcel')->name('hasilujian.download.excel');
+    Route::get('ujians/esay/{banksoal}/koreksi-offline/excel', 'PenilaianController@jawabanPesertaEsayExcel')->name('koreksi.offline.download.excel');
 
     Route::group(['middleware' => 'auth:api'], function() {
         Route::get('user-authenticated', 'UserController@getUserLogin');
@@ -98,6 +99,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('ujians/esay/exists', 'PenilaianController@getExistEsay');
         Route::post('ujians/esay/input', 'PenilaianController@storeNilaiEsay');
         Route::get('ujians/esay/{banksoal}/koreksi', 'PenilaianController@getExistEsayByBanksoal');
+        Route::get('ujians/esay/{banksoal}/koreksi-offline/link', 'PenilaianController@getJawabanPesertaEsayExcelLink');
+        Route::post('ujians/esay/koreksi-offline/upload', 'PenilaianController@storeNilaiEsayExcel');
+
         Route::get('ujians/argument/exists', 'PenilaianController@getBanksoalExistArgument');
         Route::post('ujians/argument/input', 'PenilaianController@storeNilaiArgument');
         Route::get('ujians/argument/{banksoal}/koreksi', 'PenilaianController@getExistArgumentByBanksoal');

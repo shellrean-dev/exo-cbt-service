@@ -452,13 +452,21 @@
 				    <span class="hidden sm:block">Selanjutnya</span> <next-line-icon></next-line-icon>
 			    </button>
           <button class="py-1 px-3 border-2 rounded-md hover:shadow-lg sm:flex sm:items-center sm:space-x-2"
-          v-if="questionIndex+1 == filleds.length && checkRagu() == true"
+          v-if="questionIndex+1 == filleds.length && checkRagu() == true && checkIsian() == false"
           :class="isLoadinger ? 'bg-red-200 text-white border-red-200' : 'bg-red-400 text-white border-red-400'"
           :disabled="isLoadinger || !listening"
           @click="doubtExistAlert"
           >
 				    <span class="hidden sm:block">Selanjutnya</span> <next-line-icon></next-line-icon>
 			    </button>
+          <button class="py-1 px-3 border-2 rounded-md hover:shadow-lg sm:flex sm:items-center sm:space-x-2"
+                  v-if="questionIndex+1 == filleds.length && checkRagu() == false && checkIsian() == true"
+                  :class="isLoadinger ? 'bg-red-200 text-white border-red-200' : 'bg-red-400 text-white border-red-400'"
+                  :disabled="isLoadinger || !listening"
+                  @click="kosongExistAlert"
+          >
+            <span class="hidden sm:block">Selanjutnya</span> <next-line-icon></next-line-icon>
+          </button>
 		    </div>
       </div>
     </div>
@@ -517,7 +525,10 @@ export default {
       this.sendAnswerSetujuTidak(value)
     }, 300),
     doubtExistAlert() {
-      this.$swal('Hei..', 'Jawabanmu masih ada yang ragu-ragu','warning')
+      this.$swal('Hei..', 'Jawabanmu masih ada ' + this.hei.ragu +' yang ragu-ragu, kamu bisa cek pada nomor yang berwarna kuning.','warning')
+    },
+    kosongExistAlert() {
+      this.$swal('Hei..', 'Jawabanmu masih ada ' + this.hei.kosong +' yang belum diisi, kamu bisa cek pada nomor yang berwarna abu.','warning')
     }
   },
   async created() {

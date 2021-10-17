@@ -79,6 +79,10 @@ const vue_data = {
         right: null,
         matchIndex: null
     },
+    hei: {
+        kosong: 0,
+        ragu: 0
+    },
     mengurutkan: null
 }
 
@@ -107,6 +111,7 @@ const vue_methods = {
     selesai,
     raguRagu,
     checkRagu,
+    checkIsian,
     playDirection,
     sendRagu,
     changeCheckbox,
@@ -340,6 +345,27 @@ function checkRagu() {
     })
 
     if (ragger > 0) {
+        this.hei.ragu = ragger
+        return true
+    }
+    return false
+}
+
+/**
+ * Check is isian
+ * @type vue method
+ */
+function checkIsian() {
+    let ragger = 0
+    this.filleds
+        .filter(function(element) {
+            if (element.answered == false) {
+                ragger++
+            }
+        })
+
+    if (ragger > 0) {
+        this.hei.kosong = ragger
         return true
     }
     return false

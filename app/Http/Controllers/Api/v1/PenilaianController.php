@@ -2,13 +2,19 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Exports\JawabanPesertaExport;
 use App\Http\Controllers\Controller;
+use App\Imports\GroupMemberImport;
+use App\Imports\JawabanPesertaEsayImport;
 use App\Models\SoalConstant;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 /**
  * PenilaianController
@@ -147,7 +153,7 @@ class PenilaianController extends Controller
             $exists = DB::table('jawaban_pesertas')
                 ->whereNotIn('jawaban_pesertas.id', $has)
                 ->join('soals', 'jawaban_pesertas.soal_id','=','soals.id')
-                ->where('soals.tipe_soal', '2')
+                ->where('soals.tipe_soal', SoalConstant::TIPE_ESAY)
                 ->whereNotNull('jawaban_pesertas.esay')
                 ->where('soals.banksoal_id', $banksoal->id)
                 ->select('jawaban_pesertas.id','soals.banksoal_id','soals.audio','jawaban_pesertas.esay','soals.pertanyaan','soals.rujukan')
@@ -395,6 +401,105 @@ class PenilaianController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             return SendResponse::internalServerError('Kesalahan 500.'.$e->getMessage());
+        }
+    }
+
+
+    /**
+     * @Route(path="api/v1/ujians/esay/{banksoal}/koreksi-offline/link", methods={"GET"})
+     *
+     * @param $banksoal_id
+     * @return \Illuminate\Http\Response
+     */
+    public function getJawabanPesertaEsayExcelLink($banksoal_id)
+    {
+        $banksoal = DB::table('banksoals')
+            ->where('id', $banksoal_id)
+            ->first();
+        if (!$banksoal) {
+            return SendResponse::badRequest('Banksoal tidak ditemukan');
+        }
+
+        $url = URL::temporarySignedRoute(
+            'koreksi.offline.download.excel',
+            now()->addMinutes(5),
+            ['banksoal' => $banksoal_id]
+        );
+
+        return SendResponse::acceptData($url);
+    }
+
+    /**
+     * @Route(path="api/v1/ujians/esay/{banksoal}/koreksi-offline/excel", methods={"GET"})
+     *
+     * @param Request $request
+     * @param $banksoal_id
+     * @return \Illuminate\Http\Response|void
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
+    public function jawabanPesertaEsayExcel(Request $request, $banksoal_id)
+    {
+        if (! request()->hasValidSignature()) {
+            return SendResponse::badRequest('Kesalahan, url tidak valid');
+        }
+
+        $banksoal = DB::table('banksoals')
+            ->where('id', $banksoal_id)
+            ->first();
+
+        if (!$banksoal) {
+            return SendResponse::badRequest('Kesalahan, banksoal yang diminta tidak valid');
+        }
+
+        # Ambil jawaban yang telah dikoreksi
+        $has = DB::table('jawaban_esays')
+            ->where('banksoal_id', $banksoal->id)
+            ->select('jawab_id')
+            ->get()
+            ->pluck('jawab_id');
+
+        # Jawaban peserta yang belum dikoreksi
+        $data = DB::table('jawaban_pesertas')
+            ->whereNotIn('jawaban_pesertas.id', $has)
+            ->join('soals', 'jawaban_pesertas.soal_id','=','soals.id')
+            ->where('soals.tipe_soal', SoalConstant::TIPE_ESAY)
+            ->whereNotNull('jawaban_pesertas.esay')
+            ->where('soals.banksoal_id', $banksoal->id)
+            ->select([
+                'jawaban_pesertas.id',
+                'soals.banksoal_id',
+                'soals.audio',
+                'jawaban_pesertas.esay',
+                'soals.pertanyaan',
+                'soals.rujukan'
+            ])
+            ->get();
+
+        $spreadsheet = JawabanPesertaExport::export($data, $banksoal->kode_banksoal);
+        $writer = new Xlsx($spreadsheet);
+
+        $filename = 'Jawaban Esay Peserta Banksoal- '.$banksoal->kode_banksoal;
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="'.$filename.'.xlsx"');
+        $writer->save('php://output');
+    }
+
+    /**
+     * @Route (path="api/v1/ujians/esay/{banksoal}/koreksi-offline/upload", methods={"POST"})
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response|void
+     */
+    public function storeNilaiEsayExcel(Request $request)
+    {
+        $request->validate([
+            'file'      => 'required|mimes:xlsx,xls'
+        ]);
+
+        try {
+            Excel::import(new JawabanPesertaEsayImport(), $request->file('file'));
+        } catch (\Exception $e) {
+            return SendResponse::internalServerError('kesalahan 500.'.$e->getMessage());
         }
     }
 }
