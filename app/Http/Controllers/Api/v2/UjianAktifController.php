@@ -488,9 +488,18 @@ class UjianAktifController extends Controller
             ->join('jadwals', 'jadwals.id', '=', 'hasil_ujians.jadwal_id')
             ->select([
                 'jadwals.alias',
-                'hasil_ujians.hasil'
+                'hasil_ujians.point_esay',
+                'hasil_ujians.point_setuju_tidak',
+                'hasil_ujians.hasil as result'
             ])
             ->get();
+
+        $hasil = $hasil->map(function($item) {
+            return [
+                'alias' => $item->alias,
+                'hasil' => $item->point_esay + $item->point_setuju_tidak + $item->result
+            ];
+        });
 
         return SendResponse::acceptData($hasil);
     }

@@ -377,7 +377,7 @@ final class UjianService extends AbstractService
      * @param string $banksoal_id
      * @param string $jadwal_id
      * @param string $peserta_id
-     * @return object
+     * @return bool
      * @since 3.0.0 <ristretto>
      */
     public function finishing(string $banksoal_id, string $jadwal_id, string $peserta_id)
@@ -395,8 +395,8 @@ final class UjianService extends AbstractService
             $pg_benar = 0;
             $pg_salah = 0;
             if($banksoal->jumlah_soal > 0) {
-                $pg_benar = $this->_countCorrectAnswer($jadwal_id, $peserta_id, '1');
-                $pg_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, '1');
+                $pg_benar = $this->_countCorrectAnswer($jadwal_id, $peserta_id, SoalConstant::TIPE_PG);
+                $pg_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, SoalConstant::TIPE_PG);
 
                 if ($pg_benar > 0) {
                     $hasil_pg = ($pg_benar/$banksoal->jumlah_soal) * $banksoal->persen['pilihan_ganda'];
@@ -409,8 +409,8 @@ final class UjianService extends AbstractService
             $mpg_salah = 0;
             $mpg_benar = 0;
             if($banksoal->jumlah_soal_ganda_kompleks > 0) {
-                $mpg_benar = $this->_countCorrectAnswer($jadwal_id, $peserta_id, '4');
-                $mpg_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, '4');
+                $mpg_benar = $this->_countCorrectAnswer($jadwal_id, $peserta_id, SoalConstant::TIPE_PG_KOMPLEK);
+                $mpg_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, SoalConstant::TIPE_PG_KOMPLEK);
 
                 if($mpg_benar > 0) {
                     $hasil_mpg = ($mpg_benar/$banksoal->jumlah_soal_ganda_kompleks)*$banksoal->persen['pilihan_ganda_komplek'];
@@ -422,8 +422,8 @@ final class UjianService extends AbstractService
             $listening_benar = 0;
             $listening_salah = 0;
             if($banksoal->jumlah_soal_listening > 0) {
-                $listening_benar = $this->_countCorrectAnswer($jadwal_id, $peserta_id, '3');
-                $listening_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, '3');
+                $listening_benar = $this->_countCorrectAnswer($jadwal_id, $peserta_id, SoalConstant::TIPE_LISTENING);
+                $listening_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, SoalConstant::TIPE_LISTENING);
 
                 if($listening_benar > 0) {
                     $hasil_listening = ($listening_benar/$banksoal->jumlah_soal_listening)*$banksoal->persen['listening'];
@@ -435,8 +435,8 @@ final class UjianService extends AbstractService
             $isian_singkat_benar = 0;
             $isian_singkat_salah = 0;
             if($banksoal->jumlah_isian_singkat > 0) {
-                $isian_singkat_benar = $this->_countCorrectAnswer($jadwal_id, $peserta_id, '6');
-                $isian_singkat_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, '6');
+                $isian_singkat_benar = $this->_countCorrectAnswer($jadwal_id, $peserta_id, SoalConstant::TIPE_ISIAN_SINGKAT);
+                $isian_singkat_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, SoalConstant::TIPE_ISIAN_SINGKAT);
 
                 if($isian_singkat_benar > 0) {
                     $hasil_isiang_singkat = ($isian_singkat_benar/$banksoal->jumlah_isian_singkat)*$banksoal->persen['isian_singkat'];
@@ -448,11 +448,11 @@ final class UjianService extends AbstractService
             $jumlah_menjodohkan_benar = 0;
             $jumlah_menjodohkan_salah = 0;
             if($banksoal->jumlah_menjodohkan > 0) {
-                $jumlah_menjodohkan_benar = $this->_countCorrectAnswer($jadwal_id, $peserta_id, '5');
-                $jumlah_menjodohkan_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, '5');
+                $jumlah_menjodohkan_benar = $this->_countCorrectAnswer($jadwal_id, $peserta_id, SoalConstant::TIPE_MENJODOHKAN);
+                $jumlah_menjodohkan_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, SoalConstant::TIPE_MENJODOHKAN);
 
                 if($jumlah_menjodohkan_benar > 0) {
-                    $hasil_isiang_singkat = ($jumlah_menjodohkan_benar/$banksoal->jumlah_menjodohkan)*$banksoal->persen['menjodohkan'];
+                    $hasil_menjodohkan = ($jumlah_menjodohkan_benar/$banksoal->jumlah_menjodohkan)*$banksoal->persen['menjodohkan'];
                 }
             }
 
@@ -461,8 +461,8 @@ final class UjianService extends AbstractService
             $jumlah_mengurutkan_benar = 0;
             $jumlah_mengurutkan_salah = 0;
             if($banksoal->jumlah_mengurutkan > 0) {
-                $jumlah_mengurutkan_benar = $this->_countCorrectAnswer($jadwal_id, $peserta_id, '7');
-                $jumlah_mengurutkan_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, '7');
+                $jumlah_mengurutkan_benar = $this->_countCorrectAnswer($jadwal_id, $peserta_id, SoalConstant::TIPE_MENGURUTKAN);
+                $jumlah_mengurutkan_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, SoalConstant::TIPE_MENGURUTKAN);
 
                 if($jumlah_mengurutkan_benar > 0) {
                     $hasil_mengurutkan = ($jumlah_mengurutkan_benar/$banksoal->jumlah_mengurutkan)*$banksoal->persen['mengurutkan'];
@@ -474,8 +474,8 @@ final class UjianService extends AbstractService
             $jumlah_benar_salah_benar = 0;
             $jumlah_benar_salah_salah = 0;
             if($banksoal->jumlah_benar_salah > 0) {
-                $jumlah_benar_salah_benar = $this->_countCorrectAnswer($jadwal_id, $peserta_id, '8');
-                $jumlah_benar_salah_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, '8');
+                $jumlah_benar_salah_benar = $this->_countCorrectAnswer($jadwal_id, $peserta_id, SoalConstant::TIPE_BENAR_SALAH);
+                $jumlah_benar_salah_salah = $this->_countWrongAnswer($jadwal_id, $peserta_id, SoalConstant::TIPE_BENAR_SALAH);
 
                 if($jumlah_benar_salah_benar > 0) {
                     $hasil_benar_salah = ($jumlah_benar_salah_benar/$banksoal->jumlah_benar_salah)*$banksoal->persen['benar_salah'];
@@ -487,11 +487,7 @@ final class UjianService extends AbstractService
                 'jawab'         => 0,
                 'jadwal_id'     => $jadwal_id,
                 'peserta_id'    => $peserta_id,
-            ])
-            ->whereHas('soal', function($query) {
-                $query->whereIn('tipe_soal',['1']);
-            })
-            ->count();
+            ])->where('answered', false)->count();
 
             $hasil = $hasil_pg+$hasil_listening+$hasil_mpg+$hasil_isiang_singkat+$hasil_menjodohkan+$hasil_mengurutkan+$hasil_benar_salah;
 
@@ -538,7 +534,7 @@ final class UjianService extends AbstractService
      * @return int
      * @since 3.0.0 <ristretto>
      */
-    private function _countWrongAnswer(string $jadwal_id, string $peserta_id, string $type)
+    private function _countWrongAnswer(string $jadwal_id, string $peserta_id, $type)
     {
         $salah = JawabanPeserta::where([
             'iscorrect'     => 0,
@@ -562,7 +558,7 @@ final class UjianService extends AbstractService
      * @return int
      * @since 3.0.0 <ristretto>
      */
-    private function _countCorrectAnswer(string $jadwal_id, string $peserta_id, string $type)
+    private function _countCorrectAnswer(string $jadwal_id, string $peserta_id, $type)
     {
         $benar = JawabanPeserta::where([
             'iscorrect'     => 1,

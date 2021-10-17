@@ -44,6 +44,7 @@ class ResultDataTransform
             'jadwal_id' => $item->jawab_id,
             'mengurutkan' => json_decode($item->mengurutkan),
             'setuju_tidak' => json_decode($item->setuju_tidak),
+            'benar_salah' => json_decode($item->benar_salah),
             'jawab' => $item->jawab,
             'jawab_complex' => $item->jawab_complex,
             'peserta_nama'  => $item->peserta->nama,

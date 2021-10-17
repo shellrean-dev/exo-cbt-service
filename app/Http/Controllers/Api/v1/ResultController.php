@@ -44,7 +44,7 @@ class ResultController extends Controller
 
         $res = DB::table('hasil_ujians')
             ->join('pesertas', 'pesertas.id', '=','hasil_ujians.peserta_id')
-            ->rightJoin('group_members', 'group_members.student_id', '=', 'hasil_ujians.peserta_id');
+            ->leftJoin('group_members', 'group_members.student_id', '=', 'hasil_ujians.peserta_id');
 
         $jurusan = strval($request->get('jurusan',''));
         $group = strval($request->get('group',''));
@@ -80,7 +80,7 @@ class ResultController extends Controller
                 'pesertas.no_ujian as peserta_no_ujian',
                 'pesertas.jurusan_id as peserta_jurusan_id'
             ])
-            ->orderBy('hasil_ujians.peserta_id');
+            ->orderBy('pesertas.no_ujian');
 
         if(request()->perPage != '') {
             $res = $res->paginate(request()->perPage);
@@ -148,7 +148,7 @@ class ResultController extends Controller
 
         $res = DB::table('hasil_ujians')
             ->join('pesertas', 'pesertas.id', '=','hasil_ujians.peserta_id')
-            ->rightJoin('group_members', 'group_members.student_id', '=', 'hasil_ujians.peserta_id');
+            ->leftJoin('group_members', 'group_members.student_id', '=', 'hasil_ujians.peserta_id');
 
         $jurusan = strval($request->get('jurusan',''));
         $group = strval($request->get('group',''));
@@ -184,7 +184,7 @@ class ResultController extends Controller
                 'pesertas.no_ujian as peserta_no_ujian',
                 'pesertas.jurusan_id as peserta_jurusan_id'
             ])
-            ->orderBy('hasil_ujians.peserta_id')
+            ->orderBy('pesertas.no_ujian')
             ->get()
             ->map([ResultDataTransform::class, 'resultExam']);
 
@@ -421,7 +421,7 @@ class ResultController extends Controller
                 ],
                 'data' => $value
             ];
-        });
+        })->sortBy('peserta.no_ujian');
         $data = [
             'pesertas' => $fill,
             'soals' => $soals

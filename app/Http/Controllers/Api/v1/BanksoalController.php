@@ -265,6 +265,7 @@ class BanksoalController extends Controller
             ->get();
         $jawaban_pesertas = $jawaban_pesertas->map(function ($item) {
             $item->setuju_tidak = json_decode($item->setuju_tidak, true);
+            $item->benar_salah = json_decode($item->benar_salah, true);
             return $item;
         });
 
@@ -295,12 +296,23 @@ class BanksoalController extends Controller
                         'setuju' => 0,
                         'tidak' => 0
                     ];
+                    $benar_salah = [
+                        'benar' => 0,
+                        'salah' => 0
+                    ];
                     foreach ($jawaban_peserta as $v) {
                         if (count($v->setuju_tidak) > 0) {
-                            if ($v->setuju_tidak[$item->id]['val'] == 1) {
+                            if (isset($v->setuju_tidak[$item->id]['val']) && $v->setuju_tidak[$item->id]['val'] == 1) {
                                 $argument['setuju'] += 1;
                             } else {
                                 $argument['tidak'] += 1;
+                            }
+                        }
+                        if (count($v->benar_salah) > 0) {
+                            if (isset($v->benar_salah[$item->id]) && $v->benar_salah[$item->id] == 1) {
+                                $benar_salah['benar'] += 1;
+                            } else {
+                                $benar_salah['salah'] += 1;
                             }
                         }
                     }
@@ -311,7 +323,8 @@ class BanksoalController extends Controller
                         'text'      => $item->text_jawaban,
                         'iscorrect' => $item->correct,
                         'penjawab'  => $curr_jawaban_peserta->count(),
-                        'argument'  => $argument
+                        'argument'  => $argument,
+                        'benar_salah' => $benar_salah
                     ];
                 })
             ];
