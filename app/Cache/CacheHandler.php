@@ -13,31 +13,35 @@ final class CacheHandler implements CacheHandlerInterface
 {
     /**
      * Set cache data
+     * @param string $name
      * @param string $key
      * @param $data
      * @param int $seconds
      */
-    public function cache(string $name, string $key, $data, int $seconds = 60): void
+    public function cache(string $name, string $key, $data, int $seconds = 5): void
     {
-        Cache::put(md5($name.$key), $data, $seconds);
+        Cache::put($name.$key, $data, $seconds);
     }
 
     /**
      * Get cache data
+     * @param string $name
      * @param string $key
+     * @return mixed
      */
     public function getItem(string $name, string $key)
     {
-        $value = Cache::get(md5($name.$key));
-        return $value;
+        return Cache::get($name.$key);
     }
 
     /**
      * Check for item existence
+     * @param string $name
      * @param string $key
+     * @return bool
      */
     public function isCached(string $name, string $key): bool
     {
-        return Cache::has(md5($name.$key));
+        return Cache::has($name.$key);
     }
 }

@@ -2,10 +2,11 @@
 
 namespace ShellreanDev\Services\Ujian;
 
-use App\Actions\SendResponse;
+use App\Models\CacheConstant;
 use App\Models\SoalConstant;
 use App\Models\UjianConstant;
-use stdClass;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 use Exception;
 use Carbon\Carbon;
 
@@ -15,11 +16,8 @@ use App\JawabanPeserta;
 
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
-use ShellreanDev\Utils\Error;
 use ShellreanDev\Cache\CacheHandler;
 use ShellreanDev\Services\AbstractService;
 use ShellreanDev\Services\Jadwal\JadwalService;
@@ -41,8 +39,8 @@ final class UjianService extends AbstractService
     /**
      * Inject dependency
      *
-     * @param ShellreanDev\Cache\CacheHandler $cache
-     * @param ShellreanDev\Services\Jadwal\JadwalService $jadwalService
+     * @param CacheHandler $cache
+     * @param JadwalService $jadwalService
      * @since 3.0.0 <ristretto>
      */
     public function __construct(CacheHandler $cache, JadwalService $jadwalService)
@@ -55,32 +53,26 @@ final class UjianService extends AbstractService
      * Get ujian on working today
      *
      * @param string $student_id
+     * @return Model|Builder|object|null
      * @since 3.0.0 <ristretto>
      */
     public function onWorkingToday(string $student_id)
     {
-        // ambil ujian yang aktif hari ini
+        # ambil ujian yang aktif hari ini
         $jadwals = $this->jadwalService->activeToday();
 
         $jadwal_ids = $jadwals->pluck('id')->toArray();
 
-        // ambil data siswa ujian
-        // yang sedang dikerjakan pada hari ini
-        // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
-//        $key = md5(sprintf('ujian:onwork:today:student:%s:jadwal:%s', $student_id, implode(',', $jadwal_ids)));
-//        if ($this->cache->isCached($key)) {
-//            $data = $this->cache->getItem($key);
-//        } else {
-            $data = DB::table('siswa_ujians')
-                ->where('peserta_id', $student_id)
-                ->whereIn('status_ujian', [UjianConstant::STATUS_STANDBY,UjianConstant::STATUS_PROGRESS])
-                ->whereIn('jadwal_id', $jadwal_ids)
-                ->whereDate('created_at', now()->format('Y-m-d'))
-                ->select('jadwal_id', 'status_ujian')
-                ->first();
-//
-//            $this->cache->cache($key, $data);
-//        }
+        # ambil data siswa ujian
+        # yang sedang dikerjakan pada hari ini
+        # yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
+        $data = DB::table('siswa_ujians')
+            ->where('peserta_id', $student_id)
+            ->whereIn('status_ujian', [UjianConstant::STATUS_STANDBY,UjianConstant::STATUS_PROGRESS])
+            ->whereIn('jadwal_id', $jadwal_ids)
+            ->whereDate('created_at', now()->format('Y-m-d'))
+            ->select(['jadwal_id', 'status_ujian'])
+            ->first();
 
         return $data;
     }
@@ -89,51 +81,23 @@ final class UjianService extends AbstractService
      * Get ujian on standby today
      *
      * @param string $student_id
+     * @return Model|Builder|object|null
      * @since 3.0.0 <ristretto>
      */
     public function onStandbyToday(string $student_id)
-    {
-        // ambil ujian yang aktif hari ini
-        $jadwals = $this->jadwalService->activeToday();
-
-        $jadwal_ids = $jadwals->pluck('id')->toArray();
-
-        // ambil data siswa ujian
-        // yang sudah dijalankan pada hari ini
-        // tetapi belum dimulai
-        // yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
-//        $key = md5(sprintf('ujian:onstandby:today:student:%s:jadwal:%s', $student_id, implode(',', $jadwal_ids)));
-//        if ($this->cache->isCached($key)) {
-//            $data = $this->cache->getItem($key);
-//        } else {
-            $data = DB::table('siswa_ujians')
-                ->where('peserta_id', $student_id)
-                ->where('status_ujian', UjianConstant::STATUS_STANDBY)
-                ->whereIn('jadwal_id', $jadwal_ids)
-                ->whereDate('created_at', now()->format('Y-m-d'))
-                ->first();
-
-//            $this->cache->cache($key, $data);
-//        }
-
-        return $data;
-    }
-
-    /**
-     * Get ujian on progress today
-     *
-     * @param string $student_id
-     * @since 3.0.0 <ristretto>
-     */
-    public function onProgressToday(string $student_id)
     {
         # ambil ujian yang aktif hari ini
         $jadwals = $this->jadwalService->activeToday();
 
         $jadwal_ids = $jadwals->pluck('id')->toArray();
+
+        # ambil data siswa ujian
+        # yang sudah dijalankan pada hari ini
+        # tetapi belum dimulai
+        # yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
         $data = DB::table('siswa_ujians')
             ->where('peserta_id', $student_id)
-            ->where('status_ujian', '=', UjianConstant::STATUS_PROGRESS)
+            ->where('status_ujian', UjianConstant::STATUS_STANDBY)
             ->whereIn('jadwal_id', $jadwal_ids)
             ->whereDate('created_at', now()->format('Y-m-d'))
             ->first();
@@ -142,10 +106,46 @@ final class UjianService extends AbstractService
     }
 
     /**
+     * Get ujian on progress today
+     *
+     * @param string $student_id
+     * @return Model|Builder|object|null
+     * @since 3.0.0 <ristretto>
+     */
+    public function onProgressToday(string $student_id)
+    {
+        # ambil ujian yang aktif hari ini
+        $jadwals = $this->jadwalService->activeToday();
+
+        $jadwal_ids = $jadwals->pluck('id')->toArray();
+        $query = DB::table('siswa_ujians')
+            ->where('peserta_id', $student_id)
+            ->where('status_ujian', '=', UjianConstant::STATUS_PROGRESS)
+            ->whereIn('jadwal_id', $jadwal_ids)
+            ->whereDate('created_at', now()->format('Y-m-d'));
+
+        if (config('exo.enable_cache')) {
+            $is_cached = $this->cache->isCached(CacheConstant::KEY_UJIAN_ON_PROGRESS, __METHOD__ . $student_id . implode('-', $jadwal_ids));
+            if ($is_cached) {
+                $data = $this->cache->getItem(CacheConstant::KEY_UJIAN_ON_PROGRESS, __METHOD__ . $student_id . implode('-', $jadwal_ids));
+            } else {
+                $data = $query->first();
+                if ($data) {
+                    $this->cache->cache(CacheConstant::KEY_UJIAN_ON_PROGRESS, __METHOD__ . $student_id . implode('-', $jadwal_ids), $data);
+                }
+            }
+        } else {
+            $data = $query->first();
+        }
+
+        return $data;
+    }
+
+    /**
      * Is peserta's banksoal
      *
-     * @param App\Banksoal $banksoal
-     * @param App\Peserta $peserta
+     * @param Banksoal $banksoal
+     * @param Peserta $peserta
      * @return string
      * @since 3.0.0 <ristretto>
      */
@@ -173,7 +173,7 @@ final class UjianService extends AbstractService
                     }
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $banksoal_id;
         }
         return $banksoal_id;
@@ -224,8 +224,12 @@ final class UjianService extends AbstractService
             ])
             ->get();
         $soal_jawabans = DB::table('jawaban_soals')
-            ->whereIn('soal_id', $soals->pluck('id')->toArray())
-            ->get();
+            ->whereIn('soal_id', $soals->pluck('id')->toArray());
+        if ($acak_opsi == '1') {
+            $soal_jawabans = $soal_jawabans->inRandomOrder();
+        }
+
+        $soal_jawabans = $soal_jawabans->get();
 
         $soals = $soals->map(function ($item) use ($soal_jawabans) {
             $item->jawabans = $soal_jawabans->where('soal_id', $item->id)->values();
@@ -378,6 +382,7 @@ final class UjianService extends AbstractService
      * @param string $jadwal_id
      * @param string $peserta_id
      * @return bool
+     * @throws Exception
      * @since 3.0.0 <ristretto>
      */
     public function finishing(string $banksoal_id, string $jadwal_id, string $peserta_id)
@@ -578,6 +583,7 @@ final class UjianService extends AbstractService
      *
      * @param object $siswa_ujian
      * @return void
+     * @throws Exception
      * @since 3.0.0 <ristretto>
      */
     public function updateReminingTime(object $siswa_ujian)
