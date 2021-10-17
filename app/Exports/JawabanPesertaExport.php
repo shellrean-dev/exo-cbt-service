@@ -54,7 +54,7 @@ class JawabanPesertaExport extends ExportExcel
             $sheet->getStyle('D'.$row)->getAlignment()->setWrapText(true);
             $sheet->getStyle('D'.$row)->getAlignment()->setVertical('top');
 
-            $sheet->setCellValue('E'.$row, 0);
+            $sheet->setCellValue('E'.$row, 0.0);
             $sheet->getStyle('E'.$row)->applyFromArray(self::styleYellow());
             $sheet->getStyle('E'.$row)->getAlignment()->setVertical('top');
 

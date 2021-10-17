@@ -42,8 +42,8 @@ class PesertaImport implements ToCollection, WithStartRow
             $final[$key]['id'] = Str::uuid()->toString();
             $final[$key]['jurusan_id'] = $jurusan_kodes->where('kode', $value['jurusan_id'])->first()->id;
             $final[$key]['agama_id'] = $agama_kodes->where('kode', $value['agama_id'])->first()->id;
-            $final[$key]['created_at'] = now();
-            $final[$key]['updated_at'] = now();
+            $final[$key]['created_at'] = now()->addSeconds($key);
+            $final[$key]['updated_at'] = now()->addSeconds($key);
         }
 
         try {

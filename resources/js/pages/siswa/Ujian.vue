@@ -446,7 +446,7 @@
           <button class="py-1 px-3 border-2 rounded-md hover:shadow-lg sm:flex sm:items-center sm:space-x-2"
           :class="isLoadinger ? 'bg-green-200 text-white border-green-200' : 'bg-green-400 text-white border-green-400'"
           :disabled="isLoadinger || !listening"
-          v-if="questionIndex+1 == filleds.length && checkRagu() == false"
+          v-if="questionIndex+1 == filleds.length && checkRagu() == false && checkIsian() == false"
           @click="modalConfirm = true"
           >
 				    <span class="hidden sm:block">Selanjutnya</span> <next-line-icon></next-line-icon>

@@ -43,6 +43,10 @@ class JawabanPesertaEsayImport implements ToCollection, WithStartRow
                     continue;
                 }
 
+                if (floatval($row[4]) > 1 || floatval($row[4]) < 0) {
+                    continue;
+                }
+
                 # cek apakah jawaban pernah disimpan sebelumnya
                 $exists = DB::table('jawaban_esays')
                     ->where('jawab_id', $row[0])
