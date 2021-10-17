@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use App\Models\SoalConstant;
+use Illuminate\Http\Response;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
 use App\Imports\BanksoalImport;
@@ -29,8 +30,8 @@ class SoalController extends Controller
      *
      * Store a newly created resource in storage.
      *
-     * @param Illuminate\Http\Request  $request
-     * @return App\Actions\SendResponse
+     * @param Request $request
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function store(Request $request)
@@ -72,6 +73,10 @@ class SoalController extends Controller
 
             if (in_array($request->tipe_soal, [SoalConstant::TIPE_BENAR_SALAH, SoalConstant::TIPE_SETUJU_TIDAK])) {
                 $data['layout'] = SoalConstant::LAYOUT_KEBAWAH_TABEL;
+            }
+
+            if (in_array($request->tipe_soal, [SoalConstant::TIPE_MENJODOHKAN, SoalConstant::TIPE_MENGURUTKAN])) {
+                $data['layout'] = SoalConstant::LAYOUT_KEBAWAH_STANDARD;
             }
 
             if (isset($request->case_sensitive)) {
@@ -224,8 +229,8 @@ class SoalController extends Controller
      *
      * Display the specified resource.
      *
-     * @param App\Soal $soal
-     * @return App\Actions\SendResponse
+     * @param Soal $soal
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function show(Soal $soal)
@@ -252,7 +257,7 @@ class SoalController extends Controller
      *
      * @param Illuminate\Http\Request  $request
      * @param App\Soal $soal
-     * @return Illuminate\Http\Response
+     * @return Response
      */
     public function update(Request $request, Soal $soal)
     {
@@ -280,8 +285,15 @@ class SoalController extends Controller
         DB::beginTransaction();
 
         try {
+
+            $soal->layout = $request->layout;
+
             if (in_array($soal->tipe_soal, [SoalConstant::TIPE_BENAR_SALAH, SoalConstant::TIPE_SETUJU_TIDAK])) {
                 $soal->layout = SoalConstant::LAYOUT_KEBAWAH_TABEL;
+            }
+
+            if (in_array($request->tipe_soal, [SoalConstant::TIPE_MENJODOHKAN, SoalConstant::TIPE_MENGURUTKAN])) {
+                $soal->layout = SoalConstant::LAYOUT_KEBAWAH_STANDARD;
             }
 
             $soal->pertanyaan = $request->pertanyaan;
@@ -409,7 +421,7 @@ class SoalController extends Controller
      * Get soal by banksoal
      *
      * @param App\Banksoal $banksoal
-     * @return App\Actions\SendResponse
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function getSoalByBanksoal(Banksoal $banksoal)
@@ -418,7 +430,7 @@ class SoalController extends Controller
             return SendResponse::badRequest('Banksoal sedang dikunci');
         }
 
-        $soal = Soal::with('jawabans')->where('banksoal_id',$banksoal->id);
+        $soal = Soal::with('jawabans')->where('banksoal_id',$banksoal->id)->orderBy('created_at');
         if (request()->q != '') {
             $soal = $soal->where('pertanyaan', 'LIKE', '%'. request()->q.'%');
         }
