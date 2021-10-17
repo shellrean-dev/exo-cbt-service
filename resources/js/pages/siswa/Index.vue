@@ -71,7 +71,8 @@ export default {
     return {
       channel: '',
       connection: false,
-      is_getted: false
+      is_getted: false,
+      enable_socket: process.env.MIX_ENABLE_SOCKET
     }
   },
   computed: {
@@ -112,38 +113,40 @@ export default {
       }
       this.channel = 'student_connect_channel'
 
+      if (this.enable_socket === "oke") {
         if (!this.socket.connected) {
-        this.socket.open();
+          this.socket.open();
 
-        this.socket.on('connect', () => { 
-          this.connection = false
-          if (!this.is_getted) {
-            this.socket.emit('getin_student', {
-              user: this.peserta,
-              channel: this.channel
-            });
-            this.is_getted = true
-          }
+          this.socket.on('connect', () => {
+            this.connection = false
+            if (!this.is_getted) {
+              this.socket.emit('getin_student', {
+                user: this.peserta,
+                channel: this.channel
+              });
+              this.is_getted = true
+            }
 
-          this.socket.on('disconnect',() =>{
+            this.socket.on('disconnect',() =>{
+              this.connection = true
+            })
+          });
+
+          this.socket.on('connect_failed', () => {
             this.connection = true
-          })
-        });
-        
-        this.socket.on('connect_failed', () => {
-          this.connection = true
-        });
+          });
 
-        this.socket.on('disconnect', () => {
-          this.connection = true
-        });
+          this.socket.on('disconnect', () => {
+            this.connection = true
+          });
+        }
       }
     } catch (error) {
       this.showError(error)
     }
   },
   mounted() {
-      
+
   },
   watch: {
     uncomplete(val) {
@@ -162,8 +165,11 @@ export default {
   },
   destroyed() {
     this.$store.commit('siswa_user/REMOTE_PESERTA_DETAIL')
-    this.socket.emit('exit', { channel: this.channel })
-    this.socket.close()
+
+    if (this.enable_socket === 'oke') {
+      this.socket.emit('exit', { channel: this.channel })
+      this.socket.close()
+    }
   }
 }
 </script>
