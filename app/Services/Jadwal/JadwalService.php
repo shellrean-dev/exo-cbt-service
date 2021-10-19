@@ -3,15 +3,14 @@
 namespace ShellreanDev\Services\Jadwal;
 
 use App\Models\CacheConstant;
+use App\Models\JadwalConstant;
 use App\Models\UjianConstant;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
-use ShellreanDev\Utils\Error;
 use ShellreanDev\Cache\CacheHandler;
 use ShellreanDev\Services\AbstractService;
-use stdClass;
 
 /**
  * Jadwal Service
@@ -24,12 +23,39 @@ final class JadwalService extends AbstractService
     /**
      * Inject dependency
      *
+     * @param CacheHandler $cache
      * @since 3.0.0 <ristretto>
-     * @param ShellreanDev\Cache\CacheHandler $cache
      */
     public function __construct(CacheHandler $cache)
     {
         $this->cache = $cache;
+    }
+
+    /**
+     * find single jawaban by id
+     *
+     * @param string $jadwal_id
+     * @return Model|Builder|mixed|object|null
+     * @since 3.0.0 <ristretto>
+     */
+    public function findJadwal(string $jadwal_id)
+    {
+        $query = DB::table('jadwals')
+            ->where('id', $jadwal_id);
+        if (config('exo.enable_cache')) {
+            $is_cached = $this->cache->isCached(CacheConstant::KEY_JADWAL, $jadwal_id);
+            if ($is_cached) {
+                $jadwal = $this->cache->getItem(CacheConstant::KEY_JADWAL, $jadwal_id);
+            } else {
+                $jadwal = $query->first();
+                if ($jadwal) {
+                    $this->cache->cache(CacheConstant::KEY_JADWAL, $jadwal_id, $jadwal);
+                }
+            }
+        } else {
+            $jadwal = $query->first();
+        }
+        return $jadwal;
     }
 
     /**
@@ -44,7 +70,7 @@ final class JadwalService extends AbstractService
     {
         $query = DB::table('jadwals')
             ->where([
-                'status_ujian'  => 1,
+                'status_ujian'  => JadwalConstant::STATUS_ACTIVE,
                 'tanggal'       => now()->format('Y-m-d')
             ])
             ->select([

@@ -14,6 +14,7 @@ use App\Services\Ujian\PilihanGandaKomplekService;
 use App\Services\Ujian\PilihanGandaService;
 use App\Services\Ujian\SetujuTidakService;
 use Exception;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
@@ -39,7 +40,7 @@ class UjianAktifController extends Controller
      * Ambil data ujian siswa yang belum diselesaikan pada hari ini
      *
      * @param DevUjianService $ujianService
-     * @return \Illuminate\Http\Response
+     * @return Response
      *
      * @author shellrean <wandinak17@gmail.com>
      */
@@ -71,7 +72,7 @@ class UjianAktifController extends Controller
      *
      * @param Request $request
      * @param CacheHandler $cache
-     * @return \Illuminate\Http\Response
+     * @return Response
      *
      * @author shellrean <wandinak17@gmail.com>
      */
@@ -191,7 +192,7 @@ class UjianAktifController extends Controller
      * Ambil ujian peserta yang sedang dikerjakan
      *
      * @param ShellreanDev\Services\Ujian\UjianService $ujianService
-     * @return \Illuminate\Http\Response
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function getUjianPesertaAktif(DevUjianService $ujianService)
@@ -221,7 +222,7 @@ class UjianAktifController extends Controller
      *
      * Mulai penghitungan waktu ujian
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function startUjianTime(JadwalService $jadwalService)
@@ -268,8 +269,9 @@ class UjianAktifController extends Controller
      *
      * Ambil soal dan jawaban siswa
      *
-     * @param ShellreanDev\Services\Ujian\UjianService $ujianService
-     * @return \Illuminate\Http\Response
+     * @param DevUjianService $devUjianService
+     * @param CacheHandler $cache
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function getJawabanPeserta(DevUjianService $devUjianService, CacheHandler $cache)
@@ -460,8 +462,8 @@ class UjianAktifController extends Controller
      *
      * Hasil ujian siswa
      *
-     * @param ShellreanDev\Services\JadwalService $jadwalService
-     * @return \Illuminate\Http\Response
+     * @param JadwalService $jadwalService
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function getHasilUjian(JadwalService $jadwalService)

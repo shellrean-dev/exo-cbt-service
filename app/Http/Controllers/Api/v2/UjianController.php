@@ -6,6 +6,7 @@ use App\Models\UjianConstant;
 use App\Services\Ujian\BenarSalahService;
 use App\Services\Ujian\EsayService;
 use App\Services\Ujian\IsianSingkatService;
+use App\Services\Ujian\JawabanPesertaService;
 use App\Services\Ujian\MengurutkanService;
 use App\Services\Ujian\MenjodohkanService;
 use App\Services\Ujian\PilihanGandaKomplekService;
@@ -16,9 +17,9 @@ use App\Http\Controllers\Controller;
 
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
-use ShellreanDev\Cache\CacheHandler;
 use ShellreanDev\Services\Ujian\UjianService;
 
 /**
@@ -36,11 +37,11 @@ class UjianController extends Controller
      *
      * @param Request $request
      * @param UjianService $ujianService
-     * @param CacheHandler $cache
-     * @return \Illuminate\Http\Response
+     * @param JawabanPesertaService $jawabanPesertaService
+     * @return Response
      * @throws Exception
      */
-    public function store(Request $request, UjianService $ujianService, CacheHandler $cache)
+    public function store(Request $request, UjianService $ujianService, JawabanPesertaService  $jawabanPesertaService)
     {
         $request->validate([
             'jawaban_id' => 'required',
@@ -49,9 +50,7 @@ class UjianController extends Controller
 
         $peserta = request()->get('peserta-auth');
 
-        $find = DB::table('jawaban_pesertas')
-            ->where('id', $request->jawaban_id)
-            ->first();
+        $find = $jawabanPesertaService->getJawaban($request->jawaban_id);
 
         if (!$find) {
             return SendResponse::badRequest(UjianConstant::NO_WORKING_ANSWER_FOUND);
@@ -115,18 +114,15 @@ class UjianController extends Controller
      *
      * @param Request $request
      * @param UjianService $ujianService
-     * @param CacheHandler $cache
-     * @return \Illuminate\Http\Response
+     * @param JawabanPesertaService $jawabanPesertaService
+     * @return Response
      * @throws Exception
      */
-    public function setRagu(Request $request, UjianService $ujianService, CacheHandler $cache)
+    public function setRagu(Request $request, UjianService $ujianService, JawabanPesertaService $jawabanPesertaService)
     {
         $peserta = request()->get('peserta-auth');
 
-        $find = DB::table('jawaban_pesertas')
-            ->where('id', $request->jawaban_id)
-            ->select('id','banksoal_id','soal_id','jawab','esay','ragu_ragu')
-            ->first();
+        $find = $jawabanPesertaService->getJawaban($request->jawaban_id);
 
         if (!$find) {
             return SendResponse::badRequest(UjianConstant::NO_WORKING_ANSWER_FOUND);
@@ -170,7 +166,7 @@ class UjianController extends Controller
      * Selesaikan ujian
      *
      * @param UjianService $ujianService
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function selesai(UjianService $ujianService)
     {

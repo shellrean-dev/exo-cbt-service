@@ -588,9 +588,7 @@ final class UjianService extends AbstractService
      */
     public function updateReminingTime(object $siswa_ujian)
     {
-        $deUjian = DB::table('jadwals')
-            ->where('id', $siswa_ujian->jadwal_id)
-            ->first();
+        $deUjian = $this->jadwalService->findJadwal($siswa_ujian->jadwal_id);
 
         # hitung perbedaan waktu
         # shadow dan waktu sekarang
@@ -602,7 +600,7 @@ final class UjianService extends AbstractService
             DB::table('siswa_ujians')
                 ->where('id', $siswa_ujian->id)
                 ->update([
-                    'sisa_waktu'    => $deUjian->lama-$diff_in_minutes
+                    'sisa_waktu'    => intval($deUjian->lama)-intval($diff_in_minutes)
                 ]);
         } catch (Exception $e) {
             throw new Exception($e->getMessage());
