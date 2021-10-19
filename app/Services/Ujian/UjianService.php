@@ -34,7 +34,7 @@ final class UjianService extends AbstractService
      * Jadwal Service
      * @var JadwalService
      */
-    protected $jadwalService;
+    protected JadwalService $jadwalService;
 
     /**
      * Inject dependency

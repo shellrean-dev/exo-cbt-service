@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Api\v2;
 
 use App\Http\Controllers\Controller;
 use App\Models\UjianConstant;
+use App\Services\Setting\SettingTokenService;
 use App\Services\Ujian\BenarSalahService;
 use App\Services\Ujian\EsayService;
 use App\Services\Ujian\IsianSingkatService;
@@ -74,7 +75,7 @@ class UjianAktifController extends Controller
      *
      * @author shellrean <wandinak17@gmail.com>
      */
-    public function startUjian(Request $request, CacheHandler $cache)
+    public function startUjian(Request $request, CacheHandler $cache, SettingTokenService  $tokenService)
     {
         $ujian = DB::table('jadwals')
             ->where('id', $request->jadwal_id)
@@ -92,18 +93,18 @@ class UjianAktifController extends Controller
             # Ambil token
             $token = Token::orderBy('id')->first();
             if($token) {
-                $to = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', now());
+                $to = Carbon::createFromFormat('Y-m-d H:i:s', now());
                 $from = $token->updated_at->format('Y-m-d H:i:s');
                 $differ = $to->diffInSeconds($from);
 
-                $setting_token = DB::table('settings')->where('name', 'token')->first();
+                $setting_token = $tokenService->getSetting();
 
                 if (!$setting_token) {
                     return SendResponse::badRequest('Kesalahan dalam installasi token, hubungi administrator');
                 }
 
                 $token_expired = intval($setting_token->value);
-                $token_expired = $token_expired ? $token_expired : 900;
+                $token_expired = $token_expired ?: 900;
 
                 if($differ > $token_expired) {
                     $token->token = strtoupper(Str::random(6));
