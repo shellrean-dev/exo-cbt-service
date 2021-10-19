@@ -60,7 +60,7 @@ class SettingTokenService implements SettingServiceInterface
      * @param string $value
      * @return bool
      */
-    public function setSetting(string $value)
+    public function setSetting(string $value): bool
     {
         DB::table('settings')->where('name', self::FIELD_SETTING)
             ->update(['value' => $value]);
