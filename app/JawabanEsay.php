@@ -9,6 +9,8 @@ class JawabanEsay extends Model
 {
     use Uuids;
 
+    protected $table = "penilaian_esay";
+
     /**
      * [$guarded description]
      * @var array
