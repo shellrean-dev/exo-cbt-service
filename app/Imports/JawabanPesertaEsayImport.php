@@ -66,6 +66,9 @@ class JawabanPesertaEsayImport implements ToCollection, WithStartRow
                     'jadwal_id'     => $jawab->jadwal_id,
                     'peserta_id'    => $jawab->peserta_id,
                 ])->first();
+                if (!$hasil) {
+                    continue;
+                }
 
                 # Hitung total pertanyaan
                 $jml_esay =  $jawab->jumlah_soal_esay;
