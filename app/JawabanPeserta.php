@@ -95,6 +95,6 @@ class JawabanPeserta extends Model
      */
     public function esay_result()
     {
-        return $this->hasOne(JawabanEsay::class,'jawab_id');
+        return $this->hasOne(PenilaianEsay::class,'jawab_id');
     }
 }

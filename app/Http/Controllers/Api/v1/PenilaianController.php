@@ -36,7 +36,7 @@ class PenilaianController extends Controller
         $user = request()->user('api');
         try {
             // Ambil semua jawaban yang telah dikoreksi
-            $has = DB::table('penilian_esay')
+            $has = DB::table('penilaian_esay')
                 ->select('jawab_id')
                 ->get()
                 ->pluck('jawab_id')
@@ -143,7 +143,7 @@ class PenilaianController extends Controller
             }
 
             // Ambil jawaban yang telah dikoreksi
-            $has = DB::table('penilian_esay')
+            $has = DB::table('penilaian_esay')
                 ->where('banksoal_id', $banksoal->id)
                 ->select('jawab_id')
                 ->get()
@@ -266,7 +266,7 @@ class PenilaianController extends Controller
 
         $user = request()->user('api');
 
-        $exists = DB::table('penilian_esay')
+        $exists = DB::table('penilaian_esay')
             ->where('jawab_id', $request->id)
             ->first();
         if ($exists) {
@@ -299,7 +299,7 @@ class PenilaianController extends Controller
                 ->update([
                     'point_esay'    => $hasil_esay
                 ]);
-            DB::table('penilian_esay')->insert([
+            DB::table('penilaian_esay')->insert([
                 'id'            => Str::uuid()->toString(),
                 'banksoal_id'   => $jawab->banksoal_id,
                 'peserta_id'    => $jawab->peserta_id,
@@ -452,7 +452,7 @@ class PenilaianController extends Controller
         }
 
         # Ambil jawaban yang telah dikoreksi
-        $has = DB::table('penilian_esay')
+        $has = DB::table('penilaian_esay')
             ->where('banksoal_id', $banksoal->id)
             ->select('jawab_id')
             ->get()

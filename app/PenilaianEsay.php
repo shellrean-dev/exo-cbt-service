@@ -5,7 +5,7 @@ namespace App;
 use App\Traits\Uuids;
 use Illuminate\Database\Eloquent\Model;
 
-class JawabanEsay extends Model
+class PenilaianEsay extends Model
 {
     use Uuids;
 
