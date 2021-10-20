@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Soal;
 use App\JawabanSoal;
+use Illuminate\Database\Eloquent\Model;
 use Maatwebsite\Excel\Row;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\OnEachRow;
@@ -20,14 +21,14 @@ class BanksoalImport implements OnEachRow, WithStartRow
      * [__construct description]
      * @param [type] $banksoal_id [description]
      */
-    public function __construct($banksoal_id) 
+    public function __construct($banksoal_id)
     {
         $this->banksoal_id = $banksoal_id;
     }
     /**
     * @param array $row
     *
-    * @return \Illuminate\Database\Eloquent\Model|null
+    * @return Model|null
     */
     public function onRow(Row $row)
     {

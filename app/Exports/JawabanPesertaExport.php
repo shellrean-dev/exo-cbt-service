@@ -4,6 +4,12 @@ namespace App\Exports;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
+/**
+ * Export jawaban peserta
+ *
+ * @author shellrean <wandinak17@gmail.com>
+ * @since 2.0.1 <latte>
+ */
 class JawabanPesertaExport extends ExportExcel
 {
     public static function export($data, $kode)

@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-class ExportExcel
+abstract class ExportExcel
 {
     protected static function styleGeneral()
     {

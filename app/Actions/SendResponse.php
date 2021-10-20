@@ -1,6 +1,8 @@
 <?php
 namespace App\Actions;
 
+use Illuminate\Http\JsonResponse;
+
 /**
  * SendResponse to client
  * @author shellrean <wandinak17@gmail.com>
@@ -12,7 +14,7 @@ class SendResponse
      * Status 403 Forbidden
      *
      * @param string $message
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public static function forbidden(string $message = '')
     {
@@ -26,7 +28,7 @@ class SendResponse
      * Status 404 Not Found
      *
      * @param string $message
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public static function notFound(string $message = '')
     {
@@ -40,7 +42,7 @@ class SendResponse
      * Status 400 Bad Request
      *
      * @param string $message
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public static function badRequest(string $message = '')
     {
@@ -54,7 +56,7 @@ class SendResponse
      * Status 200 Accept
      *
      * @param string $message
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public static function accept(string $message = '')
     {
@@ -68,7 +70,7 @@ class SendResponse
      * Status 200 Accept data
      *
      * @param mixed $data
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public static function acceptData($data)
     {
@@ -82,7 +84,7 @@ class SendResponse
      * Status 200 Accept data custom
      *
      * @param mixed $data
-     * @return  \Illuminate\Http\Response
+     * @return  JsonResponse
      */
     public static function acceptCustom($data)
     {
@@ -93,7 +95,7 @@ class SendResponse
      * Status 500 Internal server error
      *
      * @param string $message
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public static function internalServerError(string $message = '')
     {

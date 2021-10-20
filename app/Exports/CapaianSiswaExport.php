@@ -6,6 +6,12 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Capaian siswa export
+ *
+ * @author shellrean <wandinak17@gmail.com>
+ * @since 2.0.1 <latte>
+ */
 class CapaianSiswaExport extends ExportExcel
 {
     public static function export($datas, string $banksoal, string $jadwal)
@@ -32,7 +38,7 @@ class CapaianSiswaExport extends ExportExcel
         foreach (range(1, $datas['soals']->count()) as $index) {
             $sheet->setCellValue($column_header.'3', $index);
             $sheet->getStyle($column_header.'3')->applyFromArray(self::styleYellow());
-        
+
             $column_header++;
         }
         $sheet->setCellValue($column_header.'3', 'TOTAL');
