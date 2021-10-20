@@ -21,7 +21,7 @@ class GroupMemberController extends Controller
      *
      * Ambil data member grup
      *
-     * @return App\Actions\SendResponse
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function index()
@@ -121,7 +121,7 @@ class GroupMemberController extends Controller
                 ->join('pesertas', 'pesertas.id', '=', 'group_members.student_id')
                 ->select(['pesertas.no_ujian'])
                 ->get();
-            if ($exists) {
+            if (count($exists)) {
                 return SendResponse::badRequest('No ujian '.$exists->pluck('no_ujian')->values().' telah terdaftar di group');
             }
 
