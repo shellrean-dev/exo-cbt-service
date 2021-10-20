@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use App\Actions\SendResponse;
+use Exception;
 use Illuminate\Http\Request;
 use App\Jurusan;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -19,7 +21,7 @@ class JurusanController extends Controller
      *
      *  Display list of the source
      *
-     *  @return  App\Actions\SendResponse
+     *  @return  Response
      *  @author shellrean <wandinak17@gmail.com>
      */
     public function index()
@@ -42,7 +44,7 @@ class JurusanController extends Controller
      *
      * Store jurusan new
      *
-     *  @return App\Actions\SendResponse
+     *  @return Response
      *  @author shellrean <wandinak17@gmail.com>
      */
     public function store(Request $request)
@@ -51,8 +53,19 @@ class JurusanController extends Controller
             'nama' => 'required',
         ]);
 
+        if (isset($request->kode)) {
+            $kode = $request->kode;
+
+            $find = DB::table('jurusans')->where('kode', $kode)->count();
+            if ($find) {
+                return SendResponse::badRequest('Kode jurusan sudah dipakai');
+            }
+        } else {
+            $kode = uniqid();
+        }
+
         Jurusan::create([
-            'kode' => uniqid(),
+            'kode' => $kode,
             'nama' => $request->nama
         ]);
         return SendResponse::accept();
@@ -63,8 +76,8 @@ class JurusanController extends Controller
      *
      * Get jurusan by id
      *
-     * @param App\Jurusan $jurusan
-     * @return  App\Actions\SendResponse
+     * @param Jurusan $jurusan
+     * @return  Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function show(Jurusan $jurusan)
@@ -77,19 +90,25 @@ class JurusanController extends Controller
      *
      * Update jurusan by id
      *
-     * @param Illuminate\Http\Request $request
-     * @param App\Jurusan $jurusan
-     * @return App\Actions\SendResponse
+     * @param Request $request
+     * @param Jurusan $jurusan
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
-     *
      */
     public function update(Request $request, Jurusan $jurusan)
     {
         $request->validate([
             'nama' => 'required',
+            'kode' => 'required'
         ]);
 
+        $find = DB::table('jurusans')->where('kode', $request->kode)->first();
+        if ($find && $find->id != $jurusan->id) {
+            return SendResponse::badRequest('Kode jurusan sudah dipakai');
+        }
+
         $jurusan->nama = $request->nama;
+        $jurusan->kode = $request->kode;
         $jurusan->save();
 
         return SendResponse::acceptData($jurusan);
@@ -100,8 +119,9 @@ class JurusanController extends Controller
      *
      * Delete Jurusan by id
      *
-     * @param App\Jurusan $jurusan
-     * @return App\Actions\SendResponse
+     * @param Jurusan $jurusan
+     * @return Response
+     * @throws Exception
      * @author shellrean <wandinak17@gmail.com>
      */
     public function destroy(Jurusan $jurusan)
@@ -115,7 +135,7 @@ class JurusanController extends Controller
      *
      * Get all jurusan
      *
-     * @return  \App\Actions\SendResponse
+     * @return  Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function allData()
@@ -129,8 +149,8 @@ class JurusanController extends Controller
      *
      * Multiple destroy jurusan
      *
-     * @param Iluminate\Http\Request
-     * @return App\Actions\SendResponse
+     * @param Request $request
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function destroyMultiple(Request $request)
