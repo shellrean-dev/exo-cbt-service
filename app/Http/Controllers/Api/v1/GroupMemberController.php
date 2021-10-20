@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Response;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
 use App\Imports\GroupMemberImport;
@@ -21,7 +22,7 @@ class GroupMemberController extends Controller
      *
      * Ambil data member grup
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function index()
@@ -69,8 +70,8 @@ class GroupMemberController extends Controller
      *
      * Buat data member baru
      *
-     * @param Illuminate\Http\Request $request
-     * @return App\Actions\SendResponse
+     * @param Request $request
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function store(Request $request)
@@ -95,12 +96,12 @@ class GroupMemberController extends Controller
     }
 
     /**
-     * @Route(path="api/v1/group_members/multiple", methods={"POST})
+     * @Route(path="api/v1/group_members/multiple", methods={"POST"})
      *
      * Buat multi-data member baru
      *
-     * @param Illuminate\Http\Request $request
-     * @return App\Actions\SendResponse
+     * @param Request $request
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function multiStore(Request $request)
@@ -146,8 +147,8 @@ class GroupMemberController extends Controller
      * Import multi-data member
      * dari excel
      *
-     * @param Illuminate\Http\Request $request
-     * @return App\Actions\SendResponse;
+     * @param Request $request
+     * @return Response;
      * @author shellrean <wandinak17@gmail.com>
      */
     public function multiStoreImport(Request $request)
@@ -170,7 +171,7 @@ class GroupMemberController extends Controller
      * Hapus data member
      *
      * @param string $member_id
-     * @return App\Actions\SendResponse
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function destroy($member_id)
@@ -198,7 +199,7 @@ class GroupMemberController extends Controller
      *
      * Hapus multi-data member
      *
-     * @return  App\Actions\SendResponse
+     * @return  Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function multiDestroy()
