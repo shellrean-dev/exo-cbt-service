@@ -132,6 +132,10 @@ class JurusanController extends Controller
      */
     public function destroy(Jurusan $jurusan)
     {
+        $used = DB::table('pesertas')->where('jurusan_id', $jurusan->id)->count();
+        if ($used) {
+            return SendResponse::badRequest('Tidak bisa menghapus jurusan. ['.$used.'] peserta menggunakan jurusan ini');
+        }
         $jurusan->delete();
         return SendResponse::accept();
     }
@@ -166,6 +170,11 @@ class JurusanController extends Controller
         ]);
 
         $jurusans = $request->jurusan_id;
+
+        $used = DB::table('pesertas')->whereIn('jurusan_id', $jurusans)->count();
+        if ($used) {
+            return SendResponse::badRequest('Jurusan telah digunakan oleh peserta');
+        }
 
         DB::beginTransaction();
 
