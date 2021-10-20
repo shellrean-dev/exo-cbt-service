@@ -48,7 +48,7 @@ class JawabanPesertaEsayImport implements ToCollection, WithStartRow
                 }
 
                 # cek apakah jawaban pernah disimpan sebelumnya
-                $exists = DB::table('jawaban_esays')
+                $exists = DB::table('penilian_esay')
                     ->where('jawab_id', $row[0])
                     ->first();
                 if ($exists) {
@@ -90,7 +90,7 @@ class JawabanPesertaEsayImport implements ToCollection, WithStartRow
                         ->update([
                             'point_esay'    => $hasil_esay
                         ]);
-                    DB::table('jawaban_esays')->insert([
+                    DB::table('penilian_esay')->insert([
                         'id'            => Str::uuid()->toString(),
                         'banksoal_id'   => $jawab->banksoal_id,
                         'peserta_id'    => $jawab->peserta_id,

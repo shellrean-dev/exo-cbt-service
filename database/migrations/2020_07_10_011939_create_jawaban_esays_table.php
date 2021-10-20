@@ -13,7 +13,7 @@ class CreateJawabanEsaysTable extends Migration
      */
     public function up()
     {
-        Schema::create('jawaban_esays', function (Blueprint $table) {
+        Schema::create('penilian_esay', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('banksoal_id');
             $table->uuid('peserta_id');
@@ -36,6 +36,6 @@ class CreateJawabanEsaysTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('jawaban_esays');
+        Schema::dropIfExists('penilian_esay');
     }
 }
