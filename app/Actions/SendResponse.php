@@ -2,6 +2,7 @@
 namespace App\Actions;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 /**
  * SendResponse to client
@@ -14,94 +15,108 @@ class SendResponse
      * Status 403 Forbidden
      *
      * @param string $message
-     * @return JsonResponse
+     * @return Response
      */
     public static function forbidden(string $message = '')
     {
-        return response()->json([
+        return new Response([
             'error' => true,
             'message' => $message != '' ? $message : 'you do not have access to this source'
-        ],403);
+        ],403, [
+            'Content-Type' => 'application/json'
+        ]);
     }
 
     /**
      * Status 404 Not Found
      *
      * @param string $message
-     * @return JsonResponse
+     * @return Response
      */
     public static function notFound(string $message = '')
     {
-        return response()->json([
+        return new Response([
             'error' => true,
             'message' => $message != '' ? $message : 'data not found'
-        ],404);
+        ],404, [
+            'Content-Type' => 'application/json'
+        ]);
     }
 
     /**
      * Status 400 Bad Request
      *
      * @param string $message
-     * @return JsonResponse
+     * @return Response
      */
     public static function badRequest(string $message = '')
     {
-        return response()->json([
+        return new Response([
             'error' => true,
             'message' => $message != '' ? $message : 'bad request'
-        ],400);
+        ],400, [
+            'Content-Type' => 'application/json'
+        ]);
     }
 
     /**
      * Status 200 Accept
      *
      * @param string $message
-     * @return JsonResponse
+     * @return Response
      */
     public static function accept(string $message = '')
     {
-        return response()->json([
+        return new Response([
             'error' => false,
             'message' => $message != '' ? $message : 'success'
-        ],200);
+        ],200, [
+            'Content-Type' => 'application/json'
+        ]);
     }
 
     /**
      * Status 200 Accept data
      *
      * @param mixed $data
-     * @return JsonResponse
+     * @return Response
      */
     public static function acceptData($data)
     {
-        return response()->json([
+        return new Response([
             'error' => false,
             'data' => $data
-        ], 200);
+        ], 200, [
+            'Content-Type' => 'application/json'
+        ]);
     }
 
     /**
      * Status 200 Accept data custom
      *
      * @param mixed $data
-     * @return  JsonResponse
+     * @return  Response
      */
     public static function acceptCustom($data)
     {
-        return response()->json($data, 200);
+        return new Response($data, 200, [
+            'Content-Type' => 'application/json'
+        ]);
     }
 
     /**
      * Status 500 Internal server error
      *
      * @param string $message
-     * @return JsonResponse
+     * @return Response
      */
     public static function internalServerError(string $message = '')
     {
-        return response()->json([
+        return new Response([
             'error' => true,
             'message' => $message != '' ? $message : 'internal server error'
-        ],500);
+        ], 500, [
+            'Content-Type' => 'application/json'
+        ]);
     }
 }
