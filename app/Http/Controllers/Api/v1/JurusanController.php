@@ -101,6 +101,12 @@ class JurusanController extends Controller
             'nama' => 'required',
             'kode' => 'required'
         ]);
+        if ($request->kode != $jurusan->kode) {
+            $find = DB::table('pesertas')->where('jurusan_id', $jurusan->id)->count();
+            if ($find > 0) {
+                return SendResponse::badRequest('Jurusan sudah digunakan oleh peserta, tidak boleh edit kode jurusan');
+            }
+        }
 
         $find = DB::table('jurusans')->where('kode', $request->kode)->first();
         if ($find && $find->id != $jurusan->id) {
