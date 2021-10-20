@@ -4,6 +4,7 @@ namespace App\Services\Ujian;
 
 use App\Actions\SendResponse;
 use App\Models\SoalConstant;
+use Exception;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;

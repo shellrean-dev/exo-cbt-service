@@ -101,7 +101,7 @@ class JadwalController extends Controller
             # cocokan antara group jadwal dan group siswa
             if ($jadwal->group_ids != '') {
                 $groups = json_decode($jadwal->group_ids, true);
-                if (is_array($groups)) {
+                if (is_array($groups) && count($groups) > 0) {
 
                     # peserta tidak memiliki group
                     if ($peserta->group == null) {
