@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Exports\CapaianPesertaUjianExport;
 use App\Models\dto\ResultDataTransform;
 use App\Models\SoalConstant;
 use Illuminate\Http\Request;
@@ -345,9 +346,8 @@ class ResultController extends Controller
         $jurusan = request()->jurusan;
         $group = request()->group;
 
-        $soals = Soal::where(function($query) use($banksoal) {
-            $query->where('banksoal_id', $banksoal->id)
-            ->whereIn('tipe_soal',[
+        $soals = DB::table('soals')->where('banksoal_id', $banksoal->id)
+            ->whereIn('tipe_soal', [
                 SoalConstant::TIPE_PG,
                 SoalConstant::TIPE_LISTENING,
                 SoalConstant::TIPE_PG_KOMPLEK,
@@ -355,12 +355,15 @@ class ResultController extends Controller
                 SoalConstant::TIPE_ISIAN_SINGKAT,
                 SoalConstant::TIPE_MENGURUTKAN,
                 SoalConstant::TIPE_BENAR_SALAH
-            ]);
-        })->get();
+            ])
+            ->orderBy('soals.tipe_soal')
+            ->orderBy('soals.created_at')
+            ->select(['id', 'tipe_soal'])
+            ->get();
 
-        $sss = JawabanPeserta::with(['peserta' => function($query) {
-            $query->select('id','nama','no_ujian');
-        }]);
+        $jawaban_pesertas = DB::table('jawaban_pesertas')->join('pesertas', 'pesertas.id', '=', 'jawaban_pesertas.peserta_id');
+        $pesertas = DB::table('pesertas');
+
 
         if ($group != 0 && $group != '') {
             $groupObj = DB::table('groups')
@@ -374,60 +377,39 @@ class ResultController extends Controller
                     ->pluck('id')
                     ->toArray();
                 array_push($childs, $group);
-                $sss->whereHas('group', function($query) use ($childs) {
-                    $query->whereIn('group_id', $childs);
-                });
+                $jawaban_pesertas = $jawaban_pesertas->join('group_members', 'group_members.student_id', '=', 'jawaban_pesertas.peserta_id')->whereIn('group_members.group_id', $childs);
+                $pesertas = $pesertas->join('group_members', 'group_members.student_id', '=', 'pesertas.id')->whereIn('group_members.group_id', $childs);
             } else {
-                $sss->whereHas('group', function($query) use ($group) {
-                    $query->where('group_id', $group);
-                });
+                $jawaban_pesertas = $jawaban_pesertas->join('group_members', 'group_members.student_id', '=', 'jawaban_pesertas.peserta_id')->where('group_members.group_id', $group);
+                $pesertas = $pesertas->join('group_members', 'group_members.student_id', '=', 'pesertas.id')->where('group_members.group_id', $group);
             }
         }
 
         if ($jurusan != 0 && $jurusan != '') {
             $jurusan = explode(',',$jurusan);
-            $sss->whereHas('peserta', function($query) use ($jurusan) {
-                $query->whereIn('jurusan_id', $jurusan);
-            });
+            $jawaban_pesertas = $jawaban_pesertas->whereIn('pesertas.jurusan_id', $jurusan);
+            $pesertas = $pesertas->whereIn('pesertas.jurusan_id', $jurusan);
         }
 
+        $jawaban_pesertas = $jawaban_pesertas->select([
+            'jawaban_pesertas.id',
+            'jawaban_pesertas.soal_id',
+            'jawaban_pesertas.peserta_id',
+            'jawaban_pesertas.iscorrect',
+        ])->get();
+        $pesertas = $pesertas->select([
+            'pesertas.id',
+            'pesertas.no_ujian',
+            'pesertas.nama'
+        ])->get();
 
-        $sss = $sss->whereHas('pertanyaan', function($query) {
-            $query->whereIn('tipe_soal',[
-                SoalConstant::TIPE_PG,
-                SoalConstant::TIPE_LISTENING,
-                SoalConstant::TIPE_PG_KOMPLEK,
-                SoalConstant::TIPE_MENJODOHKAN,
-                SoalConstant::TIPE_ISIAN_SINGKAT,
-                SoalConstant::TIPE_MENGURUTKAN,
-                SoalConstant::TIPE_BENAR_SALAH
-            ]);
-        })
-        ->where([
-            'banksoal_id' => $banksoal->id,
-            'jadwal_id' => $jadwal->id
-        ])
-        ->orderBy('soal_id')
-        ->select('id','iscorrect','peserta_id', 'soal_id')
-        ->get();
-
-        $grouped = $sss->groupBy('peserta_id');
-
-        $fill = $grouped->map(function($value, $key) {
-            return [
-                'peserta' => [
-                    'no_ujian' => $value[0]->peserta->no_ujian,
-                    'nama' => $value[0]->peserta->nama
-                ],
-                'data' => $value
-            ];
-        })->sortBy('peserta.no_ujian');
         $data = [
-            'pesertas' => $fill,
+            'pesertas' => $pesertas,
+            'jawaban_pesertas' => $jawaban_pesertas,
             'soals' => $soals
         ];
 
-        $spreadsheet = CapaianSiswaExport::export($data, $banksoal->kode_banksoal, $jadwal->alias);
+        $spreadsheet = CapaianPesertaUjianExport::run($data, $banksoal->kode_banksoal, $jadwal->alias);
         $writer = new Xlsx($spreadsheet);
 
         $filename = 'Capaian siswa '.$banksoal->kode_banksoal.' '.$jadwal->alias;

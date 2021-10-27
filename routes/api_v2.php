@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 /**
  * @version 2 request
  * @handle for peserta only
- * 
+ *
  * @author shellrean <wandinak17@gmail.com>
  */
 Route::namespace('Api\v2')->group(function() {
@@ -22,7 +22,7 @@ Route::namespace('Api\v2')->group(function() {
         Route::post('ujians/start', 'UjianAktifController@startUjian');
         Route::post('ujians/start/time', 'UjianAktifController@startUjianTime');
         Route::get('ujians/filled', 'UjianAktifController@getJawabanPeserta');
-        Route::get('ujian/hasils', 'UjianAktifController@getHasilUjian');
+        Route::post('ujian/hasils', 'UjianAktifController@getHasilUjian');
         Route::post('ujian','UjianController@store');
         Route::post('ujian/ragu-ragu', 'UjianController@setRagu');
         Route::get('ujian/selesai', 'UjianController@selesai');

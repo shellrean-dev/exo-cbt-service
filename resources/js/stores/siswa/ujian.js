@@ -392,7 +392,7 @@ function getHasilUjian({ commit }) {
     return new Promise(async(resolve, reject) => {
         try {
             commit('SET_LOADING', true, { root: true })
-            let network = await $axios.get(endpoint.hasils)
+            let network = await $axios.post(endpoint.hasils)
 
             commit('ASSIGN_HASIL_UJIAN', network.data.data)
             commit('SET_LOADING', false, { root: true })
