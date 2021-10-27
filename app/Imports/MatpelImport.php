@@ -24,8 +24,12 @@ class MatpelImport implements ToCollection, WithStartRow
         foreach($rows as $row) {
             if($row->filter()->isNotEmpty()) {
                 $agama_kodes[] = $row[2];
-                if ($row[3] !== 0) {
-                    $jurusan_kodes = array_merge($jurusan_kodes, json_decode($row[3], true));
+                if ($row[3] !== 0 && $row[3] !== "[]") {
+                    $tmp_jurusan = explode(",", $row[3]);
+
+                    if (!is_null($tmp_jurusan) && is_array($tmp_jurusan) && count($tmp_jurusan)) {
+                        $jurusan_kodes = array_merge($jurusan_kodes, $tmp_jurusan);
+                    }
                 }
                 $matpels[] = [
                     'id' => Str::uuid()->toString(),
@@ -48,14 +52,17 @@ class MatpelImport implements ToCollection, WithStartRow
             }
             if ($item['jurusan_id'] !== 0) {
                 $real_jurusan = [];
-                foreach(json_decode($item['jurusan_id'], true) as $jurusan) {
-                    $real_jurusan[] = $jurusans->where('kode', $jurusan)->first()->id;
+                foreach(explode(",",$item['jurusan_id']) as $jurusan) {
+                    $jurusan_concrit = $jurusans->where('kode', $jurusan)->first();
+                    if ($jurusan_concrit) {
+                        $real_jurusan[] = $jurusan_concrit->id;
+                    }
                 }
                 $item['jurusan_id'] = json_encode($real_jurusan);
             }
             return $item;
         }, $matpels);
-        
+
         try {
             DB::table('matpels')->insert($real);
         } catch (Exception $e) {

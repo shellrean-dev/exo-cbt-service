@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Response;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
 use App\Imports\MatpelImport;
@@ -18,7 +19,7 @@ class MatpelController extends Controller
 {
     /**
      * @Route(path="api/v1/matpels", methods={"GET"})
-     * 
+     *
      * Display a listing of the resource.
      *
      * @return App\Actions\SendResponse
@@ -38,7 +39,7 @@ class MatpelController extends Controller
 
     /**
      * @Route(path="api/v1/matpels", methods={"POST"})
-     * 
+     *
      * Store a newly created resource in storage.
      *
      * @param  Illuminate\Http\Request  $request
@@ -60,12 +61,12 @@ class MatpelController extends Controller
             'agama_id'  => ($request->agama_id != '' ? $request->agama_id : 0)
         ];
         $data = Matpel::create($data);
-        return SendResponse::acceptData($data);        
+        return SendResponse::acceptData($data);
     }
 
     /**
      * @Route(path="api/v1/matpels/{matpel}", methods={"GET"})
-     * 
+     *
      * Display the specified resource.
      *
      * @param  App\Matpel $matpel
@@ -79,7 +80,7 @@ class MatpelController extends Controller
 
     /**
      * @Route(path="api/v1/matpels/{matpel}", methods={"PUT","PATCH"s})
-     * 
+     *
      * Update the specified resource in storage.
      *
      * @param Illuminate\Http\Request  $request
@@ -106,7 +107,7 @@ class MatpelController extends Controller
 
     /**
      * @Route(path="api/v1/matpels/{matpel}", methods={"DELETE"})
-     * 
+     *
      * Remove the specified resource from storage.
      *
      * @param App\Matpel $matpel
@@ -121,7 +122,7 @@ class MatpelController extends Controller
 
     /**
      * @Route(path="api/v1/matpls/all", methods={"GET"})
-     * 
+     *
      * Display all of the resource.
      *
      * @return App\Actions\SendResponse
@@ -135,9 +136,9 @@ class MatpelController extends Controller
 
     /**
      * @Route(path="api/v1/matpels/upload", methods={"POST"})
-     * 
-     * @param  Illuminate\Http\Request $request
-     * @return App\Actions\SendResponse
+     *
+     * @param Request $request
+     * @return Response
      */
     public function import(Request $request)
     {
@@ -159,7 +160,7 @@ class MatpelController extends Controller
 
     /**
      * @Route(path="api/v1/matpels/delete-multiple", methods={"POST"})
-     * 
+     *
      * Delete multiple matpel
      *
      * @param Illuminate\Http\Request $request
