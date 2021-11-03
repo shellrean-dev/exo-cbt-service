@@ -71,7 +71,7 @@ class SettingController extends Controller
 
         $value = json_decode($setting->value, true);
         $sekolah_name = isset($value['nama_sekolah']) ? $value['nama_sekolah'] : '';
-        $logo = isset($value['logo']) && $value['logo'] != '' ? env('APP_URL').'/storage/'.$value['logo'] : '';
+        $logo = isset($value['logo']) && $value['logo'] != '' ? config('app.url').'/storage/'.$value['logo'] : '';
 
         return SendResponse::acceptData([
             'sekolah_name'  => $sekolah_name,

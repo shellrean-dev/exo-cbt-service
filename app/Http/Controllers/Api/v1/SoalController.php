@@ -85,21 +85,29 @@ class SoalController extends Controller
 
             $soal = Soal::create($data);
 
-            if(in_array($request->tipe_soal, [1,3,4,5,6,7,8,9])) {
+            if(in_array($request->tipe_soal, [
+                SoalConstant::TIPE_PG,
+                SoalConstant::TIPE_LISTENING,
+                SoalConstant::TIPE_PG_KOMPLEK,
+                SoalConstant::TIPE_MENJODOHKAN,
+                SoalConstant::TIPE_ISIAN_SINGKAT,
+                SoalConstant::TIPE_MENGURUTKAN,
+                SoalConstant::TIPE_BENAR_SALAH,
+                SoalConstant::TIPE_SETUJU_TIDAK
+            ])) {
                 $data = [];
                 foreach($request->pilihan as $key => $pilihan) {
-                    if(in_array($request->tipe_soal, [1,3])) { // The tipe soal is PG, Listening
+                    if(in_array($request->tipe_soal, [SoalConstant::TIPE_PG,SoalConstant::TIPE_LISTENING])) {
                         $correct = $request->correct == $key ? '1' : '0';
                     }
-                    else if(in_array($request->tipe_soal, [4,8])) { // The tipe soal is PG Komplek and Benar/salah
+                    else if(in_array($request->tipe_soal, [SoalConstant::TIPE_PG_KOMPLEK,SoalConstant::TIPE_BENAR_SALAH])) {
                         $correct = in_array($key, $request->selected) ? '1' : '0';
                     }
                     else {
                         $correct = '0';
                     }
 
-                    // If type question menjodohkan
-                    if ($request->tipe_soal == 5) {
+                    if ($request->tipe_soal == SoalConstant::TIPE_MENJODOHKAN) {
                         $pair = [
                             "a"  => [
                                 "id"    => "a".uniqid(),
@@ -255,8 +263,8 @@ class SoalController extends Controller
      *
      * Update the specified resource in storage.
      *
-     * @param Illuminate\Http\Request  $request
-     * @param App\Soal $soal
+     * @param Request $request
+     * @param Soal $soal
      * @return Response
      */
     public function update(Request $request, Soal $soal)
@@ -308,22 +316,30 @@ class SoalController extends Controller
 
             $soal->save();
 
-            if(in_array($request->tipe_soal, [1,3,4,5,6,7,8,9])) {
+            if(in_array($request->tipe_soal, [
+                SoalConstant::TIPE_PG,
+                SoalConstant::TIPE_LISTENING,
+                SoalConstant::TIPE_PG_KOMPLEK,
+                SoalConstant::TIPE_MENJODOHKAN,
+                SoalConstant::TIPE_ISIAN_SINGKAT,
+                SoalConstant::TIPE_MENGURUTKAN,
+                SoalConstant::TIPE_BENAR_SALAH,
+                SoalConstant::TIPE_SETUJU_TIDAK
+            ])) {
                 DB::table('jawaban_soals')->where('soal_id',$request->soal_id)->delete();
                 $data = [];
                 foreach($request->pilihan as $key=>$pilihan) {
-                    if(in_array($request->tipe_soal, [1,3])) { // The tipe soal is PG, Listening
+                    if(in_array($request->tipe_soal, [SoalConstant::TIPE_PG,SoalConstant::TIPE_LISTENING])) {
                         $correct = $request->correct == $key ? '1' : '0';
                     }
-                    else if(in_array($request->tipe_soal, [4,8])) { // The tipe soal is PG Komplek and benar/salah
+                    else if(in_array($request->tipe_soal, [SoalConstant::TIPE_PG_KOMPLEK,SoalConstant::TIPE_BENAR_SALAH])) {
                         $correct = in_array($key, $request->selected) ? '1' : '0';
                     }
                     else {
                         $correct = '0';
                     }
 
-                    // If type question menjodohkan
-                    if ($request->tipe_soal == 5) {
+                    if ($request->tipe_soal == SoalConstant::TIPE_MENJODOHKAN) {
                         $pair = [
                             "a"  => [
                                 "id"    => "a".uniqid(),
@@ -360,8 +376,8 @@ class SoalController extends Controller
      *
      * Remove the specified resource from storage.
      *
-     * @param  App\Soal $soal
-     * @return Illuminate\Http\Response
+     * @param Soal $soal
+     * @return Response
      */
     public function destroy(Soal $soal)
     {
@@ -391,7 +407,7 @@ class SoalController extends Controller
      *
      * Delete multiple question
      *
-     * @return App\Actions\SendResponse
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function multipleDestroy()
@@ -452,8 +468,8 @@ class SoalController extends Controller
      *
      * Get soal by banksoal
      *
-     * @param App\Banksoal $banksoal
-     * @return App\Actions\SendResponse
+     * @param Banksoal $banksoal
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function getSoalByBanksoalAll(Banksoal $banksoal)
