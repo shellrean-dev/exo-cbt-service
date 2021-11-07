@@ -428,11 +428,19 @@ class UjianAktifController extends Controller
             try {
                 DB::beginTransaction();
 
+                $hasilUjian = DB::table('hasil_ujians')->where([
+                    'peserta_id'    => $peserta->id,
+                    'jadwal_id'     => $jadwal->id,
+                ])->count();
+
+                if (!$hasilUjian) {
+                    $devUjianService->finishing($banksoal_id, $jadwal->id, $peserta->id);
+                }
+
                 DB::table('siswa_ujians')
                     ->where('id', $ujian->id)
                     ->update(['status_ujian' => 1]);
 
-                $devUjianService->finishing($banksoal_id, $jadwal->id, $peserta->id);
                 DB::commit();
             } catch (Exception $e) {
                 DB::rollBack();

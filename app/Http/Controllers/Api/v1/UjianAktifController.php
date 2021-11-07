@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
@@ -189,8 +190,9 @@ class UjianAktifController extends Controller
      *
      * @param string $jadwal_id
      * @param string $peserta_id
-     * @param ShellreanDev\Services\UjianService $ujianService
-     * @return App\Actions\SendResponse
+     * @param DevUjianService $ujianService
+     * @param CacheHandler $cache
+     * @return Response
      */
     public function closePeserta($jadwal_id, $peserta_id, DevUjianService $ujianService, CacheHandler $cache)
     {
@@ -226,9 +228,6 @@ class UjianAktifController extends Controller
                 'api_token' => ''
             ]);
 
-//            $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta_id));
-//            $cache->cache($key, '', 0);
-
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
@@ -243,9 +242,9 @@ class UjianAktifController extends Controller
      * Multi paksa selesaikan ujian peserta
      *
      * @param string $jadwal_id
-     * @param string $peserta_id
-     * @param ShellreanDev\Services\UjianService $ujianService
-     * @return App\Actions\SendResponse
+     * @param DevUjianService $ujianService
+     * @param CacheHandler $cache
+     * @return Response
      */
     public function multiClosePeserta($jadwal_id, DevUjianService $ujianService, CacheHandler $cache)
     {
@@ -297,12 +296,6 @@ class UjianAktifController extends Controller
                 ->update([
                     'api_token' => ''
                 ]);
-
-//            foreach ($unfinishPeserta as $peserta) {
-                // remove completed jadwal cache
-//                $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta));
-//                $cache->cache($key, '', 0);
-//            }
 
             DB::commit();
         } catch (\Exception $e) {
