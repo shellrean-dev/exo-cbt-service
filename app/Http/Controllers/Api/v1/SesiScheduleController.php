@@ -20,11 +20,11 @@ class SesiScheduleController extends Controller
 {
     /**
      * @Route(path="api/v1/sesi", methods={"GET"})
-     * 
+     *
      * Get student on sesi
      *
      * @param Illuminate\Http\Request
-     * @return App\Actions\SendResponse
+     * @return \Illuminate\Http\Response
      * @since 2.0.0
      * @author shellrean <wandinak17@gmail.com>
      */
@@ -55,7 +55,7 @@ class SesiScheduleController extends Controller
 
     /**
      * @Route(path="api/v1/sesi", methods={"POST"})
-     * 
+     *
      * Push student to sesi
      *
      * @param Illuminate\Http\Request
@@ -106,7 +106,7 @@ class SesiScheduleController extends Controller
 
     /**
      * @Route(path="api/v1/sesi", methods={"DELETE"})
-     * 
+     *
      * Remove siswa from sesi
      *
      * @param Illuminate\Http\Request
@@ -145,7 +145,7 @@ class SesiScheduleController extends Controller
 
     /**
      * @Route(path="api/v1/import", methods={"POST"})
-     * 
+     *
      * Import sesi schedule from sesi
      *
      * @param Illuminate\Http\Request
@@ -174,9 +174,9 @@ class SesiScheduleController extends Controller
 
     /**
      * @Route(path="api/v1/sesi/copy", methods={"POST"})
-     * 
+     *
      * Copy sesi dari default siswa
-     * 
+     *
      * @param Illuminate\Http\Request
      * @since 2.0.0
      * @author shellrean <wandinak17@gmail.com>
@@ -205,12 +205,12 @@ class SesiScheduleController extends Controller
                 'updated_at' => now(),
             ]);
         }
-        
+
         try {
             DB::beginTransaction();
-            
+
             DB::table('sesi_schedules')->where('jadwal_id', $request->jadwal_id)->delete();
-            
+
             DB::table('sesi_schedules')->insert($data);
             DB::commit();
         } catch (\Exception $e) {

@@ -8,8 +8,8 @@ return [
     |
     */
     'version' => [
-        'name' => 'ristretto',
-        'code' => '3.0.0'
+        'name' => env('EXO_APP_VERSION_NAME', 'ristretto'),
+        'code' => env('EXO_APP_VERSION_CODE', '3.0.0'),
     ],
 
     /*

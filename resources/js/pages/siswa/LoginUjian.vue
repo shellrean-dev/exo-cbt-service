@@ -75,7 +75,7 @@
       </div>
     </div>
     <div class="fixed bottom-0 left-0 w-full border-t border-gray-300 text-gray-600 py-2 px-4 text-center bg-white">
-	    <span class="text-sm">&copy; 2021 Extraordinary CBT v3.0.0 - ristretto</span>
+      <span class="text-sm">&copy; 2019 - {{ year }} Extraordinary CBT {{ version }}</span>
     </div>
   </div>
 </template>
@@ -88,10 +88,15 @@ import { showSweetError } from '../../entities/alert'
 			  data: {
 				  no_ujian: '',
 				  password: ''
-			  }
+			  },
+        year: '',
+        version: process.env.MIX_APP_VERSION
 		  }
 	  },
 	  created() {
+      let d = new Date()
+      this.year = d.getFullYear()
+
 		  if (this.isAuth) {
 			  this.$router.replace({ name: 'ujian.konfirm' })
 		  }

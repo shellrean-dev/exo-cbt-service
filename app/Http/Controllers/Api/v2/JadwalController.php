@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
 use App\Group;
 
+use Ramsey\Uuid\Uuid;
 use ShellreanDev\Cache\CacheHandler;
 use ShellreanDev\Services\Jadwal\JadwalService;
 
@@ -63,7 +64,7 @@ class JadwalController extends Controller
             foreach($bks as $bk) {
                 # cek apakah matpel tersebut adalah matpel agama
                 # agama_id != 0
-                if($bk->agama_id != 0 && $bk->agama_id != '0') {
+                if(Uuid::isValid(strval($bk->agama_id))) {
                     # cek apakah agama di matpel sama dengan agama di peserta
                     # jika iya maka ambil banksoal
                     if($bk->agama_id == $peserta['agama_id']) {
@@ -73,10 +74,13 @@ class JadwalController extends Controller
                 } else {
                     # jika jurusan_id adalah array
                     # artinya ini adalah matpel khusus
-                    $jurusans = $bk->jurusan_id == '0' || $bk->jurusan_id == '' ? 0 : json_decode($bk->jurusan_id, true);
+                    $jurusans = ($bk->jurusan_id == '0' || $bk->jurusan_id == '') ? 0 : json_decode($bk->jurusan_id, true);
                     if(is_array($jurusans) && $jurusans != null) {
                         # loop jurusan tersebut
                         foreach($jurusans as $d) {
+                            if(!Uuid::isValid($d)) {
+                                continue;
+                            }
                             # cek apakah jurusan dari matpel
                             # sama dengan jurusan pada peserta
                             if ($d == $peserta['jurusan_id']) {
@@ -85,11 +89,8 @@ class JadwalController extends Controller
                             }
                         }
                     } else {
-                        # jika jurusan id == 0 dan tidak null
-                        if ($bk->jurusan_id == 0) {
-                            $jadwal_id = $jadwal->id;
-                            break;
-                        }
+                        $jadwal_id = $jadwal->id;
+                        break;
                     }
                 }
             }
@@ -99,7 +100,7 @@ class JadwalController extends Controller
 
             # cek group
             # cocokan antara group jadwal dan group siswa
-            if ($jadwal->group_ids != '') {
+            if ($jadwal->group_ids != '' && is_string($jadwal->group_ids)) {
                 $groups = json_decode($jadwal->group_ids, true);
                 if (is_array($groups) && count($groups) > 0) {
 

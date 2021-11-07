@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\Uuids;
+use Illuminate\Support\Carbon;
 
 class Soal extends Model
 {
@@ -36,9 +37,13 @@ class Soal extends Model
      * @var [type]
      */
     protected $casts = [
-        'analys'    => 'array',
-        'created_at' => 'datetime:d/m/Y h:i:s A'
+        'analys'    => 'array'
     ];
+
+    public function getCreatedAtAttribute()
+    {
+        return Carbon::parse($this->attributes['created_at'])->format('Y-m-d H:i');
+    }
 
     /**
      * [banksoal description]

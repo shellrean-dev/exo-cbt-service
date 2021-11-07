@@ -191,7 +191,7 @@ class UjianAktifController extends Controller
      *
      * Ambil ujian peserta yang sedang dikerjakan
      *
-     * @param ShellreanDev\Services\Ujian\UjianService $ujianService
+     * @param DevUjianService $ujianService
      * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
