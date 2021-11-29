@@ -44,4 +44,14 @@ final class CacheHandler implements CacheHandlerInterface
     {
         return Cache::has($name.$key);
     }
+
+    /**
+     * delete for item existance
+     * @param string $name
+     * @param string $key
+     */
+    public function deleteItem(string $name, string $key)
+    {
+        $this->cache($name, $key, null, -5);
+    }
 }

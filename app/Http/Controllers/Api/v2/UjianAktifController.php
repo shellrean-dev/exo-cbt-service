@@ -24,6 +24,7 @@ use App\Token;
 
 use ShellreanDev\Cache\CacheHandler;
 use ShellreanDev\Services\Jadwal\JadwalService;
+use ShellreanDev\Services\Ujian\UjianService;
 use ShellreanDev\Services\Ujian\UjianService as DevUjianService;
 
 /**
@@ -76,7 +77,7 @@ class UjianAktifController extends Controller
      *
      * @author shellrean <wandinak17@gmail.com>
      */
-    public function startUjian(Request $request, CacheHandler $cache, SettingTokenService  $tokenService)
+    public function startUjian(Request $request, UjianService $ujianService, SettingTokenService  $tokenService)
     {
         $ujian = DB::table('jadwals')
             ->where('id', $request->jadwal_id)
@@ -129,6 +130,9 @@ class UjianAktifController extends Controller
             }
         }
         $peserta = request()->get('peserta-auth');
+
+        # Invalidate cache in progress
+        $ujianService->deactivateCacheOnProgressToday($peserta->id);
 
         # cek pengaturan sesi
         if($ujian->event_id != '0' && $ujian->event_id != null) {
@@ -236,7 +240,7 @@ class UjianAktifController extends Controller
         # Ambil data yang belum dimulai
         $data = DB::table('siswa_ujians')
             ->where('peserta_id', $peserta->id)
-            ->where('status_ujian', '<>', UjianConstant::STATUS_BEFORE_START)
+            ->where('status_ujian', '<>', UjianConstant::STATUS_FINISHED)
             ->whereDate('created_at', now()->format('Y-m-d'))
             ->whereIn('jadwal_id', $jadwal_ids)
             ->first();
@@ -277,6 +281,7 @@ class UjianAktifController extends Controller
     public function getJawabanPeserta(DevUjianService $devUjianService, CacheHandler $cache)
     {
         $peserta = request()->get('peserta-auth');
+        $devUjianService->deactivateCacheOnProgressToday($peserta->id);
         $ujian_siswa = $devUjianService->onProgressToday($peserta->id);
 
         if(!$ujian_siswa) {

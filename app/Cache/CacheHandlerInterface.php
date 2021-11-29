@@ -15,4 +15,6 @@ interface CacheHandlerInterface
     public function isCached(string $name, string $key): bool;
 
     public function getItem(string $name, string $key);
+
+    public function deleteItem(string $name, string $key);
 }

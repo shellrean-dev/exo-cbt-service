@@ -194,7 +194,7 @@ class UjianController extends Controller
                 DB::table('siswa_ujians')
                     ->where('id', $ujian->id)
                     ->update([
-                        'status_ujian'  => 1
+                        'status_ujian'  => UjianConstant::STATUS_FINISHED
                     ]);
 
                 return SendResponse::badRequest(UjianConstant::WARN_UJIAN_HAS_FINISHED_BEFORE);

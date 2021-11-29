@@ -125,13 +125,13 @@ final class UjianService extends AbstractService
             ->whereDate('created_at', now()->format('Y-m-d'));
 
         if (config('exo.enable_cache')) {
-            $is_cached = $this->cache->isCached(CacheConstant::KEY_UJIAN_ON_PROGRESS, __METHOD__ . $student_id . implode('-', $jadwal_ids));
+            $is_cached = $this->cache->isCached(CacheConstant::KEY_UJIAN_ON_PROGRESS,  $student_id . implode('-', $jadwal_ids));
             if ($is_cached) {
-                $data = $this->cache->getItem(CacheConstant::KEY_UJIAN_ON_PROGRESS, __METHOD__ . $student_id . implode('-', $jadwal_ids));
+                $data = $this->cache->getItem(CacheConstant::KEY_UJIAN_ON_PROGRESS,  $student_id . implode('-', $jadwal_ids));
             } else {
                 $data = $query->first();
                 if ($data) {
-                    $this->cache->cache(CacheConstant::KEY_UJIAN_ON_PROGRESS, __METHOD__ . $student_id . implode('-', $jadwal_ids), $data);
+                    $this->cache->cache(CacheConstant::KEY_UJIAN_ON_PROGRESS,  $student_id . implode('-', $jadwal_ids), $data);
                 }
             }
         } else {
@@ -139,6 +139,24 @@ final class UjianService extends AbstractService
         }
 
         return $data;
+    }
+
+    /**
+     * Get ujian on progress today
+     *
+     * @param string $student_id
+     * @return Model|Builder|object|null
+     * @since 3.0.0 <ristretto>
+     */
+    public function deactivateCacheOnProgressToday(string $student_id)
+    {
+        if (config('exo.enable_cache')) {
+            # ambil ujian yang aktif hari ini
+            $jadwals = $this->jadwalService->activeToday();
+            $jadwal_ids = $jadwals->pluck('id')->toArray();
+
+            $this->cache->deleteItem(CacheConstant::KEY_UJIAN_ON_PROGRESS,$student_id . implode('-', $jadwal_ids));
+        }
     }
 
     /**

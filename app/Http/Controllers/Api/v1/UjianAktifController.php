@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Models\UjianConstant;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
@@ -221,7 +222,7 @@ class UjianAktifController extends Controller
                 'jadwal_id'     => $jadwal_id,
                 'peserta_id'    => $peserta_id
             ])->update([
-                'status_ujian'  => 1
+                'status_ujian'  => UjianConstant::STATUS_FINISHED
             ]);
 
             DB::table('pesertas')->where('id', $peserta_id)->update([
@@ -288,7 +289,7 @@ class UjianAktifController extends Controller
                 ->whereIn('peserta_id', $unfinishPeserta)
                 ->where('jadwal_id', $jadwal_id)
                 ->update([
-                    'status_ujian' => 1
+                    'status_ujian' => UjianConstant::STATUS_FINISHED
                 ]);
 
             DB::table('pesertas')
