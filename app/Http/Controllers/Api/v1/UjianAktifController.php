@@ -204,6 +204,12 @@ class UjianAktifController extends Controller
             ])->count();
 
             if($hasilUjian > 0) {
+                DB::table('siswa_ujians')->where([
+                    'jadwal_id'     => $jadwal_id,
+                    'peserta_id'    => $peserta_id
+                ])->update([
+                    'status_ujian'  => UjianConstant::STATUS_FINISHED
+                ]);
                 return SendResponse::accept('hasil ujian peserta sudah digenerate');
             }
 
