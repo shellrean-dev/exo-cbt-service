@@ -240,7 +240,7 @@ class UjianAktifController extends Controller
         # Ambil data yang belum dimulai
         $data = DB::table('siswa_ujians')
             ->where('peserta_id', $peserta->id)
-            ->where('status_ujian', '<>', UjianConstant::STATUS_FINISHED)
+            ->whereIn('status_ujian', [UjianConstant::STATUS_STANDBY, UjianConstant::STATUS_PROGRESS])
             ->whereDate('created_at', now()->format('Y-m-d'))
             ->whereIn('jadwal_id', $jadwal_ids)
             ->first();
