@@ -92,7 +92,7 @@ class UjianAktifController extends Controller
      * @param ShellreanDev\Cache\CacheHandler $cache
      * @return App\Actions\SendResponses
      */
-    public function resetUjianPeserta(Jadwal $jadwal, Peserta $peserta, CacheHandler $cache)
+    public function resetUjianPeserta(Jadwal $jadwal, Peserta $peserta)
     {
         $aktif = $jadwal->id;
         DB::beginTransaction();
@@ -116,10 +116,6 @@ class UjianAktifController extends Controller
             $peserta->api_token = '';
             $peserta->save();
 
-            // remove completed jadwal cache
-//            $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta->id));
-//            $cache->cache($key, '', 0);
-
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
@@ -137,10 +133,14 @@ class UjianAktifController extends Controller
      * @param ShellreanDev\Cache\CacheHandler $cache
      * @return App\Actions\SendResponse
      */
-    public function multiResetUjianPeserta(Jadwal $jadwal, CacheHandler $cache)
+    public function multiResetUjianPeserta(Jadwal $jadwal)
     {
         $aktif = $jadwal->id;
         DB::beginTransaction();
+
+        if(request()->q == '') {
+            return SendResponse::badRequest('anda belum memilih peserta ujian');
+        }
 
         $pesertas = explode(',', request()->q);
 
@@ -169,12 +169,6 @@ class UjianAktifController extends Controller
                 ->update([
                     'api_token' => ''
                 ]);
-
-//            foreach ($pesertas as $peserta) {
-                // remove completed jadwal cache
-                $key = md5(sprintf('jadwal:data:peserta:%s:ujian:complete', $peserta));
-//                $cache->cache($key, '', 0);
-//            }
 
             DB::commit();
         } catch (\Exception $e) {
@@ -257,6 +251,10 @@ class UjianAktifController extends Controller
     {
         try {
             DB::beginTransaction();
+            if(request()->q == '') {
+                return SendResponse::badRequest('anda belum memilih peserta ujian');
+            }
+
             $pesertas = explode(',', request()->q);
             if (count($pesertas) < 1) {
                 return SendResponse::badRequest('tidak ada peserta yang dipilih');
@@ -277,7 +275,7 @@ class UjianAktifController extends Controller
             }
 
             if (count($unfinishPeserta) < 1) {
-                return SendResponse::badRequest('siswa yang dipilih telah menyelesaikan ujiannya');
+                return SendResponse::badRequest('peserta yang dipilih telah menyelesaikan ujiannya');
             }
 
             foreach ($unfinishPeserta as $peserta) {
@@ -337,7 +335,7 @@ class UjianAktifController extends Controller
      * @param ShellreanDev\Cache\CacheHandler $cache
      * @return App\Actions\SendResponse
      */
-    public function getToken(CacheHandler $cache)
+    public function getToken()
     {
         $token = Token::orderBy('id')->first();
 
@@ -346,15 +344,8 @@ class UjianAktifController extends Controller
             $from = $token->updated_at->format('Y-m-d H:i:s');
             $differ = $to->diffInSeconds($from);
 
-            // ambil setting token
-//            $key = md5(sprintf('setting:token:single'));
-//            if ($cache->isCached($key)) {
-//                $setting_token = $cache->getItem($key);
-//            } else {
-                $setting_token = DB::table('settings')->where('name', 'token')->first();
+            $setting_token = DB::table('settings')->where('name', 'token')->first();
 
-//                $cache->cache($key, $setting_token);
-//            }
             if (!$setting_token) {
                 return SendResponse::badRequest('Kesalahan dalam installasi token');
             }

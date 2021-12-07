@@ -26,6 +26,10 @@ class PesertaController extends Controller
      */
     public function index()
     {
+        $perPage = intval(request()->perPage);
+        if (!$perPage) {
+            $perPage = 30;
+        }
         $peserta = DB::table('pesertas')
             ->join('agamas','pesertas.agama_id','=','agamas.id')
             ->join('jurusans','pesertas.jurusan_id','=','jurusans.id')
@@ -36,7 +40,8 @@ class PesertaController extends Controller
         
         $peserta = $peserta
             ->orderBy('pesertas.created_at')
-            ->paginate(40);
+            ->paginate($perPage);
+
         return SendResponse::acceptData($peserta);
     }
 
