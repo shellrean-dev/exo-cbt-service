@@ -48,6 +48,8 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapApiv3Routes();
 
+        $this->mapGatewayRoutes();
+
         $this->mapWebRoutes();
     }
 
@@ -108,5 +110,20 @@ class RouteServiceProvider extends ServiceProvider
             ->middleware('api')
             ->namespace($this->namespace)
             ->group(base_path('routes/api_v3.php'));
+    }
+
+    /**
+     * Define the "gateway" routes for the application.
+     * 
+     * These routes are typically stateless.
+     * 
+     * @return void
+     */
+    protected function mapGatewayRoutes()
+    {
+        Route::prefix('api/gateway')
+            ->middleware('api')
+            ->namespace($this->namespace)
+            ->group(base_path('routes/gateway.php'));
     }
 }
