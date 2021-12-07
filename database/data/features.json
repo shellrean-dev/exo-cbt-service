@@ -1,0 +1,52 @@
+[
+  {
+    "name": "form_setting_ujian_event",
+    "code": "v1",
+    "content": "<p>Biasanya kita mengadakan ujian</p><ul> <li>UH (Ulangan Harian)</li><li>UTS (Ulangan Tengah Semester)</li></ul> <p>inilah kita sebut &#39;event&#39; <br/><br/> Bila kolom ini diisi, ujian akan menginduk kepada event yang kita buat pada menu <u>ujian </u>&gt; <u>event ujian</u><br/><br/> Kelebihan menggunakan event adalah</p><ol> <li>Ubah setting sesi siswa tiap-tiap event sesuai kebutuhan.</li><li>Jadwal dalam kartu ujian siswa</li><li>Absensi</li><li>Berita Acara</li><li>dll</li></ol> <p>Pada ujian yang menginduk kepada event, sesi ujian siswa harus di setting pada menu event. Sesi pada event dapat berbeda dengan sesi default<br/> Kosongkan kolom ini sehingga sesi tetap menggunakan default<br/> <br/> ExtraordinaryCBT</p>"
+  },
+  {
+    "name": "page_peserta_tabel",
+    "code": "v1",
+    "content": "<p><strong>Manage peserta ujian.</strong></p><p>Disini kamu bisa melihat data peserta ujian, yang mana mereka adalah orang-orang yang akan melakukan ujian bisa siswa/umum.</p><p>Data yang kamu lihat disini adalah data rahasia karena menyangkut dengan informasi login dan password yang digunakan untuk mengerjakan ujian.</p><p>Untuk penginputan data peserta anda bisa menggunakan 2 opsi:</p><ol><li>Menggunakan form manual</li><li>Menggunakan file excel</li></ol><p>Kami sangat menyarankan untuk menggunakan file excel karena dapat mempermudah anda dalam penginputan.</p><p>Pada halaman ini juga kamu dapat menghapus data peserta ujian namun harus diingat bahwa <strong>ketika anda menghapus peserta</strong> maka semua data yang terkait dengan peserta akan ikut <strong>terhapus</strong> termasuk juga data nilai dan analisa.</p><p>&nbsp;</p><p>Extraordinary CBT&nbsp;</p>"
+  },
+  {
+    "name": "page_grup_tabel",
+    "code": "v1",
+    "content": "<p><strong>Manage grup<\/strong><\/p><p>Pada menu ini berisi grup pada ujian.<\/p><p>Apa kegunaan grup?<\/p><p>Grup akan digunakan untuk mengelompokkan peserta ujian. yang mana ini akan berguna pada penjadwalan dan reporting.<\/p><p>Pada grup terdapat 2 tipe yaitu parent dan children.<\/p><p>Parent adalah grup yang memiliki parent \"none\" atau kosong. sedangkan Child adalah grup yang memiliki parent selain \"none\".<\/p><p>Contoh penggunakan grup.<\/p><ul><li><strong>Kelas 7<\/strong> parent -&gt; 'none'<\/li><li><strong>Kelas 7A<\/strong> parent -&gt; 'Kelas 7'<\/li><li><strong>Kelas 7B<\/strong> parent -&gt; Kelas 7'<\/li><li><strong>Kelas 7C<\/strong> parent -&gt; 'Kelas 7'<\/li><\/ul><p>&nbsp;<\/p><ul><li><strong>Kelas 8<\/strong> parent -&gt; 'none'<\/li><li><strong>Kelas 8A<\/strong> parent -&gt; 'Kelas 8'<\/li><\/ul><p>&nbsp;<\/p><p>Pada grup ini juga anda bisa menambahkan anggota, perlu diingat sebaiknya anda menambahkan anggota <strong>hanya&nbsp;<\/strong>pada child bila kelas tersebut memiliki child. pada contoh diatas anda sebaiknya menambahkan grup hanya pada 7A, 7B, 7C, 8A tidak pada grup parent.<\/p><p>Jangan pernah menghapus grup bila grup ini telah atau sedang digunakan untuk ujian karena bisa menyebabkan gagal sistem pada saat scanning grup di jadwal.<\/p><p>&nbsp;<\/p><p>Extraordinary CBT<\/p>"
+  },
+  {
+    "name": "page_jurusan_tabel",
+    "code": "v1",
+    "content": "<p><strong>Manage Jurusan<\/strong><\/p><p>Pada halaman ini kamu dapat melihat data jurusan dalam bentuk tabel.<\/p><p>Jurusan berguna untuk pengelompokan peserta ujian pada jadwal dan reporting. Jurusan memiliki scope lebih besar dan lebih luas dari <span style=\"text-decoration: underline;\">grup.<\/span><\/p><p>Kode jurusan bisa anda isi dengan unique atau biarkan sistem mengenerate otomatis.<\/p><p>Kode jurusan akan digunakan untuk import data peserta ujian.<\/p><p>Perlu diingat dan selalu diingat bahwa pada dasarnya kami sangat tidak menyarankan untuk menghapus data jurusan \/ mengubah kode jurusan ketika sudah dibuat.&nbsp;<\/p><p>Sekali kamu menghapus data ujian maka semua data yang terkait dengan jurusan ini akan dihapus termasuk peserta dan saat peserta dihapus maka akan menghapus yang lainnya efek ini akan menjadi domino.<\/p><p>&nbsp;<\/p><p>Extraordinary CBT<\/p>"
+  },
+  {
+    "name": "page_matpel_tabel",
+    "code": "v1",
+    "content": "<p><strong>Manage Matpel A.K.A Mata Pelajaran<\/strong><\/p><p>Pada halaman ini kamu dapat melihat data mata pelajaran.<\/p><p>Mata pelajaran adalah suatu grup dalam soal.<\/p><p>Terdapat 3 matpel yang dapat kamu tentukan sesuai dengan kebutuhan.<\/p><ul><li>Matpel UMUM<\/li><li>Matpel Agama<\/li><li>Matpel Khusus<\/li><\/ul><p>Matpel umum digunakan dan akan dipakai oleh seluruh peserta didik tanpa terkecuali.<\/p><p>Matpel agama digunakan oleh peserta ujian dengan agama yang ditentukan.<\/p><p>Matpel khusus digunakan oleh peserta ujian dengan jurusan yang ditentukan. matpel khusus bisa ditambahkan lebih dari 1 jurusan.<\/p><p>Penggunaan matpel khusus bisa dicontohkan sebagai berikut:<\/p><p>Nama matpel: Matematika Teknik<\/p><p>Jurusan: Teknik Survei dan Pemetaan, Geomatika, Teknik Gambar Bangunan<\/p><p>&nbsp;<\/p><p>Pada matpel juga anda harus mengisi pengoreksi yang akan memberikan penilaian pada tipe-tipe soal yang berhubungan dengan penilaian manual. Pengoreksi dapat berisi lebih dari 1.<\/p>"
+  },
+  {
+    "name": "page_user_tabel",
+    "code": "v1",
+    "content": "<p><strong>Manage user<\/strong><\/p><p>Pada halaman ini kamu dapat melihat data user.<\/p><p>User dapat diinput menggunakan cara<\/p><ul><li>Form manual<\/li><li>Import data excel<\/li><\/ul><p>Kami sangat menyarankan untuk membuat user menggunakan excel untuk kemudahan.<\/p><p>User dapat memiliki akses untuk melakukan penginputan soal dan bisa ditambahkan sebagai tim pengoreksi soal pada data matpel.<\/p><p>&nbsp;<\/p><p>Extraordinary CBT<\/p>"
+  },
+  {
+    "name": "page_banksoal_tabel",
+    "code": "v1",
+    "content": "<p><strong>Manage Banksoal<\/strong><\/p><p>Pada halaman ini kamu dapat melihat semua banksoal, kalau kamu adalah user standard maka kamu hanya dapat melihat banksoal yang dibuat oleh kamu sendiri.<\/p><p>Banksoal adalah cara aplikasi mengelompokkan soal-soal.<\/p><p>Kamu dapat melakukan edit, hapus, dan juga menghapus banksoal.&nbsp;<\/p><p>Kami sangat menyarankan untuk mengunci banksoal bila telah selesai melakukan input soal, dengan begitu banksoal anda tidak dapat dilihat, diduplikat apalagi dihapus oleh orang lain termasuk oleh administrator.&nbsp;<\/p><p>Tetapi kamu harus mengingat password kunci banksoal karena sekali anda lupa, banksoal ini tidak akan terbuka selamanya. tidak ada mekanisme pada aplikasi untuk membuka kunci.<\/p><p>Banksoal yang dikunci masih bisa digunakan untuk ujian siswa. jadi kamu tidak perlu membuka kunci bila banksoal akan digunakan untuk ujian.<\/p><p>Kami sangat tidak menyarankan untuk mengedit apalagi menghapus banksoal saat setelah\/sedang dipakai untuk ujian pada jadwal. Kamu dapat menggunakan fitur duplikat.<\/p><p>&nbsp;<\/p><p>Extraordinary CBT<\/p>"
+  },
+  {
+    "name": "page_soal_tabel",
+    "code": "v1",
+    "content": "<p><strong>Manage soal<\/strong><\/p><p>Pada halaman ini kamu dapat melihat data soal yang berada didalam banksoal.<\/p><p>Soal yang kamu lihat adalah soal yang berurut berdasarkan waktu kamu membuat soal.&nbsp;<\/p><p>Kamu dapat melihat soal dan opsi pada tabel dengan klik button detail.<\/p><p>&nbsp;<\/p><p>Terdapat 3 cara input soal<\/p><ul><li>Input form manual<\/li><li>Import file .docx<\/li><li>Paste text<\/li><\/ul><p>Kami sangat menyarankan untuk menggunakan input form untuk hasil yang lebih baik dan komplek, gunakan import file bila dirasa soal itu berisi text sederhana.<\/p><p>Kami tidak menyarankan anda secara keras untuk mengedit \/ menekan tombol update meskipun kamu tidak melakukan update. Hal tersebut dapat menyebabkan gagal scanning soal pada analisa dan ujian.<\/p><p>&nbsp;<\/p><p>Extraordinary CBT<\/p>"
+  },
+  {
+    "name": "page_soal_template_tabel",
+    "code": "v1",
+    "content": "<p><strong>Paste soal<\/strong><\/p><p>Pada halaman ini kamu dapat membuat soal dengan paste soal pada input form yang disediakan.&nbsp;<\/p><p>Kamu harus menggunakan format yang telah ada. Hanya ada 2 tipe yang dapat diinputkan pada halaman ini yaitu Pilihan Ganda dan Esay.<\/p><p>Pastikan soal yang kamu \"paste\" pada input form sesuai dengan Tipe soal yang dipilih.<\/p><p>&nbsp;<\/p><p>Extraordinary CBT&nbsp;<\/p>"
+  },
+  {
+    "name": "page_soal_doc_tabel",
+    "code": "v1",
+    "content": "<p><strong>Import soal<\/strong><\/p><p>Pada halaman ini kamu dapat membuat soal dengan import soal .docx pada form yang disediakan.<\/p><p>Kami menyediakan 2 opsi template yang kamu bisa pakai<\/p><ul><li>Format standard - format-1<\/li><li>Format table - format-2<\/li><\/ul><p>&nbsp;<\/p><p>Pastikan kamu telah memilih tipe soal yang sesuai dengan yang anda akan import.<\/p><p>&nbsp;<\/p><p>Extraordinary CBT<\/p>"
+  }
+]

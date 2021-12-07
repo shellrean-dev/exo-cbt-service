@@ -21,6 +21,7 @@ class AppInfoController extends Controller
         $name = $request->query('name');
         $info = DB::table('feature_infos')
             ->where('name', $name)
+            ->orderByDesc('id')
             ->first();
         if (!$info) {
             return SendResponse::acceptData(['content' => 'informasi tidak ditemukan']);

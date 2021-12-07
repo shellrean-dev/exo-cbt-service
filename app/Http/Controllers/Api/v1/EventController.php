@@ -7,6 +7,9 @@ use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use App\EventUjian;
 use App\Jadwal;
+use App\Models\UjianConstant;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * EventController
@@ -152,5 +155,124 @@ class EventController extends Controller
                 ];
             }),
         ]);
+    }
+
+    /**
+     * @Route(path="api/v1/events/ujian/{jadwal_id}/summary-simple", methods={"GET"})
+     * 
+     * Get event summary
+     * 
+     * @param string $jadwal_id
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
+     */
+    public function summarize($jadwal_id)
+    {
+        $ujian = DB::table('jadwals as t_0')
+            ->join('event_ujians as t_1', 't_0.event_id', 't_1.id')
+            ->where('t_0.id', $jadwal_id)
+            ->select([
+                't_0.id',
+                't_0.alias as jadwal_name',
+                't_1.name as event_name'
+            ])
+            ->first();
+
+        if (!$ujian) {
+            return SendResponse::badRequest('jadwal ujian tidak valid');
+        }
+
+        $peserta_finish = DB::table('siswa_ujians as t_0')
+            ->where('t_0.jadwal_id', $ujian->id)
+            ->where('t_0.status_ujian', UjianConstant::STATUS_FINISHED)
+            ->count();
+
+        $peserta_onprogress = DB::table('siswa_ujians as t_0')
+            ->where('t_0.jadwal_id', $ujian->id)
+            ->whereIn('t_0.status_ujian', [UjianConstant::STATUS_STANDBY, UjianConstant::STATUS_PROGRESS])
+            ->count();
+        
+        $sesi_schedule = DB::table('sesi_schedules as t_0')->where('t_0.jadwal_id', $ujian->id)->get();
+
+        $peserta_ids = [];
+        foreach($sesi_schedule as $sesi) {
+            $pesertas = json_decode($sesi->peserta_ids, true);
+            $peserta_ids = array_merge($peserta_ids, $pesertas);
+        }
+
+        $all_peserta_ujian = DB::table('siswa_ujians as t_0')
+            ->where('t_0.jadwal_id', $ujian->id)
+            ->whereIn('t_0.peserta_id', $peserta_ids)
+            ->count();
+
+        $not_start = count($peserta_ids) - $all_peserta_ujian;
+
+        $data = [
+            'id'    => $ujian->id,
+            'event_name' => $ujian->event_name,
+            'jadwal_name' => $ujian->jadwal_name,
+            'finish'     => $peserta_finish,
+            'on_work' => $peserta_onprogress,
+            'no_start' => $not_start,
+            'timestamp' => Carbon::now()->format('Y-m-d H:i:s')
+        ];
+
+        return SendResponse::acceptData($data);
+    }
+
+    /**
+     * @Route(path="api/v1/events/ujian/{jadwal_id}/peserta-not-start", methods={"GET"})
+     * 
+     * Get jadwal peserta not work
+     * 
+     * @param string $jadwal_id
+     * @return App\Actions\SendResponse
+     * @author shellrean <wandinak17@gmail.com>
+     */
+    public function pesertaNotWork($jadwal_id)
+    {
+        $ujian = DB::table('jadwals as t_0')
+            ->join('event_ujians as t_1', 't_0.event_id', 't_1.id')
+            ->where('t_0.id', $jadwal_id)
+            ->select([
+                't_0.id',
+                't_0.alias as jadwal_name',
+                't_1.name as event_name'
+            ])
+            ->first();
+
+        if (!$ujian) {
+            return SendResponse::badRequest('jadwal ujian tidak valid');
+        }
+
+        $sesi_schedule = DB::table('sesi_schedules as t_0')->where('t_0.jadwal_id', $ujian->id)->get();
+
+        $peserta_ids = [];
+        foreach($sesi_schedule as $sesi) {
+            $pesertas = json_decode($sesi->peserta_ids, true);
+            $peserta_ids = array_merge($peserta_ids, $pesertas);
+        }
+
+        $all_peserta_ujian = DB::table('siswa_ujians as t_0')
+            ->where('t_0.jadwal_id', $ujian->id)
+            ->whereIn('t_0.peserta_id', $peserta_ids)
+            ->select(['t_0.peserta_id'])
+            ->get()->pluck('peserta_id')->toArray();
+        $peserta_in_ujians = array_keys($all_peserta_ujian, 'peserta_id');
+
+        $id_diff = array_diff($peserta_ids, $peserta_in_ujians);
+
+        $peserta = DB::table('pesertas as t_0')
+            ->whereIn('t_0.id', $id_diff)
+            ->select([
+                't_0.id',
+                't_0.no_ujian',
+                't_0.nama'
+            ])
+            ->orderBy('t_0.created_at')
+            ->limit(100)
+            ->get();
+        
+        return SendResponse::acceptData($peserta);
     }
 }

@@ -477,7 +477,7 @@ class SoalController extends Controller
         if ($banksoal->is_locked) {
             return SendResponse::badRequest('Banksoal sedang dikunci');
         }
-        $soal = Soal::with('jawabans')->where('banksoal_id',$banksoal->id)->get();
+        $soal = Soal::with('jawabans')->where('banksoal_id',$banksoal->id)->orderBy('created_at')->get();
         return SendResponse::acceptData($soal);
     }
 

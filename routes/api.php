@@ -122,6 +122,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::apiResource('ujians', 'UjianController');
 
         Route::get('events/all', 'EventController@allData');
+        Route::get('events/ujian/{jadwal_id}/summary-simple', 'EventController@summarize');
+        Route::get('events/ujian/{jadwal_id}/peserta-not-start', 'EventController@pesertaNotWork');
         Route::get('events/{id}/ujian', 'EventController@eventDetailData');
         Route::apiResource('events', 'EventController');
         Route::get('berita-acara/{id}/link', 'ReportingController@berita_acara_link');
