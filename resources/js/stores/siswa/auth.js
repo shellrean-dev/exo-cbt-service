@@ -64,6 +64,9 @@ function submit({ commit }, payload) {
             else if(network.data.status == 'non-sesi') {
                 commit('SET_ERRORS', { invalid: 'Ujian tidak sesuai sesi' }, { root: true })
             }
+            else if (network.data.status == 'susspend') {
+                commit('SET_ERRORS', { invalid: 'Peserta ujian tidak aktif, hubungi administrator' }, { root: true })
+            }
             else {
                 commit('SET_ERRORS', { invalid: 'No ujian/Password salah' } , { root: true })
             }

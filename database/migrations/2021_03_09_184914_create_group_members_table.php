@@ -17,6 +17,9 @@ class CreateGroupMembersTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('group_id');
             $table->uuid('student_id');
+
+            $table->uuid('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
 
             $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');

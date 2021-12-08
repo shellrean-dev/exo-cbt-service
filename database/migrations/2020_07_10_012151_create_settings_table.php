@@ -18,6 +18,9 @@ class CreateSettingsTable extends Migration
             $table->string('name');
             $table->string('type');
             $table->text('value');
+
+            $table->uuid('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }

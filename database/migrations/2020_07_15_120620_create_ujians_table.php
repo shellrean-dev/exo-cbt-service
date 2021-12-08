@@ -17,6 +17,9 @@ class CreateUjiansTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('jadwal_id');
             $table->enum('status',['aktif','selesai'])->default('aktif');
+
+            $table->uuid('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }

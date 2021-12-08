@@ -20,12 +20,17 @@ class CreatePenilaianArgumentTable extends Migration
             $table->uuid('jawab_id');
             $table->uuid('corrected_by');
             $table->float('point');
+
+            $table->uuid('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
 
             $table->foreign('banksoal_id')->references('id')->on('banksoals')->onDelete('cascade');
             $table->foreign('peserta_id')->references('id')->on('pesertas')->onDelete('cascade');
             $table->foreign('jawab_id')->references('id')->on('jawaban_pesertas')->onDelete('cascade');
             $table->foreign('corrected_by')->references('id')->on('users')->onDelete('cascade');
+
+            $table->index(['banksoal_id', 'peserta_id', 'jawab_id']);
         });
     }
 

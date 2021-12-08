@@ -29,6 +29,8 @@ return [
 
     'enable_socket' => env('EXO_ENABLE_SOCKET', false),
 
+    'softdel' => env('EXO_ENABLE_SOFTDEL', true),
+
     /*
     |--------------------------------------------------------------------------
     | Konfigurasi oauth

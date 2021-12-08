@@ -18,6 +18,9 @@ class CreateJawabanSoalsTable extends Migration
             $table->uuid('soal_id');
             $table->longText('text_jawaban');
             $table->char('correct', 1);
+
+            $table->uuid('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
 
             $table->foreign('soal_id')->references('id')->on('soals')->onDelete('cascade');

@@ -21,6 +21,9 @@ class CreateBanksoalAdaptifTable extends Migration
             $table->integer('max_pg');
 
             $table->index(['matpel_id']);
+
+            $table->uuid('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }

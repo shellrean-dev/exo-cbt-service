@@ -21,6 +21,9 @@ class CreateFilesTable extends Migration
             $table->string('path');
             $table->string('exstension');
             $table->string('size');
+
+            $table->uuid('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }

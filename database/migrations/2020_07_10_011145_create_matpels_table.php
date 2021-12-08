@@ -20,6 +20,9 @@ class CreateMatpelsTable extends Migration
             $table->text('agama_id')->nullable()->default(null);
             $table->string('correctors')->nullable();
             $table->string('nama');
+
+            $table->uuid('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }

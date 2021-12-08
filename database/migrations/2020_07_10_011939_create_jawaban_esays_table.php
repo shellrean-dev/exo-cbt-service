@@ -20,6 +20,9 @@ class CreateJawabanEsaysTable extends Migration
             $table->uuid('jawab_id');
             $table->uuid('corrected_by');
             $table->float('point');
+
+            $table->uuid('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
 
             $table->foreign('banksoal_id')->references('id')->on('banksoals')->onDelete('cascade');

@@ -16,6 +16,9 @@ class CreateEventUjiansTable extends Migration
         Schema::create('event_ujians', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
+
+            $table->uuid('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }

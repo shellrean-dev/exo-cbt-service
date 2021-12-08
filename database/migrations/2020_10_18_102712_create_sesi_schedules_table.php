@@ -18,6 +18,9 @@ class CreateSesiSchedulesTable extends Migration
             $table->uuid('jadwal_id');
             $table->integer('sesi')->default(1);
             $table->text('peserta_ids');
+
+            $table->uuid('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }

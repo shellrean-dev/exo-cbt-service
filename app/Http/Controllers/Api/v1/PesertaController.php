@@ -30,16 +30,25 @@ class PesertaController extends Controller
         if (!$perPage) {
             $perPage = 30;
         }
-        $peserta = DB::table('pesertas')
-            ->join('agamas','pesertas.agama_id','=','agamas.id')
-            ->join('jurusans','pesertas.jurusan_id','=','jurusans.id')
-            ->select('pesertas.id','pesertas.sesi','pesertas.no_ujian','pesertas.nama as nama_peserta','pesertas.password','agamas.nama as agama','jurusans.nama as jurusan');
+        $peserta = DB::table('pesertas as t_0')
+            ->join('agamas as t_1','t_0.agama_id','=','t_1.id')
+            ->join('jurusans as t_2','t_0.jurusan_id','=','t_2.id')
+            ->select([
+                't_0.id',
+                't_0.sesi',
+                't_0.no_ujian',
+                't_0.nama as nama_peserta',
+                't_0.password',
+                't_0.status',
+                't_1.nama as agama',
+                't_2.nama as jurusan'
+            ]);
         if (request()->q != '') {
-            $peserta = $peserta->where('pesertas.nama', 'LIKE', '%'.request()->q.'%');
+            $peserta = $peserta->where('t_0.nama', 'LIKE', '%'.request()->q.'%');
         }
         
         $peserta = $peserta
-            ->orderBy('pesertas.created_at')
+            ->orderBy('t_0.created_at')
             ->paginate($perPage);
 
         return SendResponse::acceptData($peserta);
@@ -62,6 +71,7 @@ class PesertaController extends Controller
             'password'      => 'required',
             'sesi'          => 'required',
             'jurusan_id'    => 'required',
+            'status'        => 'required|int',
             'agama_id'      => 'required'
         ]);
 
@@ -70,6 +80,7 @@ class PesertaController extends Controller
             'nama'          => $request->nama,
             'password'      => $request->password,
             'sesi'          => $request->sesi,
+            'status'        => $request->status,
             'jurusan_id'    => $request->jurusan_id,
             'agama_id'      => $request->agama_id
         ];
@@ -87,9 +98,22 @@ class PesertaController extends Controller
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
-    public function show(Peserta $peserta)
+    public function show($peserta)
     {
-        return SendResponse::acceptData($peserta);
+        $data = DB::table('pesertas as t_0')
+            ->select([
+                't_0.id',
+                't_0.agama_id',
+                't_0.jurusan_id',
+                't_0.nama',
+                't_0.no_ujian',
+                't_0.sesi',
+                't_0.status',
+                't_0.password'
+            ])
+            ->where('id', $peserta)
+            ->first();
+        return SendResponse::acceptData($data);
     }
 
     /**
@@ -110,7 +134,8 @@ class PesertaController extends Controller
             'password'      => 'required',
             'sesi'          => 'required',
             'jurusan_id'    => 'required',
-            'agama_id'      => 'required'
+            'agama_id'      => 'required',
+            'status'        => 'required|int'
         ]);
 
         $data = [
@@ -118,6 +143,7 @@ class PesertaController extends Controller
             'nama'          => $request->nama,
             'password'      => $request->password,
             'sesi'          => $request->sesi,
+            'status'        => $request->status,
             'jurusan_id'    => $request->jurusan_id,
             'agama_id'      => $request->agama_id
         ];

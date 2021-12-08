@@ -25,7 +25,7 @@ class DirectoryController extends Controller
      */
     public function index()
     {
-        $directories = Directory::withCount(['file'])->paginate(20);
+        $directories = Directory::withCount(['file'])->whereNull('deleted_at')->paginate(20);
         return SendResponse::acceptData($directories);
     }
 
@@ -61,7 +61,9 @@ class DirectoryController extends Controller
     public function show(Directory $directory)
     {
         $contentDirectory = File::where(['directory_id' => $directory->id]);
-        $contentDirectory = $contentDirectory->paginate(50);
+        $contentDirectory = $contentDirectory
+            ->whereNull('deleted_at')
+            ->paginate(50);
         return SendResponse::acceptData($contentDirectory);
     }
     

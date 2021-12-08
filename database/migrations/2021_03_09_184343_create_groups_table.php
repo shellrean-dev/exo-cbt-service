@@ -17,6 +17,9 @@ class CreateGroupsTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('parent_id')->nullable()->default(null);
             $table->string('name');
+
+            $table->uuid('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }

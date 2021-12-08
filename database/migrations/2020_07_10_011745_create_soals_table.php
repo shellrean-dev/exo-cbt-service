@@ -24,6 +24,9 @@ class CreateSoalsTable extends Migration
             $table->string('direction')->nullable();
             $table->longText('analys')->nullable();
             $table->integer('layout')->default(1);
+
+            $table->uuid('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
 
             $table->foreign('banksoal_id')->references('id')->on('banksoals')->onDelete('cascade');

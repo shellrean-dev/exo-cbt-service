@@ -36,6 +36,9 @@ class CreateHasilUjiansTable extends Migration
             $table->float('point_setuju_tidak');
             $table->integer('tidak_diisi');
             $table->float('hasil');
+
+            $table->uuid('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
 
             $table->foreign('peserta_id')->references('id')->on('pesertas')->onDelete('cascade');

@@ -3,17 +3,16 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
-use App\Models\SoalConstant;
 use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use App\JawabanPeserta;
 use App\JawabanSoal;
 use App\Directory;
 use App\Banksoal;
 use App\Soal;
+use Carbon\Carbon;
 
 /**
  * BanksoalController
@@ -35,7 +34,8 @@ class BanksoalController extends Controller
         $user = request()->user('api');
         $perPage = request()->perPage ?: '';
 
-        $banksoal = Banksoal::with(['matpel','user'])->orderBy('created_at', 'DESC');
+        $banksoal = Banksoal::with(['matpel','user'])->orderBy('created_at', 'DESC')->whereNull('deleted_at');
+
         if (request()->q != '') {
             $banksoal = $banksoal->where('kode_banksoal', 'LIKE', '%'. request()->q.'%');
         }
@@ -134,7 +134,7 @@ class BanksoalController extends Controller
      */
     public function show(Banksoal $banksoal)
     {
-        $banksoal = Banksoal::with('matpel')->find($banksoal->id);
+        $banksoal = Banksoal::with('matpel')->where('id', $banksoal->id)->whereNull('deleted_at')->first();
         return SendResponse::acceptData($banksoal);
     }
 
@@ -208,8 +208,23 @@ class BanksoalController extends Controller
         DB::beginTransaction();
 
         try {
-            $banksoal->delete();
-            Directory::find($banksoal->directory_id)->delete();
+            if (config('exo.softdel')) {
+                $user = request()->user();
+    
+                $banksoal->deleted_at = Carbon::now();
+                $banksoal->deleted_by = $user->id;
+                $banksoal->save();
+    
+                DB::table('directories')
+                    ->where('id', $banksoal->directory_id)
+                    ->update([
+                        'deleted_at' => Carbon::now(),
+                        'deleted_by' => $user->id
+                    ]);
+            } else {
+                $banksoal->delete();
+                Directory::find($banksoal->directory_id)->delete();
+            }
 
             DB::commit();
         } catch (\Exception $e) {
@@ -226,6 +241,7 @@ class BanksoalController extends Controller
      *
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
+     * @deprecated
      */
     public function allData()
     {
@@ -329,49 +345,6 @@ class BanksoalController extends Controller
                 })
             ];
         }
-
-//        $fill = $soal->map(function($val, $key) {
-////            $jawab = JawabanPeserta::where('soal_id', $val->id)->get();
-//            $jawab = DB::table('jawaban_pesertas')->where('soal_id', $val->id)->get();
-//
-//            $penjawab = $jawab->count();
-//            $salah = $jawab->where('iscorrect', '0')->count();
-//            $benar = $jawab->where('iscorrect','1')->count();
-//            return [
-//                'soal'  => $val->pertanyaan,
-//                'tipe_soal' => $val->tipe_soal,
-//                'penjawab' => $penjawab,
-//                'salah'     => $salah,
-//                'benar' => $benar,
-//                'diagram' => [
-//                    ['Tas','value'],
-//                    ['salah', $salah],
-//                    ['benar',$benar]
-//                ],
-//                'jawaban' => $val->jawabans->map(function($vel, $kiy) use($jawab) {
-//                    $argument = [
-//                        'setuju' => 0,
-//                        'tidak' => 0
-//                    ];
-//                    foreach ($jawab as $j) {
-//                        return $j;
-//                        if ($c[$vel->id]['val'] == 1) {
-//                            $argument['setuju'] += 1;
-//                        } else {
-//                            $argument['tidak'] += 1;
-//                        }
-//                    }
-//
-//                    return [
-//                        'text' => $vel->text_jawaban,
-//                        'iscorrect' => $vel->correct,
-//                        'penjawab' => $jawab->where('jawab',$vel->id)->count(),
-//                        'argument' => $argument
-//                    ];
-//                }),
-//            ];
-//        });
-
         return SendResponse::acceptData($fill);
     }
 

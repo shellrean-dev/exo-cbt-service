@@ -17,6 +17,9 @@ class CreateDirectoriesTable extends Migration
             $table->uuid('id')->primary();
             $table->string('name');
             $table->string('slug');
+
+            $table->uuid('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }

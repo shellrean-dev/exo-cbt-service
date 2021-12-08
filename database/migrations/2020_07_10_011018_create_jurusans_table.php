@@ -17,6 +17,9 @@ class CreateJurusansTable extends Migration
             $table->uuid('id')->primary();
             $table->string('kode')->unique('kode');
             $table->string('nama');
+
+            $table->uuid('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 

@@ -43,6 +43,10 @@ class PesertaLoginController extends Controller
             'password' => $request->password
         ])->first();
 
+        if ($peserta->status == 0) {
+            return SendResponse::acceptCustom(['status' => 'susspend']);
+        }
+
         if($peserta) {
             if(isset($setting->value['reset'])
                 && $setting->value['reset']
@@ -67,7 +71,7 @@ class PesertaLoginController extends Controller
             ]);
         }
 
-        return SendResponse::acceptCustom(['status' => 'error']);
+        return SendResponse::acceptCustom(['status' => 'error', 'message' => 'Email/password salah']);
     }
 
     /**

@@ -29,6 +29,9 @@ class CreateJawabanPesertasTable extends Migration
             $table->char('ragu_ragu',1)->default(0);
             $table->char('iscorrect',1)->default(0);
             $table->boolean('answered')->default(false);
+
+            $table->uuid('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
 
             $table->foreign('banksoal_id')->references('id')->on('banksoals')->onDelete('cascade');
