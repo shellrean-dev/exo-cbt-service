@@ -176,8 +176,7 @@ class UjianController extends Controller
             $fill = array();
             foreach ($request->banksoal_id as $banksoal) {
                 $fush = [
-                    'id'        => $banksoal['id'],
-                    'jurusan'   => $banksoal['matpel']['jurusan_id']
+                    'id'        => $banksoal['id']
                 ];
                 array_push($fill, $fush);
             }
@@ -189,8 +188,7 @@ class UjianController extends Controller
             $fill = array();
             foreach($request->group_ids as $group) {
                 $fush = [
-                    'id' => $group['id'],
-                    'parent' => $group['parent_id']
+                    'id' => $group['id']
                 ];
                 array_push($fill, $fush);
             }
