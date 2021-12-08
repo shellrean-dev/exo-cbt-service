@@ -43,11 +43,11 @@ class PesertaLoginController extends Controller
             'password' => $request->password
         ])->first();
 
-        if ($peserta->status == 0) {
-            return SendResponse::acceptCustom(['status' => 'susspend']);
-        }
-
         if($peserta) {
+            if ($peserta->status == 0) {
+                return SendResponse::acceptCustom(['status' => 'susspend']);
+            }
+            
             if(isset($setting->value['reset'])
                 && $setting->value['reset']
                 && $peserta->api_token != '') {

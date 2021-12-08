@@ -85,10 +85,10 @@ class UjianController extends Controller
 
         if($request->banksoal_id != '') {
             $fill = array();
+
             foreach($request->banksoal_id as $banksol) {
                 $fush = [
-                    'id' => $banksol['id'],
-                    'jurusan' => $banksol['matpel']['jurusan_id']
+                    'id' => $banksol['id']
                 ];
                 array_push($fill, $fush);
             }
@@ -100,8 +100,7 @@ class UjianController extends Controller
             $fill = array();
             foreach($request->group_ids as $group) {
                 $fush = [
-                    'id' => $group['id'],
-                    'parent' => $group['parent_id']
+                    'id' => $group['id']
                 ];
                 array_push($fill, $fush);
             }
