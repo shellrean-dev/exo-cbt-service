@@ -31,9 +31,9 @@ class AuthController extends Controller
         $credentials = request(['email', 'password']);
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
-            if ($user->deleted_at != null) {
-                return SendResponse::acceptData('invalid-credentials');
-            }
+            // if ($user->deleted_at != null) {
+            //     return SendResponse::acceptData('invalid-credentials');
+            // }
             
             $token =  $user->createToken('Personal Access Token')->accessToken;
             return SendResponse::acceptCustom([

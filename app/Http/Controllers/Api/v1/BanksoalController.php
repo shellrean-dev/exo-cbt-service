@@ -34,7 +34,7 @@ class BanksoalController extends Controller
         $user = request()->user('api');
         $perPage = request()->perPage ?: '';
 
-        $banksoal = Banksoal::with(['matpel','user'])->orderBy('created_at', 'DESC')->whereNull('deleted_at');
+        $banksoal = Banksoal::with(['matpel','user'])->orderBy('created_at', 'DESC');
 
         if (request()->q != '') {
             $banksoal = $banksoal->where('kode_banksoal', 'LIKE', '%'. request()->q.'%');
@@ -134,7 +134,7 @@ class BanksoalController extends Controller
      */
     public function show(Banksoal $banksoal)
     {
-        $banksoal = Banksoal::with('matpel')->where('id', $banksoal->id)->whereNull('deleted_at')->first();
+        $banksoal = Banksoal::with('matpel')->where('id', $banksoal->id)->first();
         return SendResponse::acceptData($banksoal);
     }
 
@@ -208,23 +208,23 @@ class BanksoalController extends Controller
         DB::beginTransaction();
 
         try {
-            if (config('exo.softdel')) {
-                $user = request()->user();
+            // if (config('exo.softdel')) {
+            //     $user = request()->user();
     
-                $banksoal->deleted_at = Carbon::now();
-                $banksoal->deleted_by = $user->id;
-                $banksoal->save();
+            //     $banksoal->deleted_at = Carbon::now();
+            //     $banksoal->deleted_by = $user->id;
+            //     $banksoal->save();
     
-                DB::table('directories')
-                    ->where('id', $banksoal->directory_id)
-                    ->update([
-                        'deleted_at' => Carbon::now(),
-                        'deleted_by' => $user->id
-                    ]);
-            } else {
+            //     DB::table('directories')
+            //         ->where('id', $banksoal->directory_id)
+            //         ->update([
+            //             'deleted_at' => Carbon::now(),
+            //             'deleted_by' => $user->id
+            //         ]);
+            // } else {
                 $banksoal->delete();
                 Directory::find($banksoal->directory_id)->delete();
-            }
+            // }
 
             DB::commit();
         } catch (\Exception $e) {
