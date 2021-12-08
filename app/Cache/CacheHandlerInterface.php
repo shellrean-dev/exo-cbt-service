@@ -10,7 +10,7 @@ namespace ShellreanDev\Cache;
  */
 interface CacheHandlerInterface
 {
-    public function cache(string $name, string $key, $data, int $seconds): void;
+    public function cache(string $name, string $key, $data, int $seconds = 5): void;
 
     public function isCached(string $name, string $key): bool;
 
