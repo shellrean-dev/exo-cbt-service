@@ -49,7 +49,10 @@ final class JadwalGatewayController extends Controller
             ->orderBy('mulai','DESC')
             ->select([
                 't_0.id',
-                't_0.alias'
+                't_0.alias',
+                't_0.tanggal',
+                't_0.mulai',
+                't_0.sesi'
             ])
             ->get();
         return SendResponse::acceptData($jadwals);
