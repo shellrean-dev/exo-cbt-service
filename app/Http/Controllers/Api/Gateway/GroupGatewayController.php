@@ -26,6 +26,7 @@ final class GroupGatewayController extends Controller
             ->orderBy('created_at')
             ->select([
                 't_0.id',
+                't_0.parent_id',
                 't_0.name'
             ])
             ->get();
