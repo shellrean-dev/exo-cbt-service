@@ -15,6 +15,7 @@ class CreateHasilUjiansTable extends Migration
     {
         Schema::create('hasil_ujians', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('ujian_id')->nullable();
             $table->uuid('banksoal_id');
             $table->uuid('peserta_id');
             $table->uuid('jadwal_id');
@@ -45,7 +46,7 @@ class CreateHasilUjiansTable extends Migration
             $table->foreign('banksoal_id')->references('id')->on('banksoals')->onDelete('cascade');
             $table->foreign('jadwal_id')->references('id')->on('jadwals')->onDelete('cascade');
 
-            $table->index(['banksoal_id', 'peserta_id', 'jadwal_id']);
+            $table->index(['banksoal_id', 'peserta_id', 'jadwal_id','ujian_id']);
         });
     }
 

@@ -19,6 +19,7 @@ class CreateSiswaUjiansTable extends Migration
             $table->uuid('jadwal_id');
             $table->string('mulai_ujian');
             $table->string('mulai_ujian_shadow');
+            $table->string('selesai_ujian')->nullable();
             $table->integer('uploaded')->default('0');
             $table->integer('sisa_waktu');
             $table->char('status_ujian');

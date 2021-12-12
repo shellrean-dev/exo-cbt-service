@@ -439,12 +439,15 @@ class UjianAktifController extends Controller
                 ])->count();
 
                 if (!$hasilUjian) {
-                    $devUjianService->finishing($banksoal_id, $jadwal->id, $peserta->id);
+                    $devUjianService->finishing($banksoal_id, $jadwal->id, $peserta->id, $ujian->id);
                 }
 
                 DB::table('siswa_ujians')
                     ->where('id', $ujian->id)
-                    ->update(['status_ujian' => 1]);
+                    ->update([
+                        'status_ujian' => UjianConstant::STATUS_FINISHED,
+                        'selesai_ujian' => now()->format('H:i:s')
+                    ]);
 
                 DB::commit();
             } catch (Exception $e) {

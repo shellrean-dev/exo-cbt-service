@@ -219,12 +219,13 @@ class UjianController extends Controller
         try {
             DB::beginTransaction();
 
-            $ujianService->finishing($jawaban->banksoal_id, $ujian->jadwal_id, $peserta->id);
+            $ujianService->finishing($jawaban->banksoal_id, $ujian->jadwal_id, $peserta->id, $ujian->id);
 
             DB::table('siswa_ujians')
                 ->where('id', $ujian->id)
                 ->update([
                     'status_ujian'  => UjianConstant::STATUS_FINISHED,
+                    'selesai_ujian' => now()->format('H:i:s')
                 ]);
             DB::commit();
 

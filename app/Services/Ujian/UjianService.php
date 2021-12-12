@@ -403,7 +403,7 @@ final class UjianService extends AbstractService
      * @throws Exception
      * @since 3.0.0 <ristretto>
      */
-    public function finishing(string $banksoal_id, string $jadwal_id, string $peserta_id)
+    public function finishing(string $banksoal_id, string $jadwal_id, string $peserta_id, string $ujian_id)
     {
         # Ambil banksoal
         $banksoal = Banksoal::find($banksoal_id);
@@ -516,6 +516,7 @@ final class UjianService extends AbstractService
 
             DB::table('hasil_ujians')->insert([
                 'id'                            => Str::uuid()->toString(),
+                'ujian_id'                      => $ujian_id,
                 'banksoal_id'                   => $banksoal_id,
                 'peserta_id'                    => $peserta_id,
                 'jadwal_id'                     => $jadwal_id,

@@ -202,7 +202,8 @@ class UjianAktifController extends Controller
                     'jadwal_id'     => $jadwal_id,
                     'peserta_id'    => $peserta_id
                 ])->update([
-                    'status_ujian'  => UjianConstant::STATUS_FINISHED
+                    'status_ujian'  => UjianConstant::STATUS_FINISHED,
+                    'selesai_ujian' => now()->format('H:i:s')
                 ]);
                 return SendResponse::accept('hasil ujian peserta sudah digenerate');
             }
@@ -216,13 +217,19 @@ class UjianAktifController extends Controller
 
             DB::beginTransaction();
 
-            $ujianService->finishing($jawaban->banksoal_id, $jadwal_id, $peserta_id);
+            $ujian = DB::table('siswa_ujians')->where([
+                'jadwal_id'     => $jadwal_id,
+                'peserta_id'    => $peserta_id
+            ])->first();
+
+            $ujianService->finishing($jawaban->banksoal_id, $jadwal_id, $peserta_id, $ujian->id);
 
             DB::table('siswa_ujians')->where([
                 'jadwal_id'     => $jadwal_id,
                 'peserta_id'    => $peserta_id
             ])->update([
-                'status_ujian'  => UjianConstant::STATUS_FINISHED
+                'status_ujian'  => UjianConstant::STATUS_FINISHED,
+                'selesai_ujian' => now()->format('H:i:s')
             ]);
 
             DB::table('pesertas')->where('id', $peserta_id)->update([
@@ -286,14 +293,20 @@ class UjianAktifController extends Controller
                 ->select('banksoal_id')
                 ->first();
 
-                $ujianService->finishing($jawaban->banksoal_id, $jadwal_id, $peserta);
+                $ujian = DB::table('siswa_ujians')->where([
+                    'jadwal_id'     => $jadwal_id,
+                    'peserta_id'    => $peserta
+                ])->first();
+
+                $ujianService->finishing($jawaban->banksoal_id, $jadwal_id, $peserta, $ujian->id);
             }
 
             DB::table('siswa_ujians')
                 ->whereIn('peserta_id', $unfinishPeserta)
                 ->where('jadwal_id', $jadwal_id)
                 ->update([
-                    'status_ujian' => UjianConstant::STATUS_FINISHED
+                    'status_ujian' => UjianConstant::STATUS_FINISHED,
+                    'selesai_ujian' => now()->format('H:i:s')
                 ]);
 
             DB::table('pesertas')
