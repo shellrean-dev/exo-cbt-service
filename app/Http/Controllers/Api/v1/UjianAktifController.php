@@ -73,6 +73,7 @@ class UjianAktifController extends Controller
                 'siswa_ujians.jadwal_id',
                 'siswa_ujians.mulai_ujian',
                 'siswa_ujians.mulai_ujian_shadow',
+                'siswa_ujians.selesai_ujian',
                 'siswa_ujians.sisa_waktu',
                 'siswa_ujians.status_ujian',
                 'siswa_ujians.peserta_id',

@@ -2,10 +2,13 @@
 
 namespace App\Models\dto;
 
+use Carbon\Carbon;
+
 class ResultDataTransform
 {
     public static function resultExam($item)
     {
+        $waktu_pengerjaan = Carbon::createFromFormat('H:i:s', $item->mulai_ujian)->diffInMinutes(Carbon::createFromFormat('H:i:s', $item->selesai_ujian));
         return (object) [
             'id'    => $item->id,
             'jumlah_benar' => $item->jumlah_benar,
@@ -26,6 +29,11 @@ class ResultDataTransform
             'point_setuju_tidak' => $item->point_setuju_tidak,
             'tidak_diisi' => $item->tidak_diisi,
             'hasil' => $item->hasil,
+            'ujian' => (object) [
+                'mulai' => $item->mulai_ujian,
+                'selesai' => $item->selesai_ujian,
+                'pengerjaan' => $waktu_pengerjaan.' menit'
+            ],
             'peserta' => (object) [
                 'nama' => $item->peserta_nama,
                 'no_ujian' => $item->peserta_no_ujian

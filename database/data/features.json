@@ -48,5 +48,15 @@
     "name": "page_soal_doc_tabel",
     "code": "v1",
     "content": "<p><strong>Import soal<\/strong><\/p><p>Pada halaman ini kamu dapat membuat soal dengan import soal .docx pada form yang disediakan.<\/p><p>Kami menyediakan 2 opsi template yang kamu bisa pakai<\/p><ul><li>Format standard - format-1<\/li><li>Format table - format-2<\/li><\/ul><p>&nbsp;<\/p><p>Pastikan kamu telah memilih tipe soal yang sesuai dengan yang anda akan import.<\/p><p>&nbsp;<\/p><p>Extraordinary CBT<\/p>"
+  },
+  {
+    "name": "page_status_ujian_table",
+    "code": "v1",
+    "content": "<p><strong>Status ujian<\/strong><\/p><p>Pada halaman ini kamu dapat melihat daftar ujian yang dilaksanakan. jadwal yang ditampilkan pada halaman ini adalah jadwal ujian yang sedang aktif.<\/p><p>Pada halaman ini juga ditampilkan token yang bisa kamu release bila belum aktif.<\/p><p>Setiap record jadwal dapat diganti sesia yang aktif dengan merubah dropdown lalu klik simpan.<\/p><p>&nbsp;<\/p><p>Extraordinary CBT<\/p>"
+  },
+  {
+    "name": "page_status_peserta_table",
+    "code": "v1",
+    "content": "<p><strong>Status peserta<\/strong><\/p><p>Pada halaman ini kamu dapat melihat peserta ujian yang masuk kedalam ujian.&nbsp;<\/p><p>Kamu dapat melakukan reset dan force close pada tiap peserta. Force close hanya berlaku jika peserta belum menyelesaikan ujiannya.<\/p><p>Reset ujian akan menghapus nilai dan semua jawaban peserta.<\/p><p>Bila kamu mengaktifkan socket, kamu dimungkinkan untuk melihat status koneksi peserta.<\/p><p>Waktu pengerjaan peserta dimunginkan untuk ditambah bila dirasa mengalami kendala, penambahan waktu tidak diperbolehkan untuk melebihi waktu saat ini. perkirakan penambahan waktu dengan waktu idle peserta.<\/p><p>Contoh kasus: Seandainya peserta menunggu 10 menit untuk perbaikan atau pindah komputer, maka beri tambahan waktu 10 menit bila kamu menambah 15 menit sistem akan menolak request tersebut. <br\/><br\/>Peserta trouble pukul 09:00, trouble fix pukul 09:10, beri waktu tambahan 10 menit.<\/p><p>&nbsp;<\/p><p>Extraordinary CBT<\/p>"
   }
 ]

@@ -40,6 +40,10 @@ class HasilUjianExport extends ExportExcel
     public const POINT_ARGUMENT_CELL = "T";
     public const HASIL_AKHIR_CELL = "U";
 
+    public const MULAI_UJIAN = "V";
+    public const SELESAI_UJIAN = "W";
+    public const PENGERJAAN = "X";
+
     public static function export($datas, $kode)
     {
         $spreadsheet = new Spreadsheet();
@@ -151,6 +155,21 @@ class HasilUjianExport extends ExportExcel
         $sheet->getStyle(self::HASIL_AKHIR_CELL.'3')->getAlignment()->setTextRotation(90);
         $sheet->getStyle(self::HASIL_AKHIR_CELL.'3')->getAlignment()->setWrapText(true);
 
+        $sheet->setCellValue(self::MULAI_UJIAN.'3', 'MULAI UJIAN');
+        $sheet->getStyle(self::MULAI_UJIAN.'3')->applyFromArray(self::styleGood());
+        $sheet->getStyle(self::MULAI_UJIAN.'3')->getAlignment()->setTextRotation(90);
+        $sheet->getStyle(self::MULAI_UJIAN.'3')->getAlignment()->setWrapText(true);
+
+        $sheet->setCellValue(self::SELESAI_UJIAN.'3', 'SELESAI UJIAN');
+        $sheet->getStyle(self::SELESAI_UJIAN.'3')->applyFromArray(self::styleGood());
+        $sheet->getStyle(self::SELESAI_UJIAN.'3')->getAlignment()->setTextRotation(90);
+        $sheet->getStyle(self::SELESAI_UJIAN.'3')->getAlignment()->setWrapText(true);
+
+        $sheet->setCellValue(self::PENGERJAAN.'3', 'WAKTU PENGERJAAN UJIAN');
+        $sheet->getStyle(self::PENGERJAAN.'3')->applyFromArray(self::styleGood());
+        $sheet->getStyle(self::PENGERJAAN.'3')->getAlignment()->setTextRotation(90);
+        $sheet->getStyle(self::PENGERJAAN.'3')->getAlignment()->setWrapText(true);
+
         $row = 4;
         foreach ($datas as $key => $value) {
             $sheet->setCellValue('A'.$row, $key+1);
@@ -215,6 +234,15 @@ class HasilUjianExport extends ExportExcel
 
             $sheet->setCellValue(self::HASIL_AKHIR_CELL.$row, $value->hasil+$value->point_setuju_tidak+$value->point_esay);
             $sheet->getStyle(self::HASIL_AKHIR_CELL.$row)->applyFromArray(self::styleGeneral());
+
+            $sheet->setCellValue(self::MULAI_UJIAN.$row, $value->ujian->mulai);
+            $sheet->getStyle(self::MULAI_UJIAN.$row)->applyFromArray(self::styleGeneral());
+
+            $sheet->setCellValue(self::SELESAI_UJIAN.$row, $value->ujian->selesai);
+            $sheet->getStyle(self::SELESAI_UJIAN.$row)->applyFromArray(self::styleGeneral());
+
+            $sheet->setCellValue(self::PENGERJAAN.$row, $value->ujian->pengerjaan);
+            $sheet->getStyle(self::PENGERJAAN.$row)->applyFromArray(self::styleGeneral());
 
             $row++;
         }

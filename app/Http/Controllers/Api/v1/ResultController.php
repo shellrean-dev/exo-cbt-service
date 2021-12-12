@@ -43,15 +43,16 @@ class ResultController extends Controller
             return SendResponse::badRequest('Kesalahan, data yang diminta tidak ditemukan');
         }
 
-        $res = DB::table('hasil_ujians')
-            ->join('pesertas', 'pesertas.id', '=','hasil_ujians.peserta_id')
-            ->leftJoin('group_members', 'group_members.student_id', '=', 'hasil_ujians.peserta_id');
+        $res = DB::table('hasil_ujians as t_0')
+            ->join('pesertas as t_1', 't_1.id', '=','t_0.peserta_id')
+            ->join('siswa_ujians as t_3', 't_3.id', '=', 't_0.ujian_id')
+            ->leftJoin('group_members as t_2', 't_2.student_id', '=', 't_0.peserta_id');
 
         $jurusan = strval($request->get('jurusan',''));
         $group = strval($request->get('group',''));
 
         if (Uuid::isValid($jurusan)) {
-            $res = $res->where('pesertas.jurusan_id', $jurusan);
+            $res = $res->where('t_1.jurusan_id', $jurusan);
         }
 
         if (Uuid::isValid($group)) {
@@ -68,20 +69,22 @@ class ResultController extends Controller
                     ->pluck('id')
                     ->toArray();
                 array_push($childs, $group);
-                $res = $res->whereIn('group_members.group_id', $childs);
+                $res = $res->whereIn('t_2.group_id', $childs);
             } else {
-                $res = $res->where('group_members.group_id', $group);
+                $res = $res->where('t_2.group_id', $group);
             }
         }
-        $res = $res->where('hasil_ujians.jadwal_id', $jadwal->id)
+        $res = $res->where('t_0.jadwal_id', $jadwal->id)
             ->select([
-                'hasil_ujians.*',
-                'pesertas.id as peserta_id',
-                'pesertas.nama as peserta_nama',
-                'pesertas.no_ujian as peserta_no_ujian',
-                'pesertas.jurusan_id as peserta_jurusan_id'
+                't_0.*',
+                't_1.id as peserta_id',
+                't_1.nama as peserta_nama',
+                't_1.no_ujian as peserta_no_ujian',
+                't_1.jurusan_id as peserta_jurusan_id',
+                't_3.mulai_ujian',
+                't_3.selesai_ujian'
             ])
-            ->orderBy('pesertas.no_ujian');
+            ->orderBy('t_1.no_ujian');
 
         if(request()->perPage != '') {
             $res = $res->paginate(request()->perPage);
@@ -147,15 +150,16 @@ class ResultController extends Controller
             return SendResponse::badRequest('Kesalahan, jadwal yang diminta tidak valid');
         }
 
-        $res = DB::table('hasil_ujians')
-            ->join('pesertas', 'pesertas.id', '=','hasil_ujians.peserta_id')
-            ->leftJoin('group_members', 'group_members.student_id', '=', 'hasil_ujians.peserta_id');
+        $res = DB::table('hasil_ujians as t_0')
+            ->join('pesertas as t_1', 't_1.id', '=','t_0.peserta_id')
+            ->join('siswa_ujians as t_3', 't_3.id', '=', 't_0.ujian_id')
+            ->leftJoin('group_members', 'group_members.student_id', '=', 't_0.peserta_id');
 
         $jurusan = strval($request->get('jurusan',''));
         $group = strval($request->get('group',''));
 
         if (Uuid::isValid($jurusan)) {
-            $res = $res->where('pesertas.jurusan_id', $jurusan);
+            $res = $res->where('t_1.jurusan_id', $jurusan);
         }
 
         if (Uuid::isValid($group)) {
@@ -177,15 +181,17 @@ class ResultController extends Controller
                 $res = $res->where('group_members.group_id', $group);
             }
         }
-        $res = $res->where('hasil_ujians.jadwal_id', $jadwal->id)
+        $res = $res->where('t_0.jadwal_id', $jadwal->id)
             ->select([
-                'hasil_ujians.*',
-                'pesertas.id as peserta_id',
-                'pesertas.nama as peserta_nama',
-                'pesertas.no_ujian as peserta_no_ujian',
-                'pesertas.jurusan_id as peserta_jurusan_id'
+                't_0.*',
+                't_1.id as peserta_id',
+                't_1.nama as peserta_nama',
+                't_1.no_ujian as peserta_no_ujian',
+                't_1.jurusan_id as peserta_jurusan_id',
+                't_3.mulai_ujian',
+                't_3.selesai_ujian'
             ])
-            ->orderBy('pesertas.no_ujian')
+            ->orderBy('t_1.no_ujian')
             ->get()
             ->map([ResultDataTransform::class, 'resultExam']);
 
