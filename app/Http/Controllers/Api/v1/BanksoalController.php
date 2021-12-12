@@ -33,8 +33,29 @@ class BanksoalController extends Controller
     {
         $user = request()->user('api');
         $perPage = request()->perPage ?: '';
-
-        $banksoal = Banksoal::with(['matpel','user'])->orderBy('created_at', 'DESC');
+        $banksoal = DB::table('banksoals as t_0')
+            ->join('matpels as t_1', 't_0.matpel_id', 't_1.id')
+            ->join('users as t_2', 't_0.author', 't_2.id')
+            ->select([
+                't_0.id',
+                't_0.is_locked',
+                't_0.jumlah_benar_salah',
+                't_0.jumlah_isian_singkat',
+                't_0.jumlah_mengurutkan',
+                't_0.jumlah_menjodohkan',
+                't_0.jumlah_pilihan',
+                't_0.jumlah_pilihan_listening',
+                't_0.jumlah_setuju_tidak',
+                't_0.jumlah_soal',
+                't_0.jumlah_soal_esay',
+                't_0.jumlah_soal_ganda_kompleks',
+                't_0.jumlah_soal_listening',
+                't_0.kode_banksoal',
+                't_0.persen',
+                't_1.nama as matpel_name',
+                't_2.name as created_by',
+                't_2.email as email_creator'
+            ])->orderByDesc('t_0.created_at');
 
         if (request()->q != '') {
             $banksoal = $banksoal->where('kode_banksoal', 'LIKE', '%'. request()->q.'%');
@@ -43,7 +64,25 @@ class BanksoalController extends Controller
             $banksoal = $banksoal->where('author',$user->id);
         }
         if($perPage != '') {
+            $ids = $banksoal->get('t_0.id')->pluck('id');
+            $inputted = DB::table('soals')->whereIn('banksoal_id', $ids)->select([
+                DB::raw('count(1) as total'),
+                'banksoal_id'
+            ])
+            ->groupBy('banksoal_id')
+            ->get();
+
             $banksoal = $banksoal->paginate($perPage);
+            $banksoal->getCollection()->transform(function ($item) use ($inputted) {
+                $input = $inputted->where('banksoal_id', $item->id)->first();
+                $item->persen = json_decode($item->persen);
+                if ($input) {
+                    $item->inputed = $input->total;
+                } else {
+                    $item->inputed = '-';
+                }
+                return $item;
+            });
         } else {
             $banksoal = $banksoal->get();
         }
