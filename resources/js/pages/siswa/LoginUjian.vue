@@ -54,8 +54,12 @@
                       <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
                     </svg>
                   </div>
-                  <input v-model="data.password" type="password" class="w-full pl-12 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-blue-300" :class="{ 'border-red-300' : errors.password }" placeholder="*******" required=""
+                  <input v-model="data.password" :type="showPassword ? 'text' : 'password'" class="w-full pl-12 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-blue-300" :class="{ 'border-red-300' : errors.password }" placeholder="*******" required=""
                   @keyup="clearError">
+                  <div class="absolute inset-y-0 right-0 w-10 flex items-center  justify-center px-2 text-gray-700 rounded-r-lg text-gray-300 cursor-pointer" @click="_showPassword">
+                    <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" width="20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye text-gray-400"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" width="20px"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye-off text-gray-400"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                  </div>
                 </div>
                 <div class="text-xs text-red-600" v-if="errors.password">{{ errors.password[0] }} </div>
               </div>
@@ -89,6 +93,7 @@ import { showSweetError } from '../../entities/alert'
 				  no_ujian: '',
 				  password: ''
 			  },
+        showPassword: false,
         year: '',
         version: process.env.MIX_APP_VERSION
 		  }
@@ -121,7 +126,10 @@ import { showSweetError } from '../../entities/alert'
 		  },
 		  clearError() {
 			  this.CLEAR_ERRORS()
-		  }
+		  },
+      _showPassword() {
+        this.showPassword = !this.showPassword
+      }
 	  },
     watch: {
       errors(v) {
