@@ -43,6 +43,8 @@ class CreateBanksoalsTable extends Migration
             $table->uuid('deleted_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
+
+            $table->index(['kode_banksoal', 'matpel_id', 'author', 'directory_id']);
         });
     }
 

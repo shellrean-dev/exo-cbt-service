@@ -27,6 +27,8 @@ class CreatePesertasTable extends Migration
             $table->uuid('deleted_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
+
+            $table->index(['no_ujian', 'api_token']);
         });
     }
 

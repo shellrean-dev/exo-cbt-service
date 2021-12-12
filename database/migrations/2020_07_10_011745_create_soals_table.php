@@ -30,6 +30,8 @@ class CreateSoalsTable extends Migration
             $table->timestamps();
 
             $table->foreign('banksoal_id')->references('id')->on('banksoals')->onDelete('cascade');
+
+            $table->index(['banksoal_id', 'tipe_soal']);
         });
     }
 

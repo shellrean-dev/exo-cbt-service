@@ -24,6 +24,8 @@ class CreateGroupMembersTable extends Migration
 
             $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
             $table->foreign('student_id')->references('id')->on('pesertas')->onDelete('cascade');
+
+            $table->index(['group_id', 'student_id']);
         });
     }
 

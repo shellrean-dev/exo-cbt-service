@@ -24,6 +24,8 @@ class CreateJawabanSoalsTable extends Migration
             $table->timestamps();
 
             $table->foreign('soal_id')->references('id')->on('soals')->onDelete('cascade');
+
+            $table->index(['soal_id', 'correct']);
         });
     }
 

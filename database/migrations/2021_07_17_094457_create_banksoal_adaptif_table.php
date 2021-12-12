@@ -25,6 +25,8 @@ class CreateBanksoalAdaptifTable extends Migration
             $table->uuid('deleted_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
+
+            $table->index(['matpel_id', 'code']);
         });
     }
 

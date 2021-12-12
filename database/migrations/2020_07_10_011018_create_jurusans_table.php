@@ -20,6 +20,8 @@ class CreateJurusansTable extends Migration
 
             $table->uuid('deleted_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
+
+            $table->index(['kode']);
         });
     }
 

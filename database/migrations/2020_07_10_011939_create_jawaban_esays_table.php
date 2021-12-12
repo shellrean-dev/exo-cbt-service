@@ -29,6 +29,8 @@ class CreateJawabanEsaysTable extends Migration
             $table->foreign('peserta_id')->references('id')->on('pesertas')->onDelete('cascade');
             $table->foreign('jawab_id')->references('id')->on('jawaban_pesertas')->onDelete('cascade');
             $table->foreign('corrected_by')->references('id')->on('users')->onDelete('cascade');
+
+            $table->index(['banksoal_id', 'peserta_id', 'jawab_id', 'corrected_by']);
         });
     }
 

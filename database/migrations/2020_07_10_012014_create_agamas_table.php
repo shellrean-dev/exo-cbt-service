@@ -18,6 +18,8 @@ class CreateAgamasTable extends Migration
             $table->string('kode');
             $table->string('nama');
             $table->timestamps();
+
+            $table->index(['kode']);
         });
     }
 

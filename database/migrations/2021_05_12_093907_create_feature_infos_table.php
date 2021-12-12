@@ -19,6 +19,8 @@ class CreateFeatureInfosTable extends Migration
             $table->string('code');
             $table->text('content');
             $table->timestamps();
+
+            $table->index(['name']);
         });
     }
 

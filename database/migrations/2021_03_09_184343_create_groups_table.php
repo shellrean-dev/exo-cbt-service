@@ -21,6 +21,8 @@ class CreateGroupsTable extends Migration
             $table->uuid('deleted_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
+
+            $table->index(['parent_id', 'name']);
         });
     }
 

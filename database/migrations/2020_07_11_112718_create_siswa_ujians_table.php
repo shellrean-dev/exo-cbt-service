@@ -29,6 +29,8 @@ class CreateSiswaUjiansTable extends Migration
 
             $table->foreign('peserta_id')->references('id')->on('pesertas')->onDelete('cascade');
             $table->foreign('jadwal_id')->references('id')->on('jadwals')->onDelete('cascade');
+
+            $table->index(['peserta_id', 'jadwal_id', 'status_ujian']);
         });
     }
 

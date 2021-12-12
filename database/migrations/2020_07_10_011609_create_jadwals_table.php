@@ -31,6 +31,8 @@ class CreateJadwalsTable extends Migration
             $table->uuid('deleted_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
+
+            $table->index(['tanggal', 'status_ujian', 'event_id']);
         });
     }
 

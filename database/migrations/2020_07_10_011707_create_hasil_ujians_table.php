@@ -44,6 +44,8 @@ class CreateHasilUjiansTable extends Migration
             $table->foreign('peserta_id')->references('id')->on('pesertas')->onDelete('cascade');
             $table->foreign('banksoal_id')->references('id')->on('banksoals')->onDelete('cascade');
             $table->foreign('jadwal_id')->references('id')->on('jadwals')->onDelete('cascade');
+
+            $table->index(['banksoal_id', 'peserta_id', 'jadwal_id']);
         });
     }
 
