@@ -8,7 +8,7 @@ class ResultDataTransform
 {
     public static function resultExam($item)
     {
-        if($item->mulai_ujian == '' || $item->selesai_ujian) {
+        if(!$item->mulai_ujian || !$item->selesai_ujian) {
             $waktu_pengerjaan = "Tidak dapat dihitung";
         } else {
             $waktu_pengerjaan = Carbon::createFromFormat('H:i:s', $item->mulai_ujian)->diffInMinutes(Carbon::createFromFormat('H:i:s', $item->selesai_ujian));
