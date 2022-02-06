@@ -38,7 +38,7 @@ class ResultDataTransform
             'ujian' => (object) [
                 'mulai' => $item->mulai_ujian,
                 'selesai' => $item->selesai_ujian,
-                'pengerjaan' => $waktu_pengerjaan.' menit'
+                'pengerjaan' => $waktu_pengerjaan
             ],
             'peserta' => (object) [
                 'nama' => $item->peserta_nama,
