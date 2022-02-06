@@ -66,8 +66,6 @@ class CapaianPesertaUjianExport extends ExportExcel
 
             $column = 'D';
             foreach ($datas['soals'] as $skey => $svalue) {
-                # $jawaban_konkrit = $datas['jawaban_pesertas']->where('soal_id', $svalue->id)->where('peserta_id', $value->id)->first();
-
                 $jawaban_konkrit = false;
                 if (isset($datas['jawaban_pesertas'][$svalue->id.'|'.$value->id])) {
                     $jawaban_konkrit = $datas['jawaban_pesertas'][$svalue->id.'|'.$value->id];
@@ -86,7 +84,8 @@ class CapaianPesertaUjianExport extends ExportExcel
                             $sheet->getStyle($column.$row)->applyFromArray(self::styleGeneral());
                         }
                     } else {
-                        $sheet->setCellValue($column.$row, '?');
+                        $sheet->setCellValue($column.$row, 'x');
+                        $sheet->getStyle($column.$row)->getAlignment()->setHorizontal('right');
                         $sheet->getStyle($column.$row)->applyFromArray(self::styleYellow());
                     }
                 } else {
