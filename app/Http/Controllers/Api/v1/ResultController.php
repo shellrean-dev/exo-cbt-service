@@ -404,6 +404,12 @@ class ResultController extends Controller
             'jawaban_pesertas.iscorrect',
             'jawaban_pesertas.answered'
         ])->get();
+
+        $new_jawaban_peserta = [];
+        foreach ($jawaban_pesertas as $jawaban) {
+            $new_jawaban_peserta[$jawaban->soal_id.'|'.$jawaban->peserta_id] = $jawaban;
+        }
+
         $pesertas = $pesertas->select([
             'pesertas.id',
             'pesertas.no_ujian',
@@ -412,7 +418,7 @@ class ResultController extends Controller
 
         $data = [
             'pesertas' => $pesertas,
-            'jawaban_pesertas' => $jawaban_pesertas,
+            'jawaban_pesertas' => $new_jawaban_peserta,
             'soals' => $soals
         ];
 

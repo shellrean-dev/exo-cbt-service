@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
 use App\Setting;
-use ShellreanDev\Cache\CacheHandler;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * SettingController
@@ -20,25 +21,15 @@ class SettingController extends Controller
      *
      * Get setting sekolah
      *
-     * @param ShellreanDev\Cache\CacheHandler $cache
      * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
-    public function getSettingSekolah(CacheHandler $cache)
+    public function getSettingSekolah()
     {
-        // ambil data setting sekolah
-//        $key = md5(sprintf('setting:data:set_sekolah'));
-//        if ($cache->isCached($key)) {
-//            $setting = $cache->getItem($key);
-//        } else {
-            $setting = DB::table('settings')
-                ->where('name', 'set_sekolah')
-                ->select('id','name','value')
-                ->first();
-
-//            $cache->cache($key, $setting);
-//        }
-
+        $setting = DB::table('settings')
+            ->where('name', 'set_sekolah')
+            ->select('id','name','value')
+            ->first();
         return SendResponse::acceptData([
             'name'  => $setting->name,
             'value' => json_decode($setting->value, true)
@@ -50,24 +41,15 @@ class SettingController extends Controller
      *
      * Get setting sekolah public
      *
-     * @param ShellreanDev\Cache\CacheHandler $cache
      * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
-    public function getSettingPublicSekolah(CacheHandler $cache)
+    public function getSettingPublicSekolah()
     {
-        // ambil data setting sekolah
-//        $key = md5(sprintf('setting:data:set_sekolah'));
-//        if ($cache->isCached($key)) {
-//            $setting = $cache->getItem($key);
-//        } else {
-            $setting = DB::table('settings')
-                ->where('name', 'set_sekolah')
-                ->select('id','name','value')
-                ->first();
-
-//            $cache->cache($key, $setting);
-//        }
+        $setting = DB::table('settings')
+            ->where('name', 'set_sekolah')
+            ->select('id','name','value')
+            ->first();
 
         $value = json_decode($setting->value, true);
         $sekolah_name = isset($value['nama_sekolah']) ? $value['nama_sekolah'] : '';
@@ -85,11 +67,10 @@ class SettingController extends Controller
      * Store setting sekolah
      *
      * @param Illuminate\Http\Request $request
-     * @param ShellreanDev\Cache\CacheHandler $cache
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
-    public function storeSettingSekolah(Request $request, CacheHandler $cache)
+    public function storeSettingSekolah(Request $request)
     {
         $request->validate([
             'nama_sekolah'      => 'required',
@@ -132,15 +113,6 @@ class SettingController extends Controller
                 'type' => 'sekolah'
             ]);
         }
-
-        // set cache setting sekolah
-//        $key = md5(sprintf('setting:data:set_sekolah'));
-        $setting = DB::table('settings')
-                ->where('name', 'set_sekolah')
-                ->select('id','name','value')
-                ->first();
-//        $cache->cache($key, $setting);
-
         return SendResponse::accept();
     }
 
@@ -160,9 +132,12 @@ class SettingController extends Controller
         ]);
         try {
             $file = $request->file('image');
-            $filename = date('d_m_Y_his').'-'.$file->getClientOriginalName();
-            $file->storeAs('public', $filename);
+            $filename = date('d_m_Y_his').'-'.$file->getClientOriginalName().'.webp';
+            $path = 'public/'.$filename;
 
+            $image = Image::make($file)->encode('webp', 90);
+            Storage::put($path, $image->__toString());
+            
             $sekolah = Setting::where('name', 'set_sekolah')->first();
             if($sekolah) {
                 $value = $sekolah->value;

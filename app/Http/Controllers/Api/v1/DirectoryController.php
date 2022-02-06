@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Directory;
 use App\File;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * DirectoryController
@@ -78,7 +80,7 @@ class DirectoryController extends Controller
     {
         $file = $request->file('file');
         $filename = date('Ymd').'-'.$file->getClientOriginalName();
-        $path = $file->storeAs('public/audio/',$filename);
+        $file->storeAs('public/audio/',$filename);
 
         return response()->json(['data' => $filename]);
     }
@@ -97,8 +99,18 @@ class DirectoryController extends Controller
         $file = $request->file('image');
         $type = $file->getClientOriginalExtension();
         $size = $file->getSize();
-        $filename = date('Ymd').'-'.$file->getClientOriginalName();
-        $path = $file->storeAs('public/'.$dir->slug,$filename);
+
+        $filename = date('Ymdhis').'-'.$file->getClientOriginalName();
+
+        if (in_array($type, ['png', 'jpg', 'jpeg'])) {
+            $path = 'public/'.$dir->slug.'/'.$filename.'.webp';
+            $filename = $filename.'.webp';
+
+            $image = Image::make($file)->encode('webp', 90);
+            Storage::put($path, $image->__toString());
+        } else {
+            $path = $file->storeAs('public/'.$dir->slug, $filename);
+        }
 
         $data= [
             'directory_id'      => $request->directory_id,
@@ -132,8 +144,18 @@ class DirectoryController extends Controller
             $file = $request->file('upload');
             $type = $file->getClientOriginalExtension();
             $size = $file->getSize();
-            $filename = date('Ymd').'-'.$file->getClientOriginalName();
-            $path = $file->storeAs('public/'.$dir->slug,$filename);
+
+            $filename = date('Ymdhis').'-'.$file->getClientOriginalName();
+
+            if (in_array($type, ['png', 'jpg', 'jpeg'])) {
+                $path = 'public/'.$dir->slug.'/'.$filename.'.webp';
+                $filename = $filename.'.webp';
+    
+                $image = Image::make($file)->encode('webp', 90);
+                Storage::put($path, $image->__toString());
+            } else {
+                $path = $file->storeAs('public/'.$dir->slug, $filename);
+            }
 
             $data= [
                 'directory_id'      => request()->directory_id,

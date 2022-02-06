@@ -3,7 +3,8 @@
 namespace App\Services;
 
 use Illuminate\Support\Str;
-
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
 class ExoProcessDoc
 {
     private $template;
@@ -140,10 +141,14 @@ class ExoProcessDoc
             $old_path=$word_folder."/".$value;
             $new_path=$this->target_dir.$imagenew_name;
 
+            $image = Image::make($old_path)->encode('webp', 90);
+            $new_path_storage = "public/".$this->directory->slug.'/'.$imagenew_name.'.webp';
+            Storage::put($new_path_storage, $image->__toString());
+
             array_push($images, [
                 'id'            => Str::uuid()->toString(),
                 'directory_id'	=> $this->directory->id,
-                'filename'		=> $imagenew_name,
+                'filename'		=> $imagenew_name.'.webp',
                 'path'			=> $new_path,
                 'exstension'	=> $ext_img,
                 'dirname'		=> $this->directory->slug,
@@ -153,7 +158,7 @@ class ExoProcessDoc
             ]);
 
             rename($old_path,$new_path);
-            $img = '<img src="'.$this->dsn.'/storage/'.$this->directory->slug.'/'.$imagenew_name.'">';;
+            $img = '<img src="'.$this->dsn.'/storage/'.$this->directory->slug.'/'.$imagenew_name.'.webp">';;
             $this->content = str_replace($rplc_str,$img,$this->content);
             $this->content = str_replace($rplc_str1,$img,$this->content);
             $this->content = str_replace($rplc_str2,$img,$this->content);

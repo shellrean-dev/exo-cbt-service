@@ -3,6 +3,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Intervention\Image\Facades\Image;
 
 class WordService
 {	
@@ -73,20 +74,25 @@ class WordService
         		$ext_img = strtolower(pathinfo($value, PATHINFO_EXTENSION));
         		$imagenew_name=time().$rand_inc_number.".".$ext_img;
         		$old_path=$word_folder."/".$value;
+
+				$image = Image::make($old_path)->encode('webp', 90);
 				$new_path=$target_dir.$imagenew_name;
+				
+				$new_path_storage = "public/".$directory->slug.'/'.$imagenew_name.'.webp';
+				Storage::put($new_path_storage, $image->__toString());
 				
 				DB::table('files')->insert([
 					'id'			=> Str::uuid()->toString(),
 					'directory_id'	=> $directory->id,
-					'filename'		=> $imagenew_name,
-					'path'			=> $new_path,
+					'filename'		=> $imagenew_name.'.webp',
+					'path'			=> $new_path_storage,
 					'exstension'	=> $ext_img,
 					'dirname'		=> $directory->slug,
 					'size'			=> 0
 				]);
 
-        		rename($old_path,$new_path);
-		        $img = '<img src="'.$dsn.'/storage/'.$directory->slug.'/'.$imagenew_name.'">';
+        		// rename($old_path,$new_path);
+		        $img = '<img src="'.$dsn.'/storage/'.$directory->slug.'/'.$imagenew_name.'.webp">';
 		        $content=str_replace($rplc_str,$img,$content);
 		        $content=str_replace($rplc_str1,$img,$content);
 		        $content=str_replace($rplc_str2,$img,$content);

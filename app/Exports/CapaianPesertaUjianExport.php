@@ -66,7 +66,12 @@ class CapaianPesertaUjianExport extends ExportExcel
 
             $column = 'D';
             foreach ($datas['soals'] as $skey => $svalue) {
-                $jawaban_konkrit = $datas['jawaban_pesertas']->where('soal_id', $svalue->id)->where('peserta_id', $value->id)->first();
+                # $jawaban_konkrit = $datas['jawaban_pesertas']->where('soal_id', $svalue->id)->where('peserta_id', $value->id)->first();
+
+                $jawaban_konkrit = false;
+                if (isset($datas['jawaban_pesertas'][$svalue->id.'|'.$value->id])) {
+                    $jawaban_konkrit = $datas['jawaban_pesertas'][$svalue->id.'|'.$value->id];
+                }
 
                 if ($jawaban_konkrit) {
                     $count += intval($jawaban_konkrit->iscorrect);
@@ -75,10 +80,10 @@ class CapaianPesertaUjianExport extends ExportExcel
                 if($jawaban_konkrit) {
                     if($jawaban_konkrit->answered) {
                         $sheet->setCellValue($column.$row, $jawaban_konkrit->iscorrect);
-                        if($jawaban_konkrit->iscorrect == '0') {
-                            $sheet->getStyle($column.$row)->applyFromArray(self::styleGeneral());
-                        } else {
+                        if($jawaban_konkrit->iscorrect == 0) {
                             $sheet->getStyle($column.$row)->applyFromArray(self::styleBad());
+                        } else {
+                            $sheet->getStyle($column.$row)->applyFromArray(self::styleGeneral());
                         }
                     } else {
                         $sheet->setCellValue($column.$row, '?');
