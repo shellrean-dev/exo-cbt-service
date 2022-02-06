@@ -72,8 +72,22 @@ class CapaianPesertaUjianExport extends ExportExcel
                     $count += intval($jawaban_konkrit->iscorrect);
                 }
 
-                $sheet->setCellValue($column.$row, $jawaban_konkrit ? $jawaban_konkrit->iscorrect : '-');
-                $sheet->getStyle($column.$row)->applyFromArray(self::styleGeneral());
+                if($jawaban_konkrit) {
+                    if($jawaban_konkrit->answered) {
+                        $sheet->setCellValue($column.$row, $jawaban_konkrit->iscorrect);
+                        if($jawaban_konkrit->iscorrect == '0') {
+                            $sheet->getStyle($column.$row)->applyFromArray(self::styleGeneral());
+                        } else {
+                            $sheet->getStyle($column.$row)->applyFromArray(self::styleBad());
+                        }
+                    } else {
+                        $sheet->setCellValue($column.$row, '?');
+                        $sheet->getStyle($column.$row)->applyFromArray(self::styleYellow());
+                    }
+                } else {
+                    $sheet->setCellValue($column.$row, '-');
+                    $sheet->getStyle($column.$row)->applyFromArray(self::styleGeneral());
+                }
                 $column++;
             }
             $sheet->setCellValue($column.$row, $count);
