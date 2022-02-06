@@ -402,6 +402,7 @@ class ResultController extends Controller
             'jawaban_pesertas.soal_id',
             'jawaban_pesertas.peserta_id',
             'jawaban_pesertas.iscorrect',
+            'jawaban_pesertas.answered'
         ])->get();
         $pesertas = $pesertas->select([
             'pesertas.id',
