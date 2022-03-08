@@ -13,4 +13,5 @@ class CacheConstant
     public const KEY_JADWAL_ACTIVE_TODAY = "JADWAL_ACTIVE_TODAY";
 
     public const KEY_UJIAN_ON_PROGRESS = "UJIAN_ON_PROGRESS";
+    public const KEY_BANKSOAL_IN_UJIAN_ACTIVE = "BANKSOAL_IN_UJIAN_ACTIVE";
 }

@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Api\v2;
 
 use App\Http\Controllers\Controller;
+use App\Models\CacheConstant;
 use App\Models\UjianConstant;
 use App\Services\Setting\SettingTokenService;
 use App\Services\Ujian\BenarSalahService;
@@ -160,7 +161,7 @@ class UjianAktifController extends Controller
         $data = DB::table('siswa_ujians')
             ->where('peserta_id', $peserta->id)
             ->where('jadwal_id', $request->jadwal_id)
-            ->where('status_ujian', UjianConstant::STATUS_STANDBY)
+            ->whereDate('created_at', now()->format('Y-m-d'))
             ->first();
 
         if($data) {
@@ -207,7 +208,7 @@ class UjianAktifController extends Controller
         # yang sudah dijalankan pada hari ini
         # tetapi belum dimulai
         # yang mana jadwal tersebut sedang aktif dan tanggal pengerjaannya hari ini
-        $data = $ujianService->onStandbyToday($peserta->id);
+        $data = $ujianService->onWorkingToday($peserta->id);
 
         if(!$data) {
             return SendResponse::acceptData([]);
@@ -243,6 +244,8 @@ class UjianAktifController extends Controller
             ->whereIn('status_ujian', [UjianConstant::STATUS_STANDBY, UjianConstant::STATUS_PROGRESS])
             ->whereDate('created_at', now()->format('Y-m-d'))
             ->whereIn('jadwal_id', $jadwal_ids)
+            ->orderBy('created_at')
+            ->orderByDesc('status_ujian')
             ->first();
 
         if (!$data) {
@@ -304,11 +307,25 @@ class UjianAktifController extends Controller
         $banksoal_diujikan = DB::table('banksoals')
             ->join('matpels','banksoals.matpel_id','=','matpels.id')
             ->whereIn('banksoals.id', $banksoal_ids)
-            ->select('banksoals.id','matpels.agama_id','matpels.jurusan_id')
-            ->get();
+            ->select('banksoals.id','matpels.agama_id','matpels.jurusan_id');
+
+        # checking cache
+        if (config('exo.enable_cache')) {
+            $cache_key_ids = implode('-', $banksoal_ids);
+            $is_cached = $cache->isCached(CacheConstant::KEY_BANKSOAL_IN_UJIAN_ACTIVE, $cache_key_ids);
+            if ($is_cached) {
+                $banksoal_diujikan = $cache->getItem(CacheConstant::KEY_BANKSOAL_IN_UJIAN_ACTIVE, $cache_key_ids);
+            } else {
+                $banksoal_diujikan = $banksoal_diujikan->get();
+                if($banksoal_diujikan) {
+                    $cache->cache(CacheConstant::KEY_BANKSOAL_IN_UJIAN_ACTIVE, $cache_key_ids, $banksoal_diujikan);
+                }
+            }
+        } else {
+            $banksoal_diujikan = $banksoal_diujikan->get();
+        }
 
         $banksoal_id = '';
-
         # Cari id banksoal yang dapat dipakai oleh siswwa
         foreach($banksoal_diujikan as $bk) {
             $banksoal = $devUjianService->checkPesertaBanksoal($bk, $peserta);
@@ -417,10 +434,10 @@ class UjianAktifController extends Controller
 
         # Get siswa ujian detail
         $ujian = DB::table('siswa_ujians')
-            ->where([
-                'jadwal_id'     => $jadwal->id,
-                'peserta_id'    => $peserta->id
-            ])
+            ->where('jadwal_id', $jadwal->id)
+            ->where('peserta_id', $peserta->id)
+            ->where('status_ujian', '=', UjianConstant::STATUS_PROGRESS)
+            ->whereDate('created_at', now()->format('Y-m-d'))
             ->first();
 
         # Check perbedaan waktu

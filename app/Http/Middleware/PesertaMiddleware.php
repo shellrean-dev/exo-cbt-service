@@ -26,8 +26,13 @@ class PesertaMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
+        $tokens = explode('|', $request->bearerToken());
+        if(count($tokens) != 2) {
+            return response()->json(['message' => 'Anda tidak lagi memiliki akses. silakan login kembali'], 401);
+        }
+
         $query = Peserta::with('group')
-            ->where(['api_token' => $request->bearerToken()]);
+            ->where(['id' => $tokens[0]]);
 
         if (config('exo.enable_cache')) {
             $is_cached = $this->cache->isCached(CacheConstant::KEY_AUTHETICATION, md5($request->bearerToken()));
@@ -43,7 +48,7 @@ class PesertaMiddleware
             $user = $query->first();
         }
 
-        if($user) {
+        if($user && $user->api_token == $request->bearerToken()) {
             $request->attributes->add(['peserta-auth' => $user]);
             return $next($request);
         }

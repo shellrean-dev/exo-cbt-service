@@ -9,7 +9,6 @@ use App\Actions\SendResponse;
 use App\Group;
 
 use Ramsey\Uuid\Uuid;
-use ShellreanDev\Cache\CacheHandler;
 use ShellreanDev\Services\Jadwal\JadwalService;
 
 /**
@@ -25,7 +24,7 @@ class JadwalController extends Controller
      * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
-    public function getJadwalPeserta(CacheHandler $cache, JadwalService $jadwalService)
+    public function getJadwalPeserta(JadwalService $jadwalService)
     {
         # data peserta
         $peserta = request()->get('peserta-auth');
@@ -37,8 +36,7 @@ class JadwalController extends Controller
         # ujian yang sedang dilaksanakan 'aktif' dan hari ini
         $jadwals = $jadwalService->activeToday();
 
-        $jadwal_ids = [];
-
+        $avail_jadwal = [];
         foreach($jadwals as $key => $jadwal) {
             if (in_array($jadwal->id, $hascomplete->toArray())) {
                 continue;
@@ -142,29 +140,28 @@ class JadwalController extends Controller
                 }
             }
 
-            array_push($jadwal_ids, $jadwal_id);
+            array_push($avail_jadwal, $jadwal);
         }
-
-        $avail_jadwal = $jadwals->whereIn('id', $jadwal_ids)->values();
 
         if (!$avail_jadwal) {
             return SendResponse::acceptData([]);
         }
 
-        $avail_jadwal = $avail_jadwal->map(function($item) {
+        $jadwal_mapped = [];
+        foreach ($avail_jadwal as $item) {
             $setting = json_decode($item->setting);
-            return [
-                'id' => $item->id,
-                'alias' => $item->alias,
-                'lama' => $item->lama,
-                'mulai' => $item->mulai,
-                'tanggal' => $item->tanggal,
-                'setting' => [
+            $jadwal_mapped[] = [
+                'id'        => $item->id,
+                'alias'     => $item->alias,
+                'lama'      => $item->lama,
+                'mulai'     => $item->mulai,
+                'tanggal'   => $item->tanggal,
+                'setting'   => [
                     'token' => intval($setting->token == '1' ? '1' : '0'),
                 ]
             ];
-        });
+        }
 
-        return SendResponse::acceptData($avail_jadwal);
+        return SendResponse::acceptData($jadwal_mapped);
     }
 }

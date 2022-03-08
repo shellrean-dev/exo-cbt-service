@@ -19,7 +19,7 @@ class EventController extends Controller
 {
     /**
      * @Route(path="api/v1/events", methods={"GET"})
-     * 
+     *
      * Display a listing of the resource.
      *
      * @return Illuminate\Http\Response
@@ -41,7 +41,7 @@ class EventController extends Controller
 
     /**
      * @Route(path="api/v1/events", methods={"POST"})
-     * 
+     *
      * Store a newly created resource in storage.
      *
      * @param  Illuminate\Http\Request  $request
@@ -62,7 +62,7 @@ class EventController extends Controller
 
     /**
      * @Route(path="api/v1/events/{id}", methods={"GET"})
-     * 
+     *
      * Display the specified resource.
      *
      * @param  App\EventUjian $event
@@ -75,7 +75,7 @@ class EventController extends Controller
 
     /**
      * @Route(path="api/v1/events/{id}", methods={"PUT", "PATCH"})
-     * 
+     *
      * Update the specified resource in storage.
      *
      * @param  Illuminate\Http\Request  $request
@@ -96,7 +96,7 @@ class EventController extends Controller
 
     /**
      * @Route(path="api/v1/events/{id}", methods={"DELETE"})
-     * 
+     *
      * Remove the specified resource from storage.
      *
      * @param  App\EventUjian $event
@@ -110,7 +110,7 @@ class EventController extends Controller
 
     /**
      * @Route(path="api/v1/events/all", methods={"GET"})
-     * 
+     *
      * @return App\Actions\SendResponse
      */
     public function allData()
@@ -121,9 +121,9 @@ class EventController extends Controller
 
     /**
      * @Route(path="api/v1/events/{event_id}/ujian", methods={"GET"})
-     * 
+     *
      * Get event detail
-     * 
+     *
      * @param string $event_id
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
@@ -136,7 +136,7 @@ class EventController extends Controller
         ->select('id', 'alias','tanggal','mulai', 'mulai_sesi')
         ->get()
         ->makeHidden('kode_banksoal');
-        
+
         return SendResponse::acceptData([
             'event' => $event,
             'jadwal' => $jadwal->map(function($item) {
@@ -159,9 +159,9 @@ class EventController extends Controller
 
     /**
      * @Route(path="api/v1/events/ujian/{jadwal_id}/summary-simple", methods={"GET"})
-     * 
+     *
      * Get event summary
-     * 
+     *
      * @param string $jadwal_id
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
@@ -191,7 +191,7 @@ class EventController extends Controller
             ->where('t_0.jadwal_id', $ujian->id)
             ->whereIn('t_0.status_ujian', [UjianConstant::STATUS_STANDBY, UjianConstant::STATUS_PROGRESS])
             ->count();
-        
+
         $sesi_schedule = DB::table('sesi_schedules as t_0')->where('t_0.jadwal_id', $ujian->id)->get();
 
         $peserta_ids = [];
@@ -222,11 +222,10 @@ class EventController extends Controller
 
     /**
      * @Route(path="api/v1/events/ujian/{jadwal_id}/peserta-not-start", methods={"GET"})
-     * 
+     *
      * Get jadwal peserta not work
-     * 
+     *
      * @param string $jadwal_id
-     * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
     public function pesertaNotWork($jadwal_id)
@@ -257,10 +256,11 @@ class EventController extends Controller
             ->where('t_0.jadwal_id', $ujian->id)
             ->whereIn('t_0.peserta_id', $peserta_ids)
             ->select(['t_0.peserta_id'])
-            ->get()->pluck('peserta_id')->toArray();
-        $peserta_in_ujians = array_keys($all_peserta_ujian, 'peserta_id');
+            ->get()
+            ->pluck('peserta_id')
+            ->toArray();
 
-        $id_diff = array_diff($peserta_ids, $peserta_in_ujians);
+        $id_diff = array_values(array_diff($peserta_ids, $all_peserta_ujian));
 
         $peserta = DB::table('pesertas as t_0')
             ->whereIn('t_0.id', $id_diff)
@@ -272,7 +272,7 @@ class EventController extends Controller
             ->orderBy('t_0.created_at')
             ->limit(100)
             ->get();
-        
+
         return SendResponse::acceptData($peserta);
     }
 }

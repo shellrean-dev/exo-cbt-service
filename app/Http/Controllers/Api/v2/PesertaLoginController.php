@@ -47,7 +47,7 @@ class PesertaLoginController extends Controller
             if ($peserta->status == 0) {
                 return SendResponse::acceptCustom(['status' => 'susspend']);
             }
-            
+
             if(isset($setting->value['reset'])
                 && $setting->value['reset']
                 && $peserta->api_token != '') {
@@ -55,7 +55,7 @@ class PesertaLoginController extends Controller
                         'status'    => 'loggedin'
                     ]);
             }
-            $token = Str::random(128);
+            $token = $peserta->id.'|'.Str::random(64);
             $peserta->update(['api_token' => $token]);
 
             $peserta = $peserta->only('id','nama','no_ujian','sesi');

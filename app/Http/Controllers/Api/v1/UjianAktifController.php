@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Peserta;
 use App\Jadwal;
+use App\SiswaUjian;
 use App\Token;
 
 use ShellreanDev\Cache\CacheHandler;
@@ -117,6 +118,35 @@ class UjianAktifController extends Controller
             $peserta->api_token = '';
             $peserta->save();
 
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return SendResponse::badRequest($e->getMessage());
+        }
+        return SendResponse::accept();
+    }
+
+    /**
+     * @Route(path="api/v1/ujians/peserta-ujian/{id}/delete", methods={"GET"})
+     *
+     */
+    public function deleteUjianPeserta($id_ujian)
+    {
+        DB::beginTransaction();
+
+        try {
+            $siswa_ujian = DB::table('siswa_ujians')->where('id', $id_ujian)->first();
+            if(!$siswa_ujian) {
+                return SendResponse::badRequest('siswa ujian not found');
+            }
+
+            DB::table('pesertas')
+            ->where('id', $siswa_ujian->peserta_id)
+            ->update([
+                'api_token' => ''
+            ]);
+
+            DB::table('siswa_ujians')->where('id', $id_ujian)->delete();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();

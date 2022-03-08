@@ -72,6 +72,8 @@ final class UjianService extends AbstractService
             ->whereIn('jadwal_id', $jadwal_ids)
             ->whereDate('created_at', now()->format('Y-m-d'))
             ->select(['jadwal_id', 'status_ujian'])
+            ->orderBy('created_at')
+            ->orderByDesc('status_ujian')
             ->first();
 
         return $data;
