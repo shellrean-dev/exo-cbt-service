@@ -33,14 +33,14 @@ class ExoProcessDoc
         'png'
     ];
 
-    public function __construct($template, $filepath, $directory) 
+    public function __construct($template, $filepath, $directory)
     {
         $this->template = $template;
         $this->directory = $directory;
         $this->target_dir = storage_path('app/public/'.$directory->slug.'/');
         // $this->new_name_path = $new_path;
 
-        $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') 
+        $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off')
             || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
         $hos = request()->server('HTTP_HOST');
         $this->dsn = $protocol.$hos;
@@ -49,7 +49,7 @@ class ExoProcessDoc
         $info = pathinfo($target_file);
         $new_name = $info['filename']. '.Zip';
         $this->new_name_path = storage_path('app/public/'.$directory->slug.'/'.$new_name);
-        
+
         rename($target_file, $this->new_name_path);
     }
 
@@ -61,15 +61,15 @@ class ExoProcessDoc
 
     private function _dom_inner_html(\DOMNode $element)
     {
-        $innerHTML = ""; 
+        $innerHTML = "";
         $children  = $element->childNodes;
 
-        foreach ($children as $child) 
-        { 
+        foreach ($children as $child)
+        {
             $innerHTML .= $element->ownerDocument->saveHTML($child);
         }
 
-        return $innerHTML; 
+        return $innerHTML;
     }
 
     private function _extract_zip()
@@ -114,7 +114,7 @@ class ExoProcessDoc
 		$prop_folder = $this->target_dir."docProps";
 		$relat_folder = $this->target_dir."_rels";
         $content_folder = $this->target_dir."[Content_Types].xml";
-            
+
         $relation_image = [];
         foreach ($xml as $key => $qjd) {
             $ext = strtolower(pathinfo($qjd['Target'], PATHINFO_EXTENSION));
@@ -127,7 +127,7 @@ class ExoProcessDoc
         }
 
         $word_folder = $this->target_dir."word";
-        
+
         $images = [];
         $iterate = 1;
         foreach ($relation_image as $key => $value) {
@@ -135,7 +135,7 @@ class ExoProcessDoc
             $rplc_str1 = '<a:blip r:embed="'.$key.'" cstate="print"></a:blip>';
             $rplc_str2 = '<a:blip r:embed="'.$key.'"></a:blip>';
             $rplc_str3 = '<a:blip r:embed="'.$key.'"/>';
-            
+
             $ext_img = strtolower(pathinfo($value, PATHINFO_EXTENSION));
             $imagenew_name=time().$iterate.".".$ext_img;
             $old_path=$word_folder."/".$value;
@@ -174,14 +174,14 @@ class ExoProcessDoc
 		$this->_rrmdir($this->new_name_path);
     }
 
-    private function _rrmdir($dir) 
+    private function _rrmdir($dir)
 	{
 	    if (is_dir($dir)) {
 	        $objects = scandir($dir);
 	        foreach ($objects as $object) {
 	            if ($object != "." && $object != "..") {
 	                if (filetype($dir."/".$object) == "dir") {
-                        $this->_rrmdir($dir."/".$object); 
+                        $this->_rrmdir($dir."/".$object);
                     } else {
                         unlink($dir."/".$object);
                     }
@@ -201,10 +201,10 @@ class ExoProcessDoc
         try {
             $this->_extract_zip();
             $this->_get_xml_content();
-    
+
             $doc = new \DOMDocument();
             $doc->loadHTML('<?xml encoding="utf-8" ?>' .$this->content);
-            
+
             $data = [];
             $body = $doc->getElementsByTagName('body');
             if ( $body && 0 < $body->length ) {

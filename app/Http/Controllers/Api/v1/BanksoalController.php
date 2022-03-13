@@ -36,6 +36,7 @@ class BanksoalController extends Controller
         $banksoal = DB::table('banksoals as t_0')
             ->join('matpels as t_1', 't_0.matpel_id', 't_1.id')
             ->join('users as t_2', 't_0.author', 't_2.id')
+            ->leftJoin('users as t_3', 't_0.lock_by', DB::raw('t_3.id::text'))
             ->select([
                 't_0.id',
                 't_0.is_locked',
@@ -54,7 +55,8 @@ class BanksoalController extends Controller
                 't_0.persen',
                 't_1.nama as matpel_name',
                 't_2.name as created_by',
-                't_2.email as email_creator'
+                't_2.email as email_creator',
+                't_3.email as email_locker'
             ])->orderByDesc('t_0.created_at');
 
         if (request()->q != '') {
@@ -249,11 +251,11 @@ class BanksoalController extends Controller
         try {
             // if (config('exo.softdel')) {
             //     $user = request()->user();
-    
+
             //     $banksoal->deleted_at = Carbon::now();
             //     $banksoal->deleted_by = $user->id;
             //     $banksoal->save();
-    
+
             //     DB::table('directories')
             //         ->where('id', $banksoal->directory_id)
             //         ->update([

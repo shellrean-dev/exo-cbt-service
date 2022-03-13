@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use App\Models\SoalConstant;
+use App\Services\ExoProcessHtml;
 use Illuminate\Http\Response;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
@@ -138,6 +139,65 @@ class SoalController extends Controller
         }
 
         return SendResponse::accept();
+    }
+
+    /**
+     * @route(path="api/v1/soals/bulk", methods={"POST"})
+     *
+     * Store new resource multi bulk
+     */
+    public function storeBulk(Request $request)
+    {
+        $soals = $request->soals;
+        $banksoal = DB::table('banksoals')
+            ->where('id', $request->banksoal_id)
+            ->select(['id','is_locked'])
+            ->first();
+        if (!$banksoal) {
+            return SendResponse::badRequest('Banksoal tidak ditemukan');
+        }
+
+        if ($banksoal->is_locked) {
+            return SendResponse::badRequest('Banksoal sedang dikunci');
+        }
+
+        DB::beginTransaction();
+        try {
+            $pertanyaans = [];
+            $options = [];
+
+            foreach ($soals as $key => $soal) {
+                $soal_id = Str::uuid()->toString();
+                $pertanyaans[$key] = [
+                    'id'            => $soal_id,
+                    'banksoal_id'   => $banksoal->id,
+                    'tipe_soal'     => SoalConstant::TIPE_PG,
+                    'pertanyaan'    => $soal['pertanyaan'],
+                    'created_at'    => now(),
+                    'updated_at'    => now()
+                ];
+
+                foreach ($soal['pilihan'] as $pilihan) {
+                    $options[] = [
+                        'id'            => Str::uuid()->toString(),
+                        'soal_id'       => $soal_id,
+                        'text_jawaban'  => $pilihan['text'],
+                        'correct'       => $pilihan['is_correct'] ? 1 : 0,
+                        'created_at'    => now(),
+                        'updated_at'    => now()
+                    ];
+                }
+            }
+
+            DB::table('soals')->insert($pertanyaans);
+            DB::table('jawaban_soals')->insert($options);
+
+            DB::commit();
+            return SendResponse::accept();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return SendResponse::badRequest($e->getMessage());
+        }
     }
 
     /**
@@ -436,7 +496,7 @@ class SoalController extends Controller
      *
      * Get soal by banksoal
      *
-     * @param App\Banksoal $banksoal
+     * @param \App\Banksoal $banksoal
      * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
@@ -486,8 +546,8 @@ class SoalController extends Controller
      *
      * Get soal by banksoal analys
      *
-     * @param App\Banksoal $banksoal
-     * @return App\Actions\SendResponse
+     * @param \App\Banksoal $banksoal
+     * @return Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function getSoalByBanksoalAnalys(Banksoal $banksoal)
@@ -502,8 +562,8 @@ class SoalController extends Controller
      * @Route(path="api/v1/soals/banksoal/{banksoal}/upload", methods={"POST"})
      *
      * @param Illuminate\Http\Request $request
-     * @param App\Banksoal $banksoal
-     * @return App\Actions\SendResponse
+     * @param \App\Banksoal $banksoal
+     * @return Response
      */
     public function import(Request $request, Banksoal $banksoal)
     {
@@ -531,8 +591,8 @@ class SoalController extends Controller
      * Import soal from docx
      *
      * @param Illuminate\http\Request $request
-     * @param App\Services\WordService $wordService
-     * @return App\Actions\SendResponse;
+     * @param \App\Services\WordService $wordService
+     * @return Response;
      * @author shellrean <wandinak17@gmail.com>
      */
     private function _formatStandart($request, $banksoal)
@@ -565,7 +625,7 @@ class SoalController extends Controller
      * Import soal from docx
      *
      * @param Illuminate\http\Request $request
-     * @return App\Actions\SendResponse;
+     * @return Response;
      * @author shellrean <wandinak17@gmail.com>
      */
     private function _formatTabled($request, $banksoal)
@@ -637,13 +697,13 @@ class SoalController extends Controller
      * Import soal from docx
      *
      * @param Illuminate\http\Request $request
-     * @return App\Actions\SendResponse;
+     * @return Response;
      * @author shellrean <wandinak17@gmail.com>
      */
     public function wordImport(Request $request, $banksoal_id)
     {
         $request->validate([
-            'file' => 'required|mimes:docx',
+            'file' => 'required|mimes:docx,zip',
             'fmt' => 'required'
         ]);
 
@@ -666,7 +726,76 @@ class SoalController extends Controller
         if ($request->fmt == '2') {
             return $this->_formatTabled($request, $banksoal);
         }
+        if ($request->fmt == '3') {
+            return $this->_formatHTMLTable($request, $banksoal);
+        }
 
         return SendResponse::badRequest('format tidak sesuai');
+    }
+
+    private function _formatHTMLTable($request, $banksoal)
+    {
+        $dir = DB::table('directories')
+            ->where('id', $banksoal->directory_id)
+            ->first();
+        if (!$dir) {
+            return SendResponse::badRequest('kesalahan, directory tidak ditemukan');
+        }
+
+        $file = $request->file('file');
+        $nama_file = time().$file->getClientOriginalName();
+        $original_name = $file->getClientOriginalName();
+        $path = $file->storeAs('public/'.$dir->slug,$nama_file);
+
+        $file = storage_path('app/'.$path);
+
+        DB::beginTransaction();
+        try {
+            $exoProc = new ExoProcessHtml($file, $dir, $original_name);
+            $data = $exoProc->render();
+
+            $questions = $data['data'];
+            $files = $data['files'];
+
+            $options = [];
+            foreach($questions as $question) {
+                $soal_id = Str::uuid()->toString();
+
+                $soal = [
+                    'id'            => $soal_id,
+                    'banksoal_id'   => $banksoal->id,
+                    'tipe_soal'     => $question['type'],
+                    'pertanyaan'    => $question['pertanyaan'],
+                    'created_at'	=> now(),
+                    'updated_at'	=> now(),
+                ];
+
+                DB::table('soals')->insert($soal);
+
+                foreach($question['options'] as $key => $opt) {
+                    $isCorrect = in_array($key, $question['correct']) ? 1 : 0;
+                    array_push($options, [
+                        'id'            => Str::uuid()->toString(),
+                        'soal_id'       => $soal_id,
+                        'text_jawaban'  => $opt,
+                        'correct'       => $isCorrect,
+                        'created_at'    => now(),
+                        'updated_at'    => now(),
+                    ]);
+                }
+            }
+            if (count($options) > 0) {
+                DB::table('jawaban_soals')->insert($options);
+            }
+            if (count($files) > 0) {
+                DB::table('files')->insert($files);
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            return SendResponse::badRequest('kesalahan 500 ('.$e->getMessage().')');
+        }
+
+        return SendResponse::accept();
     }
 }

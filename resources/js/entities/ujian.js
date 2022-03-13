@@ -479,7 +479,7 @@ function changeToZoomer(string) {
     for(var i=0; i < images.length; i++){
         let str = images[i].outerHTML.replace(/\//g, "\\/");
         let reg = new RegExp(str.slice(0, -1)+'.*?>', 'g')
-        string = string.replace(reg, `<img role="button" src="${images[i].src}" @click="showImage('${images[i].src}')" />`)
+        string = string.replace(reg, `<img role="button" alt="${images[i].alt}" max-width="100%" max-height="100%" width="${images[i].width}" height="${images[i].height}" src="${images[i].src}" @click="showImage('${images[i].src}')" />`)
     }
     return string
 }
