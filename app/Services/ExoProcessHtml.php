@@ -185,6 +185,9 @@ class ExoProcessHtml
     private function _get_xml_content()
     {
         $word_xml = $this->target_dir.$this->original_name.'/'.$this->original_name.'.html';
+        if(!file_exists($word_xml)) {
+            $word_xml = $this->target_dir.$this->original_name.'/'.$this->original_name.'.htm';
+        }
         $this->content = file_get_contents($word_xml);
         $this->content = iconv('UTF-8', 'UTF-8//IGNORE', $this->content);
         $this->_strip_tags();
