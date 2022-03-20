@@ -41,7 +41,7 @@ class ExoProcessHtml
         $target_file = $filepath;
         $info = pathinfo($target_file);
         $new_name = $info['filename']. '.Zip';
-        $this->original_name = $original_name;
+        $this->original_name = pathinfo($original_name, PATHINFO_FILENAME);
         $this->new_name_path = storage_path('app/public/'.$directory->slug.'/'.$new_name);
 
         rename($target_file, $this->new_name_path);
@@ -64,7 +64,7 @@ class ExoProcessHtml
                 }
             }
             $images = [];
-            $word_folder = $this->target_dir.$this->after_extract;
+            $word_folder = $this->target_dir.$this->original_name;
             $iterate = 0;
             foreach ($image_urls as $key => $value) {
                 $ext_img = strtolower(pathinfo($value, PATHINFO_EXTENSION));
@@ -72,25 +72,27 @@ class ExoProcessHtml
                 $old_path=$word_folder."/".$value;
                 $new_path=$this->target_dir.$imagenew_name;
 
-                $image = Image::make($old_path)->encode('webp', 90);
-                $new_path_storage = "public/".$this->directory->slug.'/'.$imagenew_name.'.webp';
-                Storage::put($new_path_storage, $image->__toString());
+                if(file_exists($old_path)) {
+                    $image = Image::make($old_path)->encode('webp', 90);
+                    $new_path_storage = "public/".$this->directory->slug.'/'.$imagenew_name.'.webp';
+                    Storage::put($new_path_storage, $image->__toString());
 
-                array_push($images, [
-                    'id'            => Str::uuid()->toString(),
-                    'directory_id'	=> $this->directory->id,
-                    'filename'		=> $imagenew_name.'.webp',
-                    'path'			=> $new_path_storage,
-                    'exstension'	=> $ext_img,
-                    'dirname'		=> $this->directory->slug,
-                    'size'			=> 0,
-                    'created_at'    => now(),
-                    'updated_at'    => now()
-                ]);
+                    array_push($images, [
+                        'id'            => Str::uuid()->toString(),
+                        'directory_id'	=> $this->directory->id,
+                        'filename'		=> $imagenew_name.'.webp',
+                        'path'			=> $new_path_storage,
+                        'exstension'	=> $ext_img,
+                        'dirname'		=> $this->directory->slug,
+                        'size'			=> 0,
+                        'created_at'    => now(),
+                        'updated_at'    => now()
+                    ]);
 
-                rename($old_path,$new_path);
-                $img = $this->dsn.'/storage/'.$this->directory->slug.'/'.$imagenew_name.'.webp';
-                $this->content = str_replace($value,$img,$this->content);
+                    rename($old_path,$new_path);
+                    $img = $this->dsn.'/storage/'.$this->directory->slug.'/'.$imagenew_name.'.webp';
+                    $this->content = str_replace($value,$img,$this->content);
+                }
                 $iterate++;
             }
             $this->files = $images;
@@ -165,15 +167,15 @@ class ExoProcessHtml
         $zip = new \ZipArchive();
         if ($zip->open($this->new_name_path) == true ) {
             $zip->extractTo($this->target_dir);
-            $this->after_extract = trim($zip->getNameIndex(0), '/');
             $zip->close();
         }
     }
 
     private function _get_xml_content()
     {
-        $word_xml = $this->target_dir.$this->after_extract."/".$this->after_extract.'.html';
+        $word_xml = $this->target_dir.$this->original_name.'/'.$this->original_name.'.html';
         $this->content = file_get_contents($word_xml);
+        $this->content = iconv('UTF-8', 'UTF-8//IGNORE', $this->content);
         $this->_strip_tags();
     }
 
