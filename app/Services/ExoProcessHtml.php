@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
+use function Complex\theta;
 
 class ExoProcessHtml
 {
@@ -127,10 +129,12 @@ class ExoProcessHtml
                                     $correct_op = array_filter(explode(',',$value->nodeValue));
                                     $correct_option_position = array();
                                     foreach($correct_op as $v){
-                                        $kj = trim(strip_tags(html_entity_decode($v)));
+                                        $kj = trim(strip_tags($v));
                                         if(isset($this->correct_position[$kj])) {
                                             $correct_option_position[] = $this->correct_position[$kj];
                                         } else {
+                                            File::delete($this->new_name_path);
+                                            File::deleteDirectory($this->target_dir.$this->original_name);
                                             throw new \Exception('Tidak ada jawaban untuk huruf: '.$kj);
                                         }
                                     }
@@ -157,6 +161,8 @@ class ExoProcessHtml
                     }
                 }
             }
+            File::delete($this->new_name_path);
+            File::deleteDirectory($this->target_dir.$this->original_name);
 
             return [
                 'data' => $data,
