@@ -31,6 +31,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
     Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel', 'ResultController@capaianSiswaExcel')->name('capaian.download.excel');
     Route::get('ujians/{jadwal}/result/excel', 'ResultController@examExcel')->name('hasilujian.download.excel');
     Route::get('ujians/esay/{banksoal}/koreksi-offline/excel', 'PenilaianController@jawabanPesertaEsayExcel')->name('koreksi.offline.download.excel');
+    Route::get('ujians-ledger/{event_id}/{peserta_id}/excel', 'ResultController@hasilUjianLedgerPeserta')->name('ledger.peserta.download.excel');
 
     Route::group(['middleware' => 'auth:api'], function() {
         Route::get('user-authenticated', 'UserController@getUserLogin');
@@ -111,6 +112,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('ujians/{jadwal}/result', 'ResultController@exam');
 
         Route::get('ujians/{jadwal}/result/link', 'ResultController@examExcelLink');
+
+        Route::get('ujians-ledger/{event_id}/{no_ujian}/link', 'ResultController@hasilUjianLedgerPesertaLink');
 
         Route::get('ujians/{jadwal}/result/banksoal', 'UjianController@getBanksoalByJadwal');
         Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa', 'ResultController@capaianSiswa');

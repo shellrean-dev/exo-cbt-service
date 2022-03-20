@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Exports\CapaianPesertaUjianExport;
+use App\Exports\LedgerPesertaHasilUjianExport;
 use App\Models\dto\ResultDataTransform;
 use App\Models\SoalConstant;
 use Illuminate\Http\Request;
@@ -463,5 +464,85 @@ class ResultController extends Controller
 
         $data = $jawaban->map([ResultDataTransform::class, 'resultUjianDetail']);
         return SendResponse::acceptData($data);
+    }
+
+    /**
+     * @Route(path="ujians-ledger/{event_id}/{no_ujian}/link", methods={"GET"})
+     *
+     * Buat link untuk download excel hasil ujian
+     * peserta
+     *
+     * @param string $jadwal_id
+     * @return Response
+     * @author shellrean <wandinak17@gmail.com>
+     */
+    public function hasilUjianLedgerPesertaLink($event_id, $no_ujian)
+    {
+        $event = DB::table('event_ujians')
+            ->where('id', $event_id)
+            ->count();
+        if (!$event) {
+            return SendResponse::badRequest('kesalahan, event yang diminta tidak dapat ditemukan');
+        }
+
+        $peserta = DB::table('pesertas')
+            ->where('no_ujian', $no_ujian)
+            ->first();
+        if (!$peserta) {
+            return SendResponse::badRequest('kesalahan, peserta yang diminta tidak dapat ditemukan');
+        }
+
+        $url = URL::temporarySignedRoute(
+            'ledger.peserta.download.excel',
+            now()->addMinutes(5),
+            ['event_id' => $event_id, 'peserta_id' => $peserta->id]
+        );
+
+        return SendResponse::acceptData($url);
+    }
+
+    /**
+     * @Route(path="ujians-ledger/{event_id}/{peserta_id}/excel", methods={"GET"})
+     *
+     * Download excel hasil ujian peserta ledger
+     *
+     * @param string $event_id
+     * @param string $peserta_id
+     * @return Response
+     * @author shellrean <wandinak17@gmail.com>
+     */
+    public function hasilUjianLedgerPeserta($event_id, $peserta_id)
+    {
+        if (! request()->hasValidSignature()) {
+            return SendResponse::badRequest('Kesalahan, url tidak valid');
+        }
+
+        $ujians = DB::table('jadwals')
+            ->where('event_id', $event_id)
+            ->select('id')
+            ->get()
+            ->pluck('id');
+        $ujians = $ujians->toArray();
+
+        $resulsts = DB::table('hasil_ujians as t_0')
+            ->join('jadwals as t_1', 't_1.id', 't_0.jadwal_id')
+            ->where('t_0.peserta_id', $peserta_id)
+            ->whereIn('t_0.jadwal_id', $ujians)
+            ->orderBy('t_0.created_at')
+            ->select([
+                't_0.*',
+                't_1.alias'
+            ])
+            ->get();
+
+        $peserta = DB::table('pesertas')->where('id', $peserta_id)->first();
+
+        $spreadsheet = LedgerPesertaHasilUjianExport::export($resulsts, $peserta);
+        $writer = new Xlsx($spreadsheet);
+
+        $filename = 'LGR_'.$peserta->no_ujian.'_'.$peserta->nama;
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="'.$filename.'.xlsx"');
+        $writer->save('php://output');
     }
 }

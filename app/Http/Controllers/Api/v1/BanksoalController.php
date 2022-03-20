@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Models\SoalConstant;
 use Illuminate\Support\Facades\DB;
 use App\Actions\SendResponse;
 use Illuminate\Http\Request;
@@ -26,7 +27,7 @@ class BanksoalController extends Controller
      *
      * Display a listing of the resource.
      *
-     * @return App\Actions\SendResponse
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function index()
@@ -96,8 +97,8 @@ class BanksoalController extends Controller
      *
      * Store a newly created resource in storage.
      *
-     * @param  Illuminate\Http\Request  $request
-     * @return App\Actions\SendResponse
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function store(Request $request)
@@ -170,7 +171,7 @@ class BanksoalController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return App\Actions\SendResponse
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function show(Banksoal $banksoal)
@@ -184,9 +185,9 @@ class BanksoalController extends Controller
      *
      * Update the specified resource in storage.
      *
-     * @param  Illuminate\Http\Request  $request
-     * @param  App\Banksoal  $banksoal
-     * @return App\Actions\SendResponse
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Banksoal  $banksoal
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function update(Request $request, Banksoal $banksoal)
@@ -236,8 +237,8 @@ class BanksoalController extends Controller
      *
      * Remove the specified resource from storage.
      *
-     * @param  App\Banksoal  $banksoal
-     * @return App\Actions\SendResponse
+     * @param  \App\Banksoal  $banksoal
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function destroy(Banksoal $banksoal)
@@ -280,7 +281,7 @@ class BanksoalController extends Controller
      *
      * Display all data.
      *
-     * @return App\Actions\SendResponse
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      * @deprecated
      */
@@ -395,7 +396,7 @@ class BanksoalController extends Controller
      * Duplikat banksoal
      *
      * @param Banksoal $banksoal
-     * @return App\Actions\SendResponse
+     * @return \Illuminate\Http\Response
      * @since 2.0.0
      */
     public function duplikat(Banksoal $banksoal)
@@ -408,6 +409,7 @@ class BanksoalController extends Controller
         try {
             $soals = Soal::with(['jawabans'])
                 ->orderBy('created_at','ASC')
+                ->where('banksoal_id', $banksoal->id)
                 ->get();
             $direk = Directory::create([
                 'name'      => $banksoal->kode_banksoal.' (Copy)',
@@ -442,7 +444,7 @@ class BanksoalController extends Controller
                     'audio'         => $soal->audio,
                     'direction'     => $soal->direction
                 ]);
-                if($newSoal->tipe_soal != 2) {
+                if($newSoal->tipe_soal != SoalConstant::TIPE_ESAY) {
                     foreach($soal->jawabans as $key=>$pilihan) {
                         JawabanSoal::create([
                             'soal_id'       => $newSoal->id,
@@ -468,7 +470,7 @@ class BanksoalController extends Controller
      * Lock banksoal
      *
      * @param Banksoal $banksoal
-     * @return App\Actions\SendResponse
+     * @return \Illuminate\Http\Response
      * @since 3.0.0
      */
     public function lock(Banksoal $banksoal, Request  $request) {
@@ -495,7 +497,7 @@ class BanksoalController extends Controller
      * Lock banksoal
      *
      * @param Banksoal $banksoal
-     * @return App\Actions\SendResponse
+     * @return \Illuminate\Http\Response
      * @since 3.0.0
      */
     public function unlock(Banksoal $banksoal, Request  $request) {

@@ -8,6 +8,7 @@ Route::group(['namespace' => 'Api\Gateway'], function() {
         Route::get('matpels/all', 'MatpelGatewayController@allData');
         Route::get('groups/all', 'GroupGatewayController@allData');
         Route::get('banksoals/all', 'BanksoalGatewayController@allData');
+        Route::get('events/all', 'EventGatewayController@allData');
 
         Route::get('ujians/all', 'JadwalGatewayController@allData');
         Route::get('ujians/active-status', 'JadwalGatewayController@activeStatus');
