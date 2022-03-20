@@ -127,7 +127,12 @@ class ExoProcessHtml
                                     $correct_op = array_filter(explode(',',$value->nodeValue));
                                     $correct_option_position = array();
                                     foreach($correct_op as $v){
-                                        $correct_option_position[] = $this->correct_position[trim(strip_tags(html_entity_decode($v)))];
+                                        $kj = trim(strip_tags(html_entity_decode($v)));
+                                        if(isset($this->correct_position[$kj])) {
+                                            $correct_option_position[] = $this->correct_position[$kj];
+                                        } else {
+                                            throw new \Exception('Tidak ada jawaban untuk huruf: '.$kj);
+                                        }
                                     }
                                     $element['correct'] = $correct_option_position;
                                     $real_iterate += 1;
