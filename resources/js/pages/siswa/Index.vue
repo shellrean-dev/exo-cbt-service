@@ -126,7 +126,7 @@ export default {
             pingInterval: 1000,
             pingTimeout: 5000,
           }),
-          this.socket.connect();
+          this.socket.open();
         }
 
           this.socket.on('connect', () => {
@@ -217,15 +217,19 @@ export default {
       }
     },
     peserta(v) {
-      if (this.enable_socket === "oke") {
-        if (!this.is_getted) {
-          const peserta = JSON.parse(JSON.stringify(this.peserta))
+      if(typeof v.id != 'undefined') {
+        if (this.enable_socket === "oke") {
+          if(this.socket.connected) {
+            if (!this.is_getted) {
+              const peserta = JSON.parse(JSON.stringify(this.peserta))
               peserta.intab = true
-          this.socket.emit('getin_student', {
-            user: peserta,
-            channel: this.channel
-          });
-          this.is_getted = true
+              this.socket.emit('getin_student', {
+                user: peserta,
+                channel: this.channel
+              });
+              this.is_getted = true
+            }
+          }
         }
       }
     }
