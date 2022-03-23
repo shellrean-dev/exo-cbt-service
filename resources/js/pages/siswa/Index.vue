@@ -109,6 +109,7 @@ export default {
   async created() {
     let d = new Date()
     this.year = d.getFullYear()
+    this.is_getted = false
 
     try {
       if(this.$route.name != 'ujian.while') {
@@ -121,10 +122,11 @@ export default {
       if (this.enable_socket === "oke") {
         if (!this.socket.connected) {
           this.socket.open();
-
+        }
           this.socket.on('connect', () => {
             this.connection = false
-            if (!this.is_getted) {
+            if (typeof this.peserta.id != 'undefined' && !this.is_getted) {
+              console.log("HOHOHOHO")
               this.socket.emit('getin_student', {
                 user: this.peserta,
                 channel: this.channel
@@ -134,17 +136,31 @@ export default {
 
             this.socket.on('disconnect',() =>{
               this.connection = true
+              this.is_getted = false
             })
           });
 
           this.socket.on('connect_failed', () => {
             this.connection = true
+            this.is_getted = false
           });
 
           this.socket.on('disconnect', () => {
             this.connection = true
+            this.is_getted = false
           });
-        }
+
+          this.socket.on("reconnect", () => {
+            console.log("HAHAHAHAHHAHAHA")
+            this.connection = false
+            if (!this.is_getted) {
+              this.socket.emit('getin_student', {
+                user: this.peserta,
+                channel: this.channel
+              });
+              this.is_getted = true
+            }
+          });
       }
     } catch (error) {
       this.showError(error)
@@ -165,6 +181,17 @@ export default {
             name: 'ujian.prepare'
           })
         }
+      }
+    },
+    peserta(v) {
+      console.log(v)
+      if (!this.is_getted) {
+        console.log("ziziziiiz")
+        this.socket.emit('getin_student', {
+          user: this.peserta,
+          channel: this.channel
+        });
+        this.is_getted = true
       }
     }
   },

@@ -14,7 +14,7 @@ const endpoint = Object.freeze({
  * @type {Object}
  */
 const state = () => ({
-	pesertaDetail: []
+	pesertaDetail: {}
 })
 
 /**
