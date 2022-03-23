@@ -126,12 +126,15 @@ export default {
           this.socket.on('connect', () => {
             this.connection = false
             if (typeof this.peserta.id != 'undefined' && !this.is_getted) {
-              console.log("HOHOHOHO")
               this.socket.emit('getin_student', {
                 user: this.peserta,
                 channel: this.channel
               });
               this.is_getted = true
+              this.socket.emit('in_tab_student', {
+                user: this.peserta.id,
+                channel: this.channel
+              });
             }
 
             this.socket.on('disconnect',() =>{
@@ -151,7 +154,6 @@ export default {
           });
 
           this.socket.on("reconnect", () => {
-            console.log("HAHAHAHAHHAHAHA")
             this.connection = false
             if (!this.is_getted) {
               this.socket.emit('getin_student', {
@@ -160,6 +162,10 @@ export default {
               });
               this.is_getted = true
             }
+            this.socket.emit('in_tab_student', {
+              user: this.peserta.id,
+              channel: this.channel
+            });
           });
       }
     } catch (error) {
@@ -167,7 +173,25 @@ export default {
     }
   },
   mounted() {
-
+    document.addEventListener("visibilitychange", (event) => {
+      if (document.visibilityState == "visible") {
+        console.log("tab is active")
+        if (this.enable_socket === "oke") {
+          this.socket.emit('in_tab_student', {
+            user: this.peserta.id,
+            channel: this.channel
+          });
+        }
+      } else {
+        console.log("tab is inactive")
+        if (this.enable_socket === "oke") {
+          this.socket.emit('not_in_tab_student', {
+            user: this.peserta.id,
+            channel: this.channel
+          });
+        }
+      }
+    });
   },
   watch: {
     uncomplete(val) {
@@ -184,14 +208,19 @@ export default {
       }
     },
     peserta(v) {
-      console.log(v)
-      if (!this.is_getted) {
-        console.log("ziziziiiz")
-        this.socket.emit('getin_student', {
-          user: this.peserta,
+      if (this.enable_socket === "oke") {
+        if (!this.is_getted) {
+          console.log("ziziziiiz")
+          this.socket.emit('getin_student', {
+            user: this.peserta,
+            channel: this.channel
+          });
+          this.is_getted = true
+        }
+        this.socket.emit('in_tab_student', {
+          user: this.peserta.id,
           channel: this.channel
         });
-        this.is_getted = true
       }
     }
   },
