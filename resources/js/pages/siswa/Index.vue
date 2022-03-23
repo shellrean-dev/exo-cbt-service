@@ -61,6 +61,7 @@ import { mapState, mapActions, mapGetters } from 'vuex'
 import { successToas, errorToas} from '../../entities/notif'
 import { showSweetError } from '../../entities/alert'
 import Loading from 'vue-loading-overlay'
+import io from 'socket.io-client'
 
 export default {
   name: 'IndexUjian',
@@ -109,7 +110,6 @@ export default {
   async created() {
     let d = new Date()
     this.year = d.getFullYear()
-    this.is_getted = false
 
     try {
       if(this.$route.name != 'ujian.while') {
@@ -121,52 +121,63 @@ export default {
 
       if (this.enable_socket === "oke") {
         if (!this.socket.connected) {
-          this.socket.open();
+          this.$store.state.siswa_channel.socket = io(process.env.MIX_SOCKET_URL,{
+            autoConnect: false,
+            pingInterval: 1000,
+            pingTimeout: 5000,
+          }),
+          this.socket.connect();
         }
-          this.socket.on('connect', () => {
-            this.connection = false
-            if (typeof this.peserta.id != 'undefined' && !this.is_getted) {
-              this.socket.emit('getin_student', {
-                user: this.peserta,
-                channel: this.channel
-              });
-              this.is_getted = true
-              this.socket.emit('in_tab_student', {
-                user: this.peserta.id,
-                channel: this.channel
-              });
-            }
 
-            this.socket.on('disconnect',() =>{
-              this.connection = true
-              this.is_getted = false
-            })
+          this.socket.on('connect', () => {
+            console.log("CONNECTING....")
+            this.connection = false
+            if(this.socket.connected) {
+              if (typeof this.peserta.id != 'undefined' && !this.is_getted) {
+                const peserta = JSON.parse(JSON.stringify(this.peserta))
+                peserta.intab = true
+                this.socket.emit('getin_student', {
+                  user: peserta,
+                  channel: this.channel
+                });
+                this.is_getted = true
+              }
+            }
           });
 
           this.socket.on('connect_failed', () => {
             this.connection = true
             this.is_getted = false
+            this.socket.emit('not_in_tab_student', {
+              user: this.peserta.id,
+              channel: this.channel
+            });
           });
 
           this.socket.on('disconnect', () => {
             this.connection = true
             this.is_getted = false
-          });
-
-          this.socket.on("reconnect", () => {
-            this.connection = false
-            if (!this.is_getted) {
-              this.socket.emit('getin_student', {
-                user: this.peserta,
-                channel: this.channel
-              });
-              this.is_getted = true
-            }
-            this.socket.emit('in_tab_student', {
+            this.socket.emit('not_in_tab_student', {
               user: this.peserta.id,
               channel: this.channel
             });
           });
+
+          // this.socket.on("reconnect", () => {
+          //   console.log("RECONNECTING....")
+          //   this.connection = false
+          //   if (typeof this.peserta.id != 'undefined' && !this.is_getted) {
+          //     this.socket.emit('getin_student', {
+          //       user: this.peserta,
+          //       channel: this.channel
+          //     });
+          //     this.is_getted = true
+          //   }
+          //   this.socket.emit('in_tab_student', {
+          //     user: this.peserta.id,
+          //     channel: this.channel
+          //   });
+          // });
       }
     } catch (error) {
       this.showError(error)
@@ -175,7 +186,6 @@ export default {
   mounted() {
     document.addEventListener("visibilitychange", (event) => {
       if (document.visibilityState == "visible") {
-        console.log("tab is active")
         if (this.enable_socket === "oke") {
           this.socket.emit('in_tab_student', {
             user: this.peserta.id,
@@ -183,7 +193,6 @@ export default {
           });
         }
       } else {
-        console.log("tab is inactive")
         if (this.enable_socket === "oke") {
           this.socket.emit('not_in_tab_student', {
             user: this.peserta.id,
@@ -210,17 +219,14 @@ export default {
     peserta(v) {
       if (this.enable_socket === "oke") {
         if (!this.is_getted) {
-          console.log("ziziziiiz")
+          const peserta = JSON.parse(JSON.stringify(this.peserta))
+              peserta.intab = true
           this.socket.emit('getin_student', {
-            user: this.peserta,
+            user: peserta,
             channel: this.channel
           });
           this.is_getted = true
         }
-        this.socket.emit('in_tab_student', {
-          user: this.peserta.id,
-          channel: this.channel
-        });
       }
     }
   },
