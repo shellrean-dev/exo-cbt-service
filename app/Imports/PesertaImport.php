@@ -49,7 +49,7 @@ class PesertaImport implements ToCollection, WithStartRow
         try {
             DB::table('pesertas')->insert($final);
         } catch (Exception $e) {
-            return SendResponse::internalServerError($e->getMessage());
+            throw $e;
         }
     }
 

@@ -189,7 +189,7 @@ class PesertaController extends Controller
             DB::commit();    
         } catch (\Exception $e) {
             DB::rollback();
-            return SendResponse::badRequest('Pastikan tidak ada no ujian duplikat dan format sesuai');
+            return SendResponse::badRequest('Pastikan tidak ada no ujian duplikat dan format sesuai: '.$e->getMessage());
         }
         return SendResponse::accept();
     }
