@@ -13,7 +13,8 @@ const endpoint = Object.freeze({
     start: 'ujians/start',
     peserta: 'ujians/peserta',
     uncomplete: 'ujians/uncomplete',
-    hasils: 'ujian/hasils'
+    hasils: 'ujian/hasils',
+    leaveCounter: 'ujians/leave-counter'
 })
 
 /**
@@ -66,6 +67,7 @@ const actions = {
     getHasilUjian,
     submitJawabanMenjodohkan,
     submitJawabanMengurutkan,
+    leaveCounterUjian
 }
 
 /**
@@ -400,6 +402,21 @@ function getHasilUjian({ commit }) {
         } catch (error) {
             reject(getError(error))
             commit('SET_LOADING', false, { root: true })
+        }
+    })
+}
+
+/**
+ * Leave counter ujian
+ * @param {*} commit
+ */
+ function leaveCounterUjian({ commit }, payload) {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let network = await $axios.post(endpoint.leaveCounter, payload)
+            resolve(network.data)
+        } catch (error) {
+            reject(getError(error))
         }
     })
 }

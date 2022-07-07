@@ -103,7 +103,7 @@ class PesertaLoginController extends Controller
      */
     public function authenticated()
     {
-        $peserta = request()->get('peserta-auth')->only('id','nama','no_ujian','sesi');
+        $peserta = request()->get('peserta-auth')->only('id','nama','no_ujian','sesi', 'status', 'block_reason');
         $peserta['ip'] = request()->ip();
         $peserta['browser'] = Browser::browserName();
         $peserta['flatform'] = Browser::platformName();

@@ -26,5 +26,6 @@ Route::namespace('Api\v2')->group(function() {
         Route::post('ujian','UjianController@store');
         Route::post('ujian/ragu-ragu', 'UjianController@setRagu');
         Route::get('ujian/selesai', 'UjianController@selesai');
+        Route::post('ujians/leave-counter', 'UjianAktifController@leaveCounter');
     });
 });

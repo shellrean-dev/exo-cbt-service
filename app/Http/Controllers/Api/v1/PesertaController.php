@@ -40,6 +40,7 @@ class PesertaController extends Controller
                 't_0.nama as nama_peserta',
                 't_0.password',
                 't_0.status',
+                't_0.block_reason',
                 't_1.nama as agama',
                 't_2.nama as jurusan'
             ]);
@@ -108,6 +109,7 @@ class PesertaController extends Controller
                 't_0.nama',
                 't_0.no_ujian',
                 't_0.sesi',
+                't_0.block_reason',
                 't_0.status',
                 't_0.password'
             ])
@@ -145,7 +147,8 @@ class PesertaController extends Controller
             'sesi'          => $request->sesi,
             'status'        => $request->status,
             'jurusan_id'    => $request->jurusan_id,
-            'agama_id'      => $request->agama_id
+            'agama_id'      => $request->agama_id,
+            'block_reason'  => $request->status == 1 ? "" : $request->block_reason
         ];
 
         $peserta->update($data);

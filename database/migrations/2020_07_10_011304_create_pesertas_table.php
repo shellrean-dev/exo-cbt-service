@@ -23,6 +23,7 @@ class CreatePesertasTable extends Migration
             $table->string('password');
             $table->string('api_token')->nullable();
             $table->integer('status')->default(1);
+            $table->string('block_reason')->nullable();
 
             $table->uuid('deleted_by')->nullable();
             $table->timestamp('deleted_at')->nullable();

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "92ee5fcd29b0951856ddd4a8cc2042e1",
+    "content-hash": "288eb8a84d72cb5cfc7707705e05134e",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -817,59 +817,6 @@
                 }
             ],
             "time": "2020-04-28T08:47:37+00:00"
-        },
-        {
-            "name": "gregwar/tex2png-bundle",
-            "version": "dev-master",
-            "target-dir": "Gregwar/Tex2pngBundle",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Gregwar/Tex2pngBundle.git",
-                "reference": "9688dd0d168e473066f3039455451214abe05268"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Gregwar/Tex2pngBundle/zipball/9688dd0d168e473066f3039455451214abe05268",
-                "reference": "9688dd0d168e473066f3039455451214abe05268",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "default-branch": true,
-            "type": "symfony-bundle",
-            "autoload": {
-                "psr-0": {
-                    "Gregwar\\Tex2pngBundle": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Grégoire Passault",
-                    "email": "g.passault@gmail.com",
-                    "homepage": "http://www.gregwar.com/"
-                }
-            ],
-            "description": "LaTeX to PNG formulas converter",
-            "homepage": "https://github.com/Gregwar/Tex2pngBundle",
-            "keywords": [
-                "Symfony2",
-                "formula",
-                "latex",
-                "math",
-                "png",
-                "tex",
-                "tex2png"
-            ],
-            "support": {
-                "issues": "https://github.com/Gregwar/Tex2pngBundle/issues",
-                "source": "https://github.com/Gregwar/Tex2pngBundle/tree/master"
-            },
-            "time": "2013-06-05T18:06:10+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -4531,6 +4478,89 @@
                 }
             ],
             "time": "2021-10-18T15:26:12+00:00"
+        },
+        {
+            "name": "swooletw/laravel-swoole",
+            "version": "v2.12.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/swooletw/laravel-swoole.git",
+                "reference": "b9b766a68a532600d1e20d66f698a40ebb434ca0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/swooletw/laravel-swoole/zipball/b9b766a68a532600d1e20d66f698a40ebb434ca0",
+                "reference": "b9b766a68a532600d1e20d66f698a40ebb434ca0",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/console": "~5.4|~6.0|~7.0|~8.0|~9.0",
+                "illuminate/contracts": "~5.4|~6.0|~7.0|~8.0|~9.0",
+                "illuminate/http": "~5.4|~6.0|~7.0|~8.0|~9.0",
+                "illuminate/support": "~5.4|~6.0|~7.0|~8.0|~9.0",
+                "php": "^7.2|^8.0",
+                "predis/predis": "^1.1"
+            },
+            "require-dev": {
+                "codedungeon/phpunit-result-printer": "^0.31.0",
+                "laravel/lumen-framework": "~5.4|~6.0|~7.0|~8.0|~9.0",
+                "mockery/mockery": "~1.5",
+                "php-coveralls/php-coveralls": "^2.1",
+                "php-mock/php-mock": "^2.3",
+                "phpunit/php-code-coverage": "^9",
+                "phpunit/phpunit": "^9",
+                "swoole/ide-helper": "@dev"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "SwooleTW\\Http\\LaravelServiceProvider"
+                    ],
+                    "aliases": {
+                        "Server": "SwooleTW\\Http\\Server\\Facades\\Server",
+                        "Table": "SwooleTW\\Http\\Server\\Facades\\Table",
+                        "Room": "SwooleTW\\Http\\Websocket\\Facades\\Room",
+                        "Websocket": "SwooleTW\\Http\\Websocket\\Facades\\Websocket"
+                    }
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/Server/helpers.php"
+                ],
+                "psr-4": {
+                    "SwooleTW\\Http\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Albert Chen",
+                    "email": "albert@unisharp.com"
+                },
+                {
+                    "name": "Huang Yi",
+                    "email": "coodeer@163.com"
+                }
+            ],
+            "description": "High performance HTTP server based on Swoole. Speed up your Laravel and Lumen applications.",
+            "keywords": [
+                "http",
+                "laravel",
+                "lumen",
+                "performance",
+                "server",
+                "swoole"
+            ],
+            "support": {
+                "issues": "https://github.com/swooletw/laravel-swoole/issues",
+                "source": "https://github.com/swooletw/laravel-swoole/tree/v2.12.1"
+            },
+            "time": "2022-03-19T04:41:32+00:00"
         },
         {
             "name": "symfony/console",
@@ -9451,7 +9481,9 @@
     "prefer-lowest": false,
     "platform": {
         "php": "^7.4",
-        "ext-json": "*"
+        "ext-dom": "*",
+        "ext-json": "*",
+        "ext-zip": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.1.0"

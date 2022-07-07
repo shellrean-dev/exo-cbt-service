@@ -23,7 +23,7 @@ class CreateSiswaUjiansTable extends Migration
             $table->integer('uploaded')->default('0');
             $table->integer('sisa_waktu');
             $table->char('status_ujian');
-
+            $table->integer('out_ujian_counter')->default(0);
             $table->uuid('deleted_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();

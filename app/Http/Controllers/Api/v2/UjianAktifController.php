@@ -539,4 +539,39 @@ class UjianAktifController extends Controller
 
         return SendResponse::acceptData($hasil);
     }
+
+    /**
+     * @Route(path="api/v2/ujians/leave-counter", methods={"POST"})
+     * 
+     * Leave counter update
+     * 
+     * @param Request $request
+     * @return Response
+     * @author shellrean <wandinak17@gmail.com>
+     */
+    public function leaveCounter(Request $request)
+    {
+        $ujian = DB::table('siswa_ujians')->where('id', $request->id)->first();
+        if($ujian) {
+            $count = $ujian->out_ujian_counter + 1;
+            DB::table('siswa_ujians')->where('id', $ujian->id)->update([
+                'out_ujian_counter' => $count
+            ]);
+            
+            if($count > 5) {
+                DB::table('pesertas')->where('id', $ujian->peserta_id)->update([
+                    'status' => 0,
+                    'block_reason' => 'Terlalu sering keluar ujian'
+                ]);
+                return SendResponse::acceptData([
+                    'status' => 0,
+                    'block_reason' => 'Terlalu sering keluar ujian'
+                ]);
+            }
+        }
+        return SendResponse::acceptData([
+            'status' => 1,
+            'block_reason' => ''
+        ]);
+    }
 }

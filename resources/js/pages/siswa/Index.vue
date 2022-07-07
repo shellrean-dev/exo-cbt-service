@@ -17,6 +17,16 @@
       :active.sync="connection"
       :is-full-page="true"
     ><div class="text-xl text-center">Kamu terputus dengan server<br /> silakan cek koneksi internet kamu</div></loading>
+    <loading
+      color="#007bff"
+      :opacity="0.8"
+      loader="dots"
+      :height="45"
+      :width="45"
+      :active.sync="isBlockedPeserta"
+      :is-full-page="true"
+    ><div class="text-xl text-center">Akun anda dibekukan karena: <u>{{ peserta.block_reason }}</u> <br /> Hubungi administrator untuk membuka blok</div></loading>
+    
     <div class="pt-6 pb-24 shadow-sm border-gray-300 px-4 bg-gradient-to-r from-blue-500 to-blue-400 text-white">
       <div class="flex justify-between flex-col sm:flex-row">
         <div class="flex items-center space-x-1"
@@ -62,6 +72,7 @@ import { successToas, errorToas} from '../../entities/notif'
 import { showSweetError } from '../../entities/alert'
 import Loading from 'vue-loading-overlay'
 import io from 'socket.io-client'
+import { async } from 'q'
 
 export default {
   name: 'IndexUjian',
@@ -84,14 +95,21 @@ export default {
       peserta: state => state.pesertaDetail
     }),
     ...mapState('siswa_ujian', {
-      uncomplete: state => state.uncomplete
+      uncomplete: state => state.uncomplete,
+      detail: state => state.filledUjian.detail
     }),
-    ...mapState('siswa_channel', ['socket'])
+    ...mapState('siswa_channel', ['socket']),
+    isBlockedPeserta() {
+      if(typeof this.peserta.status != 'undefined' && this.peserta.status == '0') {
+        return true;
+      }
+      return false;
+    }
   },
   methods: {
     ...mapActions('siswa_jadwal',['ujianAktif']),
     ...mapActions('siswa_auth',['logoutPeserta']),
-    ...mapActions('siswa_ujian',['getPesertaDataUjian', 'getPesertaUjian', 'getUncompleteUjian']),
+    ...mapActions('siswa_ujian',['getPesertaDataUjian', 'getPesertaUjian', 'getUncompleteUjian', 'leaveCounterUjian']),
     showError(err) {
       showSweetError(this, err)
     },
@@ -162,29 +180,13 @@ export default {
               channel: this.channel
             });
           });
-
-          // this.socket.on("reconnect", () => {
-          //   console.log("RECONNECTING....")
-          //   this.connection = false
-          //   if (typeof this.peserta.id != 'undefined' && !this.is_getted) {
-          //     this.socket.emit('getin_student', {
-          //       user: this.peserta,
-          //       channel: this.channel
-          //     });
-          //     this.is_getted = true
-          //   }
-          //   this.socket.emit('in_tab_student', {
-          //     user: this.peserta.id,
-          //     channel: this.channel
-          //   });
-          // });
       }
     } catch (error) {
       this.showError(error)
     }
   },
   mounted() {
-    document.addEventListener("visibilitychange", (event) => {
+    document.addEventListener("visibilitychange", async (event) => {
       if (document.visibilityState == "visible") {
         if (this.enable_socket === "oke") {
           this.socket.emit('in_tab_student', {
@@ -198,6 +200,15 @@ export default {
             user: this.peserta.id,
             channel: this.channel
           });
+        }
+        if(typeof this.detail.id != 'undefined') {
+          let net = await this.leaveCounterUjian({
+            id: this.detail.id
+          })
+          if(net.data.status == '0') {
+            this.$store.state.siswa_user.pesertaDetail.status = 0;
+            this.$store.state.siswa_user.pesertaDetail.block_reason = net.data.block_reason;
+          }
         }
       }
     });
