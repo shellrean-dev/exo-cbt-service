@@ -9,6 +9,9 @@ use Exception;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 /**
  * BackupController Controller
@@ -16,6 +19,24 @@ use Illuminate\Http\UploadedFile;
  */
 class BackupController extends Controller
 {
+    /**
+     * @Route(path="api/v1/system/backup", methods={"GET"})
+     * 
+     * List audit
+     *
+     * @param BackupService $backupService
+     * @return \Illuminate\Http\Response
+     * @since 3.16.0
+     */
+    public function index()
+    {
+        $data = DB::table("exo_backups")->orderByDesc("id")->get();
+        return SendResponse::acceptCustom([
+            'data' => $data,
+            'secret_key' => config('app.key')
+        ]);
+    }
+
     /**
      * @Route(path="api/v1/system/backup", methods={"GET"})
      *
@@ -53,9 +74,63 @@ class BackupController extends Controller
             $data = $backupService->restore($fileString, $file->getClientOriginalName());
             return SendResponse::accept('restore success');
         } catch (DecryptException $e) {
-            return SendResponse::badRequest($e->getMessage());
+            return SendResponse::badRequest('Enkripsi failed, cek key dan file ('.$e->getMessage().')');
         } catch (Exception $e) {
             return SendResponse::internalServerError($e->getMessage());
         }
+    }
+
+    /**
+     * @Route(path="api/v1/system/backup-download/{id}/proxy", methods={"GET"})
+     *
+     * Restore system
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param BackupService $backupService
+     * @return \Illuminate\Http\Response
+     * @since 3.16.0
+     */
+    public function proxyLinkDownload($backupId)
+    {
+        $backup = DB::table('exo_backups')->where('id', $backupId)->first();
+        if(!$backup) {
+            return SendResponse::badRequest('backup tidak ditemukan');
+        }
+
+        if(!Storage::exists('public'.DIRECTORY_SEPARATOR.'backup'.DIRECTORY_SEPARATOR.$backup->filename)) {
+            return SendResponse::badRequest('backup tidak ditemukan pada direktori');
+        }
+
+        $url = URL::temporarySignedRoute(
+            'backup.download',
+            now()->addMinutes(5),
+            ['backup_id' => $backup->id]
+        );
+
+        return SendResponse::acceptData($url);
+    }
+
+    /**
+     * @Route(path="api/v1/system/backup-download/{id}/download", methods={"GET"})
+     *
+     * Restore system
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param BackupService $backupService
+     * @return \Illuminate\Http\Response
+     * @since 3.16.0
+     */
+    public function download($backupId)
+    {
+        if (! request()->hasValidSignature()) {
+            return SendResponse::badRequest('Kesalahan, url tidak valid');
+        }
+
+        $backup = DB::table('exo_backups')->where('id', $backupId)->first();
+        if(!$backup) {
+            return SendResponse::badRequest('backup tidak ditemukan');
+        }
+
+        return Storage::download('public'.DIRECTORY_SEPARATOR.'backup'.DIRECTORY_SEPARATOR.$backup->filename);
     }
 }

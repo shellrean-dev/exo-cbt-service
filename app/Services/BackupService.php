@@ -67,9 +67,10 @@ class BackupService
         /**
          * File generation
          */
-        $path = "public".DIRECTORY_SEPARATOR."backup".DIRECTORY_SEPARATOR.now()."-exo-backup.exo";
+        $filename = DIRECTORY_SEPARATOR.now()."-exo-backup.exo";
+        $path = "public".DIRECTORY_SEPARATOR."backup".$filename;
         DB::table("exo_backups")->insert([
-            "filename" => $path,
+            "filename" => $filename,
             "version" => config("exo.version.code"),
             "detail" => json_encode([
                 "jurusan" => $jurusans->count(),
@@ -81,7 +82,7 @@ class BackupService
                 "jawaban_soal" => $jawaban_soals->count(),
                 "peserta" => $pesertas->count()
             ]),
-            "generated_date" => now(),
+            "generated_date" => now()->format('d/m/Y h:i:s A'),
             "bak_type" => ExoBackup::TYPE_BACKUP
         ]);
         Storage::put($path, $textInBackup);
@@ -185,7 +186,7 @@ class BackupService
     {
         return [
             "code" => config("exo.version.code"),
-            "time_generated" => now()
+            "time_generated" => now()->format('d/m/Y h:i:s A')
         ];
     }
 
