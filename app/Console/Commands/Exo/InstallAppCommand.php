@@ -43,8 +43,6 @@ class InstallAppCommand extends Command
 
             $this->call('db:seed');
 
-            $this->call('passport:install');
-
             $this->call('storage:link');
 
             $this->call('cache:clear');

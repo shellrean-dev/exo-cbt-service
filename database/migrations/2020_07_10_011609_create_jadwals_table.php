@@ -21,6 +21,7 @@ class CreateJadwalsTable extends Migration
             $table->date('tanggal');
             $table->time('mulai');
             $table->integer('lama');
+            $table->integer('min_test')->default(0);
             $table->char('status_ujian',1);
             $table->uuid('event_id')->nullable()->default(null);
             $table->integer('sesi')->default(1);

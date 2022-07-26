@@ -14,4 +14,5 @@ class UjianConstant
     public const NO_BANKSOAL_FOR_YOU = "Kamu tidak mendapat banksoal yang sesuai, silakan logout lalu hubungi administrator";
     public const NO_WORKING_ANSWER_FOUND = "Kami tidak dapat menemukan data dari jawaban kamu";
     public const WARN_UJIAN_HAS_FINISHED_BEFORE = "Ujian ini telah diselesaikan. silakan logout, laporkan perihal ini kepada andministrator";
+    public const MINUMUM_TEST_INVALID = "Waktu minimal pengerjaan belum terpenuhi, kerjakan soal anda minimal";
 }

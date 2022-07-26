@@ -66,7 +66,8 @@ class UjianController extends Controller
             'banksoal_id'       => 'required|array',
             'setting'           => 'required|array',
             'mulai_sesi'        => 'required|array',
-            'view_result'       => 'required|int'
+            'view_result'       => 'required|int',
+            'min_test'          => 'required|int'
         ]);
 
         $data = [
@@ -80,7 +81,8 @@ class UjianController extends Controller
             'mulai_sesi'        => array_map(function($item) {
                 return date('H:i:s', strtotime($item));
             }, $request->mulai_sesi),
-            'view_result'       => $request->view_result
+            'view_result'       => $request->view_result,
+            'min_test'          => $request->min_test,
         ];
 
         if($request->banksoal_id != '') {
@@ -153,10 +155,11 @@ class UjianController extends Controller
             'mulai'         => 'required',
             'lama'          => 'required',
             'alias'         => 'required',
-            'banksoal_id'       => 'required|array',
-            'setting'           => 'required|array',
+            'banksoal_id'   => 'required|array',
+            'setting'       => 'required|array',
             'mulai_sesi'    => 'required|array',
-            'view_result'   => 'required|int'
+            'view_result'   => 'required|int',
+            'min_test'      => 'required|int'
         ]);
 
         $data = [
@@ -169,7 +172,8 @@ class UjianController extends Controller
             'mulai_sesi'    => array_map(function($item) {
                 return date('H:i:s', strtotime($item));
             }, $request->mulai_sesi),
-            'view_result'   => $request->view_result
+            'view_result'   => $request->view_result,
+            'min_test'      => $request->min_test
         ];
 
         if($request->banksoal_id != '') {

@@ -14,7 +14,7 @@ use App\Services\Ujian\PilihanGandaService;
 use App\Services\Ujian\SetujuTidakService;
 use App\Actions\SendResponse;
 use App\Http\Controllers\Controller;
-
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -201,6 +201,16 @@ class UjianController extends Controller
             } catch (Exception $e) {
                 return SendResponse::internalServerError('Terjadi kesalahan 500. '.$e->getMessage());
             }
+        }
+
+        # validate minimum time
+        $start = Carbon::createFromFormat('H:i:s', $ujian->mulai_ujian_shadow);
+        $now = Carbon::createFromFormat('H:i:s', Carbon::now()->format('H:i:s'));
+        $diff_in_minutes = $start->diffInSeconds($now);
+
+        $jadwal = DB::table("jadwals")->where("id", $ujian->jadwal_id)->first();
+        if($diff_in_minutes < ($jadwal->min_test*60)) {
+            return SendResponse::badRequest(UjianConstant::MINUMUM_TEST_INVALID." min:".$jadwal->min_test." menit");
         }
 
         # ambil hanya banksoal untuk jawaban peserta pertama
