@@ -27,6 +27,8 @@ class BackupService
      * Backup exo-cbt data
      * This method will backup jurusan, matpel, directories, banksoals, soals and jawaban soals
      * You have to create app-key for your application
+     * 
+     * @since 3.16.0
      */
     public function backup()
     {
@@ -87,6 +89,8 @@ class BackupService
 
     /**
      * Restore exo-cbt data
+     * 
+     * @since 3.16.0
      */
     public function restore($backupLiteral, $originalName)
     {
@@ -159,6 +163,8 @@ class BackupService
      * Map file base64
      * This file will get base64 file for files data
      * And also do filter if the file not found
+     * 
+     * @since 3.16.0
      */
     private function mapFileBase64($files)
     {
@@ -185,8 +191,10 @@ class BackupService
 
     /**
      * Restore jurusan section
+     * 
      * @param $jurusan array
      * @return void
+     * @since 3.16.0
      */
     private function restoreJurusanSection($jurusans)
     {
@@ -196,8 +204,10 @@ class BackupService
 
     /**
      * Restore matpel section
+     * 
      * @param $matpels array
      * @return void
+     * @since 3.16.0
      */
     private function restoreMatpelSection($matpels)
     {
@@ -207,8 +217,10 @@ class BackupService
 
     /**
      * Restore directories section
+     * 
      * @param $directories array
      * @return void
+     * @since 3.16.0
      */
     private function restoreDirectoriesSection($directories)
     {
@@ -218,8 +230,10 @@ class BackupService
 
     /**
      * Restore banksoals section
+     * 
      * @param $banksoals array
      * @return void
+     * @since 3.16.0
      */
     private function restoreBanksoalsSection($banksoals)
     {
@@ -234,8 +248,10 @@ class BackupService
 
     /**
      * Restore files section
+     * 
      * @param $files array
      * @return void
+     * @since 3.16.0
      */
     private function restoreFilesSection($files)
     {
@@ -252,8 +268,10 @@ class BackupService
 
     /**
      * Restore soals section
+     * 
      * @param $soals array
      * @return void
+     * @since 3.16.0
      */
     private function restoreSoalSection($soals)
     {
@@ -263,8 +281,10 @@ class BackupService
 
     /**
      * Restore jawaban_soals section
+     * 
      * @param $jawaban_soals array
      * @return void
+     * @since 3.16.0
      */
     private function restoreJawabanSoalSection($jawaban_soals)
     {
@@ -274,8 +294,10 @@ class BackupService
 
     /**
      * Restore pesertas section
+     * 
      * @param $pesertas array
      * @return void
+     * @since 3.16.0
      */
     private function restorePesertaSection($pesertas)
     {

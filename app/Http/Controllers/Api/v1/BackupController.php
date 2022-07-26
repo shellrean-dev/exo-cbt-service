@@ -18,19 +18,28 @@ class BackupController extends Controller
 {
     /**
      * @Route(path="api/v1/system/backup", methods={"GET"})
-     * 
+     *
      * Backup system
+     *
+     * @param BackupService $backupService
+     * @return \Illuminate\Http\Response
+     * @since 3.16.0
      */
     public function backup(BackupService $backupService)
     {
         $backupService->backup();
-        return SendResponse::accept("backup-created");
+        return SendResponse::accept("backup berhasil dibuat");
     }
 
     /**
      * @Route(path="api/v1/system/restore", methods={"POST"})
-     * 
+     *
      * Restore system
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param BackupService $backupService
+     * @return \Illuminate\Http\Response
+     * @since 3.16.0
      */
     public function restore(Request $request, BackupService $backupService)
     {
