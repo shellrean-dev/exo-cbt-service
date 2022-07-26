@@ -33,7 +33,7 @@ class PenilaianController extends Controller
      */
     public function getExistEsay()
     {
-        $user = request()->user('api');
+        $user = request()->user();
         try {
             // Ambil semua jawaban yang telah dikoreksi
             $has = DB::table('penilaian_esay')
@@ -84,7 +84,7 @@ class PenilaianController extends Controller
     public function getBanksoalExistArgument()
     {
         try {
-            $user = request()->user('api');
+            $user = request()->user();
 
             # Ambil semua jawaban yang telah dikoreksi
             $has = DB::table('penilaian_argument')
@@ -264,7 +264,7 @@ class PenilaianController extends Controller
             return SendResponse::badRequest('Tidak dapat menemukan data yang diminta');
         }
 
-        $user = request()->user('api');
+        $user = request()->user();
 
         $exists = DB::table('penilaian_esay')
             ->where('jawab_id', $request->id)
@@ -350,7 +350,7 @@ class PenilaianController extends Controller
             return SendResponse::badRequest('Tidak dapat menemukan data yang diminta');
         }
 
-        $user = request()->user('api');
+        $user = request()->user();
 
         $exists = DB::table('penilaian_argument')
             ->where('jawab_id', $request->id)

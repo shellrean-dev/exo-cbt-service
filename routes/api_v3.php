@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 Route::namespace('Api\v3')->group(function() {
     Route::get('feature-info', 'AppInfoController@info');
 
-    Route::middleware('auth:api')->group(function() {
+    Route::middleware('auth:sanctum')->group(function() {
         Route::get('agamas', 'AgamaController@index');
 
         Route::get('jurusans-all', 'JurusanController@all');

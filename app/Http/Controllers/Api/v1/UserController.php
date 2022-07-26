@@ -29,7 +29,7 @@ class UserController extends Controller
      **/
     public function getUserLogin()
     {
-        $user = request()->user('api');
+        $user = request()->user();
         $user->ip = request()->ip();
         $user->browser = Browser::browserName();
         $user->flatform = Browser::platformName();
@@ -60,7 +60,7 @@ class UserController extends Controller
         $request->validate([
             'password'  => 'required'
         ]);
-        $user = request()->user('api'); 
+        $user = request()->user(); 
         $user->password = bcrypt($request->password);
         $user->save();
 

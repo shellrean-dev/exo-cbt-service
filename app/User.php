@@ -5,12 +5,26 @@ namespace App;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Passport\HasApiTokens;
 use App\Traits\Uuids;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     use Notifiable, HasApiTokens,Uuids;
+
+    /**
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+    
+    /**
+     * The "type" of the primary key ID.
+     *
+     * @var string
+     */
+    protected $keyType = 'string';
 
     /**
      * The attributes that are mass assignable.

@@ -3,6 +3,7 @@
 ### 3.16.0-RELEASE
 - Auto-block student for in-tab
 - Backup matpel & banksoal
+- Goodbye passport, welcome sanctum
 
 ### v3.1.2-dev
 - Add aktif/non-aktif peserta
