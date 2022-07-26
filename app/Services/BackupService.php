@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 
+use App\ExoBackup;
 use Exception;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,7 @@ class BackupService
     public const SOALS_SECTION = "soals";
     public const JAWABAN_SOAL_SECTION = "jawaban_soal";
     public const VERSION_SECTION = "version";
+    public const PESERTA_SECTION = "peserta";
 
     /**
      * Backup exo-cbt data
@@ -38,6 +40,7 @@ class BackupService
         $files = $this->mapFileBase64(DB::table("files")->get());
         $soals = DB::table("soals")->get();
         $jawaban_soals = DB::table("jawaban_soals")->get();
+        $pesertas = DB::table("pesertas")->get();
 
         /**
          * Data construction
@@ -50,6 +53,7 @@ class BackupService
             BackupService::FILES_SECTION => $files,
             BackupService::SOALS_SECTION => $soals,
             BackupService::JAWABAN_SOAL_SECTION => $jawaban_soals,
+            BackupService::PESERTA_SECTION => $pesertas,
             BackupService::VERSION_SECTION => $this->retreiveVersionSection()
         ]);
 
@@ -62,45 +66,92 @@ class BackupService
          * File generation
          */
         $path = "public".DIRECTORY_SEPARATOR."backup".DIRECTORY_SEPARATOR.now()."-exo-backup.exo";
+        DB::table("exo_backups")->insert([
+            "filename" => $path,
+            "version" => config("exo.version.code"),
+            "detail" => json_encode([
+                "jurusan" => $jurusans->count(),
+                "matpel" => $matpels->count(),
+                "directory" => $directories->count(),
+                "banksoal" => $banksoal->count(),
+                "file" => $files->count(),
+                "soal" => $soals->count(),
+                "jawaban_soal" => $jawaban_soals->count(),
+                "peserta" => $pesertas->count()
+            ]),
+            "generated_date" => now(),
+            "bak_type" => ExoBackup::TYPE_BACKUP
+        ]);
         Storage::put($path, $textInBackup);
     }
 
     /**
      * Restore exo-cbt data
      */
-    public function restore($backupLiteral)
+    public function restore($backupLiteral, $originalName)
     {
+        $data_detail = [
+            "filename" => $originalName,
+            "version" => "Unknown",
+            "detail" => [],
+            "generated_date" => "Unknown",
+            "bak_type" => ExoBackup::TYPE_RESTORE
+        ];
+
         try {
             DB::beginTransaction();
             $textInBackup = Crypt::decryptString($backupLiteral);
             $dataInBackup = json_decode($textInBackup, true);
 
+            $detail = [];
+            if(isset($dataInBackup[BackupService::VERSION_SECTION])) {
+                $data_detail["version"] = $dataInBackup[BackupService::VERSION_SECTION]["code"];
+                $data_detail["generated_date"] = $dataInBackup[BackupService::VERSION_SECTION]["time_generated"];
+            }
             if(isset($dataInBackup[BackupService::JURUSAN_SECTIONS])) {
+                $detail["jurusan"] = count($dataInBackup[BackupService::JURUSAN_SECTIONS]);
                 $this->restoreJurusanSection($dataInBackup[BackupService::JURUSAN_SECTIONS]);
             }
             if(isset($dataInBackup[BackupService::MATPEL_SECTIONS])) {
+                $detail["matpel"] = count($dataInBackup[BackupService::MATPEL_SECTIONS]);
                 $this->restoreMatpelSection($dataInBackup[BackupService::MATPEL_SECTIONS]);
             }
             if(isset($dataInBackup[BackupService::DIRECTORIES_SECTIONS])) {
+                $detail["directory"] = count($dataInBackup[BackupService::DIRECTORIES_SECTIONS]);
                 $this->restoreDirectoriesSection($dataInBackup[BackupService::DIRECTORIES_SECTIONS]);
             }
             if(isset($dataInBackup[BackupService::BANKSOAL_SECTION])) {
+                $detail["banksoal"] = count($dataInBackup[BackupService::BANKSOAL_SECTION]);
                 $this->restoreBanksoalsSection($dataInBackup[BackupService::BANKSOAL_SECTION]);
             }
             if(isset($dataInBackup[BackupService::FILES_SECTION])) {
+                $detail["file"] = count($dataInBackup[BackupService::FILES_SECTION]);
                 $this->restoreFilesSection($dataInBackup[BackupService::FILES_SECTION]);
             }
             if(isset($dataInBackup[BackupService::SOALS_SECTION])) {
+                $detail["soal"] = count($dataInBackup[BackupService::SOALS_SECTION]);
                 $this->restoreSoalSection($dataInBackup[BackupService::SOALS_SECTION]);
             }
             if(isset($dataInBackup[BackupService::JAWABAN_SOAL_SECTION])) {
+                $detail["jawaban_soal"] = count($dataInBackup[BackupService::JAWABAN_SOAL_SECTION]);
                 $this->restoreJawabanSoalSection($dataInBackup[BackupService::JAWABAN_SOAL_SECTION]);
             }
+            if(isset($dataInBackup[BackupService::PESERTA_SECTION])) {
+                $detail["peserta"] = count($dataInBackup[BackupService::PESERTA_SECTION]);
+                $this->restorePesertaSection($dataInBackup[BackupService::PESERTA_SECTION]);
+            }
+            $data_detail["detail"] = $detail;
+            
             DB::commit();
             return $dataInBackup;
         } catch (Exception $e) {
             DB::rollBack();
+            $data_detail["status"] = "FAILED";
+
             throw $e;
+        } finally {
+            $data_detail["detail"] = json_encode($data_detail["detail"]);
+            DB::table("exo_backups")->insert($data_detail);
         }
     }
 
@@ -219,5 +270,22 @@ class BackupService
     {
         DB::table("jawaban_soals")->delete();
         DB::table("jawaban_soals")->insert($jawaban_soals);
+    }
+
+    /**
+     * Restore pesertas section
+     * @param $pesertas array
+     * @return void
+     */
+    private function restorePesertaSection($pesertas)
+    {
+        DB::table("pesertas")->delete();
+        $new_pesertas = [];
+        foreach($pesertas as $peserta) {
+            $new_peserta = $peserta;
+            $new_peserta['api_token'] = null;
+            $new_pesertas[] = $new_peserta;
+        }
+        DB::table("pesertas")->insert($new_pesertas);
     }
 }

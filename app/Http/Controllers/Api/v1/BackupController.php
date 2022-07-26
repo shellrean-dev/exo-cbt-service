@@ -41,7 +41,7 @@ class BackupController extends Controller
             }
 
             $fileString = $file->get();
-            $data = $backupService->restore($fileString);
+            $data = $backupService->restore($fileString, $file->getClientOriginalName());
             return SendResponse::accept('restore success');
         } catch (DecryptException $e) {
             return SendResponse::badRequest($e->getMessage());
