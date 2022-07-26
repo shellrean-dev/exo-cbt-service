@@ -4,6 +4,7 @@
 - Auto-block student for in-tab
 - Backup matpel & banksoal
 - Goodbye passport, welcome sanctum
+- Minimum waktu pengerjaan
 
 ### v3.1.2-dev
 - Add aktif/non-aktif peserta
