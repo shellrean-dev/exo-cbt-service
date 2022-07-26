@@ -33,7 +33,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
     Route::get('ujians/esay/{banksoal}/koreksi-offline/excel', 'PenilaianController@jawabanPesertaEsayExcel')->name('koreksi.offline.download.excel');
     Route::get('ujians-ledger/{event_id}/{peserta_id}/excel', 'ResultController@hasilUjianLedgerPeserta')->name('ledger.peserta.download.excel');
 
+    Route::get('system/backup', 'BackupController@backup');
+    Route::post('system/restore', 'BackupController@restore');
+    
     Route::group(['middleware' => 'auth:api'], function() {
+       
         Route::get('user-authenticated', 'UserController@getUserLogin');
         Route::get('user-lists', 'UserController@userLists');
         Route::post('user/change-password', 'UserController@changePassword');
