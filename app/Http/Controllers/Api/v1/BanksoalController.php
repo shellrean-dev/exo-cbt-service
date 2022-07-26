@@ -32,7 +32,7 @@ class BanksoalController extends Controller
      */
     public function index()
     {
-        $user = request()->user('api');
+        $user = request()->user();
         $perPage = request()->perPage ?: '';
         $banksoal = DB::table('banksoals as t_0')
             ->join('matpels as t_1', 't_0.matpel_id', 't_1.id')
@@ -103,7 +103,7 @@ class BanksoalController extends Controller
      */
     public function store(Request $request)
     {
-        $user = request()->user('api');
+        $user = request()->user();
         $request->validate([
             'kode_banksoal'     => 'required|unique:banksoals,kode_banksoal',
             'matpel_id'         => 'required|exists:matpels,id',
@@ -287,7 +287,7 @@ class BanksoalController extends Controller
      */
     public function allData()
     {
-        $user = request()->user('api');
+        $user = request()->user();
         $banksoal = Banksoal::with(['matpel'])->orderBy('created_at', 'DESC');
         if ($user->role != 'admin') {
             $banksoal = $banksoal->where('author',$user->id);
@@ -474,7 +474,7 @@ class BanksoalController extends Controller
      * @since 3.0.0
      */
     public function lock(Banksoal $banksoal, Request  $request) {
-        $user = request()->user('api');
+        $user = request()->user();
         $request->validate([
             'key_lock' => 'required'
         ]);

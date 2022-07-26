@@ -2,7 +2,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::group(['namespace' => 'Api\Gateway'], function() {
-    Route::group(['middleware' => 'auth:api'], function() {
+    Route::group(['middleware' => 'auth:sanctum'], function() {
         Route::get('jurusans/all', 'JurusanGatewayController@allData');
         Route::get('agamas/all', 'AgamaGatewayController@allData');
         Route::get('matpels/all', 'MatpelGatewayController@allData');

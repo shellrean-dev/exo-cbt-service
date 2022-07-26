@@ -19,9 +19,6 @@ use Illuminate\Support\Facades\Route;
  */
 Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
     Route::post('login', 'AuthController@login');
-    Route::get('login/oauth', 'AuthController@oauth');
-    Route::get('login/sso', 'AuthController@sso');
-    Route::get('login/callback', 'AuthController@callback');
     Route::get('settings/auth', 'SettingController@getSetAuth');
     Route::get('settings-public-sekolah', 'SettingController@getSettingPublicSekolah');
     Route::get('info-app', 'SettingController@infoApp');
@@ -35,7 +32,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
 
     Route::get('system/backup-download/{backup_id}/download', 'BackupController@download')->name('backup.download');
     
-    Route::group(['middleware' => 'auth:api'], function() {
+    Route::group(['middleware' => 'auth:sanctum'], function() {
         Route::get('system/backup-index', 'BackupController@index');
         Route::get('system/backup', 'BackupController@backup');
         Route::post('system/restore', 'BackupController@restore');
