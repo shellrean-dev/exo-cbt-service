@@ -41,6 +41,7 @@ class PesertaController extends Controller
                 't_0.password',
                 't_0.status',
                 't_0.block_reason',
+                't_0.antiblock',
                 't_1.nama as agama',
                 't_2.nama as jurusan'
             ]);
@@ -83,7 +84,8 @@ class PesertaController extends Controller
             'sesi'          => $request->sesi,
             'status'        => $request->status,
             'jurusan_id'    => $request->jurusan_id,
-            'agama_id'      => $request->agama_id
+            'agama_id'      => $request->agama_id,
+            'antiblock'     => isset($request->antiblock) ?? false
         ];
 
         $data = Peserta::create($data);
@@ -111,7 +113,8 @@ class PesertaController extends Controller
                 't_0.sesi',
                 't_0.block_reason',
                 't_0.status',
-                't_0.password'
+                't_0.password',
+                't_0.antiblock'
             ])
             ->where('id', $peserta)
             ->first();
@@ -148,8 +151,13 @@ class PesertaController extends Controller
             'status'        => $request->status,
             'jurusan_id'    => $request->jurusan_id,
             'agama_id'      => $request->agama_id,
-            'block_reason'  => $request->status == 1 ? "" : $request->block_reason
+            'block_reason'  => $request->status == 1 ? "" : $request->block_reason,
+            'antiblock'     => isset($request->antiblock) ?? false
         ];
+
+        if($request->status == 1) {
+            DB::table("siswa_ujians")->where("peserta_id", $peserta->id)->update(['out_ujian_counter' => 0]);
+        }
 
         $peserta->update($data);
         return SendResponse::acceptData($data);

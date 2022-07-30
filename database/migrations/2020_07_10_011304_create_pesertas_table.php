@@ -24,6 +24,7 @@ class CreatePesertasTable extends Migration
             $table->string('api_token')->nullable();
             $table->integer('status')->default(1);
             $table->string('block_reason')->nullable();
+            $table->boolean('antiblock')->default(false);
 
             $table->uuid('deleted_by')->nullable();
             $table->timestamp('deleted_at')->nullable();

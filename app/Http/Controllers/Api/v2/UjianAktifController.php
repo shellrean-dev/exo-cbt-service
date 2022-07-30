@@ -552,7 +552,8 @@ class UjianAktifController extends Controller
     public function leaveCounter(Request $request)
     {
         $ujian = DB::table('siswa_ujians')->where('id', $request->id)->first();
-        if($ujian) {
+        $peserta = request()->get('peserta-auth');
+        if($ujian && !$peserta->antiblock) {
             $count = $ujian->out_ujian_counter + 1;
             DB::table('siswa_ujians')->where('id', $ujian->id)->update([
                 'out_ujian_counter' => $count
