@@ -1,5 +1,9 @@
 ### EXO CBT CHANGE LOG
 
+### 3.16.1-RELEASE
+- Fix issue with leave-counter
+- Anti-block feature
+
 ### 3.16.0-RELEASE
 - Auto-block student for in-tab
 - Backup matpel & banksoal
