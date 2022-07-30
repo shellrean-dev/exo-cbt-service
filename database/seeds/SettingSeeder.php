@@ -32,5 +32,13 @@ class SettingSeeder extends Seeder
             'value' => 900,
             'type' => 'general'
         ]);
+
+        Setting::create([
+            'name' => 'ujian',
+            'type' => 'general',
+            'value' => [
+                'reset' => false
+            ]
+        ]);
     }
 }
