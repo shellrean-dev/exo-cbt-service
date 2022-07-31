@@ -1,5 +1,5 @@
 <template>
-	<div class="wrapper font-poppins">
+	<div class="wrapper">
     <router-view />
   </div>
 </template>
