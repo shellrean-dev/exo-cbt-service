@@ -85,7 +85,7 @@ class PesertaController extends Controller
             'status'        => $request->status,
             'jurusan_id'    => $request->jurusan_id,
             'agama_id'      => $request->agama_id,
-            'antiblock'     => isset($request->antiblock) ?? false
+            'antiblock'     => isset($request->antiblock) ? $request->antiblock :  false
         ];
 
         $data = Peserta::create($data);
@@ -152,7 +152,7 @@ class PesertaController extends Controller
             'jurusan_id'    => $request->jurusan_id,
             'agama_id'      => $request->agama_id,
             'block_reason'  => $request->status == 1 ? "" : $request->block_reason,
-            'antiblock'     => isset($request->antiblock) ?? false
+            'antiblock'     => isset($request->antiblock) ? $request->antiblock :  false
         ];
 
         if($request->status == 1) {

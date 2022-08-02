@@ -205,6 +205,7 @@ export default {
           let net = await this.leaveCounterUjian({
             id: this.detail.id
           })
+          console.log(net.data.status)
           if(net.data.status == '0') {
             this.$store.state.siswa_user.pesertaDetail.status = 0;
             this.$store.state.siswa_user.pesertaDetail.block_reason = net.data.block_reason;

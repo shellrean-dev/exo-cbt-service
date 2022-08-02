@@ -1,5 +1,7 @@
 ### EXO CBT CHANGE LOG
 
+### 3.16.2-RELEASE
+- Fix issue with leave-counter
 ### 3.16.1-RELEASE
 - Fix issue with leave-counter
 - Anti-block feature
