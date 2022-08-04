@@ -86,7 +86,8 @@ export default {
       is_getted: false,
       enable_socket: process.env.MIX_ENABLE_SOCKET,
       version: process.env.MIX_APP_VERSION,
-      year: ''
+      year: '',
+      isBlockedPeserta: false
     }
   },
   computed: {
@@ -98,13 +99,7 @@ export default {
       uncomplete: state => state.uncomplete,
       detail: state => state.filledUjian.detail
     }),
-    ...mapState('siswa_channel', ['socket']),
-    isBlockedPeserta() {
-      if(typeof this.peserta.status != 'undefined' && this.peserta.status == '0') {
-        return true;
-      }
-      return false;
-    }
+    ...mapState('siswa_channel', ['socket'])
   },
   methods: {
     ...mapActions('siswa_jadwal',['ujianAktif']),
@@ -122,6 +117,33 @@ export default {
         this.$router.push('/')
       } catch (error) {
         this.showError(error)
+      }
+    },
+    async listenEventChange() {
+      if (document.visibilityState == "visible") {
+        if (this.enable_socket === "oke") {
+          this.socket.emit('in_tab_student', {
+            user: this.peserta.id,
+            channel: this.channel
+          });
+        }
+      } else {
+        if (this.enable_socket === "oke") {
+          this.socket.emit('not_in_tab_student', {
+            user: this.peserta.id,
+            channel: this.channel
+          });
+        }
+        if(typeof this.detail.id != 'undefined') {
+          let net = await this.leaveCounterUjian({
+            id: this.detail.id
+          })
+          console.log(net.data.status)
+          if(net.data.status == '0') {
+            this.$store.commit('siswa_user/_block_peserta', net.data.block_reason)
+            this.isBlockedPeserta = true
+          }
+        }
       }
     }
   },
@@ -186,33 +208,7 @@ export default {
     }
   },
   mounted() {
-    document.addEventListener("visibilitychange", async (event) => {
-      if (document.visibilityState == "visible") {
-        if (this.enable_socket === "oke") {
-          this.socket.emit('in_tab_student', {
-            user: this.peserta.id,
-            channel: this.channel
-          });
-        }
-      } else {
-        if (this.enable_socket === "oke") {
-          this.socket.emit('not_in_tab_student', {
-            user: this.peserta.id,
-            channel: this.channel
-          });
-        }
-        if(typeof this.detail.id != 'undefined') {
-          let net = await this.leaveCounterUjian({
-            id: this.detail.id
-          })
-          console.log(net.data.status)
-          if(net.data.status == '0') {
-            this.$store.state.siswa_user.pesertaDetail.status = 0;
-            this.$store.state.siswa_user.pesertaDetail.block_reason = net.data.block_reason;
-          }
-        }
-      }
-    });
+    document.addEventListener("visibilitychange", this.listenEventChange);
   },
   watch: {
     uncomplete(val) {
@@ -245,6 +241,9 @@ export default {
         }
       }
     }
+  },
+  beforeDestroy() {
+    document.removeEventListener("visibilitychange", this.listenEventChange)
   },
   destroyed() {
     this.$store.commit('siswa_user/REMOTE_PESERTA_DETAIL')

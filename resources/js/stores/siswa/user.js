@@ -23,7 +23,13 @@ const state = () => ({
  */
 const mutations = {
 	ASSIGN_PESERTA_DETAIL,
-    REMOTE_PESERTA_DETAIL
+    REMOTE_PESERTA_DETAIL,
+    _block_peserta(state, payload) {
+        let pesertaDet = state.pesertaDetail
+        pesertaDet.status = 0
+        pesertaDet.block_reason = payload
+        state.pesertaDetail = pesertaDet
+    }
 }
 
 /**

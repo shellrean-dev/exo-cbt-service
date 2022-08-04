@@ -559,9 +559,10 @@ class UjianAktifController extends Controller
                 'out_ujian_counter' => $count
             ]);
             
-            if($count > 5) {
+            if($count > 3) {
                 DB::table('pesertas')->where('id', $ujian->peserta_id)->update([
                     'status' => 0,
+                    'api_token' => null,
                     'block_reason' => 'Terlalu sering keluar ujian'
                 ]);
                 return SendResponse::acceptData([
