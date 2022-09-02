@@ -1,5 +1,8 @@
 ### EXO CBT CHANGE LOG
 
+### 3.16.4-RELEASE
+- fix issue with auto block counter
+
 ### 3.16.3-RELEASE
 - Change max leave counter to 3
 - Auto logout if the max leave reached
