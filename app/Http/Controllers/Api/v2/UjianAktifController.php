@@ -551,6 +551,21 @@ class UjianAktifController extends Controller
      */
     public function leaveCounter(Request $request)
     {
+        $settings = DB::table('settings')->where('name', 'ujian')->first();
+        if(!$settings) {
+            return SendResponse::acceptData([
+                'status' => 1,
+                'block_reason' => ''
+            ]);
+        }
+        $sett_value = json_decode($settings->value);
+        if(!isset($sett_value->autoblock) ||  !$sett_value->autoblock) {
+            return SendResponse::acceptData([
+                'status' => 1,
+                'block_reason' => ''
+            ]);
+        }
+
         $ujian = DB::table('siswa_ujians')->where('id', $request->id)->first();
         $peserta = request()->get('peserta-auth');
         if($ujian && !$peserta->antiblock) {

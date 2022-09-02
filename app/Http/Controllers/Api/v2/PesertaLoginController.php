@@ -45,7 +45,7 @@ class PesertaLoginController extends Controller
 
         if($peserta) {
             if ($peserta->status == 0) {
-                return SendResponse::acceptCustom(['status' => 'susspend']);
+                return SendResponse::acceptCustom(['status' => 'susspend', 'reason' => $peserta->block_reason]);
             }
 
             if(isset($setting->value['reset'])
