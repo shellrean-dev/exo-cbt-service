@@ -1,4 +1,7 @@
 ### EXO CBT CHANGE LOG
+### 3.16.5-RELEASE
+- endpoint to get peserta in block status
+- endpoint unblock single or multiple
 
 ### 3.16.4-RELEASE
 - fix issue with auto block counter
