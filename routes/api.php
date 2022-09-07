@@ -31,7 +31,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
     Route::get('ujians-ledger/{event_id}/{peserta_id}/excel', 'ResultController@hasilUjianLedgerPeserta')->name('ledger.peserta.download.excel');
 
     Route::get('system/backup-download/{backup_id}/download', 'BackupController@download')->name('backup.download');
-    
+
     Route::group(['middleware' => 'auth:sanctum'], function() {
         Route::get('system/backup-index', 'BackupController@index');
         Route::get('system/backup', 'BackupController@backup');
@@ -56,6 +56,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('pesertas/multi-reset-login','PesertaController@multiResetPeserta');
         Route::post('pesertas/upload', 'PesertaController@import');
         Route::post('pesertas/delete-multiple', 'PesertaController@destroyMultiple');
+        Route::get('pesertas/status-blocked', 'PesertaController@blocked');
+        Route::delete('pesertas/unblock', 'PesertaController@unblock');
         Route::apiResource('pesertas', 'PesertaController');
 
         Route::get('matpels/all', 'MatpelController@allData');

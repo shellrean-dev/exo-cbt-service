@@ -18,10 +18,10 @@ class PesertaController extends Controller
 {
     /**
      * @Route(path="api/v1/pesertas", methods={"GET"})
-     * 
+     *
      * Display a listing of the resource.
      *
-     * @return App\Actions\SendResponse
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function index()
@@ -48,7 +48,7 @@ class PesertaController extends Controller
         if (request()->q != '') {
             $peserta = $peserta->where('t_0.nama', 'LIKE', '%'.request()->q.'%');
         }
-        
+
         $peserta = $peserta
             ->orderBy('t_0.created_at')
             ->paginate($perPage);
@@ -58,11 +58,11 @@ class PesertaController extends Controller
 
     /**
      * @Route(path="api/v1/pesertas", methods={"POST"})
-     * 
+     *
      * Store a newly created resource in storage.
      *
-     * @param Illuminate\Http\Request  $request
-     * @return App\Actions\SendResponse
+     * @param \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function store(Request $request)
@@ -94,11 +94,11 @@ class PesertaController extends Controller
 
     /**
      * @Route(path="api/v1/pesertas/{peserta}", methods={"GET"})
-     * 
+     *
      * Display the specified resource.
      *
-     * @param App\Peserta $peserta
-     * @return App\Actions\SendResponse
+     * @param \App\Peserta $peserta
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function show($peserta)
@@ -123,12 +123,12 @@ class PesertaController extends Controller
 
     /**
      * @Route(path="api/v1/pesertas/{peserta}, methods={"PUT", "PATCH"})
-     * 
+     *
      * Update the specified resource in storage.
      *
-     * @param Illuminate\Http\Request  $request
-     * @param App\Peserta $pesertas
-     * @return App\Actions\SendResponse
+     * @param \Illuminate\Http\Request  $request
+     * @param \App\Peserta $pesertas
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function update(Request $request, Peserta $peserta)
@@ -165,11 +165,11 @@ class PesertaController extends Controller
 
     /**
      * @Route(path="api/v1/pesertas/{peserta}", methods={"DELETE"})
-     * 
+     *
      * Remove the specified resource from storage.
      *
-     * @param App\Peserta $peserta
-     * @return Illuminate\Http\Response
+     * @param \App\Peserta $peserta
+     * @return \Illuminate\Http\Response
      */
     public function destroy(Peserta $peserta)
     {
@@ -179,11 +179,11 @@ class PesertaController extends Controller
 
     /**
      * @Route(path="api/v1/pesertas/upload", methods={"POST"})
-     * 
+     *
      * Upload peserta by excel
      *
-     * @param Illuminate\Http\Request  $request
-     * @return App\Actions\SendResponse
+     * @param \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function import(Request $request)
@@ -196,8 +196,8 @@ class PesertaController extends Controller
 
         try {
             Excel::import(new PesertaImport,$request->file('file'));
-            
-            DB::commit();    
+
+            DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
             return SendResponse::badRequest('Pastikan tidak ada no ujian duplikat dan format sesuai: '.$e->getMessage());
@@ -207,12 +207,11 @@ class PesertaController extends Controller
 
     /**
      * @Route(path="api/v1/pesertas/login", methods={"GET"})
-     * 
-     * @return App\Actions\SendResponse
+     *
+     * @return \Illuminate\Http\Response
      */
     public function getPesertaLogin()
     {
-        // $peserta = Peserta::orderBy('no_ujian');
         $peserta = DB::table('pesertas')
             ->select('id','no_ujian','nama');
         $peserta->where('api_token','!=','');
@@ -227,9 +226,9 @@ class PesertaController extends Controller
 
     /**
      * @Route(path="api/v1/pesertas/{peserta}/login", methods={"DELETE"})
-     * 
-     * @param  App\Peserta $peserta
-     * @return App\Actions\SendResponse
+     *
+     * @param  \App\Peserta $peserta
+     * @return \Illuminate\Http\Response
      */
     public function resetPesertaLogin(Peserta $peserta)
     {
@@ -241,10 +240,10 @@ class PesertaController extends Controller
 
     /**
      * @Route(path="api/v1/pesertas/multi-reset-login", methods={"GET"})
-     * 
+     *
      * Multiple reset api-token peserta
-     * 
-     * @return App\Actions\SendResponse
+     *
+     * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
     public function multiResetPeserta()
@@ -258,6 +257,7 @@ class PesertaController extends Controller
                 ->update([
                     'api_token' => ''
                 ]);
+            return SendResponse::accept('success');
         } catch (\Exception $e) {
             return SendResponse::internalServerError('kesalahan 500 ('.$e->getMessage().')');
         }
@@ -265,13 +265,13 @@ class PesertaController extends Controller
 
     /**
      * @Route(path="api/v1/pesertas/delete-multiple", methods={"POST"})
-     * 
-     * @param Illuminate\Http\Request $request
-     * @return App\Actions\SendResponse
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
      */
     public function destroyMultiple(Request $request)
     {
-        $request->validate([    
+        $request->validate([
             'peserta_id'    => 'required|array'
         ]);
 
@@ -283,6 +283,45 @@ class PesertaController extends Controller
             DB::rollback();
             return SendResponse::badRequest('Error: '.$e->getMessage());
         }
+        return SendResponse::accept();
+    }
+
+    /**
+     * @route(path="api/v1/pesertas/status-blocked", methods={"GET"})
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function blocked()
+    {
+        $peserta = DB::table('pesertas as t_0')
+            ->select([
+                't_0.id',
+                't_0.sesi',
+                't_0.no_ujian',
+                't_0.nama as nama_peserta'
+            ])
+            ->orderByDesc('t_0.created_at')
+            ->where('t_0.status', 0)
+            ->get();
+
+        return SendResponse::acceptData($peserta);
+    }
+
+    /**
+     * @route(path="api/v1/pesertas/unblock/{peserta_id}", methods={"DELETE"})
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function unblock(Request $request)
+    {
+        $pesertaSrt = $request->get('peserta_id');
+        $pesertas = explode(',', $pesertaSrt);
+
+        DB::table('pesertas')->whereIn('id', $pesertas)->update([
+            'status' => 1,
+            'block_reason' => ''
+        ]);
+        DB::table("siswa_ujians")->whereIn("peserta_id", $pesertas)->update(['out_ujian_counter' => 0]);
         return SendResponse::accept();
     }
 }
