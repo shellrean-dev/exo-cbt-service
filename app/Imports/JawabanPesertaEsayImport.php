@@ -13,10 +13,15 @@ use Ramsey\Uuid\Uuid;
 
 class JawabanPesertaEsayImport implements ToCollection, WithStartRow
 {
+    private $user;
+
+    public function __construct($user)
+    {
+        $this->user = $user;
+    }
+
     public function collection(Collection $rows)
     {
-        $user = request()->user('api');
-
         $jawaban_peserta_ids = [];
         foreach($rows as $row) {
             if($row->filter()->isNotEmpty()) {
@@ -95,7 +100,7 @@ class JawabanPesertaEsayImport implements ToCollection, WithStartRow
                         'banksoal_id'   => $jawab->banksoal_id,
                         'peserta_id'    => $jawab->peserta_id,
                         'jawab_id'      => $jawab->id,
-                        'corrected_by'  => $user->id,
+                        'corrected_by'  => $this->user->id,
                         'point'         => $row[4],
                         'created_at'    => now(),
                         'updated_at'    => now()

@@ -497,7 +497,8 @@ class PenilaianController extends Controller
         ]);
 
         try {
-            Excel::import(new JawabanPesertaEsayImport(), $request->file('file'));
+            $user = $request->user();
+            Excel::import(new JawabanPesertaEsayImport($user), $request->file('file'));
         } catch (\Exception $e) {
             return SendResponse::internalServerError('kesalahan 500.'.$e->getMessage());
         }
