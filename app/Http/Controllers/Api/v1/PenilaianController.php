@@ -64,7 +64,7 @@ class PenilaianController extends Controller
             // dari selsain pengoreksi
             $filtered = $banksoal->reject(function ($value, $key) use($user) {
                 return !in_array($user->id, json_decode($value->correctors, true));
-            });
+            })->values();
         } catch (Exception $e) {
             return SendResponse::internalServerError('Kesalahan 500. '.$e->getMessage());
         }
