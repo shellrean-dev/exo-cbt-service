@@ -592,4 +592,26 @@ class UjianAktifController extends Controller
             'block_reason' => ''
         ]);
     }
+
+    /**
+     * @Route(path="api/v2/ujians/block-me-please", methods={"POST"})
+     * 
+     * Please block me
+     * 
+     * @param Request $request
+     * @return Response
+     * @author shellrean <wandinak17@gmail.com>
+     */
+    public function blockMePlease(Request $request)
+    {
+        $ujian = DB::table('siswa_ujians')->where('id', $request->id)->first();
+        $peserta = request()->get('peserta-auth');
+        if($ujian && !$peserta->antiblock) {
+            DB::table('pesertas')->where('id', $ujian->peserta_id)->update([
+                'status'        => 0,
+                'api_token'     => null,
+                'block_reason' => $request->reason
+            ]);
+        }
+    }
 }

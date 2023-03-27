@@ -298,7 +298,8 @@ class PesertaController extends Controller
                 't_0.id',
                 't_0.sesi',
                 't_0.no_ujian',
-                't_0.nama as nama_peserta'
+                't_0.nama as nama_peserta',
+                't_0.block_reason'
             ])
             ->orderByDesc('t_0.created_at')
             ->where('t_0.status', 0)

@@ -266,6 +266,9 @@ class ExoProcessDoc
 
                                 continue;
                             }
+                            if(trim($key->nodeValue) == '?') {
+                                $element['type'] = SoalConstant::TIPE_SETUJU_TIDAK;
+                            }
                             array_push($element['options'], $this->_dom_inner_html($value));
                         }
                         if($element['type'] == 0) {

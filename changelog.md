@@ -9,6 +9,8 @@
 - add feature import soal menjodohkan by docx format 2 and format 2 html
 - add feature import soal mengurutkan by docx format 2 and format 2 html
 - add feature import soal benar-salah by docx format 2 and format 2 html
+- add feature import soal setuju-tidak by docx format 2 and format 2 html
+- add feature auto-block when student not in full-screen
 
 ### 3.16.5-RELEASE
 - endpoint to get peserta in block status

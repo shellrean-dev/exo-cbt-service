@@ -167,6 +167,10 @@ class ExoProcessHtml
                                     $element['type'] = SoalConstant::TIPE_BENAR_SALAH;
                                     continue;
                                 }
+
+                                if(trim(strip_tags($key->nodeValue)) == '?') {
+                                    $element['type'] = SoalConstant::TIPE_SETUJU_TIDAK;
+                                }
                                 array_push($element['options'], $this->_dom_inner_html($value));
                             }
                         }

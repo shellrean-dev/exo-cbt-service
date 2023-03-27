@@ -14,7 +14,8 @@ const endpoint = Object.freeze({
     peserta: 'ujians/peserta',
     uncomplete: 'ujians/uncomplete',
     hasils: 'ujian/hasils',
-    leaveCounter: 'ujians/leave-counter'
+    leaveCounter: 'ujians/leave-counter',
+    blockmePlease: 'ujians/block-me-please',
 })
 
 /**
@@ -67,7 +68,8 @@ const actions = {
     getHasilUjian,
     submitJawabanMenjodohkan,
     submitJawabanMengurutkan,
-    leaveCounterUjian
+    leaveCounterUjian,
+    blockMePlease
 }
 
 /**
@@ -414,6 +416,21 @@ function getHasilUjian({ commit }) {
     return new Promise(async(resolve, reject) => {
         try {
             let network = await $axios.post(endpoint.leaveCounter, payload)
+            resolve(network.data)
+        } catch (error) {
+            reject(getError(error))
+        }
+    })
+}
+
+/**
+ * Block me please
+ * @param {*} commit
+ */
+ function blockMePlease({ commit }, payload) {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let network = await $axios.post(endpoint.blockmePlease, payload)
             resolve(network.data)
         } catch (error) {
             reject(getError(error))
