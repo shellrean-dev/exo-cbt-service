@@ -1,4 +1,15 @@
 ### EXO CBT CHANGE LOG
+### 3.17.0-RELEASE
+- fix issue order when import soal docx 2, docx 1 and html
+- fix issue esay correct not show
+- add banksoal detail tipe inputted
+- fix issue soal random order when not set as random
+- fix created_at not inserted when input soal
+- fix issue preview soal menjodohkan in admin
+- add feature import soal menjodohkan by docx format 2 and format 2 html
+- add feature import soal mengurutkan by docx format 2 and format 2 html
+- add feature import soal benar-salah by docx format 2 and format 2 html
+
 ### 3.16.5-RELEASE
 - endpoint to get peserta in block status
 - endpoint unblock single or multiple
@@ -12,6 +23,7 @@
 
 ### 3.16.2-RELEASE
 - Fix issue with leave-counter
+
 ### 3.16.1-RELEASE
 - Fix issue with leave-counter
 - Anti-block feature
