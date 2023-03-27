@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\SoalConstant;
 use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
@@ -212,10 +213,12 @@ class ExoProcessDoc
                 foreach($body->childNodes as $table) {
                     if ($table->nodeName == "table") {
                         $element = [
-                            'pertanyaan' => '',
-                            'correct'    => [],
-                            'options'    => [],
-                            'type'       => 0,
+                            'pertanyaan'            => '',
+                            'correct'               => [],
+                            'options'               => [],
+                            'options_menjodohkan'   => [],
+                            'options_mengurutkan'   => [],
+                            'type'                  => 0,
                         ];
                         foreach($table->childNodes as $iterate => $tr) {
                             $td = $tr->childNodes;
@@ -227,6 +230,7 @@ class ExoProcessDoc
                                 continue;
                             }
 
+                            # CEK KUNCI JAWABAN
                             if ($key->nodeValue == ":::") {
                                 $correct_op = array_filter(explode(',',$value->nodeValue));
                                 $correct_option_position = array();
@@ -237,17 +241,39 @@ class ExoProcessDoc
                                 $element['correct'] = $correct_option_position;
                                 continue;
                             }
+                            # TIPE SOAL MENJODOHKAN
+                            if(is_numeric(trim($key->nodeValue))) {
+                                $element['options_menjodohkan'][trim($key->nodeValue)][] = $this->_dom_inner_html($value);
+                                continue;
+                            }
+                            # TIPE SOAL MENGURUTKAN
+                            if(trim($key->nodeValue) == '|') {
+                                $element['options_mengurutkan'][] = $this->_dom_inner_html($value);
+                                continue;
+                            }
                             array_push($element['options'], $this->_dom_inner_html($value));
                         }
                         if (count($element['correct']) > 1) {
-                            $element['type'] = 4;
+                            $element['type'] = SoalConstant::TIPE_PG_KOMPLEK;
+
                         } else if (count($element['correct']) == 1) {
-                            $element['type'] = 1;
+                            $element['type'] = SoalConstant::TIPE_PG;
+
                         } else if (count($element['correct']) == 0) {
                             if (count($element['options']) > 0) {
-                                $element['type'] = 6;
+                                $element['type'] = SoalConstant::TIPE_ISIAN_SINGKAT;
+
                             } else {
-                                $element['type'] = 2;
+                                if(count($element['options_menjodohkan']) > 0) {
+                                    $element['type'] = SoalConstant::TIPE_MENJODOHKAN;
+                                    
+                                } else if(count($element['options_mengurutkan']) > 0) {
+                                    $element['type'] = SoalConstant::TIPE_MENGURUTKAN;
+
+                                } else {
+                                    $element['type'] = SoalConstant::TIPE_ESAY;
+
+                                }
                             }
                         }
                         array_push($data, $element);

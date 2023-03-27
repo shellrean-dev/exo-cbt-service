@@ -36,6 +36,8 @@ class MengurutkanService implements TipeSoalInterface
             ]);
             if($setting['acak_soal'] == "1") {
                 $mengurutkan = $mengurutkan->inRandomOrder();
+            } else {
+                $mengurutkan = $mengurutkan->orderBy('created_at');
             }
             $mengurutkan = $mengurutkan->take($max_mengurutkan)->get();
 

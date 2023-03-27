@@ -39,6 +39,8 @@ class EsayService implements TipeSoalInterface
             # Acak soal bila di set
             if($setting['acak_soal'] == "1") {
                 $esay = $esay->inRandomOrder();
+            } else {
+                $esay = $esay->orderBy('created_at');
             }
 
             # Ambil soal sebanyak maximum

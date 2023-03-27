@@ -37,6 +37,8 @@ class PilihanGandaService implements TipeSoalInterface
             ]);
             if ($setting['acak_soal'] == "1") {
                 $pg = $pg->inRandomOrder();
+            } else {
+                $pg = $pg->orderBy('created_at');
             }
             # Ambil soal sebanyak maximum
             $pg = $pg->take($max_soal)->get();

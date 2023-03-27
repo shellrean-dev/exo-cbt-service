@@ -37,7 +37,10 @@ class BenarSalahService implements TipeSoalInterface
             ]);
             if($setting['acak_soal'] == "1") {
                 $benar_salah = $benar_salah->inRandomOrder();
+            } else {
+                $benar_salah = $benar_salah->orderBy('created_at');
             }
+            
             $benar_salah = $benar_salah->take($max_benar_salah)->get();
 
             $soal_benar_salah= [];

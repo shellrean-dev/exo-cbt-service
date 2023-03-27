@@ -37,6 +37,8 @@ class MenjodohkanService implements TipeSoalInterface
             ]);
             if($setting['acak_soal'] == "1") {
                 $menjodohkan = $menjodohkan->inRandomOrder();
+            } else {
+                $menjodohkan = $menjodohkan->orderBy('created_at');
             }
             $menjodohkan = $menjodohkan->take($max_menjodohkan)->get();
 

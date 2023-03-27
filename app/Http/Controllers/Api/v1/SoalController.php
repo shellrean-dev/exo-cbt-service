@@ -86,7 +86,7 @@ class SoalController extends Controller
 
             $soal = Soal::create($data);
 
-            if(in_array($request->tipe_soal, [
+            if(in_array(intval($request->tipe_soal), [
                 SoalConstant::TIPE_PG,
                 SoalConstant::TIPE_LISTENING,
                 SoalConstant::TIPE_PG_KOMPLEK,
@@ -97,6 +97,7 @@ class SoalController extends Controller
                 SoalConstant::TIPE_SETUJU_TIDAK
             ])) {
                 $data = [];
+                $time_offset = 0;
                 foreach($request->pilihan as $key => $pilihan) {
                     if(in_array($request->tipe_soal, [SoalConstant::TIPE_PG,SoalConstant::TIPE_LISTENING])) {
                         $correct = $request->correct == $key ? '1' : '0';
@@ -127,7 +128,10 @@ class SoalController extends Controller
                         'soal_id'       => $soal->id,
                         'text_jawaban'  => $pilihan,
                         'correct'       => $correct,
+                        'created_at'    => now()->addSeconds($time_offset)
                     ]);
+
+                    $time_offset++;
                 }
                 DB::table('jawaban_soals')->insert($data);
             }
@@ -376,7 +380,7 @@ class SoalController extends Controller
 
             $soal->save();
 
-            if(in_array($request->tipe_soal, [
+            if(in_array(intval($request->tipe_soal), [
                 SoalConstant::TIPE_PG,
                 SoalConstant::TIPE_LISTENING,
                 SoalConstant::TIPE_PG_KOMPLEK,
@@ -388,6 +392,7 @@ class SoalController extends Controller
             ])) {
                 DB::table('jawaban_soals')->where('soal_id',$request->soal_id)->delete();
                 $data = [];
+                $time_offset = 0;
                 foreach($request->pilihan as $key=>$pilihan) {
                     if(in_array($request->tipe_soal, [SoalConstant::TIPE_PG,SoalConstant::TIPE_LISTENING])) {
                         $correct = $request->correct == $key ? '1' : '0';
@@ -418,7 +423,10 @@ class SoalController extends Controller
                         'soal_id'       => $soal->id,
                         'text_jawaban'  => $pilihan,
                         'correct'       => $correct,
+                        'created_at'    => now()->addSeconds($time_offset)
                     ]);
+
+                    $time_offset++;
                 }
                 DB::table('jawaban_soals')->insert($data);
             }
@@ -538,6 +546,24 @@ class SoalController extends Controller
             return SendResponse::badRequest('Banksoal sedang dikunci');
         }
         $soal = Soal::with('jawabans')->where('banksoal_id',$banksoal->id)->orderBy('created_at')->get();
+
+        $soal = $soal->map(function($item) {
+            if($item->tipe_soal == SoalConstant::TIPE_MENJODOHKAN) {
+                
+                $jawabans = [];
+                foreach($item->jawabans as $key => $jwb) {
+                    $jawabans[$key] = $jwb;
+                    $decoded2 = json_decode($jwb->text_jawaban, true);
+                    
+                    $tableled = '<table style="border: 1px solid black !important;">
+                        <tr><td style="border: 1px solid black !important;">'.$decoded2['a']['text'].'</td>
+                        <td style="border: 1px solid black !important">'.$decoded2['b']['text'].'</td></tr></table>';
+                    $jawabans[$key]->text_jawaban = $tableled;
+                }
+            }
+            return $item;
+        })->values();
+        
         return SendResponse::acceptData($soal);
     }
 
@@ -651,6 +677,7 @@ class SoalController extends Controller
             $files = $data['files'];
 
             $options = [];
+            $time_offset = 0;
             foreach($questions as $key => $question) {
                 $soal_id = Str::uuid()->toString();
 
@@ -659,12 +686,13 @@ class SoalController extends Controller
                     'banksoal_id'   => $banksoal->id,
 					'tipe_soal'     => $question['type'],
 					'pertanyaan'    => $question['pertanyaan'],
-					'created_at'	=> now(),
+					'created_at'	=> now()->addSeconds($time_offset),
 					'updated_at'	=> now(),
                 ];
 
                 DB::table('soals')->insert($soal);
 
+                $time_offset_var2 = 0;
                 foreach($question['options'] as $key => $opt) {
                     $isCorrect = in_array($key, $question['correct']) ? 1 : 0;
                     array_push($options, [
@@ -672,10 +700,52 @@ class SoalController extends Controller
                         'soal_id'       => $soal_id,
                         'text_jawaban'  => $opt,
                         'correct'       => $isCorrect,
-                        'created_at'    => now(),
+                        'created_at'    => now()->addSeconds($time_offset_var2),
                         'updated_at'    => now(),
                     ]);
+                    $time_offset_var2++;
                 }
+                if ($soal['tipe_soal'] == SoalConstant::TIPE_MENJODOHKAN) {
+                    foreach($question['options_menjodohkan'] as $option) {
+                        $pair = [];
+                        if(isset($option[0]) && isset($option[1])) {
+                            $pair["a"] = [
+                                "id"        => "a".uniqid(),
+                                "text"      => $option[0]
+                            ];
+                            $pair["b"] = [
+                                "id"        => "b".uniqid(),
+                                "text"      => $option[1]
+                            ];
+
+                            array_push($options, [
+                                'id'            => Str::uuid()->toString(),
+                                'soal_id'       => $soal_id,
+                                'text_jawaban'  => json_encode($pair),
+                                'correct'       => 0,
+                                'created_at'    => now()->addSeconds($time_offset_var2),
+                                'updated_at'    => now(),
+                            ]);
+
+                            $time_offset_var2++;
+                        }
+                    }
+                }
+                if ($soal['tipe_soal'] == SoalConstant::TIPE_MENGURUTKAN) {
+                    foreach($question['options_mengurutkan'] as $option) {
+                        array_push($options, [
+                            'id'            => Str::uuid()->toString(),
+                            'soal_id'       => $soal_id,
+                            'text_jawaban'  => $option,
+                            'correct'       => 0,
+                            'created_at'    => now()->addSeconds($time_offset_var2),
+                            'updated_at'    => now(),
+                        ]);
+                        $time_offset_var2++;
+                    }
+                }
+                
+                $time_offset++;
             }
             if (count($options) > 0) {
                 DB::table('jawaban_soals')->insert($options);
@@ -758,6 +828,7 @@ class SoalController extends Controller
             $files = $data['files'];
 
             $options = [];
+            $time_offset = 0;
             foreach($questions as $question) {
                 $soal_id = Str::uuid()->toString();
 
@@ -766,12 +837,13 @@ class SoalController extends Controller
                     'banksoal_id'   => $banksoal->id,
                     'tipe_soal'     => $question['type'],
                     'pertanyaan'    => $question['pertanyaan'],
-                    'created_at'	=> now(),
+                    'created_at'	=> now()->addSeconds($time_offset),
                     'updated_at'	=> now(),
                 ];
 
                 DB::table('soals')->insert($soal);
 
+                $time_offset_var2 = 0;
                 foreach($question['options'] as $key => $opt) {
                     $isCorrect = in_array($key, $question['correct']) ? 1 : 0;
                     array_push($options, [
@@ -779,10 +851,53 @@ class SoalController extends Controller
                         'soal_id'       => $soal_id,
                         'text_jawaban'  => $opt,
                         'correct'       => $isCorrect,
-                        'created_at'    => now(),
+                        'created_at'    => now()->addSeconds($time_offset_var2),
                         'updated_at'    => now(),
                     ]);
+                    $time_offset_var2++;
                 }
+
+                if ($soal['tipe_soal'] == SoalConstant::TIPE_MENJODOHKAN) {
+                    foreach($question['options_menjodohkan'] as $option) {
+                        $pair = [];
+                        if(isset($option[0]) && isset($option[1])) {
+                            $pair["a"] = [
+                                "id"        => "a".uniqid(),
+                                "text"      => $option[0]
+                            ];
+                            $pair["b"] = [
+                                "id"        => "b".uniqid(),
+                                "text"      => $option[1]
+                            ];
+
+                            array_push($options, [
+                                'id'            => Str::uuid()->toString(),
+                                'soal_id'       => $soal_id,
+                                'text_jawaban'  => json_encode($pair),
+                                'correct'       => 0,
+                                'created_at'    => now()->addSeconds($time_offset_var2),
+                                'updated_at'    => now(),
+                            ]);
+
+                            $time_offset_var2++;
+                        }
+                    }
+                }
+                if ($soal['tipe_soal'] == SoalConstant::TIPE_MENGURUTKAN) {
+                    foreach($question['options_mengurutkan'] as $option) {
+                        array_push($options, [
+                            'id'            => Str::uuid()->toString(),
+                            'soal_id'       => $soal_id,
+                            'text_jawaban'  => $option,
+                            'correct'       => 0,
+                            'created_at'    => now()->addSeconds($time_offset_var2),
+                            'updated_at'    => now(),
+                        ]);
+                        $time_offset_var2++;
+                    }
+                }
+
+                $time_offset++;
             }
             if (count($options) > 0) {
                 DB::table('jawaban_soals')->insert($options);

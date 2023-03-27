@@ -247,17 +247,21 @@ final class UjianService extends AbstractService
             ->whereIn('soal_id', $soals->pluck('id')->toArray());
         if ($acak_opsi == '1') {
             $soal_jawabans = $soal_jawabans->inRandomOrder();
+        } else {
+            $soal_jawabans = $soal_jawabans->orderBy('created_at');
         }
 
         $soal_jawabans = $soal_jawabans->get();
+        $soal_jawabans_indexeds = $soal_jawabans->groupBy('soal_id');
 
-        $soals = $soals->map(function ($item) use ($soal_jawabans) {
-            $item->jawabans = $soal_jawabans->where('soal_id', $item->id)->values();
+        $soals = $soals->map(function ($item) use ($soal_jawabans_indexeds) {
+            $item->jawabans = $soal_jawabans_indexeds->get($item->id)->values();
             return $item;
         });
 
-        $find = $find->map(function ($item) use ($soals) {
-            $item->soal = $soals->where('id', $item->soal_id)->first();
+        $soals_indexeds = $soals->keyBy('id');
+        $find = $find->map(function ($item) use ($soals_indexeds) {
+            $item->soal = $soals_indexeds->get($item->soal_id);
             return $item;
         });
 
@@ -357,6 +361,8 @@ final class UjianService extends AbstractService
                 }
             }
 
+
+            # FINALIZE DATA YEEE, YOU ARE EXTRAORDINARY SHELLREAN GREAT JOBS
             if ($item->soal->tipe_soal == SoalConstant::TIPE_MENJODOHKAN) {
                 $jawabans = $item->soal->jawabans->map(function($jw, $index) use ($jwra, $jwrb) {
                     return [
@@ -365,30 +371,36 @@ final class UjianService extends AbstractService
                     ];
                 });
             } else {
-                $jawabans = $item->soal->jawabans;
+                # Pada soal listening kita tidak boleh untuk mengacak opsi
+                # jadi kita urutkan lagi
+                if($item->soal->tipe_soal == SoalConstant::TIPE_LISTENING) {
+                    $jawabans = $item->soal->jawabans->sortBy('created_at')->values();
+                } else {
+                    $jawabans = $item->soal->jawabans;
+                }
             }
 
             $result[] = [
-                'id'    => $item->id,
-                'banksoal_id' => $item->banksoal_id,
-                'soal_id' => $item->soal_id,
-                'jawab' => $item->jawab,
-                'esay' => $item->esay,
+                'id'            => $item->id,
+                'banksoal_id'   => $item->banksoal_id,
+                'soal_id'       => $item->soal_id,
+                'jawab'         => $item->jawab,
+                'esay'          => $item->esay,
                 'jawab_complex' => json_decode($item->jawab_complex),
-                'benar_salah' => $item->benar_salah,
-                'setuju_tidak' => $item->setuju_tidak,
-                'answered'  => $item->answered,
+                'benar_salah'   => $item->benar_salah,
+                'setuju_tidak'  => $item->setuju_tidak,
+                'answered'      => $item->answered,
                 'soal' => [
-                    'audio' => $item->soal->audio,
-                    'banksoal_id' => $item->soal->banksoal_id,
-                    'direction' => $item->soal->direction,
-                    'id' => $item->soal->id,
-                    'jawabans' => $jawabans,
-                    'pertanyaan' => $item->soal->pertanyaan,
-                    'tipe_soal' => $item->soal->tipe_soal,
-                    'layout'    => $item->soal->layout,
+                    'audio'         => $item->soal->audio,
+                    'banksoal_id'   => $item->soal->banksoal_id,
+                    'direction'     => $item->soal->direction,
+                    'id'            => $item->soal->id,
+                    'jawabans'      => $jawabans,
+                    'pertanyaan'    => $item->soal->pertanyaan,
+                    'tipe_soal'     => intval($item->soal->tipe_soal),
+                    'layout'        => intval($item->soal->layout),
                 ],
-                'ragu_ragu' => $item->ragu_ragu,
+                'ragu_ragu'     => $item->ragu_ragu,
             ];
         }
 

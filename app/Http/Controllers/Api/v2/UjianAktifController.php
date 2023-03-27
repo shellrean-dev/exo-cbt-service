@@ -405,11 +405,12 @@ class UjianAktifController extends Controller
             }
 
             $new_soals = [];
-            $unique_num = 1;
-            foreach ($soals as $soal) {
-                $soal['created_at'] = now()->addSeconds($unique_num);
-                $new_soals[] = $soal;
-                $unique_num ++;
+            $time_offset = 1;
+            foreach ($soals as $key => $soal) {
+                $new_soals[$key] = $soal;
+                $new_soals[$key]['created_at'] = now()->addSeconds($time_offset);
+                
+                $time_offset++;
             }
 
             # Insert ke database sebagai jawaban siswa

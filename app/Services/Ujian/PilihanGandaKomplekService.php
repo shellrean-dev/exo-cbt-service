@@ -39,6 +39,8 @@ class PilihanGandaKomplekService implements TipeSoalInterface
             # Acak soal bila di set
             if($setting['acak_soal'] == "1") {
                 $complex = $complex->inRandomOrder();
+            } else {
+                $complex = $complex->orderBy('created_at');
             }
 
             # Ambil soal sebanyak maximum

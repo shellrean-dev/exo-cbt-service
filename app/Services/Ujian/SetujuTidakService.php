@@ -36,7 +36,10 @@ class SetujuTidakService implements TipeSoalInterface
             ]);
             if($setting['acak_soal'] == "1") {
                 $setuju_tidak = $setuju_tidak->inRandomOrder();
+            } else {
+                $setuju_tidak = $setuju_tidak->orderBy('created_at');
             }
+
             $setuju_tidak = $setuju_tidak->take($max_setuju_tidak)->get();
 
             $soal_setuju_tidak= [];
