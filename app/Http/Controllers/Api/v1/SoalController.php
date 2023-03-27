@@ -690,11 +690,23 @@ class SoalController extends Controller
 					'updated_at'	=> now(),
                 ];
 
+                if (in_array(intval($soal['tipe_soal']), [SoalConstant::TIPE_BENAR_SALAH, SoalConstant::TIPE_SETUJU_TIDAK])) {
+                    $soal['layout'] = SoalConstant::LAYOUT_KEBAWAH_TABEL;
+
+                } else if (in_array(intval($soal['tipe_soal']), [SoalConstant::TIPE_MENJODOHKAN, SoalConstant::TIPE_MENGURUTKAN])) {
+                    $soal['layout'] = SoalConstant::LAYOUT_KEBAWAH_STANDARD;
+
+                }
+
                 DB::table('soals')->insert($soal);
 
                 $time_offset_var2 = 0;
                 foreach($question['options'] as $key => $opt) {
-                    $isCorrect = in_array($key, $question['correct']) ? 1 : 0;
+                    if($soal['tipe_soal'] == SoalConstant::TIPE_BENAR_SALAH) {
+                        $isCorrect = $question['correct_benar_salah'][$key];   
+                    } else {
+                        $isCorrect = in_array($key, $question['correct']) ? 1 : 0;
+                    }
                     array_push($options, [
                         'id'            => Str::uuid()->toString(),
                         'soal_id'       => $soal_id,
@@ -840,12 +852,24 @@ class SoalController extends Controller
                     'created_at'	=> now()->addSeconds($time_offset),
                     'updated_at'	=> now(),
                 ];
+                
+                if (in_array(intval($soal['tipe_soal']), [SoalConstant::TIPE_BENAR_SALAH, SoalConstant::TIPE_SETUJU_TIDAK])) {
+                    $soal['layout'] = SoalConstant::LAYOUT_KEBAWAH_TABEL;
+
+                } else if (in_array(intval($soal['tipe_soal']), [SoalConstant::TIPE_MENJODOHKAN, SoalConstant::TIPE_MENGURUTKAN])) {
+                    $soal['layout'] = SoalConstant::LAYOUT_KEBAWAH_STANDARD;
+
+                }
 
                 DB::table('soals')->insert($soal);
 
                 $time_offset_var2 = 0;
                 foreach($question['options'] as $key => $opt) {
-                    $isCorrect = in_array($key, $question['correct']) ? 1 : 0;
+                    if($soal['tipe_soal'] == SoalConstant::TIPE_BENAR_SALAH) {
+                        $isCorrect = $question['correct_benar_salah'][$key];   
+                    } else {
+                        $isCorrect = in_array($key, $question['correct']) ? 1 : 0;
+                    }
                     array_push($options, [
                         'id'            => Str::uuid()->toString(),
                         'soal_id'       => $soal_id,

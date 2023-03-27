@@ -215,6 +215,7 @@ class ExoProcessDoc
                         $element = [
                             'pertanyaan'            => '',
                             'correct'               => [],
+                            'correct_benar_salah'   => [],
                             'options'               => [],
                             'options_menjodohkan'   => [],
                             'options_mengurutkan'   => [],
@@ -225,6 +226,7 @@ class ExoProcessDoc
                             $key = $td->item(0);
                             $value = $td->item(1);
 
+                            # FIRST ROW ADALAH PERTANYAAN
                             if ($iterate == 0) {
                                 $element['pertanyaan'] = $this->_dom_inner_html($value);
                                 continue;
@@ -251,28 +253,43 @@ class ExoProcessDoc
                                 $element['options_mengurutkan'][] = $this->_dom_inner_html($value);
                                 continue;
                             }
+                            # TIPE SOAL BENAR SALAH
+                            if(trim($key->nodeValue) == 'BENAR' || trim($key->nodeValue) == 'SALAH') {
+                                array_push($element['options'], $this->_dom_inner_html($value));
+
+                                if(trim($key->nodeValue) == 'BENAR') {
+                                    $element['correct_benar_salah'][count($element['options'])-1] = 1;
+                                } else {
+                                    $element['correct_benar_salah'][count($element['options'])-1] = 0;
+                                }
+                                $element['type'] = SoalConstant::TIPE_BENAR_SALAH;
+
+                                continue;
+                            }
                             array_push($element['options'], $this->_dom_inner_html($value));
                         }
-                        if (count($element['correct']) > 1) {
-                            $element['type'] = SoalConstant::TIPE_PG_KOMPLEK;
+                        if($element['type'] == 0) {
+                            if (count($element['correct']) > 1) {
+                                $element['type'] = SoalConstant::TIPE_PG_KOMPLEK;
 
-                        } else if (count($element['correct']) == 1) {
-                            $element['type'] = SoalConstant::TIPE_PG;
+                            } else if (count($element['correct']) == 1) {
+                                $element['type'] = SoalConstant::TIPE_PG;
 
-                        } else if (count($element['correct']) == 0) {
-                            if (count($element['options']) > 0) {
-                                $element['type'] = SoalConstant::TIPE_ISIAN_SINGKAT;
-
-                            } else {
-                                if(count($element['options_menjodohkan']) > 0) {
-                                    $element['type'] = SoalConstant::TIPE_MENJODOHKAN;
-                                    
-                                } else if(count($element['options_mengurutkan']) > 0) {
-                                    $element['type'] = SoalConstant::TIPE_MENGURUTKAN;
+                            } else if (count($element['correct']) == 0) {
+                                if (count($element['options']) > 0) {
+                                    $element['type'] = SoalConstant::TIPE_ISIAN_SINGKAT;
 
                                 } else {
-                                    $element['type'] = SoalConstant::TIPE_ESAY;
+                                    if(count($element['options_menjodohkan']) > 0) {
+                                        $element['type'] = SoalConstant::TIPE_MENJODOHKAN;
+                                        
+                                    } else if(count($element['options_mengurutkan']) > 0) {
+                                        $element['type'] = SoalConstant::TIPE_MENGURUTKAN;
 
+                                    } else {
+                                        $element['type'] = SoalConstant::TIPE_ESAY;
+
+                                    }
                                 }
                             }
                         }
