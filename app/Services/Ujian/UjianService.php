@@ -16,6 +16,8 @@ use App\JawabanPeserta;
 
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 use ShellreanDev\Cache\CacheHandler;
@@ -255,7 +257,7 @@ final class UjianService extends AbstractService
         $soal_jawabans_indexeds = $soal_jawabans->groupBy('soal_id');
 
         $soals = $soals->map(function ($item) use ($soal_jawabans_indexeds) {
-            $item->jawabans = $soal_jawabans_indexeds->get($item->id)->values();
+            $item->jawabans = $soal_jawabans_indexeds->get($item->id, new Collection())->values();
             return $item;
         });
 
@@ -420,7 +422,21 @@ final class UjianService extends AbstractService
     public function finishing(string $banksoal_id, string $jadwal_id, string $peserta_id, string $ujian_id)
     {
         # Ambil banksoal
-        $banksoal = Banksoal::find($banksoal_id);
+        if (config('exo.enable_cache')) {
+            $cacheKeyConsolidate = "banksoal_1838471746_".$banksoal_id;
+            if(Cache::has($cacheKeyConsolidate)) {
+                $banksoal = Cache::get($cacheKeyConsolidate);
+            } else {
+                $banksoal = Banksoal::find($banksoal_id);
+                if($banksoal) {
+                    Cache::put($cacheKeyConsolidate, $banksoal, 60);
+                    
+                }
+            }
+
+        } else {
+            $banksoal = Banksoal::find($banksoal_id);
+        }
 
         if (!$banksoal) {
             throw new Exception('banksoal tidak ditemukan');

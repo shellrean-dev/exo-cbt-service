@@ -5,6 +5,8 @@ namespace App\Services\Ujian;
 use App\Actions\SendResponse;
 use App\Models\SoalConstant;
 use Exception;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -69,8 +71,23 @@ class MengurutkanService implements TipeSoalInterface
     {
         $jwb_soals = DB::table('jawaban_soals')
             ->where('soal_id', $jawaban_peserta->soal_id)
-            ->orderBy('created_at')
-            ->get();
+            ->orderBy('created_at');
+
+        if(config('exo.enable_cache')) {
+            $cacheKeyConsolidate = "jawaban_soals_RMA2R25GAY_".$jawaban_peserta->soal_id;
+            if(Cache::has($cacheKeyConsolidate)) {
+                $jwb_soals = Cache::get($cacheKeyConsolidate, new Collection());
+
+            } else {
+                $jwb_soals = $jwb_soals->get();
+                if($jwb_soals) {
+                    Cache::put($cacheKeyConsolidate, $jwb_soals, 60);
+                }
+            }
+        } else {
+            $jwb_soals = $jwb_soals->get();
+        }
+
         $mengurutkan_correct = $jwb_soals->map(function($item) {
             return $item->id;
         });

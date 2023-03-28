@@ -6,6 +6,7 @@ use App\Actions\SendResponse;
 use App\Models\SoalConstant;
 use App\Soal;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -75,7 +76,24 @@ class PilihanGandaKomplekService implements TipeSoalInterface
     {
         $soal_complex = Soal::with(['jawabans' => function($query) {
             $query->where('correct', 1);
-        }])->where("id", $jawaban_peserta->soal_id)->first();
+        }])->where("id", $jawaban_peserta->soal_id);
+
+        if(config('exo.enable_cache')) {
+            $cacheKeyConsolidate = "soals_TB5I8Z25NZ_".$jawaban_peserta->soal_id;
+            if(Cache::has($cacheKeyConsolidate)) {
+                $soal_complex = Cache::get($cacheKeyConsolidate);
+
+            } else {
+                $soal_complex = $soal_complex->first();
+                if($soal_complex) {
+                    Cache::put($cacheKeyConsolidate, $soal_complex, 60);
+                    
+                }
+            }
+        } else {
+            $soal_complex = $soal_complex->first();
+        }
+
         if ($soal_complex) {
             $array = $soal_complex->jawabans->map(function($item){
                 return $item->id;

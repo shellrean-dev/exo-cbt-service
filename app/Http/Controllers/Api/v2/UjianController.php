@@ -44,8 +44,8 @@ class UjianController extends Controller
     public function store(Request $request, UjianService $ujianService, JawabanPesertaService  $jawabanPesertaService)
     {
         $request->validate([
-            'jawaban_id' => 'required',
-            'index'     => 'required'
+            'jawaban_id'    => 'required',
+            'index'         => 'required'
         ]);
 
         $peserta = request()->get('peserta-auth');
