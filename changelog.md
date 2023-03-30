@@ -1,7 +1,7 @@
 ### EXO CBT CHANGE LOG
 ### 3.17.0-RELEASE
 - fix issue order when import soal docx 2, docx 1 and html
-- fix issue esay correct not show
+- fix issue esay correction not show
 - add banksoal detail tipe inputted
 - fix issue soal random order when not set as random
 - fix created_at not inserted when input soal
@@ -12,6 +12,8 @@
 - add feature import soal setuju-tidak by docx format 2 and format 2 html
 - add feature auto-block when student not in full-screen
 - improve performance cache in answer student
+- add feature edit header text for instantion
+- add kop instantion in berita-acara-event
 
 ### 3.16.5-RELEASE
 - endpoint to get peserta in block status

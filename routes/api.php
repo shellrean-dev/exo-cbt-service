@@ -139,6 +139,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::apiResource('events', 'EventController');
         Route::get('berita-acara/{id}/link', 'ReportingController@berita_acara_link');
         Route::get('absensi-ujian/{id}/link', 'ReportingController@absensi_ujian_link');
+        Route::get('events/ujian/{jawal_id}/peserta-in-sesi', 'EventController@peserta_in_sesi');
 
         Route::get('sesi', 'SesiScheduleController@studentBySesi');
         Route::post('sesi', 'SesiScheduleController@pushToSesi');

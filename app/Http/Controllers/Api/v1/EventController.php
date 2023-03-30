@@ -275,4 +275,59 @@ class EventController extends Controller
 
         return SendResponse::acceptData($peserta);
     }
+    
+    /**
+     * @Route(path="api/v1/events/ujian/{jawal_id}/peserta-in-sesi", methods={"GET"})
+     *
+     * Get jadwal peserta not work
+     *
+     * @param string $jadwal_id
+     * @author shellrean <wandinak17@gmail.com>
+     */
+    public function peserta_in_sesi($jadwal_id)
+    {
+        $sesi = request()->q;
+        if (!in_array(intval($sesi), [1,2,3,4])) {
+            return SendResponse::badRequest('sesi invalid');
+        }
+
+        $jadwal = DB::table('jadwals')
+            ->where('id', $jadwal_id)
+            ->select('id','alias','event_id')
+            ->first();
+        if (!$jadwal) {
+            return SendResponse::badRequest('jadwal tidak ditemukan');
+        }
+
+        $check = DB::table('sesi_schedules')
+            ->where('jadwal_id', $jadwal_id)
+            ->where('sesi', $sesi)
+            ->count();
+        if ($check < 1) {
+            return SendResponse::badRequest('tidak ada peserta pada sesi tersebut');
+        }
+
+        $event = DB::table('event_ujians')
+            ->where('id', $jadwal->event_id)
+            ->first();
+        if (!$event) {
+            return SendResponse::badRequest('event ujian tidak ditemukan');
+        }
+
+        $sesi = DB::table('sesi_schedules')
+            ->where('jadwal_id', $jadwal_id)
+            ->where('sesi', $sesi)
+            ->select('id','peserta_ids')
+            ->first();
+        if (!$sesi) {
+            return SendResponse::badRequest('sesi tidak ditemukan');
+        }
+
+        $students = DB::table('pesertas')
+            ->whereIn('id', json_decode($sesi->peserta_ids, true))
+            ->select('id','no_ujian','nama')
+            ->get();
+
+        return SendResponse::acceptData($students);
+    }
 }
