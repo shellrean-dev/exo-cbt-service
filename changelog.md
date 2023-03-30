@@ -14,6 +14,7 @@
 - improve performance cache in answer student
 - add feature edit header text for instantion
 - add kop instantion in berita-acara-event
+- add kop instantion in banksoal-preview
 
 ### 3.16.5-RELEASE
 - endpoint to get peserta in block status
