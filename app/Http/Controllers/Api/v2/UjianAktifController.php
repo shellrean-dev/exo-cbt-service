@@ -405,11 +405,12 @@ class UjianAktifController extends Controller
             }
 
             $new_soals = [];
-            $unique_num = 1;
-            foreach ($soals as $soal) {
-                $soal['created_at'] = now()->addSeconds($unique_num);
-                $new_soals[] = $soal;
-                $unique_num ++;
+            $time_offset = 1;
+            foreach ($soals as $key => $soal) {
+                $new_soals[$key] = $soal;
+                $new_soals[$key]['created_at'] = now()->addSeconds($time_offset);
+                
+                $time_offset++;
             }
 
             # Insert ke database sebagai jawaban siswa
@@ -590,5 +591,27 @@ class UjianAktifController extends Controller
             'status' => 1,
             'block_reason' => ''
         ]);
+    }
+
+    /**
+     * @Route(path="api/v2/ujians/block-me-please", methods={"POST"})
+     * 
+     * Please block me
+     * 
+     * @param Request $request
+     * @return Response
+     * @author shellrean <wandinak17@gmail.com>
+     */
+    public function blockMePlease(Request $request)
+    {
+        $ujian = DB::table('siswa_ujians')->where('id', $request->id)->first();
+        $peserta = request()->get('peserta-auth');
+        if($ujian && !$peserta->antiblock) {
+            DB::table('pesertas')->where('id', $ujian->peserta_id)->update([
+                'status'        => 0,
+                'api_token'     => null,
+                'block_reason' => $request->reason
+            ]);
+        }
     }
 }

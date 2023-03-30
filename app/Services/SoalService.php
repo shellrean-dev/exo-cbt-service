@@ -8,6 +8,7 @@ class SoalService
 {
 	public function importQues($question, $banksoal_id) 
 	{
+		$time_offsett = 0;
 		foreach($question as $key => $singlequestion){
 			if($key != 0){
 				$question = $singlequestion['question'];
@@ -66,7 +67,7 @@ class SoalService
 					'banksoal_id' => $banksoal_id,
 					'tipe_soal'   => $ques_type2,
 					'pertanyaan' => "<p>".$question."</p>",
-					'created_at'	=> now(),
+					'created_at'	=> now()->addSeconds($time_offsett),
 					'updated_at'	=> now(),
 				);
 
@@ -83,6 +84,7 @@ class SoalService
 						}
 
 						$jawabans = [];
+						$time_offsett_var2 = 0;
 						foreach($singlequestion['option'] as $corect_key => $correct_val){
 							if(in_array($corect_key, $correct_option_position)){
 								$divideratio=count($correct_option_position);
@@ -96,9 +98,11 @@ class SoalService
 								'soal_id' => $soal_id,
 								'text_jawaban' => "<p>".$correct_val."</p>",
 								'correct' => $correctoption,
-								'created_at' => now(),
+								'created_at' => now()->addSeconds($time_offsett_var2),
 								'updated_at' => now(),
 							]);
+
+							$time_offsett_var2++;
 						}
 						if(count($jawabans) > 0) {
 							DB::table('jawaban_soals')->insert($jawabans);
@@ -111,6 +115,8 @@ class SoalService
 					return ['success' => false, 'message' => $e->getMessage()];
 				}
 			}
+
+			$time_offsett++;
 		}
 		return ['success' => true];
 	}

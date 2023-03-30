@@ -31,7 +31,7 @@ class ListeningService implements TipeSoalInterface
             $listening = DB::table('soals')->where([
                 'banksoal_id'   => $banksoal->id,
                 'tipe_soal'     => SoalConstant::TIPE_LISTENING
-            ]);
+            ])->orderBy('created_at');
 
             # Ambil soal sebanyak maximum
             $listening = $listening->take($max_listening)->get();

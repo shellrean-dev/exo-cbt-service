@@ -114,7 +114,7 @@ class PenilaianController extends Controller
             # Hanya pengoreksi yang dapat data ini
             $filtered = $banksoal->reject(function ($value, $key) use($user) {
                 return !in_array($user->id, json_decode($value->correctors, true));
-            });
+            })->values();
 
             return SendResponse::acceptData($filtered);
         } catch (Exception $e) {

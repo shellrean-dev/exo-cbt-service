@@ -6,6 +6,8 @@ use App\Actions\SendResponse;
 use App\Models\SoalConstant;
 use Exception;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -37,7 +39,10 @@ class BenarSalahService implements TipeSoalInterface
             ]);
             if($setting['acak_soal'] == "1") {
                 $benar_salah = $benar_salah->inRandomOrder();
+            } else {
+                $benar_salah = $benar_salah->orderBy('created_at');
             }
+            
             $benar_salah = $benar_salah->take($max_benar_salah)->get();
 
             $soal_benar_salah= [];
@@ -70,12 +75,28 @@ class BenarSalahService implements TipeSoalInterface
         $soal_benar_salah = DB::table('soals as s')
             ->join('jawaban_soals as j', 'j.soal_id', '=','s.id')
             ->select('j.id as jawaban_id', 'correct')
-            ->where('s.id', $jawaban_peserta->soal_id)
-            ->get();
+            ->where('s.id', $jawaban_peserta->soal_id);
 
+        if(config('exo.enable_cache')) {
+            $cacheKeyConsolidate = "soals_benar_salah_D0GZ9MXOAK_".$jawaban_peserta->soal_id;
+            if(Cache::has($cacheKeyConsolidate)) {
+                $soal_benar_salah = Cache::get($cacheKeyConsolidate, new Collection());
+
+            } else {
+                $soal_benar_salah = $soal_benar_salah->get();
+                if($soal_benar_salah) {
+                    Cache::put($cacheKeyConsolidate, $soal_benar_salah, 60);
+
+                }
+            }
+        } else {
+            $soal_benar_salah = $soal_benar_salah->get();
+        }
+
+        $soal_benar_salah_indexeds = $soal_benar_salah->keyBy('jawaban_id');
         $count_corect = 0;
         foreach ($request->benar_salah as $k => $v) {
-            $seachSoal = $soal_benar_salah->where('jawaban_id', $k)->first();
+            $seachSoal = $soal_benar_salah_indexeds->get($k);
             if ($seachSoal && ($seachSoal->correct == $v)) {
                 $count_corect += 1;
             }
@@ -88,7 +109,7 @@ class BenarSalahService implements TipeSoalInterface
 
         try {
             $data_update = [
-                'benar_salah' => json_encode($request->benar_salah),
+                'benar_salah'   => json_encode($request->benar_salah),
                 'iscorrect'     => $jawaban_peserta->iscorrect,
             ];
             if (!$jawaban_peserta->answered) {

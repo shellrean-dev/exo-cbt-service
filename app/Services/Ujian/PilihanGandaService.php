@@ -6,6 +6,7 @@ use App\Actions\SendResponse;
 use App\Models\SoalConstant;
 use Exception;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -37,6 +38,8 @@ class PilihanGandaService implements TipeSoalInterface
             ]);
             if ($setting['acak_soal'] == "1") {
                 $pg = $pg->inRandomOrder();
+            } else {
+                $pg = $pg->orderBy('created_at');
             }
             # Ambil soal sebanyak maximum
             $pg = $pg->take($max_soal)->get();
@@ -69,9 +72,28 @@ class PilihanGandaService implements TipeSoalInterface
     public static function setJawab($request, $jawaban_peserta)
     {
         $kj = DB::table('jawaban_soals')
-            ->where('id', $request->jawab)
-            ->select('correct')
-            ->first();
+                ->where('id', $request->jawab)
+                ->select('correct');
+
+        # Cache layer, system need more helper
+        if (config('exo.enable_cache')) {
+            $cacheKeyConsolidate = "jawaban_soal_pilihan_ganda_1297161284_".$request->jawab;
+            if(Cache::has($cacheKeyConsolidate)) {
+
+                # Get Cache if exist
+                $kj = Cache::get($cacheKeyConsolidate);
+            } else {
+                $kj = $kj->first();
+
+                # Make sure the cache not null when stored to memcache
+                if($kj) {
+                    Cache::put($cacheKeyConsolidate, $kj, 60);
+                }
+            }
+        } else {
+            $kj = $kj->first();
+        }
+        
         if(!$kj) {
             return SendResponse::acceptCustom([
                 'data' => [
@@ -92,6 +114,7 @@ class PilihanGandaService implements TipeSoalInterface
             DB::table('jawaban_pesertas')
                 ->where('id', $jawaban_peserta->id)
                 ->update($data_update);
+                
             $jawaban_peserta->jawab = $request->jawab;
 
             return SendResponse::acceptCustom([

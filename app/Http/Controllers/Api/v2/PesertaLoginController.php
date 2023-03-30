@@ -148,7 +148,8 @@ class PesertaLoginController extends Controller
             'text' => [
                 'welcome' => $ujian->value['text_welcome'] ?? '',
                 'finish'  => $ujian->value['text_finish'] ?? ''
-            ]
+            ],
+            'only_fullscreen' => $ujian->value['only_fullscreen'] ?? '0'
         ];
         return SendResponse::acceptData($return);
     }

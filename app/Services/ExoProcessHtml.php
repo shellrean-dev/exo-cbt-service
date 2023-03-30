@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\SoalConstant;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -107,10 +108,13 @@ class ExoProcessHtml
                 foreach($body->childNodes as $table) {
                     if ($table->nodeName == "table") {
                         $element = [
-                            'pertanyaan' => '',
-                            'correct'    => [],
-                            'options'    => [],
-                            'type'       => 0,
+                            'pertanyaan'            => '',
+                            'correct'               => [],
+                            'correct_benar_salah'   => [],
+                            'options'               => [],
+                            'options_menjodohkan'   => [],
+                            'options_mengurutkan'   => [],
+                            'type'                  => 0,
                         ];
 
                         $real_iterate = 0;
@@ -142,19 +146,58 @@ class ExoProcessHtml
                                     $real_iterate += 1;
                                     continue;
                                 }
+                                if(is_numeric(trim(strip_tags($key->nodeValue)))) {
+                                    $element['options_menjodohkan'][trim($key->nodeValue)][] = $this->_dom_inner_html($value);
+                                    $real_iterate += 1;
+                                    continue;
+                                }
+                                if(trim(strip_tags($key->nodeValue)) == '|') {
+                                    $element['options_mengurutkan'][] = $this->_dom_inner_html($value);
+                                    $real_iterate += 1;
+                                    continue;
+                                }
+                                
+                                if(trim(strip_tags($key->nodeValue)) == 'BENAR' || trim(strip_tags($key->nodeValue)) == 'SALAH') {
+                                    array_push($element['options'], $this->_dom_inner_html($value));
+                                    if(trim($key->nodeValue) == 'BENAR') {
+                                        $element['correct_benar_salah'][count($element['options'])-1] = 1;
+                                    } else {
+                                        $element['correct_benar_salah'][count($element['options'])-1] = 0;
+                                    }
+                                    $element['type'] = SoalConstant::TIPE_BENAR_SALAH;
+                                    continue;
+                                }
 
+                                if(trim(strip_tags($key->nodeValue)) == '?') {
+                                    $element['type'] = SoalConstant::TIPE_SETUJU_TIDAK;
+                                }
                                 array_push($element['options'], $this->_dom_inner_html($value));
                             }
                         }
-                        if (count($element['correct']) > 1) {
-                            $element['type'] = 4;
-                        } else if (count($element['correct']) == 1) {
-                            $element['type'] = 1;
-                        } else if (count($element['correct']) == 0) {
-                            if (count($element['options']) > 0) {
-                                $element['type'] = 6;
-                            } else {
-                                $element['type'] = 2;
+                        
+                        if($element['type'] == 0) {
+                            if (count($element['correct']) > 1) {
+                                $element['type'] = SoalConstant::TIPE_PG_KOMPLEK;
+
+                            } else if (count($element['correct']) == 1) {
+                                $element['type'] = SoalConstant::TIPE_PG;
+
+                            } else if (count($element['correct']) == 0) {
+                                if (count($element['options']) > 0) {
+                                    $element['type'] = SoalConstant::TIPE_ISIAN_SINGKAT;
+
+                                } else {
+                                    if(count($element['options_menjodohkan']) > 0) {
+                                        $element['type'] = SoalConstant::TIPE_MENJODOHKAN;
+                                        
+                                    } else if(count($element['options_mengurutkan']) > 0) {
+                                        $element['type'] = SoalConstant::TIPE_MENGURUTKAN;
+
+                                    } else {
+                                        $element['type'] = SoalConstant::TIPE_ESAY;
+
+                                    }
+                                }
                             }
                         }
                         array_push($data, $element);

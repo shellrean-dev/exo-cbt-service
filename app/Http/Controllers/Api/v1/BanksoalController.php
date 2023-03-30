@@ -70,20 +70,73 @@ class BanksoalController extends Controller
             $ids = $banksoal->get('t_0.id')->pluck('id');
             $inputted = DB::table('soals')->whereIn('banksoal_id', $ids)->select([
                 DB::raw('count(1) as total'),
-                'banksoal_id'
+                'banksoal_id',
+                'tipe_soal'
             ])
             ->groupBy('banksoal_id')
+            ->groupBy('tipe_soal')
             ->get();
+            $inputted = $inputted->groupBy('banksoal_id');
 
             $banksoal = $banksoal->paginate($perPage);
             $banksoal->getCollection()->transform(function ($item) use ($inputted) {
-                $input = $inputted->where('banksoal_id', $item->id)->first();
-                $item->persen = json_decode($item->persen);
-                if ($input) {
-                    $item->inputed = $input->total;
-                } else {
-                    $item->inputed = '-';
+                $input = $inputted->get($item->id, []);
+                $pg_inputted = 0;
+                $pg_komplek_inputted = 0;
+                $listening_inputted = 0;
+                $menjodohkan_inputted = 0;
+                $isian_singkat_inputted = 0;
+                $esay_inputted = 0;
+                $urutan_inputted = 0;
+                $benar_salah_inputted = 0;
+                $setuju_tidak_inputted = 0;
+
+                $total = 0;
+                foreach($input as $var2) {
+                    $total += $var2->total;
+                    if($var2->tipe_soal == SoalConstant::TIPE_PG) {
+                        $pg_inputted += $var2->total;
+
+                    } else if($var2->tipe_soal == SoalConstant::TIPE_ESAY) {
+                        $esay_inputted += $var2->total;
+
+                    } else if($var2->tipe_soal == SoalConstant::TIPE_LISTENING) {
+                        $listening_inputted += $var2->total;
+
+                    } else if($var2->tipe_soal == SoalConstant::TIPE_PG_KOMPLEK) {
+                        $pg_komplek_inputted += $var2->total;
+
+                    } else if($var2->tipe_soal == SoalConstant::TIPE_MENJODOHKAN) {
+                        $menjodohkan_inputted += $var2->total;
+
+                    } else if($var2->tipe_soal == SoalConstant::TIPE_ISIAN_SINGKAT) {
+                        $isian_singkat_inputted += $var2->total;
+
+                    } else if($var2->tipe_soal == SoalConstant::TIPE_MENGURUTKAN) {
+                        $urutan_inputted += $var2->total;
+
+                    } else if($var2->tipe_soal == SoalConstant::TIPE_BENAR_SALAH) {
+                        $benar_salah_inputted += $var2->total;
+
+                    } else if($var2->tipe_soal == SoalConstant::TIPE_SETUJU_TIDAK) {
+                        $setuju_tidak_inputted += $var2->total;
+
+                    }
                 }
+
+                $item->persen = json_decode($item->persen);
+            
+                $item->inputed = $total;
+                $item->pg_inputted = $pg_inputted;
+                $item->pg_komplek_inputted = $pg_komplek_inputted;
+                $item->listening_inputted = $listening_inputted;
+                $item->menjodohkan_inputted = $menjodohkan_inputted;
+                $item->isian_singkat_inputted = $isian_singkat_inputted;
+                $item->esay_inputted = $esay_inputted;
+                $item->urutan_inputted = $urutan_inputted;
+                $item->benar_salah_inputted = $benar_salah_inputted;
+                $item->setuju_tidak_inputted = $setuju_tidak_inputted;
+
                 return $item;
             });
         } else {
@@ -208,6 +261,14 @@ class BanksoalController extends Controller
 
         if ($banksoal->is_locked) {
             return SendResponse::badRequest('Banksoal sedang dikunci');
+        }
+
+        $point = 0;
+        foreach(array_values($request->persen) as $item) {
+            $point += intval($item);
+        }
+        if ($point != 100) {
+            return SendResponse::badRequest('Persentase harus 100 %');
         }
 
         $banksoal->kode_banksoal = $request->kode_banksoal;

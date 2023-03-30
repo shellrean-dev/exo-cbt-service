@@ -39,6 +39,8 @@ class IsianSingkatService implements TipeSoalInterface
             # Acak soal bila di set
             if($setting['acak_soal'] == "1") {
                 $isian_singkat = $isian_singkat->inRandomOrder();
+            } else {
+                $isian_singkat = $isian_singkat->orderBy('created_at');
             }
 
             # Ambil soal sebanyak maximum
