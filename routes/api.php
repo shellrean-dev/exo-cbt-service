@@ -26,6 +26,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
     Route::get('absensi-ujian/{id}', 'ReportingController@absensi_ujian')->name('absensi.download.excel');
     Route::get('berita-acara/{id}', 'ReportingController@berita_acara')->name('beritaacara.download.excel');
     Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel', 'ResultController@capaianSiswaExcel')->name('capaian.download.excel');
+    Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa-mc/excel', 'ResultController@capaianSiswaMCExcel')->name('capaian.mc.download.excel');
     Route::get('ujians/{jadwal}/result/excel', 'ResultController@examExcel')->name('hasilujian.download.excel');
     Route::get('ujians/esay/{banksoal}/koreksi-offline/excel', 'PenilaianController@jawabanPesertaEsayExcel')->name('koreksi.offline.download.excel');
     Route::get('ujians-ledger/{event_id}/{peserta_id}/excel', 'ResultController@hasilUjianLedgerPeserta')->name('ledger.peserta.download.excel');
@@ -125,6 +126,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1'], function() {
         Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa', 'ResultController@capaianSiswa');
 
         Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/link', 'ResultController@capaianSiswaExcelLink');
+        Route::get('ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa-mc/link', 'ResultController@capaianSiswaMCExcelLink');
 
         Route::get('ujians/all', 'UjianController@allData');
         Route::get('ujians/active-status', 'UjianController@getActive');

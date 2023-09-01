@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Exports\CapaianPesertaMCUjianExport;
 use App\Exports\CapaianPesertaUjianExport;
 use App\Exports\LedgerPesertaHasilUjianExport;
 use App\Models\dto\ResultDataTransform;
@@ -316,6 +317,48 @@ class ResultController extends Controller
     }
 
     /**
+     * @Route(path="api/v1/ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa-mc/link", methods={"GET"})
+     *
+     * Buat link untuk download excel capaian
+     * siswa pada hasil ujian
+     *
+     * @param string $jadwal_id
+     * @param string $banksoal_id
+     * @return Response
+     * @author shellrean <wandinak17@gmail.com>
+     */
+    public function capaianSiswaMCExcelLink($jadwal_id, $banksoal_id)
+    {
+        $jadwal = DB::table('jadwals')
+            ->where('id', $jadwal_id)
+            ->select('id')
+            ->first();
+
+        if (!$jadwal) {
+            return SendResponse::badRequest('kesalahan, jadwal yang diminta tidak ditemukan');
+        }
+
+        $banksoal = DB::table('banksoals')
+            ->where('id', $banksoal_id)
+            ->select('id')
+            ->first();
+
+        if (!$banksoal) {
+            return SendResponse::badRequest('kesalahan, banksoal yang diminta tidak ditemukan');
+        }
+
+        $jurusan = request()->q;
+        $group = request()->group;
+        $url = URL::temporarySignedRoute(
+            'capaian.mc.download.excel',
+            now()->addMinutes(5),
+            ['jadwal' => $jadwal->id, 'banksoal' => $banksoal->id,'jurusan' => $jurusan, 'group' => $group]
+        );
+
+        return SendResponse::acceptData($url);
+    }
+
+    /**
      * @Route(path="api/v1/ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa/excel", methods={"GET"})
      *
      * Download excel capaian
@@ -427,6 +470,118 @@ class ResultController extends Controller
         $writer = new Xlsx($spreadsheet);
 
         $filename = 'Capaian siswa '.$banksoal->kode_banksoal.' '.$jadwal->alias;
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="'.$filename.'.xlsx"');
+        $writer->save('php://output');
+    }
+
+    /**
+     * @Route(path="api/v1/ujians/{jadwal}/banksoal/{banksoal}/capaian-siswa-mc/excel", methods={"GET"})
+     *
+     * Download excel capaian
+     * siswa pada hasil ujian
+     *
+     * @param string $jadwal_id
+     * @param string $banksoal_id
+     * @return Response
+     * @author shellrean <wandinak17@gmail.com>
+     */
+    public function capaianSiswaMCExcel($jadwal_id, $banksoal_id)
+    {
+        $jadwal = DB::table('jadwals')
+            ->where('id', $jadwal_id)
+            ->select('id','alias')
+            ->first();
+
+        if (!$jadwal) {
+            return SendResponse::badRequest('kesalahan, jadwal yang diminta tidak ditemukan');
+        }
+
+        $banksoal = DB::table('banksoals')
+            ->where('id', $banksoal_id)
+            ->select('id','kode_banksoal')
+            ->first();
+
+        if (!$banksoal) {
+            return SendResponse::badRequest('kesalahan, banksoal yang diminta tidak ditemukan');
+        }
+
+        if (! request()->hasValidSignature()) {
+            abort(401);
+        }
+
+        $jurusan = request()->jurusan;
+        $group = request()->group;
+
+        $soals = DB::table('soals')->where('banksoal_id', $banksoal->id)
+            ->where('tipe_soal', SoalConstant::TIPE_PG)
+            ->orderBy('soals.tipe_soal')
+            ->orderBy('soals.created_at')
+            ->select(['id', 'tipe_soal'])
+            ->get();
+
+        $jawaban_pesertas = DB::table('jawaban_pesertas')
+            ->join('soals', 'soals.id', 'jawaban_pesertas.soal_id')
+            ->join('pesertas', 'pesertas.id', '=', 'jawaban_pesertas.peserta_id')
+            ->where('soals.tipe_soal', SoalConstant::TIPE_PG);
+        $pesertas = DB::table('pesertas');
+
+        if ($group != 0 && $group != '') {
+            $groupObj = DB::table('groups')
+                ->where('id', $group)
+                ->first();
+            if ($groupObj->parent_id == 0) {
+                $childs = DB::table('groups')
+                    ->where('parent_id', $group)
+                    ->select('id')
+                    ->get()
+                    ->pluck('id')
+                    ->toArray();
+                array_push($childs, $group);
+                $jawaban_pesertas = $jawaban_pesertas->join('group_members', 'group_members.student_id', '=', 'jawaban_pesertas.peserta_id')->whereIn('group_members.group_id', $childs);
+                $pesertas = $pesertas->join('group_members', 'group_members.student_id', '=', 'pesertas.id')->whereIn('group_members.group_id', $childs);
+            } else {
+                $jawaban_pesertas = $jawaban_pesertas->join('group_members', 'group_members.student_id', '=', 'jawaban_pesertas.peserta_id')->where('group_members.group_id', $group);
+                $pesertas = $pesertas->join('group_members', 'group_members.student_id', '=', 'pesertas.id')->where('group_members.group_id', $group);
+            }
+        }
+
+        if ($jurusan != 0 && $jurusan != '') {
+            $jurusan = explode(',',$jurusan);
+            $jawaban_pesertas = $jawaban_pesertas->whereIn('pesertas.jurusan_id', $jurusan);
+            $pesertas = $pesertas->whereIn('pesertas.jurusan_id', $jurusan);
+        }
+
+        $jawaban_pesertas = $jawaban_pesertas->select([
+            'jawaban_pesertas.id',
+            'jawaban_pesertas.jawab',
+            'jawaban_pesertas.soal_id',
+            'jawaban_pesertas.peserta_id',
+            'jawaban_pesertas.iscorrect',
+            'jawaban_pesertas.answered'
+        ])->get();
+
+        $new_jawaban_peserta = [];
+        foreach ($jawaban_pesertas as $jawaban) {
+            $new_jawaban_peserta[$jawaban->soal_id.'|'.$jawaban->peserta_id] = $jawaban;
+        }
+
+        $pesertas = $pesertas->select([
+            'pesertas.id',
+            'pesertas.no_ujian',
+            'pesertas.nama'
+        ])->get();
+
+        $data = [
+            'pesertas' => $pesertas,
+            'jawaban_pesertas' => $new_jawaban_peserta,
+            'soals' => $soals
+        ];
+
+        $spreadsheet = CapaianPesertaMCUjianExport::run($data, $banksoal->kode_banksoal, $jadwal->alias);
+        $writer = new Xlsx($spreadsheet);
+
+        $filename = 'Capaian siswa [MC]'.$banksoal->kode_banksoal.' '.$jadwal->alias;
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="'.$filename.'.xlsx"');
         $writer->save('php://output');

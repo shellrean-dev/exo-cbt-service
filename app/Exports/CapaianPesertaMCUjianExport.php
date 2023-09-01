@@ -3,10 +3,11 @@
 namespace App\Exports;
 
 use App\Utils\SoalUtil;
+use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
-class CapaianPesertaUjianExport extends ExportExcel
+class CapaianPesertaMCUjianExport extends ExportExcel
 {
     /**
      * @param $datas
@@ -20,7 +21,15 @@ class CapaianPesertaUjianExport extends ExportExcel
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->setCellValue('A1', 'CAPAIAN SISWA '.chr(13).$banksoal.' '.$jadwal);
+        $jawab_ids = [];
+        foreach ($datas['jawaban_pesertas'] as $key => $value) {
+            $jawab_ids[$value->jawab] = true;
+        }
+
+        $jawab_soal = DB::table('jawaban_soals')->whereIn('id', array_keys($jawab_ids))->get()
+            ->keyBy('id');
+
+        $sheet->setCellValue('A1', 'CAPAIAN SISWA [MC]'.chr(13).$banksoal.' '.$jadwal);
         $sheet->getStyle('A1')->getAlignment()->setWrapText(true);
         $sheet->getStyle('A1')->getAlignment()->setVertical('center');
         $sheet->mergeCells("A1:C1");
@@ -71,13 +80,16 @@ class CapaianPesertaUjianExport extends ExportExcel
                     $jawaban_konkrit = $datas['jawaban_pesertas'][$svalue->id.'|'.$value->id];
                 }
 
+                $label_mark = "-";
                 if ($jawaban_konkrit) {
                     $count += intval($jawaban_konkrit->iscorrect);
+                    $label_mark = $jawab_soal->get($jawaban_konkrit->jawab, (object) ['label_mark'])->label_mark;
                 }
 
                 if($jawaban_konkrit) {
                     if($jawaban_konkrit->answered) {
-                        $sheet->setCellValue($column.$row, $jawaban_konkrit->iscorrect);
+//                        $sheet->setCellValue($column.$row, $jawaban_konkrit->iscorrect);
+                        $sheet->setCellValue($column.$row, $label_mark);
                         if($jawaban_konkrit->iscorrect == 0) {
                             $sheet->getStyle($column.$row)->applyFromArray(self::styleBad());
                         } else {

@@ -6,7 +6,7 @@ use Illuminate\Support\Str;
 
 class SoalService
 {
-	public function importQues($question, $banksoal_id) 
+	public function importQues($question, $banksoal_id)
 	{
 		$time_offsett = 0;
 		foreach($question as $key => $singlequestion){
@@ -85,6 +85,7 @@ class SoalService
 
 						$jawabans = [];
 						$time_offsett_var2 = 0;
+                        $label_mark = "A";
 						foreach($singlequestion['option'] as $corect_key => $correct_val){
 							if(in_array($corect_key, $correct_option_position)){
 								$divideratio=count($correct_option_position);
@@ -93,14 +94,15 @@ class SoalService
 								$correctoption =0;
 							}
 
-							array_push($jawabans, [
-								'id'	=> Str::uuid()->toString(),
-								'soal_id' => $soal_id,
-								'text_jawaban' => "<p>".$correct_val."</p>",
-								'correct' => $correctoption,
-								'created_at' => now()->addSeconds($time_offsett_var2),
-								'updated_at' => now(),
-							]);
+							$jawabans[] = [
+                                'id' => Str::uuid()->toString(),
+                                'soal_id' => $soal_id,
+                                'text_jawaban' => "<p>" . $correct_val . "</p>",
+                                'correct' => $correctoption,
+                                'label_mark' => $label_mark++,
+                                'created_at' => now()->addSeconds($time_offsett_var2),
+                                'updated_at' => now(),
+                            ];
 
 							$time_offsett_var2++;
 						}
