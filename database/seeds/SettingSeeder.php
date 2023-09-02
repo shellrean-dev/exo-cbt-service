@@ -40,5 +40,11 @@ class SettingSeeder extends Seeder
                 'reset' => false
             ]
         ]);
+
+        Setting::create([
+            'name' => 'user-agent-whitelist',
+            'type'  => 'general',
+            'value' => '*'
+        ]);
     }
 }

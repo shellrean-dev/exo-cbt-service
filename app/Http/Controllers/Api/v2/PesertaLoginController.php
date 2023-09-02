@@ -32,6 +32,8 @@ class PesertaLoginController extends Controller
     public function login(Request $request)
     {
         $setting = Setting::where('name','ujian')->first();
+        $user_agent_whitelist = Setting::where('name','user-agent-whitelist')->first();
+        $userAgent = $request->header('User-Agent');
 
         $request->validate([
             'no_ujian'      => 'required',
@@ -46,6 +48,10 @@ class PesertaLoginController extends Controller
         if($peserta) {
             if ($peserta->status == 0) {
                 return SendResponse::acceptCustom(['status' => 'susspend', 'reason' => $peserta->block_reason]);
+            }
+
+            if ($user_agent_whitelist && $user_agent_whitelist->value != '*' && !str_contains($userAgent, $user_agent_whitelist->value)) {
+                return SendResponse::badRequest('Anda tidak menggunakan browser yang diizinkan');
             }
 
             if(isset($setting->value['reset'])
