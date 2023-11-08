@@ -27,7 +27,6 @@ class CreateSoalsTable extends Migration
 
             $table->uuid('deleted_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
-            $table->string('label_mark')->nullable();
             $table->timestamps();
 
             $table->foreign('banksoal_id')->references('id')->on('banksoals')->onDelete('cascade');
