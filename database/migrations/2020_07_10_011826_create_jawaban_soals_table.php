@@ -20,7 +20,6 @@ class CreateJawabanSoalsTable extends Migration
             $table->char('correct', 1);
 
             $table->uuid('deleted_by')->nullable();
-            $table->string('label_mark')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
 
