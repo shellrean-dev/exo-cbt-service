@@ -311,24 +311,9 @@ class BanksoalController extends Controller
         DB::beginTransaction();
 
         try {
-            // if (config('exo.softdel')) {
-            //     $user = request()->user();
-
-            //     $banksoal->deleted_at = Carbon::now();
-            //     $banksoal->deleted_by = $user->id;
-            //     $banksoal->save();
-
-            //     DB::table('directories')
-            //         ->where('id', $banksoal->directory_id)
-            //         ->update([
-            //             'deleted_at' => Carbon::now(),
-            //             'deleted_by' => $user->id
-            //         ]);
-            // } else {
-                $banksoal->delete();
-                Directory::find($banksoal->directory_id)->delete();
-            // }
-
+            $banksoal->delete();
+            Directory::find($banksoal->directory_id)->delete();
+            
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();

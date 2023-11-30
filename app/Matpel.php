@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\Uuids;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class Matpel extends Model
 {
@@ -43,7 +43,7 @@ class Matpel extends Model
      */
     public function getJurusansAttribute()
     {
-        if($this->jurusan_id != 0) {
+        if($this->jurusan_id != '0') {
             $jurusans = DB::table('jurusans')->whereIn('id', $this->jurusan_id)->get();
             return $jurusans;
         }
@@ -103,7 +103,7 @@ class Matpel extends Model
      */
     public function getAgamaAttribute()
     {
-        if($this->agama_id != 0) {
+        if($this->agama_id != '0') {
             $agama = DB::table('agamas')->where('id', $this->agama_id)->first();
             return $agama->nama;
         }

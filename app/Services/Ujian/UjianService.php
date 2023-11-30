@@ -175,7 +175,7 @@ final class UjianService extends AbstractService
     {
         $banksoal_id = '';
         try {
-            if ($banksoal->agama_id != 0) {
+            if ($banksoal->agama_id != '0') {
                 if ($banksoal->agama_id == $peserta->agama_id) {
                     $banksoal_id = $banksoal->id;
                 }

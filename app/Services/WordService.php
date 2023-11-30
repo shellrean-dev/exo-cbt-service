@@ -12,18 +12,12 @@ class WordService
 		$question_split = "/S:[0-9]+\)/";
 		$option_split = "/[A-Z]:\)/";
 		$correct_split = "/JAWAB:/";
-		$protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') 
-            || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-		$hos = request()->server('HTTP_HOST');
-		$dsn = $protocol.$hos;
 
-
-		$target_dir = storage_path('app/public/'.$directory->slug.'/');
-		$target_file = $filepath;
-		$info = pathinfo($target_file);
+		$target_dir = public_path(sprintf('storage/%s/', $directory->slug));
+		$info = pathinfo($filepath);
 		$new_name = $info['filename']. '.Zip';
-		$new_name_path = storage_path('app/public/'.$directory->slug.'/'.$new_name);
-		rename($target_file, $new_name_path);
+		$new_name_path = public_path(sprintf('storage/%s/%s', $directory->slug, $new_name));
+		rename($filepath, $new_name_path);
 		$zip = new \ZipArchive;
 
 		if ($zip->open($new_name_path) == true ) {
@@ -78,7 +72,7 @@ class WordService
 				$image = Image::make($old_path)->encode('webp', 90);
 				$new_path=$target_dir.$imagenew_name;
 				
-				$new_path_storage = "public/".$directory->slug.'/'.$imagenew_name.'.webp';
+				$new_path_storage = $directory->slug.'/'.$imagenew_name.'.webp';
 				Storage::put($new_path_storage, $image->__toString());
 				
 				DB::table('files')->insert([
@@ -91,8 +85,7 @@ class WordService
 					'size'			=> 0
 				]);
 
-        		// rename($old_path,$new_path);
-		        $img = '<img src="'.$dsn.'/storage/'.$directory->slug.'/'.$imagenew_name.'.webp">';
+				$img = sprintf('<img src="%s" />', sprintf('/storage/%s/%s.webp', $directory->slug, $imagenew_name));
 		        $content=str_replace($rplc_str,$img,$content);
 		        $content=str_replace($rplc_str1,$img,$content);
 		        $content=str_replace($rplc_str2,$img,$content);

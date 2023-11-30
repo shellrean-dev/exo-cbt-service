@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Setting;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * SettingController
@@ -30,9 +31,13 @@ class SettingController extends Controller
             ->where('name', 'set_sekolah')
             ->select('id','name','value')
             ->first();
+        $settingData = json_decode($setting->value, true);
+        if (isset($settingData['logo']) && $settingData['logo'] != '') {
+            $settingData['logo'] = sprintf('/storage/%s', $settingData['logo']);
+        }
         return SendResponse::acceptData([
             'name'  => $setting->name,
-            'value' => json_decode($setting->value, true)
+            'value' => $settingData
         ]);
     }
 
@@ -53,7 +58,7 @@ class SettingController extends Controller
 
         $value = json_decode($setting->value, true);
         $sekolah_name = isset($value['nama_sekolah']) ? $value['nama_sekolah'] : '';
-        $logo = isset($value['logo']) && $value['logo'] != '' ? config('app.url').'/storage/'.$value['logo'] : '';
+        $logo = isset($value['logo']) && $value['logo'] != '' ? sprintf('/storage/%s', $value['logo']) : '';
 
         return SendResponse::acceptData([
             'sekolah_name'  => $sekolah_name,
@@ -132,8 +137,8 @@ class SettingController extends Controller
         ]);
         try {
             $file = $request->file('image');
-            $filename = date('d_m_Y_his').'-'.$file->getClientOriginalName().'.webp';
-            $path = 'public/'.$filename;
+            $filename = Str::uuid()->toString() .'.webp';
+            $path = $filename;
 
             $image = Image::make($file)->encode('webp', 90);
             Storage::put($path, $image->__toString());

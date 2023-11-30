@@ -80,7 +80,7 @@ class DirectoryController extends Controller
     {
         $file = $request->file('file');
         $filename = date('Ymd').'-'.$file->getClientOriginalName();
-        $file->storeAs('public/audio/',$filename);
+        $file->storeAs('audio/',$filename);
 
         return response()->json(['data' => $filename]);
     }
@@ -100,22 +100,22 @@ class DirectoryController extends Controller
         $type = $file->getClientOriginalExtension();
         $size = $file->getSize();
 
-        $filename = date('Ymdhis').'-'.$file->getClientOriginalName();
+        $filename = sprintf('%s.%s', Str::uuid()->toString(), $type);
 
         if (in_array($type, ['png', 'jpg', 'jpeg'])) {
-            $path = 'public/'.$dir->slug.'/'.$filename.'.webp';
+            $path = sprintf('%s/%s.webp', $dir->slug, $filename);
             $filename = $filename.'.webp';
 
             $image = Image::make($file)->encode('webp', 90);
             Storage::put($path, $image->__toString());
         } else {
-            $path = $file->storeAs('public/'.$dir->slug, $filename);
+            $path = $file->storeAs($dir->slug, $filename);
         }
 
         $data= [
             'directory_id'      => $request->directory_id,
             'filename'          => $filename,
-            'path'              => $path,
+            'path'              => sprintf('/storage/%s', $path),
             'exstension'        => $type,
             'dirname'           => $dir->slug,
             'size'              => $size,
@@ -145,33 +145,32 @@ class DirectoryController extends Controller
             $type = $file->getClientOriginalExtension();
             $size = $file->getSize();
 
-            $filename = date('Ymdhis').'-'.$file->getClientOriginalName();
+            $filename = sprintf('%s.%s', Str::uuid()->toString(), $type);
 
             if (in_array($type, ['png', 'jpg', 'jpeg'])) {
-                $path = 'public/'.$dir->slug.'/'.$filename.'.webp';
+                $path = sprintf('%s/%s.webp', $dir->slug, $filename);
                 $filename = $filename.'.webp';
     
                 $image = Image::make($file)->encode('webp', 90);
                 Storage::put($path, $image->__toString());
             } else {
-                $path = $file->storeAs('public/'.$dir->slug, $filename);
+                $path = $file->storeAs($dir->slug, $filename);
             }
 
             $data= [
                 'directory_id'      => request()->directory_id,
                 'filename'          => $filename,
-                'path'              => $path,
+                'path'              => sprintf('/storage/%s', $path),
                 'exstension'        => $type,
                 'dirname'           => $dir->slug,
                 'size'              => $size,
             ];
 
             $image = File::create($data);
-            $url = asset('storage/'.$dir->slug.'/' . $filename); 
             return response()->json([
                 'uploaded' => 1,
                 'fileName' => $filename,
-                'url' => $url
+                'url' => $data['path'],
             ]);
         }
     }
@@ -185,8 +184,8 @@ class DirectoryController extends Controller
     public function deleteFilemedia($id)
     {
         $file = File::find($id);
-        if(file_exists(storage_path('app/'.$file->path))) {
-            unlink(storage_path('app/'.$file->path));
+        if(file_exists(public_path($file->path))) {
+            unlink(public_path($file->path));
         }
         $file->delete();
         return response()->json([],200);
@@ -212,8 +211,8 @@ class DirectoryController extends Controller
                 ->get();
 
             foreach($files as $file) {
-                if(file_exists(storage_path('app/'.$file->path))) {
-                    unlink(storage_path('app/'.$file->path));
+                if(file_exists(public_path($file->path))) {
+                    unlink(public_path($file->path));
                 }
             }
             DB::table('files')

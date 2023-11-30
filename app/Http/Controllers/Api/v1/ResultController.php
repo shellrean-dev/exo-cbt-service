@@ -415,7 +415,7 @@ class ResultController extends Controller
         $pesertas = DB::table('pesertas');
 
 
-        if ($group != 0 && $group != '') {
+        if ($group != '0' && $group != '') {
             $groupObj = DB::table('groups')
                 ->where('id', $group)
                 ->first();
@@ -435,7 +435,7 @@ class ResultController extends Controller
             }
         }
 
-        if ($jurusan != 0 && $jurusan != '') {
+        if ($jurusan != '0' && $jurusan != '') {
             $jurusan = explode(',',$jurusan);
             $jawaban_pesertas = $jawaban_pesertas->whereIn('pesertas.jurusan_id', $jurusan);
             $pesertas = $pesertas->whereIn('pesertas.jurusan_id', $jurusan);
@@ -526,11 +526,11 @@ class ResultController extends Controller
             ->where('soals.tipe_soal', SoalConstant::TIPE_PG);
         $pesertas = DB::table('pesertas');
 
-        if ($group != 0 && $group != '') {
+        if ($group != '0' && $group != '') {
             $groupObj = DB::table('groups')
                 ->where('id', $group)
                 ->first();
-            if ($groupObj->parent_id == 0) {
+            if ($groupObj->parent_id == '' || $groupObj->parent_id == '0') {
                 $childs = DB::table('groups')
                     ->where('parent_id', $group)
                     ->select('id')
@@ -546,7 +546,7 @@ class ResultController extends Controller
             }
         }
 
-        if ($jurusan != 0 && $jurusan != '') {
+        if ($jurusan != '0' && $jurusan != '') {
             $jurusan = explode(',',$jurusan);
             $jawaban_pesertas = $jawaban_pesertas->whereIn('pesertas.jurusan_id', $jurusan);
             $pesertas = $pesertas->whereIn('pesertas.jurusan_id', $jurusan);

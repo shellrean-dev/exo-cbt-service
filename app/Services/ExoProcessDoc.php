@@ -38,20 +38,13 @@ class ExoProcessDoc
     {
         $this->template = $template;
         $this->directory = $directory;
-        $this->target_dir = storage_path('app/public/'.$directory->slug.'/');
-        // $this->new_name_path = $new_path;
+        $this->target_dir = public_path(sprintf('storage/%s/', $directory->slug));
 
-        $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off')
-            || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-        $hos = request()->server('HTTP_HOST');
-        $this->dsn = $protocol.$hos;
-
-        $target_file = $filepath;
-        $info = pathinfo($target_file);
+        $info = pathinfo($filepath);
         $new_name = $info['filename']. '.Zip';
-        $this->new_name_path = storage_path('app/public/'.$directory->slug.'/'.$new_name);
+        $this->new_name_path = public_path(sprintf('storage/%s/%s', $directory->slug, $new_name));
 
-        rename($target_file, $this->new_name_path);
+        rename($filepath, $this->new_name_path);
     }
 
     private function _xml_attribute($obj, $attr)
@@ -138,12 +131,12 @@ class ExoProcessDoc
             $rplc_str3 = '<a:blip r:embed="'.$key.'"/>';
 
             $ext_img = strtolower(pathinfo($value, PATHINFO_EXTENSION));
-            $imagenew_name=time().$iterate.".".$ext_img;
-            $old_path=$word_folder."/".$value;
-            $new_path=$this->target_dir.$imagenew_name;
+            $imagenew_name = time().$iterate.".".$ext_img;
+            $old_path = $word_folder."/".$value;
+            $new_path = $this->target_dir.$imagenew_name;
 
             $image = Image::make($old_path)->encode('webp', 90);
-            $new_path_storage = "public/".$this->directory->slug.'/'.$imagenew_name.'.webp';
+            $new_path_storage = $this->directory->slug.'/'.$imagenew_name.'.webp';
             Storage::put($new_path_storage, $image->__toString());
 
             array_push($images, [
@@ -159,7 +152,8 @@ class ExoProcessDoc
             ]);
 
             rename($old_path,$new_path);
-            $img = '<img src="'.$this->dsn.'/storage/'.$this->directory->slug.'/'.$imagenew_name.'.webp">';;
+            $img = sprintf('<img src="%s" />', sprintf('/storage/%s/%s.webp', $this->directory->slug, $imagenew_name));
+
             $this->content = str_replace($rplc_str,$img,$this->content);
             $this->content = str_replace($rplc_str1,$img,$this->content);
             $this->content = str_replace($rplc_str2,$img,$this->content);
