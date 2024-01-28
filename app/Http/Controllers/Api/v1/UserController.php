@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
 use App\Actions\SendResponse;
@@ -80,11 +81,13 @@ class UserController extends Controller
      *
      * @return App\Actions\SendResponse
      */
-    public function index()
+    public function index(Request $request)
     {
+        $user = $request->user();
+
         $perPage = request()->perPage ?: 10;
 
-        $users = User::where('role','!=','admin');
+        $users = DB::table('users')->where('id', '<>', $user->id);
         if (request()->q != '') {
             $users = $users->where('name', 'LIKE', '%'. request()->q.'%');
         }
@@ -103,18 +106,22 @@ class UserController extends Controller
         $request->validate([
             'name'      => 'required',
             'email'     => 'required|email|unique:users,email',
+            'role'      => 'required',
             'password'  => 'required'
         ]);
 
         try {
             $data = [
+                'id'        => Str::uuid(),
                 'name'      => $request->name,
                 'email'     => $request->email,
                 'password'  => bcrypt($request->password),
-                'role'      => 'guru'
+                'role'      => $request->role,
+                'created_at'=> now(),
+                'updated_at'=> now()
             ];
 
-            User::create($data);
+            DB::table('users')->insert($data);
         } catch (\Exception $e) {
             return SendResponse::badRequest($e->getMessage());
         }
@@ -143,6 +150,7 @@ class UserController extends Controller
     {
         $request->validate([
             'name'      => 'required',
+            'role'      => 'required',
             'email'     => 'required|email|unique:users,email,'.$user->id
         ]);
 
@@ -150,12 +158,14 @@ class UserController extends Controller
             $data = [
                 'name'  => $request->name,
                 'email' => $request->email,
+                'role' => $request->role,
+                'updated_at' => now()
             ];
             if($request->password != '') {
                 $data['password'] = bcrypt($request->password);
             }
 
-            $user->update($data);
+            DB::table('users')->where('id', $user->id)->update($data);
         } catch (\Exception $e) {
             return SendResponse::badRequest($e->getMessage());
         }

@@ -18,7 +18,7 @@ class User extends Authenticatable
      * @var bool
      */
     public $incrementing = false;
-    
+
     /**
      * The "type" of the primary key ID.
      *
@@ -26,14 +26,7 @@ class User extends Authenticatable
      */
     protected $keyType = 'string';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'name', 'email', 'password',
-    ];
+    protected $guarded = [];
 
     /**
      * The attributes that should be hidden for arrays.
