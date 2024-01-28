@@ -106,7 +106,7 @@ class UjianAktifController extends Controller
                     return SendResponse::badRequest('Kesalahan dalam installasi token, hubungi administrator');
                 }
 
-                $token_expired = intval($setting_token->value);
+                $token_expired = intval(json_decode($setting_token->value));
                 $token_expired = $token_expired ?: 900;
 
                 if($differ > $token_expired) {
@@ -409,7 +409,7 @@ class UjianAktifController extends Controller
             foreach ($soals as $key => $soal) {
                 $new_soals[$key] = $soal;
                 $new_soals[$key]['created_at'] = now()->addSeconds($time_offset);
-                
+
                 $time_offset++;
             }
 
@@ -543,9 +543,9 @@ class UjianAktifController extends Controller
 
     /**
      * @Route(path="api/v2/ujians/leave-counter", methods={"POST"})
-     * 
+     *
      * Leave counter update
-     * 
+     *
      * @param Request $request
      * @return Response
      * @author shellrean <wandinak17@gmail.com>
@@ -574,7 +574,7 @@ class UjianAktifController extends Controller
             DB::table('siswa_ujians')->where('id', $ujian->id)->update([
                 'out_ujian_counter' => $count
             ]);
-            
+
             if($count > 3) {
                 DB::table('pesertas')->where('id', $ujian->peserta_id)->update([
                     'status' => 0,
@@ -595,9 +595,9 @@ class UjianAktifController extends Controller
 
     /**
      * @Route(path="api/v2/ujians/block-me-please", methods={"POST"})
-     * 
+     *
      * Please block me
-     * 
+     *
      * @param Request $request
      * @return Response
      * @author shellrean <wandinak17@gmail.com>

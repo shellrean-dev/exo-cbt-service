@@ -22,7 +22,7 @@ class UserController extends Controller
 {
     /**
      * @Route(path="api/v1/user-authenticated", methods={"GET"})
-     * 
+     *
      * Get current user login
      *
      * @return App\Actions\SendResponse
@@ -30,17 +30,25 @@ class UserController extends Controller
     public function getUserLogin()
     {
         $user = request()->user();
+
+        $menus = DB::table('role_menuses')
+            ->where('role', $user->role)
+            ->get()->mapWithKeys(function($rm, $key) {
+                return [$rm->code => true];
+            });
+
         $user->ip = request()->ip();
         $user->browser = Browser::browserName();
         $user->flatform = Browser::platformName();
+        $user->menus =$menus;
         return SendResponse::acceptData($user);
     }
 
     /**
      * @Route(path="api/v1/user-lists", methods={"GET"})
-     * 
-     *  Get all users 
-     *  
+     *
+     *  Get all users
+     *
      * @return App\Actions\SendResponse
      */
     public function userLists()
@@ -51,7 +59,7 @@ class UserController extends Controller
 
     /**
      * @Route(path="api/v1/user/change-password", methods={"POST"})
-     * 
+     *
      * @param  Illuminate\Http\Request $request
      * @return App\Actions\SendResponse
      */
@@ -60,7 +68,7 @@ class UserController extends Controller
         $request->validate([
             'password'  => 'required'
         ]);
-        $user = request()->user(); 
+        $user = request()->user();
         $user->password = bcrypt($request->password);
         $user->save();
 
@@ -69,7 +77,7 @@ class UserController extends Controller
 
     /**
      * @Route(path="api/v1/users", methods={"GET"})
-     * 
+     *
      * @return App\Actions\SendResponse
      */
     public function index()
@@ -86,11 +94,11 @@ class UserController extends Controller
 
     /**
      * @Route(path="api/v1/users", methods={"POST"})
-     * 
+     *
      * @param  Illuminate\Http\Request $request
      * @return App\Actions\SendResponse
      */
-    public function store(Request $request) 
+    public function store(Request $request)
     {
         $request->validate([
             'name'      => 'required',
@@ -115,7 +123,7 @@ class UserController extends Controller
 
     /**
      * @Route(path="api/v1/users/{user}", methods={"GET"})
-     * 
+     *
      * @param  App\User   $user
      * @return App\Actions\SendResponse
      */
@@ -126,7 +134,7 @@ class UserController extends Controller
 
     /**
      * @Route(path="api/v1/users/{user}, methods={"PUT", "PATCH"})
-     * 
+     *
      * @param  Illuminate\Http\Request $request
      * @param  App\User    $user
      * @return App\Actions\SendResponse
@@ -156,7 +164,7 @@ class UserController extends Controller
 
     /**
      * @Route(path="api/v1/users/{user}", methods={"DELETE"})
-     * 
+     *
      * @param  App\User   $user
      * @return App\Actions\SendResponse
      */
@@ -168,7 +176,7 @@ class UserController extends Controller
 
     /**
      * @Route(path="api/v1/users/upload", methods={"POST"})
-     * 
+     *
      * @param  Illuminate\Http\Request $request]
      * @return App\Actions\SendResponse
      */
@@ -192,7 +200,7 @@ class UserController extends Controller
 
     /**
      * @Route(path="api/v1/users/delete-multiple", methods={"POST"})
-     * 
+     *
      * Delete user multiple
      *
      * @param Illuminate\Http\Request $request

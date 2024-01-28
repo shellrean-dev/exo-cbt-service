@@ -28,8 +28,10 @@ class UjianController extends Controller
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
-    public function index()
+    public function index(Request  $request)
     {
+        $user = $request->user();
+
         $ujian = Jadwal::with('event')
             ->orderBy('tanggal','DESC')
             ->orderBy('mulai','DESC');
@@ -37,11 +39,16 @@ class UjianController extends Controller
         if (request()->q != '') {
             $ujian = $ujian->where('alias', 'LIKE', '%'. request()->q.'%');
         }
+        if ($user->role == 'guru') {
+            $ujian = $ujian->where('created_by', $user->id);
+        }
+
         if (request()->perPage != '') {
             $ujian = $ujian->paginate(request()->perPage);
         } else {
             $ujian = $ujian->paginate(20);
         }
+
         $ujian->makeHidden('banksoal_id');
         $ujian->makeVisible('groups');
         return SendResponse::acceptData($ujian);
@@ -70,6 +77,8 @@ class UjianController extends Controller
             'min_test'          => 'required|int'
         ]);
 
+        $user = $request->user();
+
         $data = [
             'mulai'             => date('H:i:s', strtotime($request->mulai)),
             'lama'              => $request->lama*60,
@@ -83,6 +92,7 @@ class UjianController extends Controller
             }, $request->mulai_sesi),
             'view_result'       => $request->view_result,
             'min_test'          => $request->min_test,
+            'created_by'        => $user->id,
         ];
 
         if($request->banksoal_id != '') {
@@ -249,11 +259,17 @@ class UjianController extends Controller
      * @return \Illuminate\Http\Response
      * @author shellrean <wandinak17@gmail.com>
      */
-    public function allData()
+    public function allData(Request  $request)
     {
+        $user = $request->user();
         $ujians = Jadwal::orderBy('tanggal','DESC')
-            ->orderBy('mulai','DESC')
-            ->get();
+            ->orderBy('mulai','DESC');
+
+        if ($user->role == 'guru') {
+            $ujians = $ujians->where('created_by', $user->id);
+        }
+        $ujians = $ujians->get();
+
         return SendResponse::acceptData($ujians);
     }
 

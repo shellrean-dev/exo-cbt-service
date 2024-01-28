@@ -394,7 +394,7 @@ class UjianAktifController extends Controller
                 return SendResponse::badRequest('Kesalahan dalam installasi token');
             }
 
-            $token_expired = intval($setting_token->value);
+            $token_expired = intval(json_decode($setting_token->value));
             $token_expired = $token_expired ? $token_expired : 900;
 
             if($differ > $token_expired) {
