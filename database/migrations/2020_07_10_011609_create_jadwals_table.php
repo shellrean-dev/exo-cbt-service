@@ -26,7 +26,7 @@ class CreateJadwalsTable extends Migration
             $table->uuid('event_id')->nullable()->default(null);
             $table->integer('sesi')->default(1);
             $table->text('setting');
-            $table->text('mulai_sesi')->default('{}');
+            $table->text('mulai_sesi')->nullable();
             $table->integer('view_result')->default(0);
 
             $table->uuid('deleted_by')->nullable();

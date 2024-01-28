@@ -21,10 +21,10 @@ class CreateJawabanPesertasTable extends Migration
             $table->uuid('jadwal_id');
             $table->string('jawab')->default(0);
             $table->string('jawab_complex')->nullable()->default("[]");
-            $table->text('menjodohkan')->nullable()->default("[]");
-            $table->text('mengurutkan')->nullable()->default("[]");
-            $table->text('benar_salah')->nullable()->default("[]");
-            $table->longText('setuju_tidak')->nullable()->default("[]");
+            $table->text('menjodohkan')->nullable();
+            $table->text('mengurutkan')->nullable();
+            $table->text('benar_salah')->nullable();
+            $table->longText('setuju_tidak')->nullable();
             $table->longText('esay')->nullable();
             $table->char('ragu_ragu',1)->default(0);
             $table->char('iscorrect',1)->default(0);

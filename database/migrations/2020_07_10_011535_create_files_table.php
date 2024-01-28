@@ -25,8 +25,6 @@ class CreateFilesTable extends Migration
             $table->uuid('deleted_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
-
-            $table->index(['directory_id', 'dirname', 'filename', 'path']);
         });
     }
 
