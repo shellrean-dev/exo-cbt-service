@@ -34,18 +34,13 @@ class ExoProcessHtml
     public function __construct($filepath, $directory, $original_name)
     {
         $this->directory = $directory;
-        $this->target_dir = storage_path('app/public/'.$directory->slug.'/');
-
-        $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off')
-            || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-        $hos = request()->server('HTTP_HOST');
-        $this->dsn = $protocol.$hos;
+        $this->target_dir = public_path(sprintf('storage/%s/', $directory->slug));
 
         $target_file = $filepath;
         $info = pathinfo($target_file);
-        $new_name = $info['filename']. '.Zip';
+        $new_name = $info['filename']. '.zip';
         $this->original_name = pathinfo($original_name, PATHINFO_FILENAME);
-        $this->new_name_path = storage_path('app/public/'.$directory->slug.'/'.$new_name);
+        $this->new_name_path = public_path(sprintf('storage/exec171200/%s/%s', $directory->slug, $new_name));
 
         rename($target_file, $this->new_name_path);
     }
@@ -77,23 +72,24 @@ class ExoProcessHtml
 
                 if(file_exists($old_path)) {
                     $image = Image::make($old_path)->encode('webp', 90);
-                    $new_path_storage = "public/".$this->directory->slug.'/'.$imagenew_name.'.webp';
+
+                    $new_path_storage = $this->directory->slug.'/'.$imagenew_name.'.webp';
                     Storage::put($new_path_storage, $image->__toString());
 
-                    array_push($images, [
-                        'id'            => Str::uuid()->toString(),
-                        'directory_id'	=> $this->directory->id,
-                        'filename'		=> $imagenew_name.'.webp',
-                        'path'			=> $new_path_storage,
-                        'exstension'	=> $ext_img,
-                        'dirname'		=> $this->directory->slug,
-                        'size'			=> 0,
-                        'created_at'    => now(),
-                        'updated_at'    => now()
-                    ]);
+                    $images[] = [
+                        'id' => Str::uuid()->toString(),
+                        'directory_id' => $this->directory->id,
+                        'filename' => $imagenew_name . '.webp',
+                        'path' => $new_path_storage,
+                        'exstension' => $ext_img,
+                        'dirname' => $this->directory->slug,
+                        'size' => 0,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ];
 
                     rename($old_path,$new_path);
-                    $img = $this->dsn.'/storage/'.$this->directory->slug.'/'.$imagenew_name.'.webp';
+                    $img = '/storage/'.$this->directory->slug.'/'.$imagenew_name.'.webp';
                     $this->content = str_replace($value,$img,$this->content);
                 }
                 $iterate++;
@@ -156,7 +152,7 @@ class ExoProcessHtml
                                     $real_iterate += 1;
                                     continue;
                                 }
-                                
+
                                 if(trim(strip_tags($key->nodeValue)) == 'BENAR' || trim(strip_tags($key->nodeValue)) == 'SALAH') {
                                     array_push($element['options'], $this->_dom_inner_html($value));
                                     if(trim($key->nodeValue) == 'BENAR') {
@@ -174,7 +170,7 @@ class ExoProcessHtml
                                 array_push($element['options'], $this->_dom_inner_html($value));
                             }
                         }
-                        
+
                         if($element['type'] == 0) {
                             if (count($element['correct']) > 1) {
                                 $element['type'] = SoalConstant::TIPE_PG_KOMPLEK;
@@ -189,7 +185,7 @@ class ExoProcessHtml
                                 } else {
                                     if(count($element['options_menjodohkan']) > 0) {
                                         $element['type'] = SoalConstant::TIPE_MENJODOHKAN;
-                                        
+
                                     } else if(count($element['options_mengurutkan']) > 0) {
                                         $element['type'] = SoalConstant::TIPE_MENGURUTKAN;
 
@@ -200,11 +196,13 @@ class ExoProcessHtml
                                 }
                             }
                         }
-                        array_push($data, $element);
+                        $data[] = $element;
                     }
                 }
             }
-            File::delete($this->new_name_path);
+            if (file_exists($this->new_name_path)) {
+                unlink($this->new_name_path);
+            }
             File::deleteDirectory($this->target_dir.$this->original_name);
 
             return [

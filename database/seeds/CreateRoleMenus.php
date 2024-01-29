@@ -73,7 +73,6 @@ class CreateRoleMenus extends Seeder
             ['role' => 'guru', 'code' => '00012A'],
             ['role' => 'guru', 'code' => '00013A'],
             ['role' => 'guru', 'code' => '00014A'],
-            ['role' => 'guru', 'code' => '00015A'],
             ['role' => 'guru', 'code' => '00016A'],
             ['role' => 'guru', 'code' => '00017A'],
             ['role' => 'guru', 'code' => '00018A'],

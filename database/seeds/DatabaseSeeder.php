@@ -17,5 +17,6 @@ class DatabaseSeeder extends Seeder
         $this->call(SettingSeeder::class);
         $this->call(InfoFeatureSeeder::class);
         $this->call(JurusanUmum::class);
+        $this->call(CreateRoleMenus::class);
     }
 }

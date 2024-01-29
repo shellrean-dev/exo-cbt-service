@@ -20,20 +20,27 @@ class DirectoryController extends Controller
 {
     /**
      * @Route(path="api/v1/directory", methods={"GET"})
-     * 
+     *
      * Display a listing of the resource.
      *
      * @return Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $directories = Directory::withCount(['file'])->paginate(20);
+        $user = $request->user();
+        $directories = Directory::withCount(['file']);
+        if ($user->role == 'guru') {
+            $directories = $directories->whereHas('banksoal', function ($query) use ($user) {
+                return $query->where('author', '=', $user->id);
+            });
+        }
+        $directories = $directories->paginate(20);
         return SendResponse::acceptData($directories);
     }
 
     /**
      * @Route(path="api/v1/directory", methods={"POST"})
-     * 
+     *
      * Store a newly created resource in storage.
      *
      * @param  Illuminate\Http\Request  $request
@@ -54,7 +61,7 @@ class DirectoryController extends Controller
 
     /**
      * @Route(path="api/v1/directory/{id}", methods={"GET"})
-     * 
+     *
      * Display the specified resource.
      *
      * @param  App\Directory $directory
@@ -67,10 +74,10 @@ class DirectoryController extends Controller
             ->paginate(50);
         return SendResponse::acceptData($contentDirectory);
     }
-    
+
     /**
      * @Route(path="api/v1/upload/file-audio", methods={"POST"})
-     * 
+     *
      * Update the specified resource in storage.
      *
      * @param  Illuminate\Http\Request  $request
@@ -87,7 +94,7 @@ class DirectoryController extends Controller
 
     /**
      * @Route(path="api/v1/directory/filemedia", methods={"POST"})
-     * 
+     *
      * Insert filemedia.
      *
      * @param  Illuminate\Http\Request  $request
@@ -128,9 +135,9 @@ class DirectoryController extends Controller
 
     /**
      * @Route(path="api/v1/file/upload", methods={"POST"})
-     * 
+     *
      * Upload file
-     * 
+     *
      * @param  Illuminate\Http\Request $request
      * @return Illuminate\Http\Response
      */
@@ -150,7 +157,7 @@ class DirectoryController extends Controller
             if (in_array($type, ['png', 'jpg', 'jpeg'])) {
                 $path = sprintf('%s/%s.webp', $dir->slug, $filename);
                 $filename = $filename.'.webp';
-    
+
                 $image = Image::make($file)->encode('webp', 90);
                 Storage::put($path, $image->__toString());
             } else {
@@ -174,10 +181,10 @@ class DirectoryController extends Controller
             ]);
         }
     }
-    
+
     /**
      * @Route(path="api/v1/directory/filemedia/{id}", methods={"DELETE"})
-     * 
+     *
      * @param  string $id
      * @return Illuminate\Http\Response
      */
@@ -193,9 +200,9 @@ class DirectoryController extends Controller
 
     /**
      * @Route(path="api/v1/directory/filemedia/multiple-delete", methods={"GET"})
-     * 
+     *
      * Delete filemedia multiple
-     * 
+     *
      * @return App\Actions\SendResponse
      * @author shellrean <wandinak17@gmail.com>
      */
@@ -225,9 +232,9 @@ class DirectoryController extends Controller
 
     /**
      * @Route(path="api/v1/directory/banksoal/{id}", methods={"GET"})
-     * 
+     *
      * Get directory banksoal
-     * 
+     *
      * @param  string $id
      * @return Illuminate\Http\Response
      */

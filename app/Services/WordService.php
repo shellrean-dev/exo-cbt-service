@@ -6,8 +6,8 @@ use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
 
 class WordService
-{	
-	public function wordFileImport($filepath, $directory) 
+{
+	public function wordFileImport($filepath, $directory)
 	{
 		$question_split = "/S:[0-9]+\)/";
 		$option_split = "/[A-Z]:\)/";
@@ -16,7 +16,7 @@ class WordService
 		$target_dir = public_path(sprintf('storage/%s/', $directory->slug));
 		$info = pathinfo($filepath);
 		$new_name = $info['filename']. '.Zip';
-		$new_name_path = public_path(sprintf('storage/%s/%s', $directory->slug, $new_name));
+		$new_name_path = public_path(sprintf('storage/exec171200/%s/%s', $directory->slug, $new_name));
 		rename($filepath, $new_name_path);
 		$zip = new \ZipArchive;
 
@@ -71,10 +71,10 @@ class WordService
 
 				$image = Image::make($old_path)->encode('webp', 90);
 				$new_path=$target_dir.$imagenew_name;
-				
+
 				$new_path_storage = $directory->slug.'/'.$imagenew_name.'.webp';
 				Storage::put($new_path_storage, $image->__toString());
-				
+
 				DB::table('files')->insert([
 					'id'			=> Str::uuid()->toString(),
 					'directory_id'	=> $directory->id,
@@ -98,6 +98,7 @@ class WordService
 		    $this->rrmdir($prop_folder);
 		    $this->rrmdir($content_folder);
 		    $this->rrmdir($new_name_path);
+            $this->rrmdir($target_dir."customXml");
 
 		    $question_data=array();
 		    $option=array();
@@ -146,7 +147,7 @@ class WordService
 		    	}
 		    }
 
-		    
+
 		    return $singlequestion_array;
 		} else {
 			return false;
@@ -159,7 +160,7 @@ class WordService
 	 	return (string) $object[$attribute];
 	}
 
-	public function rrmdir($dir) 
+	public function rrmdir($dir)
 	{
 	  if (is_dir($dir)) {
 	    $objects = scandir($dir);
@@ -173,7 +174,9 @@ class WordService
 	      rmdir($dir);
 	    }
 	  }else{
-	    unlink($dir);
+          if (file_exists($dir)) {
+              unlink($dir);
+          }
 	  }
 	}
 

@@ -48,4 +48,9 @@ class Directory extends Model
     {
         return File::where('directory_id', $this->id)->get()->sum('size');
     }
+
+    public function banksoal()
+    {
+        return $this->hasOne(Banksoal::class);
+    }
 }

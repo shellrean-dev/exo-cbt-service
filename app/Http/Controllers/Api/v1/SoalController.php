@@ -836,11 +836,11 @@ class SoalController extends Controller
         }
 
         $file = $request->file('file');
-        $nama_file = time().$file->getClientOriginalName();
         $original_name = $file->getClientOriginalName();
-        $path = $file->storeAs('public/'.$dir->slug,$nama_file);
+        $nama_file = time().$file->getClientOriginalName();
+        $path = $file->storeAs(sprintf('exec171200/%s', $dir->slug), $nama_file);
 
-        $file = storage_path('app/'.$path);
+        $file = public_path('storage/'.$path);
 
         DB::beginTransaction();
         try {
@@ -912,6 +912,7 @@ class SoalController extends Controller
                                 'soal_id' => $soal_id,
                                 'text_jawaban' => json_encode($pair),
                                 'correct' => 0,
+                                'label_mark' => null,
                                 'created_at' => now()->addSeconds($time_offset_var2),
                                 'updated_at' => now(),
                             ];
@@ -927,6 +928,7 @@ class SoalController extends Controller
                             'soal_id' => $soal_id,
                             'text_jawaban' => $option,
                             'correct' => 0,
+                            'label_mark' => null,
                             'created_at' => now()->addSeconds($time_offset_var2),
                             'updated_at' => now(),
                         ];
@@ -945,7 +947,8 @@ class SoalController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
-            return SendResponse::badRequest('kesalahan 500 ('.$e->getMessage().')');
+            throw $e;
+//            return SendResponse::badRequest('kesalahan 500 ('.$e->getMessage().')');
         }
 
         return SendResponse::accept();

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Gateway;
 use App\Actions\SendResponse;
 use App\Http\Controllers\Controller;
 use App\Models\JadwalConstant;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -21,16 +22,21 @@ final class JadwalGatewayController extends Controller
      * @author shellrean <wandinak17@gmail.com>
      * @since 3.1.0
      */
-    public function allData()
+    public function allData(Request $request)
     {
+        $user = $request->user();
+
         $jadwals = DB::table('jadwals as t_0')
             ->orderBy('tanggal','DESC')
             ->orderBy('mulai','DESC')
             ->select([
                 't_0.id',
                 't_0.alias'
-            ])
-            ->get();
+            ]);
+        if ($user->role == 'guru') {
+            $jadwals = $jadwals->where('t_0.created_by', $user->id);
+        }
+        $jadwals = $jadwals ->get();
         return SendResponse::acceptData($jadwals);
     }
 
@@ -41,8 +47,9 @@ final class JadwalGatewayController extends Controller
      * @author shellrean <wandinak17@gmail.com>
      * @since 3.1.0
      */
-    public function activeStatus()
+    public function activeStatus(Request $request)
     {
+        $user = $request->user();
         $jadwals = DB::table('jadwals as t_0')
             ->where('status_ujian', JadwalConstant::STATUS_ACTIVE)
             ->orderBy('tanggal','DESC')
@@ -53,8 +60,11 @@ final class JadwalGatewayController extends Controller
                 't_0.tanggal',
                 't_0.mulai',
                 't_0.sesi'
-            ])
-            ->get();
+            ]);
+        if ($user->role == 'guru') {
+            $jadwals = $jadwals->where('t_0.created_by', $user->id);
+        }
+        $jadwals = $jadwals ->get();
         return SendResponse::acceptData($jadwals);
     }
 }

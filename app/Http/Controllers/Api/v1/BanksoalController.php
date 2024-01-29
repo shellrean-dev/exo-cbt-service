@@ -37,7 +37,7 @@ class BanksoalController extends Controller
         $banksoal = DB::table('banksoals as t_0')
             ->join('matpels as t_1', 't_0.matpel_id', 't_1.id')
             ->join('users as t_2', 't_0.author', 't_2.id')
-            ->leftJoin('users as t_3', 't_0.lock_by', DB::raw('t_3.id::text'))
+            ->leftJoin('users as t_3', 't_0.lock_by', 't_3.id')
             ->select([
                 't_0.id',
                 't_0.is_locked',
@@ -125,7 +125,7 @@ class BanksoalController extends Controller
                 }
 
                 $item->persen = json_decode($item->persen);
-            
+
                 $item->inputed = $total;
                 $item->pg_inputted = $pg_inputted;
                 $item->pg_komplek_inputted = $pg_komplek_inputted;
@@ -313,7 +313,7 @@ class BanksoalController extends Controller
         try {
             $banksoal->delete();
             Directory::find($banksoal->directory_id)->delete();
-            
+
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
@@ -405,14 +405,14 @@ class BanksoalController extends Controller
                         'salah' => 0
                     ];
                     foreach ($jawaban_peserta as $v) {
-                        if (count($v->setuju_tidak) > 0) {
+                        if ($v->setuju_tidak != null && count($v->setuju_tidak) > 0) {
                             if (isset($v->setuju_tidak[$item->id]['val']) && $v->setuju_tidak[$item->id]['val'] == 1) {
                                 $argument['setuju'] += 1;
                             } else {
                                 $argument['tidak'] += 1;
                             }
                         }
-                        if (count($v->benar_salah) > 0) {
+                        if ($v->benar_salah != null && count($v->benar_salah) > 0) {
                             if (isset($v->benar_salah[$item->id]) && $v->benar_salah[$item->id] == 1) {
                                 $benar_salah['benar'] += 1;
                             } else {

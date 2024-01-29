@@ -35,23 +35,14 @@ class PenilaianController extends Controller
     {
         $user = request()->user();
         try {
-            // Ambil semua jawaban yang telah dikoreksi
-            $has = DB::table('penilaian_esay')
-                ->select('jawab_id')
-                ->get()
-                ->pluck('jawab_id')
-                ->unique();
+            $exists = DB::select('SELECT distinct s.banksoal_id
+                FROM jawaban_pesertas
+                JOIN soals s on jawaban_pesertas.soal_id = s.id
+                WHERE s.tipe_soal=2
+                AND jawaban_pesertas.id not in
+                (select penilaian_esay.jawab_id from penilaian_esay where penilaian_esay.banksoal_id=jawaban_pesertas.banksoal_id)');
 
-            // Ambil banksoal yang digunakan oleh peserta esay
-            $exists = DB::table('jawaban_pesertas')
-                ->whereNotIn('jawaban_pesertas.id', $has)
-                ->join('soals', 'jawaban_pesertas.soal_id','=','soals.id')
-                ->where('soals.tipe_soal', '2')
-                ->whereNotNull('jawaban_pesertas.esay')
-                ->select('soals.banksoal_id')
-                ->get()
-                ->pluck('banksoal_id')
-                ->unique();
+            $exists = array_column($exists, 'banksoal_id');
 
             // Ambil banksoal yang ada
             $banksoal = DB::table('banksoals')
@@ -63,7 +54,12 @@ class PenilaianController extends Controller
             // Filter banksoal untuk mencegah
             // dari selsain pengoreksi
             $filtered = $banksoal->reject(function ($value, $key) use($user) {
-                return !in_array($user->id, json_decode($value->correctors, true));
+                $correctors = json_decode($value->correctors, true);
+                if (count($correctors) < 1) {
+                    return true;
+                }
+
+                return !in_array($user->id, $correctors);
             })->values();
         } catch (Exception $e) {
             return SendResponse::internalServerError('Kesalahan 500. '.$e->getMessage());
@@ -136,36 +132,33 @@ class PenilaianController extends Controller
     {
         $user = request()->user();
         try {
-            $exists = DB::select('SELECT distinct s.banksoal_id
-                FROM jawaban_pesertas
-                JOIN soals s on jawaban_pesertas.soal_id = s.id
-                WHERE s.tipe_soal=2
-                AND jawaban_pesertas.id not in
-                (select penilaian_esay.jawab_id from penilaian_esay where penilaian_esay.banksoal_id=jawaban_pesertas.banksoal_id)');
-
-            $exists = array_column($exists, 'banksoal_id');
-
-            // Ambil banksoal yang ada
             $banksoal = DB::table('banksoals')
-                ->whereIn('banksoals.id', $exists)
-                ->join('matpels', 'banksoals.matpel_id', '=', 'matpels.id')
-                ->select('banksoals.id', 'banksoals.kode_banksoal','matpels.nama as nama_matpel','matpels.correctors')
-                ->get();
+                ->where('id', $banksoal_id)
+                ->first();
+            if (!$banksoal) {
+                return SendResponse::badRequest('Tidak dapat menemukan banksoal yang diminta');
+            }
 
-            // Filter banksoal untuk mencegah
-            // dari selsain pengoreksi
-            $filtered = $banksoal->reject(function ($value, $key) use($user) {
-                $correctors = json_decode($value->correctors, true);
-                if (is_array($correctors)) {
-                    return !in_array($user->id, $correctors);
-                }
-                return false;
-            })->values();
+            // Ambil jawaban yang telah dikoreksi
+            $has = DB::table('penilaian_esay')
+                ->where('banksoal_id', $banksoal->id)
+                ->select('jawab_id')
+                ->get()
+                ->pluck('jawab_id');
+
+            // Jawaban peserta yang belum dikoreksi
+            $exists = DB::table('jawaban_pesertas')
+                ->whereNotIn('jawaban_pesertas.id', $has)
+                ->join('soals', 'jawaban_pesertas.soal_id','=','soals.id')
+                ->where('soals.tipe_soal', SoalConstant::TIPE_ESAY)
+                ->whereNotNull('jawaban_pesertas.esay')
+                ->where('soals.banksoal_id', $banksoal->id)
+                ->select('jawaban_pesertas.id','soals.banksoal_id','soals.audio','jawaban_pesertas.esay','soals.pertanyaan','soals.rujukan')
+                ->paginate(30);
+            return SendResponse::acceptData($exists);
         } catch (Exception $e) {
             return SendResponse::internalServerError('Kesalahan 500. '.$e->getMessage());
         }
-
-        return SendResponse::acceptData($exists);
     }
 
     /**
