@@ -85,7 +85,7 @@ class WordService
 					'size'			=> 0
 				]);
 
-				$img = sprintf('<img src="%s" />', sprintf('/storage/%s/%s.webp', $directory->slug, $imagenew_name));
+				$img = sprintf('<img src="%s" />', sprintf('/storage/%s', $new_path_storage));
 		        $content=str_replace($rplc_str,$img,$content);
 		        $content=str_replace($rplc_str1,$img,$content);
 		        $content=str_replace($rplc_str2,$img,$content);

@@ -39,7 +39,7 @@ class AbsensiUjianService {
             }
 
             $this->event = $event;
-        
+
             $sesi = DB::table('sesi_schedules')
                 ->where('jadwal_id', $this->jadwal_id)
                 ->where('sesi', $this->sesi)
@@ -76,7 +76,7 @@ class AbsensiUjianService {
         $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
         $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
         $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-        
+
         $pdf->setFontSubsetting(true);
         $pdf->SetFont('dejavusans', '', 9, '', true);
         $pdf->setPrintHeader(false);
@@ -85,7 +85,7 @@ class AbsensiUjianService {
         // $this->_setBorder($pdf);
         $this->_setHeader($pdf, 'DAFTAR HADIR <br />'.$event->name, $setting);
         $pdf->Ln(20);
-        
+
         $this->_setHeaderDetail($pdf);
         $pdf->Ln(10);
 
@@ -148,10 +148,10 @@ class AbsensiUjianService {
     {
         $this->pdf->Output('Absensi '.$this->event->name.' sesi-'.$this->sesi.'.pdf', 'D');
     }
-    
+
     /**
      * Set border pada page
-     * 
+     *
      * @param object $pdf
      * @return void
      * @author <wandinak17@gmail.com>
@@ -168,7 +168,7 @@ class AbsensiUjianService {
 
         foreach($data as $set) {
             $pdf->SetLineStyle( array( 'width' => $set['width'], 'color' => array(0,0,0)));
-            $pdf->Line($set['break'],$set['break'],$pageWidth-$set['break'],$set['break']); 
+            $pdf->Line($set['break'],$set['break'],$pageWidth-$set['break'],$set['break']);
             $pdf->Line($pageWidth-$set['break'],$set['break'],$pageWidth-$set['break'],$pageHeight-$set['break']);
             $pdf->Line($set['break'],$pageHeight-$set['break'],$pageWidth-$set['break'],$pageHeight-$set['break']);
             $pdf->Line($set['break'],$set['break'],$set['break'],$pageHeight-$set['break']);
@@ -177,7 +177,7 @@ class AbsensiUjianService {
 
     /**
      * Ambil logo pada sekolah
-     * 
+     *
      * @param object $setting
      * @return void
      * @author <wandinak17@gmail.com>
@@ -188,8 +188,8 @@ class AbsensiUjianService {
             $image_file = public_path('img/exo.jpg');
             $ext = 'jpg';
         } else {
-            $image_file = storage_path('app/public/'.$setting->logo);
-            $ext = pathinfo(storage_path('app/public/'.$setting->logo), PATHINFO_EXTENSION);
+            $image_file = public_path('storage/'.$setting->logo);
+            $ext = pathinfo(public_path('storage/'.$setting->logo), PATHINFO_EXTENSION);
         }
         return ['img' => $image_file, 'ext' => $ext];
     }

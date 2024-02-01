@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\SoalConstant;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
@@ -42,8 +43,7 @@ class ExoProcessDoc
 
         $info = pathinfo($filepath);
         $new_name = $info['filename']. '.Zip';
-        $this->new_name_path = public_path(sprintf('storage/%s/%s', $directory->slug, $new_name));
-
+        $this->new_name_path = public_path(sprintf('storage/exec171200/%s/%s', $directory->slug, $new_name));
         rename($filepath, $this->new_name_path);
     }
 
@@ -139,17 +139,17 @@ class ExoProcessDoc
             $new_path_storage = $this->directory->slug.'/'.$imagenew_name.'.webp';
             Storage::put($new_path_storage, $image->__toString());
 
-            array_push($images, [
-                'id'            => Str::uuid()->toString(),
-                'directory_id'	=> $this->directory->id,
-                'filename'		=> $imagenew_name.'.webp',
-                'path'			=> $new_path,
-                'exstension'	=> $ext_img,
-                'dirname'		=> $this->directory->slug,
-                'size'			=> 0,
-                'created_at'    => now(),
-                'updated_at'    => now()
-            ]);
+            $images[] = [
+                'id' => Str::uuid()->toString(),
+                'directory_id' => $this->directory->id,
+                'filename' => $imagenew_name . '.webp',
+                'path' => $new_path,
+                'exstension' => $ext_img,
+                'dirname' => $this->directory->slug,
+                'size' => 0,
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
 
             rename($old_path,$new_path);
             $img = sprintf('<img src="%s" />', sprintf('/storage/%s/%s.webp', $this->directory->slug, $imagenew_name));
@@ -279,7 +279,7 @@ class ExoProcessDoc
                                 } else {
                                     if(count($element['options_menjodohkan']) > 0) {
                                         $element['type'] = SoalConstant::TIPE_MENJODOHKAN;
-                                        
+
                                     } else if(count($element['options_mengurutkan']) > 0) {
                                         $element['type'] = SoalConstant::TIPE_MENGURUTKAN;
 

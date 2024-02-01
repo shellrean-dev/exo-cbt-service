@@ -274,8 +274,8 @@ final class UjianService extends AbstractService
                 $jwra = [];
                 $jwrb = [];
 
-                $objMenjodohkan = json_decode($item->menjodohkan, true);
-                if ($objMenjodohkan != null) {
+                if ($item->menjodohkan != null) {
+                    $objMenjodohkan = json_decode($item->menjodohkan, true);
                     foreach ($objMenjodohkan as $key => $val) {
                         foreach($item->soal->jawabans as $jwb) {
                             $jwb_arr = json_decode($jwb->text_jawaban, true);
@@ -296,14 +296,14 @@ final class UjianService extends AbstractService
                 } else {
                     foreach($item->soal->jawabans as $key => $jwb) {
                         $jwb_arr = json_decode($jwb->text_jawaban, true);
-                        array_push($jwra, [
+                        $jwra[] = [
                             'id' => $jwb_arr['a']['id'],
                             'text' => $jwb_arr['a']['text'],
-                        ]);
-                        array_push($jwrb, [
+                        ];
+                        $jwrb[] = [
                             'id' => $jwb_arr['b']['id'],
                             'text' => $jwb_arr['b']['text'],
-                        ]);
+                        ];
                     }
 
                     $jwra = Arr::shuffle($jwra);
@@ -313,11 +313,11 @@ final class UjianService extends AbstractService
 
             # Jika tipe soal adalah mengurutkan
             if ($item->soal->tipe_soal == SoalConstant::TIPE_MENGURUTKAN) {
-                $objMengurutkan = json_decode($item->mengurutkan, true);
-                if ($objMengurutkan == null) {
+                if ($item->mengurutkan == null) {
                     $item->soal->jawabans = Arr::shuffle($item->soal->jawabans->toArray());
                 } else {
                     $new_jwbns = [];
+                    $objMengurutkan = json_decode($item->mengurutkan, true);
                     foreach ($objMengurutkan as $urut) {
                         foreach($item->soal->jawabans as $key => $jwb) {
                             if ($urut == $jwb->id) {
@@ -332,9 +332,8 @@ final class UjianService extends AbstractService
 
             # Jika tipe soal adalah benar salah
             if ($item->soal->tipe_soal == SoalConstant::TIPE_BENAR_SALAH) {
-                $objBenarSalah = json_decode($item->benar_salah, true);
 
-                if ($objBenarSalah == null) {
+                if ($item->benar_salah == null) {
                     $new_jwb_benar_salah = [];
 
                     foreach ($item->soal->jawabans as $v) {
@@ -342,15 +341,15 @@ final class UjianService extends AbstractService
                     }
                     $item->benar_salah = $new_jwb_benar_salah;
                 } else {
+                    $objBenarSalah = json_decode($item->benar_salah, true);
                     $item->benar_salah = $objBenarSalah;
                 }
             }
 
             # Jika tipe soal adalah setuju tidak
             if ($item->soal->tipe_soal == SoalConstant::TIPE_SETUJU_TIDAK) {
-                $objSetujuTidak = json_decode($item->setuju_tidak, true);
 
-                if ($objSetujuTidak == null) {
+                if ($item->setuju_tidak == null) {
                     $new_jwb_setuju_tidak = [];
 
                     foreach ($item->soal->jawabans as $v) {
@@ -359,6 +358,7 @@ final class UjianService extends AbstractService
                     }
                     $item->setuju_tidak = $new_jwb_setuju_tidak;
                 } else {
+                    $objSetujuTidak = json_decode($item->setuju_tidak, true);
                     $item->setuju_tidak = $objSetujuTidak;
                 }
             }
@@ -430,7 +430,7 @@ final class UjianService extends AbstractService
                 $banksoal = Banksoal::find($banksoal_id);
                 if($banksoal) {
                     Cache::put($cacheKeyConsolidate, $banksoal, 60);
-                    
+
                 }
             }
 
