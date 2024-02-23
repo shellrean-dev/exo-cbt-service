@@ -27,7 +27,7 @@ class BackupService
      * Backup exo-cbt data
      * This method will backup jurusan, matpel, directories, banksoals, soals and jawaban soals
      * You have to create app-key for your application
-     * 
+     *
      * @since 3.16.0
      */
     public function backup()
@@ -90,7 +90,7 @@ class BackupService
 
     /**
      * Restore exo-cbt data
-     * 
+     *
      * @since 3.16.0
      */
     public function restore($backupLiteral, $originalName)
@@ -146,7 +146,7 @@ class BackupService
                 $this->restorePesertaSection($dataInBackup[BackupService::PESERTA_SECTION]);
             }
             $data_detail["detail"] = $detail;
-            
+
             DB::commit();
             return $dataInBackup;
         } catch (Exception $e) {
@@ -164,7 +164,7 @@ class BackupService
      * Map file base64
      * This file will get base64 file for files data
      * And also do filter if the file not found
-     * 
+     *
      * @since 3.16.0
      */
     private function mapFileBase64($files)
@@ -174,7 +174,7 @@ class BackupService
             if(Storage::exists($item->path)) {
                 $item->base64 = base64_encode(Storage::get($item->path));
             }
-            
+
             return $item;
         })->filter(function($item) {
             return $item->base64 != null;
@@ -192,7 +192,7 @@ class BackupService
 
     /**
      * Restore jurusan section
-     * 
+     *
      * @param $jurusan array
      * @return void
      * @since 3.16.0
@@ -205,7 +205,7 @@ class BackupService
 
     /**
      * Restore matpel section
-     * 
+     *
      * @param $matpels array
      * @return void
      * @since 3.16.0
@@ -218,7 +218,7 @@ class BackupService
 
     /**
      * Restore directories section
-     * 
+     *
      * @param $directories array
      * @return void
      * @since 3.16.0
@@ -231,7 +231,7 @@ class BackupService
 
     /**
      * Restore banksoals section
-     * 
+     *
      * @param $banksoals array
      * @return void
      * @since 3.16.0
@@ -244,12 +244,16 @@ class BackupService
             $item["author"] = $admin->id;
             return $item;
         }, $banksoals);
-        DB::table("banksoals")->insert($banksoals);
+
+        $banksoalChuncx = array_chunk($banksoals, 500);
+        foreach ($banksoalChuncx as $chuncx) {
+            DB::table("banksoals")->insert($chuncx);
+        }
     }
 
     /**
      * Restore files section
-     * 
+     *
      * @param $files array
      * @return void
      * @since 3.16.0
@@ -264,12 +268,16 @@ class BackupService
             unset($new_file['base64']);
             $new_files[] = $new_file;
         }
-        DB::table("files")->insert($new_files);
+
+        $newfileChuncx = array_chunk($new_files, 500);
+        foreach ($newfileChuncx as $chuncx) {
+            DB::table("files")->insert($chuncx);
+        }
     }
 
     /**
      * Restore soals section
-     * 
+     *
      * @param $soals array
      * @return void
      * @since 3.16.0
@@ -277,12 +285,16 @@ class BackupService
     private function restoreSoalSection($soals)
     {
         DB::table("soals")->delete();
-        DB::table("soals")->insert($soals);
+
+        $soalsChunx = array_chunk($soals, 500);
+        foreach ($soalsChunx as $chunx) {
+            DB::table("soals")->insert($chunx);
+        }
     }
 
     /**
      * Restore jawaban_soals section
-     * 
+     *
      * @param $jawaban_soals array
      * @return void
      * @since 3.16.0
@@ -290,12 +302,16 @@ class BackupService
     private function restoreJawabanSoalSection($jawaban_soals)
     {
         DB::table("jawaban_soals")->delete();
-        DB::table("jawaban_soals")->insert($jawaban_soals);
+
+        $jawabanSoalChunx = array_chunk($jawaban_soals, 500);
+        foreach ($jawabanSoalChunx as $chunx) {
+            DB::table("jawaban_soals")->insert($chunx);
+        }
     }
 
     /**
      * Restore pesertas section
-     * 
+     *
      * @param $pesertas array
      * @return void
      * @since 3.16.0
@@ -309,6 +325,10 @@ class BackupService
             $new_peserta['api_token'] = null;
             $new_pesertas[] = $new_peserta;
         }
-        DB::table("pesertas")->insert($new_pesertas);
+
+        $pesertaChunx = array_chunk($pesertas,500);
+        foreach ($pesertaChunx as $chunx) {
+            DB::table("pesertas")->insert($chunx);
+        }
     }
 }

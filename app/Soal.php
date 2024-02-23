@@ -60,7 +60,7 @@ class Soal extends Model
      */
     public function jawabans()
     {
-        return $this->hasMany(JawabanSoal::class, 'soal_id','id');
+        return $this->hasMany(JawabanSoal::class, 'soal_id','id')->orderBy('created_at');
     }
 
     /**
