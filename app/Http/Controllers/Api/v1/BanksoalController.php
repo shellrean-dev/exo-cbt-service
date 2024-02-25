@@ -61,7 +61,7 @@ class BanksoalController extends Controller
             ])->orderByDesc('t_0.created_at');
 
         if (request()->q != '') {
-            $banksoal = $banksoal->where('kode_banksoal', 'LIKE', '%'. request()->q.'%');
+            $banksoal = $banksoal->where('t_0.kode_banksoal', 'LIKE', '%'. request()->q.'%')->orWhere('t_1.nama', 'LIKE', '%'. request()->q.'%');
         }
         if ($user->role != 'admin') {
             $banksoal = $banksoal->where('author',$user->id);
