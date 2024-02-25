@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Utils\SoalUtil;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
@@ -83,7 +84,7 @@ class CapaianPesertaMCUjianExport extends ExportExcel
                 $label_mark = "-";
                 if ($jawaban_konkrit) {
                     $count += intval($jawaban_konkrit->iscorrect);
-                    $label_mark = $jawab_soal->get($jawaban_konkrit->jawab, (object) ['label_mark'])->label_mark;
+                    $label_mark = $jawab_soal->get($jawaban_konkrit->jawab, (object) ['label_mark' => '-'])->label_mark;
                 }
 
                 if($jawaban_konkrit) {
