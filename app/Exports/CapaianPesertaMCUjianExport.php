@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\SoalConstant;
 use App\Utils\SoalUtil;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -84,7 +85,9 @@ class CapaianPesertaMCUjianExport extends ExportExcel
                 $label_mark = "-";
                 if ($jawaban_konkrit) {
                     $count += intval($jawaban_konkrit->iscorrect);
-                    $label_mark = $jawab_soal->get($jawaban_konkrit->jawab, (object) ['label_mark' => '-'])->label_mark;
+                    if ($svalue->tipe_soal == SoalConstant::TIPE_PG) {
+                        $label_mark = $jawab_soal->get($jawaban_konkrit->jawab, (object)['label_mark' => '-'])->label_mark;
+                    }
                 }
 
                 if($jawaban_konkrit) {
