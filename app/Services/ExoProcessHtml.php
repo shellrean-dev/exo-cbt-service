@@ -236,7 +236,7 @@ class ExoProcessHtml
 
     private function _strip_tags()
     {
-        $this->content = strip_tags($this->content, "<u><p><b><i><ul><ol><li><img><span><table><tr><td>");
+        $this->content = strip_tags($this->content, "<u><p><b><i><ul><ol><li><img><span><table><tr><td><sup><sub>");
         $this->content = preg_replace("/text-indent[^>]*;/is", "", $this->content);
         $this->content = trim(preg_replace('/\s\s+/', ' ', $this->content));
     }
