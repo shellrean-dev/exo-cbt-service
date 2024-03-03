@@ -26,7 +26,7 @@ final class MatpelGatewayController extends Controller
             ->orderBy('nama')
             ->select(
                 'id', 
-                DB::Raw("CONCAT(nama, ' | ', kode_mapel) AS nama")
+                DB::Raw("CONCAT(kode_mapel, ' | ',nama) AS nama")
             )
             ->get();
         return SendResponse::acceptData($matpels);
