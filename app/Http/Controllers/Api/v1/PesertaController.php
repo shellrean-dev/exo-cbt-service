@@ -46,7 +46,7 @@ class PesertaController extends Controller
                 't_2.nama as jurusan'
             ]);
         if (request()->q != '') {
-            $peserta = $peserta->where('t_0.nama', 'LIKE', '%'.request()->q.'%');
+            $peserta = $peserta->where('t_0.nama', 'LIKE', '%'.request()->q.'%')->orWhere('t_0.no_ujian', '=',request()->q);
         }
 
         $peserta = $peserta
