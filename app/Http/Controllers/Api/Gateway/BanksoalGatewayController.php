@@ -19,11 +19,12 @@ final class BanksoalGatewayController extends Controller
     {
         $user = $request->user();
         $banksoals = DB::table('banksoals as t_0')
-            ->orderByDesc('created_at')
-            ->select([
-              't_0.id',
-              't_0.kode_banksoal'
-            ]);
+            ->join('matpels as t_1', 't_0.matpel_id', 't_1.id')
+            ->orderByDesc('t_0.created_at')
+            ->select(
+                't_0.id',
+                DB::Raw("CONCAT(t_0.kode_banksoal, ' | ', t_1.nama) AS kode_banksoal")
+            );
         if ($user->role == 'guru') {
             $banksoals = $banksoals->where('t_0.author', $user->id);
         }
