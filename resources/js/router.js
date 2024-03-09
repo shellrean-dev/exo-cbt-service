@@ -12,7 +12,7 @@ import UjianSelesai from './pages/siswa/UjianSelesai'
 Vue.use(Router)
 
 const router = new Router({
-	mode: 'history',
+	mode: 'hash',
 	routes: [
 		{
 			path: '/',
